@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Launch World War Z Bot website`
+4. Enter the commit message: `Add dashboard preview`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -31,6 +31,12 @@ GitHub may take a few minutes to publish the first version.
 - `index.html` — website content and structure
 - `styles.css` — full visual design and mobile layout
 - `script.js` — navigation, header and scroll effects
+- `dashboard.html` — interactive dashboard preview
+- `dashboard.css` — dashboard layout and responsive design
+- `dashboard.js` — dashboard navigation, command search and login preview
+- `privacy.html` — current and future dashboard privacy information
+- `changelog.html` — browser-readable website release history
+- `pages.css` — shared privacy and changelog page design
 - `404.html` — custom missing-page screen
 - `site.webmanifest` — website metadata
 - `assets/world-war-z-banner.png` — supplied World War Z banner
@@ -39,7 +45,7 @@ GitHub may take a few minutes to publish the first version.
 
 ## Security
 
-Never add Discord bot tokens, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors.
+Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. The dashboard currently uses demonstration data only.
 
 ## Disclaimer
 

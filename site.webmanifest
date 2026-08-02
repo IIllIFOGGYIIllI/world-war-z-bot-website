@@ -1,7 +1,7 @@
 {
   "name": "World War Z Bot",
   "short_name": "WWZ Bot",
-  "description": "The World War Z community's unofficial DayZ Discord bot.",
+  "description": "The World War Z community's unofficial DayZ Discord bot and dashboard preview.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#090808",

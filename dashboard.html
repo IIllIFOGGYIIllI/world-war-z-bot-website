@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0909">
+  <meta name="description" content="Preview the future World War Z Bot dashboard for DayZ server information, player systems and staff tools.">
+  <meta property="og:title" content="World War Z Bot Dashboard Preview">
+  <meta property="og:description" content="One control centre for the World War Z DayZ community.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/world-war-z-banner.png">
+  <title>Dashboard Preview | World War Z Bot</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
+
+  <header class="dashboard-topbar">
+    <button class="icon-button mobile-menu" type="button" aria-expanded="false" aria-controls="dashboard-sidebar" data-sidebar-toggle>
+      <span aria-hidden="true">☰</span><span class="sr-only">Open dashboard menu</span>
+    </button>
+    <a class="dashboard-brand" href="index.html" aria-label="World War Z Bot home">
+      <span class="dashboard-brand-mark" aria-hidden="true">W<span>Z</span></span>
+      <span><strong>WORLD WAR Z</strong><small>BOT CONTROL CENTRE</small></span>
+    </a>
+    <span class="preview-pill">Preview mode</span>
+    <div class="topbar-spacer"></div>
+    <div class="connection-state"><span></span> Website online</div>
+    <button class="discord-button" type="button" data-open-login><span aria-hidden="true">◈</span> Sign in with Discord</button>
+  </header>
+
+  <div class="dashboard-shell">
+    <aside id="dashboard-sidebar" class="dashboard-sidebar" data-sidebar>
+      <nav aria-label="Dashboard navigation">
+        <p class="nav-label">Community</p>
+        <button class="side-link active" type="button" data-view="overview"><span aria-hidden="true">⌂</span>Overview</button>
+        <button class="side-link" type="button" data-view="server"><span aria-hidden="true">◉</span>Server status</button>
+        <button class="side-link" type="button" data-view="commands"><span aria-hidden="true">⌘</span>Commands</button>
+        <button class="side-link" type="button" data-view="economy"><span aria-hidden="true">$</span>Economy</button>
+        <button class="side-link" type="button" data-view="players"><span aria-hidden="true">♙</span>Players</button>
+        <button class="side-link" type="button" data-view="tickets"><span aria-hidden="true">◇</span>Tickets</button>
+
+        <p class="nav-label">Staff preview</p>
+        <button class="side-link" type="button" data-view="staff"><span aria-hidden="true">⚑</span>Staff tools <small>Locked</small></button>
+        <button class="side-link" type="button" data-view="configuration"><span aria-hidden="true">⚙</span>Configuration <small>Locked</small></button>
+
+        <p class="nav-label">Account</p>
+        <button class="side-link" type="button" data-view="settings"><span aria-hidden="true">◎</span>Settings &amp; help</button>
+      </nav>
+
+      <div class="access-card">
+        <span class="access-icon" aria-hidden="true">⌁</span>
+        <div><strong>Guest preview</strong><small>Sign in will assign your community access.</small></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="index.html">Return to website</a>
+        <a href="privacy.html">Privacy</a>
+      </div>
+    </aside>
+    <button class="sidebar-scrim" type="button" aria-label="Close dashboard menu" data-sidebar-scrim></button>
+
+    <main id="dashboard-content" class="dashboard-main">
+      <div class="preview-banner" role="status">
+        <span aria-hidden="true">i</span>
+        <p><strong>Interactive preview.</strong> All information shown here is demonstration data. No bot, Discord, Nitrado or member account is connected yet.</p>
+      </div>
+
+      <section class="dashboard-view active" data-view-panel="overview" aria-labelledby="overview-title">
+        <div class="view-heading">
+          <div><p class="breadcrumb">Dashboard / Overview</p><h1 id="overview-title">Welcome, survivor.</h1><p>A first look at your World War Z community control centre.</p></div>
+          <div class="heading-actions"><button class="secondary-action" type="button" data-jump="commands">View commands</button><button class="primary-action" type="button" data-open-login>Connect Discord</button></div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card"><div><span class="metric-icon online" aria-hidden="true">◉</span><small>DayZ server</small></div><strong>Online</strong><p>Demonstration status</p></article>
+          <article class="metric-card"><div><span class="metric-icon" aria-hidden="true">♙</span><small>Players</small></div><strong>3 <em>/ 26</em></strong><p>Preview population</p></article>
+          <article class="metric-card"><div><span class="metric-icon" aria-hidden="true">◷</span><small>Next restart</small></div><strong>1h 42m</strong><p>Three-hour cycle</p></article>
+          <article class="metric-card"><div><span class="metric-icon" aria-hidden="true">$</span><small>Your balance</small></div><strong>—</strong><p>Discord connection required</p></article>
+        </div>
+
+        <div class="dashboard-grid main-grid">
+          <article class="panel server-panel">
+            <div class="panel-heading"><div><p class="panel-kicker">Main server</p><h2>World War Z</h2></div><span class="status-badge online"><i></i>Online · Preview</span></div>
+            <div class="server-hero">
+              <div><span>Platform</span><strong>PlayStation 4 &amp; 5</strong></div>
+              <div><span>Map</span><strong>Chernarus</strong></div>
+              <div><span>Capacity</span><strong>26 survivors</strong></div>
+              <div><span>Host</span><strong>Nitrado</strong></div>
+            </div>
+            <div class="restart-track"><div class="restart-progress" style="--progress:43%"></div></div>
+            <div class="restart-labels"><span>Last restart <strong>9:00 PM</strong></span><span>Next restart <strong>12:00 AM</strong></span></div>
+            <button class="text-action" type="button" data-jump="server">Open server details <span aria-hidden="true">→</span></button>
+          </article>
+
+          <article class="panel quick-panel">
+            <div class="panel-heading"><div><p class="panel-kicker">Shortcuts</p><h2>Quick actions</h2></div><span class="lock-label">Preview locked</span></div>
+            <div class="quick-grid">
+              <button type="button" disabled><span aria-hidden="true">↻</span><strong>Restart server</strong><small>Owner only</small></button>
+              <button type="button" disabled><span aria-hidden="true">♙</span><strong>My profile</strong><small>Sign in required</small></button>
+              <button type="button" disabled><span aria-hidden="true">◇</span><strong>Open ticket</strong><small>Sign in required</small></button>
+              <button type="button" disabled><span aria-hidden="true">⚑</span><strong>Player lookup</strong><small>Staff only</small></button>
+            </div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid lower-grid">
+          <article class="panel activity-panel">
+            <div class="panel-heading"><div><p class="panel-kicker">Demonstration feed</p><h2>Recent activity</h2></div><span class="muted-label">Preview entries</span></div>
+            <ol class="activity-list">
+              <li><span class="activity-symbol green">✓</span><div><strong>Configuration validation passed</strong><small>Example event · 14 minutes ago</small></div></li>
+              <li><span class="activity-symbol red">↻</span><div><strong>Scheduled restart completed</strong><small>Example event · 1 hour ago</small></div></li>
+              <li><span class="activity-symbol">◇</span><div><strong>Support ticket resolved</strong><small>Example event · 3 hours ago</small></div></li>
+            </ol>
+          </article>
+          <article class="panel roadmap-panel">
+            <div class="panel-heading"><div><p class="panel-kicker">Development</p><h2>Connection roadmap</h2></div></div>
+            <ol class="mini-roadmap"><li class="done"><i></i><div><strong>Dashboard interface</strong><small>Interactive preview</small></div></li><li class="active"><i></i><div><strong>Bot refactor</strong><small>Stages 5–7</small></div></li><li><i></i><div><strong>Railway API</strong><small>Secure data connection</small></div></li><li><i></i><div><strong>Discord sign-in</strong><small>Role-based access</small></div></li></ol>
+          </article>
+        </div>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="server" aria-labelledby="server-title" hidden>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Server status</p><h1 id="server-title">Server status.</h1><p>A detailed server view prepared for the future Nitrado connection.</p></div><span class="status-badge online large"><i></i>Online · Preview</span></div>
+        <div class="dashboard-grid server-detail-grid">
+          <article class="panel map-panel"><div class="map-art"><span class="map-grid"></span><strong>CHERNARUS</strong><small>World War Z · PlayStation</small><i class="map-dot one"></i><i class="map-dot two"></i><i class="map-dot three"></i></div></article>
+          <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Server details</p><h2>Current session</h2></div></div><dl class="detail-list"><div><dt>Status</dt><dd class="green-text">Online</dd></div><div><dt>Players</dt><dd>3 / 26</dd></div><div><dt>Queue</dt><dd>0</dd></div><div><dt>Map</dt><dd>Chernarus</dd></div><div><dt>Restart cycle</dt><dd>Every 3 hours</dd></div><div><dt>Information source</dt><dd>Preview data</dd></div></dl></article>
+          <article class="panel full-width"><div class="panel-heading"><div><p class="panel-kicker">Owner controls</p><h2>Server operations</h2></div><span class="lock-label">Railway API required</span></div><div class="operation-grid"><button disabled><strong>Restart server</strong><small>Confirmation and audit log required</small></button><button disabled><strong>Stop server</strong><small>Owner permission required</small></button><button disabled><strong>Start server</strong><small>Owner permission required</small></button><button disabled><strong>Refresh status</strong><small>Live connection required</small></button></div></article>
+        </div>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="commands" aria-labelledby="commands-dashboard-title" hidden>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Commands</p><h1 id="commands-dashboard-title">Command library.</h1><p>Search the preview catalogue by command name, description or category.</p></div><span class="catalogue-count"><strong data-command-count>0</strong> preview commands</span></div>
+        <div class="command-toolbar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search commands</span><input type="search" placeholder="Search commands…" autocomplete="off" data-command-search></label><div class="filter-list" aria-label="Filter command categories" data-command-filters></div></div>
+        <div class="command-results" data-command-results aria-live="polite"></div>
+        <p class="empty-state" data-command-empty hidden>No preview commands match your search.</p>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="economy" aria-labelledby="economy-title" hidden>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Economy</p><h1 id="economy-title">Community economy.</h1><p>Your balance, transfers, rewards, games and bounties will live here after sign-in.</p></div><button class="primary-action" type="button" data-open-login>Connect Discord</button></div>
+        <div class="locked-hero panel"><div class="locked-copy"><span class="large-lock" aria-hidden="true">$</span><p class="panel-kicker">Personal account required</p><h2>Connect your Discord profile.</h2><p>Economy information belongs to a specific community member. Real balances will only be requested after secure authentication.</p><button class="primary-action" type="button" data-open-login>Preview sign-in</button></div><div class="balance-preview"><small>Example wallet</small><strong>$2,450,000</strong><span>Demonstration only</span><div class="balance-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+        <div class="metric-grid three"><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">↗</span><small>Transfers</small></div><strong>Secure</strong><p>Confirmation before sending</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">♢</span><small>Games</small></div><strong>Tracked</strong><p>Slots and other commands</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">⚑</span><small>Bounties</small></div><strong>Connected</strong><p>Community bounty board</p></article></div>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="players" aria-labelledby="players-title" hidden>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Players</p><h1 id="players-title">Player directory.</h1><p>A privacy-conscious preview of Discord and PlayStation profile linking.</p></div><span class="lock-label">Staff data hidden</span></div>
+        <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Example records</p><h2>Linked profiles</h2></div><label class="small-search"><span class="sr-only">Search players</span><input type="search" placeholder="Search preview…" disabled></label></div><div class="responsive-table"><table><thead><tr><th>Player</th><th>Discord</th><th>PlayStation</th><th>Access</th><th>Status</th></tr></thead><tbody><tr><td><span class="avatar">S1</span>Sample Survivor 01</td><td>Connected</td><td>Linked</td><td>Member</td><td><span class="table-status online"><i></i>Online</span></td></tr><tr><td><span class="avatar">S2</span>Sample Survivor 02</td><td>Connected</td><td>Linked</td><td>Member</td><td><span class="table-status"><i></i>Offline</span></td></tr><tr><td><span class="avatar">S3</span>Sample Staff 01</td><td>Connected</td><td>Linked</td><td>Staff</td><td><span class="table-status"><i></i>Offline</span></td></tr></tbody></table></div><p class="table-note">These are fictional preview records. No community member information is included.</p></article>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="tickets" aria-labelledby="tickets-title" hidden>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Tickets</p><h1 id="tickets-title">Support centre.</h1><p>Create, follow and respond to community support requests in one place.</p></div><button class="primary-action" type="button" data-open-login>Connect to open a ticket</button></div>
+        <div class="dashboard-grid ticket-grid"><article class="panel empty-panel"><span aria-hidden="true">◇</span><h2>No account connected</h2><p>Your open and resolved tickets will appear here after Discord authentication.</p><button class="secondary-action" type="button" data-open-login>Preview sign-in</button></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">How it will work</p><h2>Structured support</h2></div></div><ol class="support-steps"><li><span>01</span><div><strong>Choose a category</strong><small>Direct the request to the correct team.</small></div></li><li><span>02</span><div><strong>Provide the details</strong><small>Keep evidence and context together.</small></div></li><li><span>03</span><div><strong>Follow the outcome</strong><small>Receive updates without staff DMs.</small></div></li></ol></article></div>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="staff" aria-labelledby="staff-title" hidden>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Staff tools</p><h1 id="staff-title">Moderation centre.</h1><p>A secure workspace for warnings, notes, cases and administration records.</p></div><span class="restricted-badge">Restricted preview</span></div>
+        <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Staff role required</strong><p>Real moderation information will only be returned after Discord authentication and a fresh server-role check.</p></div></div>
+        <div class="metric-grid three"><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">⚑</span><small>Open cases</small></div><strong>—</strong><p>Live data unavailable</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">!</span><small>Warnings</small></div><strong>—</strong><p>Staff role required</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">≡</span><small>Audit records</small></div><strong>Ready</strong><p>Every action will be recorded</p></article></div>
+        <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Planned workflow</p><h2>Player administration</h2></div><span class="lock-label">Controls disabled</span></div><div class="admin-preview"><label><span>Player lookup</span><input type="text" placeholder="Discord name or PSN ID" disabled></label><div class="operation-grid"><button disabled><strong>Add warning</strong><small>Reason required</small></button><button disabled><strong>Add staff note</strong><small>Audit logged</small></button><button disabled><strong>View history</strong><small>Staff only</small></button><button disabled><strong>Open case</strong><small>Evidence supported</small></button></div></div></article>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="configuration" aria-labelledby="configuration-title" hidden>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Configuration</p><h1 id="configuration-title">Configuration control.</h1><p>Back up, validate, compare and restore DayZ configuration files safely.</p></div><span class="restricted-badge">Owner access</span></div>
+        <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Safe by design</strong><p>Destructive actions will require a confirmation, permission check, fresh backup and permanent audit record.</p></div></div>
+        <div class="config-flow"><article class="flow-card complete"><span>01</span><strong>Back up</strong><small>Capture current files</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>02</span><strong>Validate</strong><small>Check syntax and structure</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>03</span><strong>Compare</strong><small>Review every change</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>04</span><strong>Restore</strong><small>Owner confirmation</small></article></div>
+        <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Example history</p><h2>Recent backups</h2></div><button class="secondary-action" type="button" disabled>Create backup</button></div><div class="responsive-table"><table><thead><tr><th>Backup</th><th>Created</th><th>Files</th><th>Validation</th><th>Action</th></tr></thead><tbody><tr><td>Pre-update example</td><td>Today, 8:42 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled>Compare</button></td></tr><tr><td>Scheduled example</td><td>Yesterday, 9:00 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled>Compare</button></td></tr></tbody></table></div><p class="table-note">Example history only. No Nitrado files are present on this website.</p></article>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="settings" aria-labelledby="settings-title" hidden>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Settings &amp; help</p><h1 id="settings-title">Settings &amp; help.</h1><p>Connection status, privacy information and answers about the dashboard.</p></div></div>
+        <div class="dashboard-grid settings-grid"><article class="panel connection-panel"><div class="panel-heading"><div><p class="panel-kicker">Account</p><h2>Discord connection</h2></div><span class="status-badge"><i></i>Not connected</span></div><p>Discord will identify your community profile and determine which features you are allowed to use.</p><button class="primary-action" type="button" data-open-login>Preview Discord sign-in</button><a class="inline-link" href="privacy.html">Read the privacy information <span aria-hidden="true">→</span></a></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Access levels</p><h2>Role-based permissions</h2></div></div><ul class="role-list"><li><span>Visitor</span><small>Public server information</small></li><li><span>Member</span><small>Profile, economy and tickets</small></li><li><span>Staff</span><small>Approved moderation tools</small></li><li><span>Owner</span><small>Server and configuration control</small></li></ul></article></div>
+        <article class="panel help-panel"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open><summary>Why are the buttons locked?</summary><p>The secure Railway API has not been connected yet. Locking controls prevents the public preview from pretending to perform real bot or server actions.</p></details><details><summary>Is the displayed information real?</summary><p>No. Every statistic, player, balance, ticket and activity entry is demonstration data created only to show the intended layout.</p></details><details><summary>What will Discord sign-in request?</summary><p>The planned sign-in will identify your Discord account and check your World War Z server membership and roles. The exact permission screen will be reviewed before it is enabled.</p></details><details><summary>When will the dashboard become live?</summary><p>After bot refactor Stages 5–7, the Railway API, Discord authentication and permission checks have been implemented and tested.</p></details></article>
+      </section>
+
+      <footer class="dashboard-footer"><p>World War Z Bot is an independent community project. Preview data only.</p><div><a href="index.html">Website</a><a href="changelog.html">Changelog</a><a href="privacy.html">Privacy</a><a href="https://discord.gg/worldwarzps" target="_blank" rel="noreferrer">Discord</a></div><p>&copy; <span data-year></span> World War Z Community</p></footer>
+    </main>
+  </div>
+
+  <dialog class="login-dialog" data-login-dialog aria-labelledby="login-title">
+    <form method="dialog">
+      <button class="dialog-close" value="close" aria-label="Close sign-in preview">×</button>
+      <span class="discord-mark" aria-hidden="true">◈</span>
+      <p class="panel-kicker">Coming after backend connection</p>
+      <h2 id="login-title">Sign in with Discord</h2>
+      <p>The finished sign-in will connect your Discord identity, confirm your World War Z membership and assign the correct dashboard access.</p>
+      <ul><li><span aria-hidden="true">✓</span>View your linked community profile</li><li><span aria-hidden="true">✓</span>Access member or approved staff features</li><li><span aria-hidden="true">✓</span>Keep bot and Nitrado secrets off this website</li></ul>
+      <div class="dialog-notice"><strong>Preview only</strong><span>No Discord authorisation request will open today.</span></div>
+      <button class="discord-button wide" type="button" disabled>Discord connection coming soon</button>
+      <button class="dialog-cancel" value="close">Return to dashboard</button>
+    </form>
+  </dialog>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

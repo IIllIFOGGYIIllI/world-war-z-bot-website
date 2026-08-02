@@ -1,5 +1,28 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.1.0 — Dashboard Preview
+
+### Added
+
+- Interactive dashboard preview designed for the future Railway backend.
+- Responsive dashboard navigation for desktop, tablet and mobile devices.
+- Overview, server status, commands, economy, players, tickets, staff, configuration and settings views.
+- Searchable 25-command preview catalogue with category filters.
+- Discord login preview explaining the future authentication process.
+- Visitor, member, staff and owner access-level previews.
+- Clearly labelled fictional server, player, activity, economy and backup data.
+- Disabled owner and staff controls showing the planned secure workflows.
+- Frequently asked questions on the public homepage.
+- Dedicated privacy and browser-readable changelog pages.
+- Dashboard links in the public navigation, hero and footer.
+
+### Security
+
+- No live Discord, Railway, Nitrado or SQLite connection is made by the preview.
+- Bot tokens, API credentials, client secrets and member records remain absent from the public website.
+- Live actions stay disabled until authentication, permission checks, confirmations and audit logging are implemented on Railway.
+- Real Discord login is deliberately unavailable until the backend is ready.
+
 ## Version 1.0.0 — Initial Website Release
 
 ### Added

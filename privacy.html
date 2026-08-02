@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090808">
+  <meta name="description" content="Privacy and security information for the World War Z Bot website and dashboard preview.">
+  <title>Privacy | World War Z Bot</title>
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="page-header"><div class="shell"><a class="page-brand" href="index.html"><span class="page-brand-mark" aria-hidden="true">W<span>Z</span></span><strong>WORLD WAR Z BOT</strong></a><nav class="page-nav" aria-label="Page navigation"><a href="index.html">Website</a><a class="accent" href="dashboard.html">Dashboard</a><a href="changelog.html">Changelog</a><a href="https://discord.gg/worldwarzps" target="_blank" rel="noreferrer">Discord</a></nav></div></header>
+  <main id="content">
+    <section class="page-hero"><div class="shell"><p class="eyebrow">Privacy &amp; security</p><h1>Clear boundaries for community data.</h1><p>This page explains the current public preview and the privacy rules planned for the future connected dashboard. Last updated 3 August 2026.</p></div></section>
+    <section class="page-content"><div class="shell content-grid">
+      <nav class="content-nav" aria-label="Privacy sections"><a href="#current">Current website</a><a href="#future">Future sign-in</a><a href="#permissions">Permissions</a><a href="#security">Security</a><a href="#retention">Data handling</a><a href="#contact">Contact</a></nav>
+      <div class="content-stack">
+        <div class="notice"><strong>Current status:</strong> the dashboard is a demonstration interface. It does not connect to Discord accounts, the bot, Nitrado or the player database.</div>
+        <article id="current" class="content-card"><h2>Current public website</h2><p>The website is publicly hosted through GitHub Pages. Its own code does not include analytics, advertising trackers or account cookies. The dashboard uses fictional demonstration data and does not submit information to the World War Z Bot.</p><p>Links to Discord, GitHub or another service take you to that service, where its own privacy terms apply.</p></article>
+        <article id="future" class="content-card"><h2>Future Discord sign-in</h2><p>When secure sign-in is enabled, the dashboard is expected to use Discord authentication to identify your Discord account and confirm your membership and roles in the World War Z community.</p><h3>Expected account information</h3><ul><li>Your Discord user identifier and display information.</li><li>Your membership and assigned roles in the World War Z Discord server.</li><li>Your existing bot profile, such as a linked PlayStation ID, when one already exists.</li></ul><p>The final authorisation screen and data handling will be reviewed before sign-in is activated.</p></article>
+        <article id="permissions" class="content-card"><h2>Access permissions</h2><p>Dashboard features will be assigned by role. Visitors will receive public information, members will receive their own account features, staff will receive approved moderation tools, and owner-only server controls will remain restricted.</p><p>A Discord role check should occur before protected information is returned or a protected action is accepted.</p></article>
+        <article id="security" class="content-card"><h2>Security boundaries</h2><ul><li>Discord bot tokens, Discord client secrets and Nitrado API credentials must remain on the secure Railway service.</li><li>Secrets must never be committed to the public website repository or exposed to browser JavaScript.</li><li>Administrative actions should require authentication, permission checks, confirmation and an audit record.</li><li>The public preview cannot restart the server, edit balances, expose player records or change configuration files.</li></ul></article>
+        <article id="retention" class="content-card"><h2>Data handling and retention</h2><p>The connected dashboard has not launched, so no dashboard retention period is currently in effect. Before launch, retention rules should be defined for login sessions, audit logs, tickets and moderation records. Community records already managed by the Discord bot remain subject to the bot's own administration processes.</p></article>
+        <article id="contact" class="content-card"><h2>Questions or requests</h2><p>For questions about the World War Z community, your bot profile or future dashboard information, use the community's established Discord support ticket process.</p><p><a href="https://discord.gg/worldwarzps" target="_blank" rel="noreferrer">Join the World War Z Discord →</a></p></article>
+      </div>
+    </div></section>
+  </main>
+  <footer class="page-footer"><div class="shell"><p>Independent community project. All trademarks belong to their respective owners.</p><div><a href="index.html">Website</a><a href="dashboard.html">Dashboard</a></div></div></footer>
+</body>
+</html>
