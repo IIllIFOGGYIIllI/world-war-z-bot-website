@@ -1,8 +1,8 @@
 # ChernarusPlus Map Attribution
 
-`assets/chernarus-map.webp` and `assets/chernarus-roads.webp` are derived from
-`CETool/ChernarusPlus/map.png` in the official Bohemia Interactive DayZ
-Central Economy repository.
+`assets/chernarus-map.webp`, `assets/chernarus-roads.webp` and
+`assets/chernarus-tactical.webp` are derived from `CETool/ChernarusPlus/map.png`
+in the official Bohemia Interactive DayZ Central Economy repository.
 
 - Author and copyright holder: Bohemia Interactive a.s.
 - Source: https://github.com/BohemiaInteractive/DayZ-Central-Economy/tree/master/CETool/ChernarusPlus
@@ -13,6 +13,10 @@ Central Economy repository.
 - Enhanced Roads modification: enlarged to 4096 × 4096, desaturated, brightened,
   contrast adjusted and sharpened to make existing roads and buildings easier
   to distinguish. It does not add or redraw geographic features.
+- WWZ Tactical modification: enlarged to 4096 × 4096 and restyled with a pale
+  olive base, darker source-derived feature edges and restrained amber emphasis
+  on high-confidence narrow features. It does not add, redraw or relocate roads,
+  buildings, terrain or labels.
 
 The iZurvive Chernarus+ and Tourist Map artwork is not included, copied,
 embedded or requested by this website.

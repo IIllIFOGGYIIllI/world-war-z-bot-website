@@ -652,7 +652,7 @@ button { color: inherit; }
 .map-layer-switch > div { display: flex; }
 
 .map-layer-switch button {
-  min-width: 78px;
+  min-width: 70px;
   padding: 8px 10px;
   border: 1px solid rgba(238,232,222,0.16);
   background: #100e0e;
@@ -955,7 +955,7 @@ td:first-child { color: #e7dfd7; font-weight: 700; }
   .map-controls { top: 9px; left: 9px; }
   .map-controls button { width: 36px; height: 36px; }
   .map-layer-switch { top: 9px; right: 9px; }
-  .map-layer-switch button { min-width: 67px; padding-inline: 8px; }
+  .map-layer-switch button { min-width: 57px; padding-inline: 7px; font-size: 7px; }
   .map-coordinate-readout { right: 9px; bottom: 9px; left: auto; min-width: 128px; }
 }
 

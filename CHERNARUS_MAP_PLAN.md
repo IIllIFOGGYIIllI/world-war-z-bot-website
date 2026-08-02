@@ -5,7 +5,9 @@ Map Stage 1 is implemented as a dedicated public dashboard view.
 ## Current implementation
 
 - Official ChernarusPlus satellite image hosted inside this website repository.
-- Enhanced 4096px Roads view with a Roads/Satellite layer switch.
+- Custom 4096px WWZ Tactical view with pale terrain, stronger real feature edges
+  and restrained amber emphasis for clearer roads and structures.
+- Tactical, Roads and Satellite layer switch with Tactical opening by default.
 - No third-party map scripts, embeds, tiles, cookies or tracking.
 - Native mouse, touch and keyboard pan and zoom.
 - Validated public JSON POIs with search, filters and accessible details.

@@ -1,5 +1,27 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.6.0 — WWZ Tactical Map
+
+### Added and improved
+
+- Added a custom 4096px **WWZ Tactical** view derived from the official
+  Bohemia Interactive ChernarusPlus image.
+- Added a pale tactical base, stronger real feature edges and restrained amber
+  emphasis to make roads, towns and structures easier to distinguish.
+- Added a three-way **Tactical / Roads / Satellite** selector.
+- Tactical opens by default, supports closer zoom and remains aligned with all
+  existing POI coordinates.
+- Updated the Server Status preview to use the new tactical artwork.
+
+### Source and privacy
+
+- The new view is an original World War Z presentation of the official source
+  and is distributed under ADPL-SA.
+- It does not add, redraw or relocate geographic features.
+- iZurvive artwork, labels and tiles are not included, copied or requested.
+- All three map images are hosted locally, so visitors do not contact a
+  third-party map service.
+
 ## Version 1.5.2 — Admin Server Controls
 
 ### Changed

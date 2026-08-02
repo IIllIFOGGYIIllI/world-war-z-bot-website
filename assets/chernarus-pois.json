@@ -3,8 +3,15 @@
   "map": {
     "name": "ChernarusPlus",
     "size_meters": 15360,
-    "default_layer": "roads",
+    "default_layer": "tactical",
     "layers": [
+      {
+        "id": "tactical",
+        "name": "WWZ Tactical",
+        "image": "assets/chernarus-tactical.webp",
+        "max_zoom": 3.2,
+        "note": "WWZ Tactical view · custom high-contrast adaptation of the official map © Bohemia Interactive, used under ADPL-SA."
+      },
       {
         "id": "roads",
         "name": "Enhanced Roads",

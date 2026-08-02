@@ -42,6 +42,7 @@ GitHub may take a few minutes to publish the first version.
 - `site.webmanifest` — website metadata
 - `assets/world-war-z-banner.png` — supplied World War Z banner
 - `assets/chernarus-map.webp` — locally hosted official ChernarusPlus map image
+- `assets/chernarus-tactical.webp` — custom 4096px high-contrast tactical view derived from the official image
 - `assets/chernarus-roads.webp` — enhanced 4096px Roads view derived from the official image
 - `assets/chernarus-pois.json` — validated public map locations
 - `PATCH_NOTES.md` — version history and update notes
