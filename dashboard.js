@@ -49,6 +49,7 @@ const showView = (view, updateHistory = true) => {
   if (updateHistory) history.pushState({ view: selectedView }, '', `#${selectedView}`);
   document.querySelector('#dashboard-content')?.scrollIntoView({ block: 'start' });
   closeSidebar();
+  window.dispatchEvent(new CustomEvent('wwz:viewchange', { detail: { view: selectedView } }));
 };
 
 viewButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view)));

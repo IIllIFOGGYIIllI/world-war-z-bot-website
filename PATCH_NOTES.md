@@ -1,5 +1,27 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.5.0 — Interactive Chernarus Map
+
+### Added
+
+- A dedicated **Chernarus map** tab under Community navigation.
+- Official locally hosted ChernarusPlus imagery from Bohemia Interactive.
+- Mouse, touch and keyboard pan and zoom controls.
+- Public map markers with category filters, search and a location list.
+- Clickable location details with DayZ X/Z coordinates.
+- Responsive desktop, tablet and mobile map layouts.
+- A compact map shortcut on the Server Status page.
+
+### Access and safety
+
+- The map is public and read only; Discord sign-in is not required.
+- Only JSON entries explicitly marked `public` are displayed.
+- Live players, private bases, Admin positions and unpublished events are excluded.
+- The map image is stored in the website repository, so no third-party map
+  provider receives visitor requests.
+- Future Owner editing remains locked until Railway provides validation,
+  permission checks, confirmation and audit history.
+
 ## Version 1.4.0 — Member Profile & Economy
 
 ### Added
