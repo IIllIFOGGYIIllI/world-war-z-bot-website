@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add clearer Chernarus road layer`
+4. Enter the commit message: `Move server controls to Admin tools`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages

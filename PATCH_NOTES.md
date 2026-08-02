@@ -1,5 +1,24 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.5.2 — Admin Server Controls
+
+### Changed
+
+- Moved **Protected server controls** from the public Server Status page into
+  the verified **Admin tools** page.
+- Admins and the Owner can now see the protected Restart, Stop and Start
+  controls after Railway verifies their Discord role.
+- Changed the Overview restart shortcut from Owner-only to Admin access.
+- Kept the Owner Configuration page and its future file-management operations
+  owner-only.
+
+### Security
+
+- The server controls remain disabled until protected Railway endpoints,
+  confirmation prompts and audit logging are connected.
+- Moving or hiding controls does not replace backend authorization; Railway
+  must verify Admin permission again before every future server action.
+
 ## Version 1.5.1 — Clearer Map Layers
 
 ### Added and improved
