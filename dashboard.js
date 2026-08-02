@@ -50,13 +50,12 @@ window.addEventListener('popstate', () => showView(location.hash.slice(1), false
 
 document.querySelectorAll('[data-open-login]').forEach((button) => {
   button.addEventListener('click', () => {
-    if (typeof loginDialog?.showModal === 'function') loginDialog.showModal();
-    else loginDialog?.setAttribute('open', '');
+    handleAuthAction();
   });
 });
 
 loginDialog?.addEventListener('click', (event) => {
-  if (event.target === loginDialog) loginDialog.close();
+  if (event.target === loginDialog) loginDialog.close?.();
 });
 
 document.addEventListener('keydown', (event) => {
@@ -69,6 +68,13 @@ document.querySelectorAll('[data-year]').forEach((item) => {
 
 const DASHBOARD_API_BASE = 'https://world-war-z-discord-bot-production.up.railway.app';
 const SERVER_STATUS_URL = `${DASHBOARD_API_BASE}/api/server/status`;
+const AUTH_CONFIG_URL = `${DASHBOARD_API_BASE}/api/auth/config`;
+const AUTH_LOGIN_URL = `${DASHBOARD_API_BASE}/api/auth/discord/login`;
+const AUTH_COMPLETE_URL = `${DASHBOARD_API_BASE}/api/auth/discord/complete`;
+const AUTH_ME_URL = `${DASHBOARD_API_BASE}/api/auth/me`;
+const AUTH_LOGOUT_URL = `${DASHBOARD_API_BASE}/api/auth/logout`;
+const AUTH_SESSION_KEY = 'wwz_dashboard_session';
+const AUTH_RETURN_VIEW_KEY = 'wwz_dashboard_return_view';
 const LIVE_STATUS_REFRESH_MS = 30_000;
 const STATUS_CLASSES = ['online', 'restarting', 'offline', 'unavailable', 'loading'];
 const STATUS_LABELS = {
@@ -76,6 +82,309 @@ const STATUS_LABELS = {
   restarting: 'Restarting',
   offline: 'Offline'
 };
+
+const authMessage = document.querySelector('[data-auth-message]');
+const startDiscordLoginButton = document.querySelector('[data-start-discord-login]');
+const signOutButton = document.querySelector('[data-sign-out]');
+const authDialogNotice = document.querySelector('[data-auth-dialog-notice]');
+let discordAuthEnabled = false;
+let authenticatedUser = null;
+let authRequestInProgress = false;
+
+const storageGet = (key) => {
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch (error) {
+    return null;
+  }
+};
+
+const storageSet = (key, value) => {
+  try {
+    window.sessionStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+const storageRemove = (key) => {
+  try {
+    window.sessionStorage.removeItem(key);
+  } catch (error) {
+    // A blocked browser storage setting is treated like a signed-out tab.
+  }
+};
+
+const showAuthMessage = (message, state = 'info') => {
+  if (!authMessage) return;
+  authMessage.textContent = message;
+  authMessage.dataset.state = state;
+  authMessage.hidden = false;
+};
+
+const hideAuthMessage = () => {
+  if (authMessage) authMessage.hidden = true;
+};
+
+const accessLabel = (level) => {
+  if (level === 'owner') return 'Owner';
+  if (level === 'staff') return 'Staff';
+  return 'Member';
+};
+
+const setAuthBadgeState = (state, label) => {
+  document.querySelectorAll('[data-auth-badge]').forEach((badge) => {
+    setStatusClass(badge, state);
+  });
+  setText('[data-auth-badge-label]', label);
+};
+
+const applySignedOutState = ({ unavailable = false } = {}) => {
+  authenticatedUser = null;
+  setText('[data-auth-button-label]', 'Sign in with Discord');
+  setText('[data-access-card-title]', 'Guest access');
+  setText('[data-access-card-copy]', 'Sign in will securely verify your community access.');
+  setText('[data-access-icon]', '⌁');
+  setText('[data-auth-description]', unavailable
+    ? 'Discord verification is temporarily unavailable. Your existing browser session has not been exposed.'
+    : 'Discord sign-in securely verifies your World War Z membership and current access level.');
+  setText('[data-auth-cta]', 'Connect Discord');
+  setText('[data-staff-access-label]', 'Locked');
+  setText('[data-owner-access-label]', 'Locked');
+  setText('[data-welcome-copy]', 'Live server information and a secure path into your World War Z community account.');
+  document.querySelector('[data-account-summary]')?.setAttribute('hidden', '');
+  document.querySelector('[data-auth-guest-action]')?.removeAttribute('hidden');
+  signOutButton?.setAttribute('hidden', '');
+  setAuthBadgeState(unavailable ? 'unavailable' : 'offline', unavailable ? 'Verification unavailable' : 'Not connected');
+};
+
+const applyAuthenticatedState = (payload) => {
+  if (!payload?.user || !payload?.membership) {
+    throw new Error('Unexpected account response');
+  }
+
+  authenticatedUser = payload;
+  const displayName = String(payload.user.display_name || payload.user.username || 'Survivor');
+  const username = String(payload.user.username || 'Discord account');
+  const level = accessLabel(payload.membership.access_level);
+  const initials = displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('') || 'WZ';
+
+  setText('[data-auth-button-label]', displayName);
+  setText('[data-access-card-title]', displayName);
+  setText('[data-access-card-copy]', `${level} access verified`);
+  setText('[data-access-icon]', initials);
+  setText('[data-account-avatar]', initials);
+  setText('[data-account-display-name]', displayName);
+  setText('[data-account-username]', `@${username}`);
+  setText('[data-account-level]', level);
+  setText('[data-auth-description]', `Your Discord identity and ${level.toLowerCase()} access are verified. Private profile and economy data will connect in the next stage.`);
+  setText('[data-auth-cta]', 'View account');
+  setText('[data-welcome-copy]', `Signed in as ${displayName} with verified ${level.toLowerCase()} access.`);
+  setText('[data-staff-access-label]', ['staff', 'owner'].includes(payload.membership.access_level) ? 'Verified' : 'Locked');
+  setText('[data-owner-access-label]', payload.membership.access_level === 'owner' ? 'Verified' : 'Locked');
+  document.querySelector('[data-account-summary]')?.removeAttribute('hidden');
+  document.querySelector('[data-auth-guest-action]')?.setAttribute('hidden', '');
+  signOutButton?.removeAttribute('hidden');
+  setAuthBadgeState('online', `Connected · ${level}`);
+};
+
+const openLoginDialog = () => {
+  if (typeof loginDialog?.showModal === 'function') loginDialog.showModal();
+  else loginDialog?.setAttribute('open', '');
+};
+
+const handleAuthAction = () => {
+  if (authenticatedUser) {
+    showView('settings');
+    return;
+  }
+
+  openLoginDialog();
+};
+
+const authErrorMessages = {
+  cancelled: 'Discord sign-in was cancelled.',
+  not_member: 'You must be a member of the World War Z Discord server to use account features.',
+  discord_unavailable: 'Discord verification is temporarily unavailable. Please try again shortly.',
+  invalid_response: 'Discord returned an invalid sign-in response. Please try again.'
+};
+
+const callbackFragment = () => {
+  const params = new URLSearchParams(location.hash.slice(1));
+  return {
+    loginTicket: params.get('login_ticket'),
+    authError: params.get('auth_error')
+  };
+};
+
+const clearCallbackFragment = () => {
+  const returnView = storageGet(AUTH_RETURN_VIEW_KEY) || 'overview';
+  storageRemove(AUTH_RETURN_VIEW_KEY);
+  history.replaceState({ view: returnView }, '', `#${availableViews.has(returnView) ? returnView : 'overview'}`);
+  return returnView;
+};
+
+const authFetch = async (url, options = {}) => {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 10_000);
+
+  try {
+    return await fetch(url, {
+      cache: 'no-store',
+      credentials: 'omit',
+      ...options,
+      signal: controller.signal
+    });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+};
+
+const loadCurrentAccount = async (sessionToken) => {
+  try {
+    const response = await authFetch(AUTH_ME_URL, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionToken}`
+      }
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      storageRemove(AUTH_SESSION_KEY);
+      applySignedOutState();
+      return;
+    }
+
+    if (!response.ok) {
+      applySignedOutState({ unavailable: true });
+      return;
+    }
+
+    applyAuthenticatedState(await response.json());
+  } catch (error) {
+    applySignedOutState({ unavailable: true });
+  }
+};
+
+const completeDiscordLogin = async (loginTicket) => {
+  if (authRequestInProgress) return;
+  authRequestInProgress = true;
+  showAuthMessage('Finishing your secure Discord sign-in…', 'info');
+
+  try {
+    const response = await authFetch(AUTH_COMPLETE_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ ticket: loginTicket })
+    });
+    const payload = await response.json();
+
+    if (!response.ok || !payload.session_token) {
+      throw new Error(payload.message || 'Unable to complete Discord sign-in');
+    }
+
+    if (!storageSet(AUTH_SESSION_KEY, payload.session_token)) {
+      throw new Error('Browser session storage is unavailable');
+    }
+
+    applyAuthenticatedState(payload);
+    const returnView = clearCallbackFragment();
+    showView(returnView, false);
+    showAuthMessage(`Signed in as ${payload.user.display_name || payload.user.username}.`, 'success');
+  } catch (error) {
+    storageRemove(AUTH_SESSION_KEY);
+    const returnView = clearCallbackFragment();
+    showView(returnView, false);
+    applySignedOutState();
+    showAuthMessage(error.message || 'Discord sign-in could not be completed.', 'error');
+  } finally {
+    authRequestInProgress = false;
+  }
+};
+
+const configureDiscordAuth = async () => {
+  try {
+    const response = await authFetch(AUTH_CONFIG_URL, {
+      method: 'GET',
+      headers: { Accept: 'application/json' }
+    });
+    const payload = await response.json();
+    discordAuthEnabled = Boolean(response.ok && payload?.discord_auth?.enabled);
+  } catch (error) {
+    discordAuthEnabled = false;
+  }
+
+  if (discordAuthEnabled) {
+    startDiscordLoginButton?.removeAttribute('disabled');
+    if (startDiscordLoginButton) startDiscordLoginButton.textContent = 'Continue securely with Discord';
+    if (authDialogNotice) authDialogNotice.querySelector('span').textContent = 'Your dashboard session lasts for this browser tab and expires automatically.';
+  } else {
+    startDiscordLoginButton?.setAttribute('disabled', '');
+    if (startDiscordLoginButton) startDiscordLoginButton.textContent = 'Discord sign-in is being configured';
+    if (authDialogNotice) authDialogNotice.querySelector('span').textContent = 'The live server status remains available while Discord sign-in is being configured.';
+  }
+
+  const fragment = callbackFragment();
+
+  if (fragment.authError) {
+    const returnView = clearCallbackFragment();
+    showView(returnView, false);
+    applySignedOutState();
+    showAuthMessage(authErrorMessages[fragment.authError] || 'Discord sign-in could not be completed.', 'error');
+    return;
+  }
+
+  if (fragment.loginTicket) {
+    await completeDiscordLogin(fragment.loginTicket);
+    return;
+  }
+
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+
+  if (sessionToken && discordAuthEnabled) {
+    await loadCurrentAccount(sessionToken);
+  } else {
+    applySignedOutState();
+  }
+};
+
+startDiscordLoginButton?.addEventListener('click', () => {
+  if (!discordAuthEnabled || authRequestInProgress) return;
+  const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel || 'overview';
+  storageSet(AUTH_RETURN_VIEW_KEY, activeView);
+  window.location.assign(AUTH_LOGIN_URL);
+});
+
+signOutButton?.addEventListener('click', async () => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  storageRemove(AUTH_SESSION_KEY);
+  applySignedOutState();
+  showAuthMessage('You have been signed out of this dashboard tab.', 'success');
+
+  if (!sessionToken) return;
+
+  try {
+    await authFetch(AUTH_LOGOUT_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionToken}`
+      }
+    });
+  } catch (error) {
+    // Local sign-out is complete even when Railway cannot be reached.
+  }
+});
 
 const apiConnection = document.querySelector('[data-api-connection]');
 const apiConnectionLabel = document.querySelector('[data-api-connection-label]');
@@ -330,4 +639,5 @@ const renderCommands = () => {
 commandSearch?.addEventListener('input', renderCommands);
 renderFilters();
 renderCommands();
+configureDiscordAuth();
 showView(location.hash.slice(1), false);

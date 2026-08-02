@@ -1,5 +1,30 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.3.0 — Secure Discord Sign-In
+
+### Added
+
+- Real Discord OAuth sign-in through the existing Railway bot service.
+- Live World War Z Discord membership and role verification.
+- Verified member, staff and owner access labels in the dashboard.
+- Automatic session restoration within the same browser tab.
+- Secure sign-out and clear sign-in error messages.
+- Updated homepage, privacy information and browser changelog.
+
+### Security
+
+- Discord requests only the basic `identify` permission.
+- The OAuth client secret and Discord access token never enter the
+  GitHub Pages website.
+- The one-time login ticket is returned in the URL fragment, exchanged
+  immediately and removed from the address bar.
+- The dashboard session is kept in `sessionStorage`, disappears when
+  the tab closes and expires on Railway after 12 hours.
+- Railway rechecks current guild membership and roles before returning
+  authenticated identity information.
+- Private profiles, economy records, moderation information and all
+  server-changing controls remain locked for later stages.
+
 ## Version 1.2.0 — Live Server Status
 
 ### Added

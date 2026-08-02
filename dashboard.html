@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0909">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://world-war-z-discord-bot-production.up.railway.app; img-src 'self' data: https://cdn.discordapp.com https://media.discordapp.net; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self'">
   <meta name="description" content="View live World War Z DayZ server information and preview the community bot dashboard.">
   <meta property="og:title" content="World War Z Bot Dashboard">
   <meta property="og:description" content="Live public DayZ server status and a preview of the World War Z community control centre.">
@@ -26,7 +27,7 @@
     <span class="preview-pill" data-dashboard-mode>Live status</span>
     <div class="topbar-spacer"></div>
     <div class="connection-state" data-api-connection data-state="loading"><span></span><span data-api-connection-label>Connecting to bot API…</span></div>
-    <button class="discord-button" type="button" data-open-login><span aria-hidden="true">◈</span> Sign in with Discord</button>
+    <button class="discord-button" type="button" data-open-login><span aria-hidden="true">◈</span> <span data-auth-button-label>Sign in with Discord</span></button>
   </header>
 
   <div class="dashboard-shell">
@@ -41,16 +42,16 @@
         <button class="side-link" type="button" data-view="tickets"><span aria-hidden="true">◇</span>Tickets</button>
 
         <p class="nav-label">Staff preview</p>
-        <button class="side-link" type="button" data-view="staff"><span aria-hidden="true">⚑</span>Staff tools <small>Locked</small></button>
-        <button class="side-link" type="button" data-view="configuration"><span aria-hidden="true">⚙</span>Configuration <small>Locked</small></button>
+        <button class="side-link" type="button" data-view="staff"><span aria-hidden="true">⚑</span>Staff tools <small data-staff-access-label>Locked</small></button>
+        <button class="side-link" type="button" data-view="configuration"><span aria-hidden="true">⚙</span>Configuration <small data-owner-access-label>Locked</small></button>
 
         <p class="nav-label">Account</p>
         <button class="side-link" type="button" data-view="settings"><span aria-hidden="true">◎</span>Settings &amp; help</button>
       </nav>
 
-      <div class="access-card">
-        <span class="access-icon" aria-hidden="true">⌁</span>
-        <div><strong>Guest preview</strong><small>Sign in will assign your community access.</small></div>
+      <div class="access-card" data-access-card>
+        <span class="access-icon" aria-hidden="true" data-access-icon>⌁</span>
+        <div><strong data-access-card-title>Guest access</strong><small data-access-card-copy>Sign in will securely verify your community access.</small></div>
       </div>
 
       <div class="sidebar-footer">
@@ -65,11 +66,12 @@
         <span aria-hidden="true">◉</span>
         <p><strong data-live-banner-title>Connecting to live server status.</strong> <span data-live-banner-message>Public DayZ information is loading from the bot. Account, economy, player, staff and configuration areas remain clearly labelled previews.</span></p>
       </div>
+      <div class="auth-message" role="status" data-auth-message hidden></div>
 
       <section class="dashboard-view active" data-view-panel="overview" aria-labelledby="overview-title">
         <div class="view-heading">
-          <div><p class="breadcrumb">Dashboard / Overview</p><h1 id="overview-title">Welcome, survivor.</h1><p>A first look at your World War Z community control centre.</p></div>
-          <div class="heading-actions"><button class="secondary-action" type="button" data-jump="commands">View commands</button><button class="primary-action" type="button" data-open-login>Connect Discord</button></div>
+          <div><p class="breadcrumb">Dashboard / Overview</p><h1 id="overview-title">Welcome, survivor.</h1><p data-welcome-copy>Live server information and a secure path into your World War Z community account.</p></div>
+          <div class="heading-actions"><button class="secondary-action" type="button" data-jump="commands">View commands</button><button class="primary-action" type="button" data-open-login data-auth-cta>Connect Discord</button></div>
         </div>
 
         <div class="metric-grid">
@@ -137,8 +139,8 @@
       </section>
 
       <section class="dashboard-view" data-view-panel="economy" aria-labelledby="economy-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Economy</p><h1 id="economy-title">Community economy.</h1><p>Your balance, transfers, rewards, games and bounties will live here after sign-in.</p></div><button class="primary-action" type="button" data-open-login>Connect Discord</button></div>
-        <div class="locked-hero panel"><div class="locked-copy"><span class="large-lock" aria-hidden="true">$</span><p class="panel-kicker">Personal account required</p><h2>Connect your Discord profile.</h2><p>Economy information belongs to a specific community member. Real balances will only be requested after secure authentication.</p><button class="primary-action" type="button" data-open-login>Preview sign-in</button></div><div class="balance-preview"><small>Example wallet</small><strong>$2,450,000</strong><span>Demonstration only</span><div class="balance-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Economy</p><h1 id="economy-title">Community economy.</h1><p>Your balance, transfers, rewards, games and bounties will connect in the next account-data stage.</p></div><button class="primary-action" type="button" data-open-login data-auth-cta>Connect Discord</button></div>
+        <div class="locked-hero panel"><div class="locked-copy"><span class="large-lock" aria-hidden="true">$</span><p class="panel-kicker">Personal account required</p><h2>Connect your Discord profile.</h2><p>Economy information belongs to a specific community member. Identity can be verified now; real balances will connect in a later stage.</p><button class="primary-action" type="button" data-open-login>Sign in with Discord</button></div><div class="balance-preview"><small>Example wallet</small><strong>$2,450,000</strong><span>Demonstration only</span><div class="balance-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
         <div class="metric-grid three"><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">↗</span><small>Transfers</small></div><strong>Secure</strong><p>Confirmation before sending</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">♢</span><small>Games</small></div><strong>Tracked</strong><p>Slots and other commands</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">⚑</span><small>Bounties</small></div><strong>Connected</strong><p>Community bounty board</p></article></div>
       </section>
 
@@ -148,8 +150,8 @@
       </section>
 
       <section class="dashboard-view" data-view-panel="tickets" aria-labelledby="tickets-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Tickets</p><h1 id="tickets-title">Support centre.</h1><p>Create, follow and respond to community support requests in one place.</p></div><button class="primary-action" type="button" data-open-login>Connect to open a ticket</button></div>
-        <div class="dashboard-grid ticket-grid"><article class="panel empty-panel"><span aria-hidden="true">◇</span><h2>No account connected</h2><p>Your open and resolved tickets will appear here after Discord authentication.</p><button class="secondary-action" type="button" data-open-login>Preview sign-in</button></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">How it will work</p><h2>Structured support</h2></div></div><ol class="support-steps"><li><span>01</span><div><strong>Choose a category</strong><small>Direct the request to the correct team.</small></div></li><li><span>02</span><div><strong>Provide the details</strong><small>Keep evidence and context together.</small></div></li><li><span>03</span><div><strong>Follow the outcome</strong><small>Receive updates without staff DMs.</small></div></li></ol></article></div>
+        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Tickets</p><h1 id="tickets-title">Support centre.</h1><p>Create, follow and respond to community support requests in one place.</p></div><button class="primary-action" type="button" data-open-login data-auth-cta>Connect Discord</button></div>
+        <div class="dashboard-grid ticket-grid"><article class="panel empty-panel"><span aria-hidden="true">◇</span><h2>Ticket connection coming later</h2><p>Discord identity can be verified now. Open and resolved tickets will connect in a later stage.</p><button class="secondary-action" type="button" data-open-login>Sign in with Discord</button></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">How it will work</p><h2>Structured support</h2></div></div><ol class="support-steps"><li><span>01</span><div><strong>Choose a category</strong><small>Direct the request to the correct team.</small></div></li><li><span>02</span><div><strong>Provide the details</strong><small>Keep evidence and context together.</small></div></li><li><span>03</span><div><strong>Follow the outcome</strong><small>Receive updates without staff DMs.</small></div></li></ol></article></div>
       </section>
 
       <section class="dashboard-view" data-view-panel="staff" aria-labelledby="staff-title" hidden>
@@ -168,8 +170,8 @@
 
       <section class="dashboard-view" data-view-panel="settings" aria-labelledby="settings-title" hidden>
         <div class="view-heading"><div><p class="breadcrumb">Dashboard / Settings &amp; help</p><h1 id="settings-title">Settings &amp; help.</h1><p>Connection status, privacy information and answers about the dashboard.</p></div></div>
-        <div class="dashboard-grid settings-grid"><article class="panel connection-panel"><div class="panel-heading"><div><p class="panel-kicker">Account</p><h2>Discord connection</h2></div><span class="status-badge"><i></i>Not connected</span></div><p>Discord will identify your community profile and determine which features you are allowed to use.</p><button class="primary-action" type="button" data-open-login>Preview Discord sign-in</button><a class="inline-link" href="privacy.html">Read the privacy information <span aria-hidden="true">→</span></a></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Access levels</p><h2>Role-based permissions</h2></div></div><ul class="role-list"><li><span>Visitor</span><small>Public server information</small></li><li><span>Member</span><small>Profile, economy and tickets</small></li><li><span>Staff</span><small>Approved moderation tools</small></li><li><span>Owner</span><small>Server and configuration control</small></li></ul></article></div>
-        <article class="panel help-panel"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open><summary>Why are some buttons still locked?</summary><p>The Railway API currently exposes safe, read-only public server status. Account data and server-changing actions remain locked until Discord authentication, permission checks, confirmations and audit logging are added.</p></details><details><summary>Which displayed information is live?</summary><p>The DayZ server status, player count, capacity, map, platform and API update time are live. Player examples, balances, tickets, activity and configuration history remain demonstration data.</p></details><details><summary>What will Discord sign-in request?</summary><p>The planned sign-in will identify your Discord account and check your World War Z server membership and roles. The exact permission screen will be reviewed before it is enabled.</p></details><details><summary>What comes next?</summary><p>The public Railway status connection is complete. The next dashboard backend stage will add secure Discord authentication and role-based access without exposing bot or Nitrado credentials.</p></details></article>
+        <div class="dashboard-grid settings-grid"><article class="panel connection-panel"><div class="panel-heading"><div><p class="panel-kicker">Account</p><h2>Discord connection</h2></div><span class="status-badge" data-auth-badge><i></i><span data-auth-badge-label>Checking connection</span></span></div><div class="account-summary" data-account-summary hidden><span class="account-avatar" data-account-avatar aria-hidden="true">WZ</span><div><strong data-account-display-name>Survivor</strong><small><span data-account-username>Discord account</span> · <span data-account-level>Member</span></small></div></div><p data-auth-description>Discord sign-in securely verifies your World War Z membership and current access level.</p><div class="auth-actions"><button class="primary-action" type="button" data-open-login data-auth-guest-action>Sign in with Discord</button><button class="secondary-action" type="button" data-sign-out hidden>Sign out</button></div><a class="inline-link" href="privacy.html">Read the privacy information <span aria-hidden="true">→</span></a></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Access levels</p><h2>Role-based permissions</h2></div></div><ul class="role-list"><li><span>Visitor</span><small>Public server information</small></li><li><span>Member</span><small>Verified profile and future account features</small></li><li><span>Staff</span><small>Verified access to approved moderation areas</small></li><li><span>Owner</span><small>Verified access to owner-only areas</small></li></ul></article></div>
+        <article class="panel help-panel"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open><summary>Why are some buttons still locked?</summary><p>Discord sign-in now verifies identity, membership and access level. Server-changing and private-data actions remain locked until their own protected endpoints, confirmations and audit logging are completed.</p></details><details><summary>Which displayed information is live?</summary><p>The DayZ server status, player count, capacity, map, platform and API update time are live. After sign-in, your Discord identity and access level are also live. Balances, tickets, player examples, activity and configuration history remain demonstrations.</p></details><details><summary>What does Discord sign-in request?</summary><p>The sign-in requests only Discord's basic <strong>identify</strong> permission. The bot then checks whether that Discord user is currently a World War Z member and calculates member, staff or owner access on Railway.</p></details><details><summary>What comes next?</summary><p>The next backend stage can connect the verified member session to personal profile and economy information. Protected owner actions will remain separate and require stronger safeguards.</p></details></article>
       </section>
 
       <footer class="dashboard-footer"><p>Live public server status. Account and protected areas remain previews.</p><div><a href="index.html">Website</a><a href="changelog.html">Changelog</a><a href="privacy.html">Privacy</a><a href="https://discord.gg/worldwarzps" target="_blank" rel="noreferrer">Discord</a></div><p>&copy; <span data-year></span> World War Z Community</p></footer>
@@ -178,14 +180,14 @@
 
   <dialog class="login-dialog" data-login-dialog aria-labelledby="login-title">
     <form method="dialog">
-      <button class="dialog-close" value="close" aria-label="Close sign-in preview">×</button>
+      <button class="dialog-close" value="close" aria-label="Close sign-in">×</button>
       <span class="discord-mark" aria-hidden="true">◈</span>
-      <p class="panel-kicker">Coming after backend connection</p>
+      <p class="panel-kicker">Secure Discord OAuth</p>
       <h2 id="login-title">Sign in with Discord</h2>
-      <p>The finished sign-in will connect your Discord identity, confirm your World War Z membership and assign the correct dashboard access.</p>
-      <ul><li><span aria-hidden="true">✓</span>View your linked community profile</li><li><span aria-hidden="true">✓</span>Access member or approved staff features</li><li><span aria-hidden="true">✓</span>Keep bot and Nitrado secrets off this website</li></ul>
-      <div class="dialog-notice"><strong>Preview only</strong><span>No Discord authorisation request will open today.</span></div>
-      <button class="discord-button wide" type="button" disabled>Discord connection coming soon</button>
+      <p>Discord will identify your account. Railway will then confirm your current World War Z membership and assign member, staff or owner access.</p>
+      <ul><li><span aria-hidden="true">✓</span>Requests only Discord's basic identify permission</li><li><span aria-hidden="true">✓</span>Rechecks community membership and roles on Railway</li><li><span aria-hidden="true">✓</span>Keeps Discord and Nitrado secrets off this website</li></ul>
+      <div class="dialog-notice" data-auth-dialog-notice><strong>Secure connection</strong><span>Your dashboard session lasts for this browser tab and expires automatically.</span></div>
+      <button class="discord-button wide" type="button" data-start-discord-login disabled>Checking Discord sign-in…</button>
       <button class="dialog-cancel" value="close">Return to dashboard</button>
     </form>
   </dialog>
