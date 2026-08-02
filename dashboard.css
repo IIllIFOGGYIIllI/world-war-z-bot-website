@@ -132,7 +132,9 @@ button { color: inherit; }
 
 .topbar-spacer { flex: 1; }
 .connection-state { display: inline-flex; align-items: center; gap: 8px; color: #b1aaa4; font-size: 12px; font-weight: 650; }
-.connection-state > span { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 5px rgba(78, 178, 106, 0.1); }
+.connection-state > span:first-child { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 5px rgba(212, 161, 43, 0.1); }
+.connection-state[data-state="online"] > span:first-child { background: var(--green); box-shadow: 0 0 0 5px rgba(78, 178, 106, 0.1); }
+.connection-state[data-state="unavailable"] > span:first-child { background: var(--red-bright); box-shadow: 0 0 0 5px rgba(243, 58, 40, 0.1); }
 
 .discord-button,
 .primary-action,
@@ -271,6 +273,10 @@ button { color: inherit; }
 .preview-banner > span { width: 20px; height: 20px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--red); color: white; font-weight: 850; }
 .preview-banner p { margin: 1px 0 0; }
 .preview-banner strong { color: #f2eae2; }
+.preview-banner.live { border-color: rgba(78,178,106,0.28); background: rgba(78,178,106,0.07); }
+.preview-banner.live > span { background: var(--green); }
+.preview-banner.degraded { border-color: rgba(212,161,43,0.32); background: rgba(212,161,43,0.07); }
+.preview-banner.degraded > span { background: var(--amber); color: var(--ink); }
 
 .dashboard-view { max-width: 1480px; margin: 0 auto; animation: view-in 240ms ease both; }
 .dashboard-view[hidden] { display: none !important; }
@@ -335,6 +341,13 @@ button { color: inherit; }
 .status-badge i, .table-status i { width: 6px; height: 6px; border-radius: 50%; background: #5d5651; }
 .status-badge.online { border-color: rgba(78,178,106,0.25); background: rgba(78,178,106,0.07); color: #7fd392; }
 .status-badge.online i, .table-status.online i { background: var(--green); box-shadow: 0 0 0 4px rgba(78,178,106,0.1); }
+.status-badge.restarting { border-color: rgba(212,161,43,0.3); background: rgba(212,161,43,0.08); color: #e7bf62; }
+.status-badge.restarting i { background: var(--amber); box-shadow: 0 0 0 4px rgba(212,161,43,0.1); }
+.status-badge.offline, .status-badge.unavailable { border-color: rgba(243,58,40,0.3); background: rgba(212,36,24,0.08); color: #ff8f82; }
+.status-badge.offline i, .status-badge.unavailable i { background: var(--red-bright); box-shadow: 0 0 0 4px rgba(243,58,40,0.1); }
+.metric-icon.online { background: rgba(78,178,106,0.1); color: var(--green); }
+.metric-icon.restarting { background: rgba(212,161,43,0.1); color: var(--amber); }
+.metric-icon.offline, .metric-icon.unavailable { background: rgba(212,36,24,0.1); color: var(--red-bright); }
 .status-badge.large { align-self: center; padding: 10px 13px; }
 .lock-label, .muted-label { color: #6f6762; font-size: 8px; font-weight: 850; letter-spacing: 0.11em; text-transform: uppercase; }
 
@@ -400,7 +413,13 @@ button { color: inherit; }
 .detail-list dt { color: #77706a; font-size: 9px; }
 .detail-list dd { margin: 0; font-size: 10px; font-weight: 750; text-align: right; }
 .green-text { color: var(--green); }
+.online-text { color: var(--green); }
+.restarting-text { color: var(--amber); }
+.offline-text, .unavailable-text { color: var(--red-bright); }
 .operation-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+.operation-grid button:not(:disabled) { cursor: pointer; border-color: rgba(78,178,106,0.22); color: #d8d0c9; transition: transform 160ms ease, border-color 160ms ease, background 160ms ease; }
+.operation-grid button:not(:disabled):hover { transform: translateY(-2px); border-color: rgba(78,178,106,0.45); background: rgba(78,178,106,0.05); }
+.operation-grid button.is-loading { cursor: wait; opacity: 0.65; }
 
 .command-toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .command-search { min-width: min(390px, 100%); display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border: 1px solid var(--line-strong); background: var(--panel); color: #746d68; }

@@ -1,5 +1,22 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.2.0 — Live Server Status
+
+### Added
+
+- Live read-only DayZ server status from the World War Z Bot API on Railway.
+- Live player count, capacity, map, platform and API update time.
+- Automatic status refresh every 30 seconds and a manual refresh action.
+- Online, restarting, offline and temporarily unavailable display states.
+- Complete current catalogue of 30 top-level Discord commands.
+- Updated homepage roadmap, dashboard help, privacy information and browser changelog.
+
+### Security
+
+- The public website cannot perform server-changing actions.
+- Online player names, Discord member records, bot credentials and Nitrado credentials are not requested or displayed.
+- Discord authentication and all protected account, staff and owner features remain locked for future stages.
+
 ## Version 1.1.0 — Dashboard Preview
 
 ### Added
