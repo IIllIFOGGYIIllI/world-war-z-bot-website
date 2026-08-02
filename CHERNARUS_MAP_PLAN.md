@@ -4,12 +4,14 @@ Map Stage 1 is implemented as a dedicated public dashboard view.
 
 ## Current implementation
 
-- Official ChernarusPlus image hosted inside this website repository.
+- Official ChernarusPlus satellite image hosted inside this website repository.
+- Enhanced 4096px Roads view with a Roads/Satellite layer switch.
 - No third-party map scripts, embeds, tiles, cookies or tracking.
 - Native mouse, touch and keyboard pan and zoom.
 - Validated public JSON POIs with search, filters and accessible details.
 - DayZ X/Z coordinate readout and marker positioning on a 15360 m map.
 - Responsive desktop, tablet and mobile layouts.
+- The current position and approved markers remain aligned when layers change.
 
 Public markers live in `assets/chernarus-pois.json`. Every entry must contain a
 unique ID, category, name, description, X/Z DayZ coordinates and

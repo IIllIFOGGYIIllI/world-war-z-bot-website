@@ -3,7 +3,23 @@
   "map": {
     "name": "ChernarusPlus",
     "size_meters": 15360,
-    "image": "assets/chernarus-map.webp",
+    "default_layer": "roads",
+    "layers": [
+      {
+        "id": "roads",
+        "name": "Enhanced Roads",
+        "image": "assets/chernarus-roads.webp",
+        "max_zoom": 2.6,
+        "note": "Enhanced Roads view · derived from the official map © Bohemia Interactive, used under ADPL-SA."
+      },
+      {
+        "id": "satellite",
+        "name": "Satellite",
+        "image": "assets/chernarus-map.webp",
+        "max_zoom": 1.8,
+        "note": "Satellite view · official map © Bohemia Interactive, used under ADPL-SA."
+      }
+    ],
     "source_name": "BohemiaInteractive/DayZ-Central-Economy",
     "source_url": "https://github.com/BohemiaInteractive/DayZ-Central-Economy/tree/master/CETool/ChernarusPlus"
   },

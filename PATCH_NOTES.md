@@ -1,5 +1,24 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.5.1 — Clearer Map Layers
+
+### Added and improved
+
+- Added a locally hosted 4096px **Roads** view for clearer navigation.
+- Added an in-map **Roads / Satellite** layer switch.
+- Roads opens by default and the selected layer is remembered for the tab.
+- Switching layers preserves the current position, markers and coordinates.
+- Satellite zoom is capped closer to its native resolution to reduce blur.
+
+### Source and privacy
+
+- Both views are derived from the official Bohemia Interactive ChernarusPlus
+  source and remain covered by ADPL-SA attribution.
+- The enhanced Roads view changes presentation only; it does not invent or
+  redraw geographic features.
+- iZurvive imagery and tiles are not copied, embedded or requested.
+- No third-party map provider receives visitor requests.
+
 ## Version 1.5.0 — Interactive Chernarus Map
 
 ### Added

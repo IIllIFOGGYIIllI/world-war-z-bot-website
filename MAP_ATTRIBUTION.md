@@ -1,14 +1,21 @@
 # ChernarusPlus Map Attribution
 
-`assets/chernarus-map.webp` is derived from `CETool/ChernarusPlus/map.png` in
-the official Bohemia Interactive DayZ Central Economy repository.
+`assets/chernarus-map.webp` and `assets/chernarus-roads.webp` are derived from
+`CETool/ChernarusPlus/map.png` in the official Bohemia Interactive DayZ
+Central Economy repository.
 
 - Author and copyright holder: Bohemia Interactive a.s.
 - Source: https://github.com/BohemiaInteractive/DayZ-Central-Economy/tree/master/CETool/ChernarusPlus
 - Licence: Arma and DayZ Public License Share Alike (ADPL-SA)
 - Licence text: https://www.bohemia.net/community/licenses/arma-and-dayz-public-license-share-alike-adpl-sa
-- Modification: converted from PNG to WebP for faster website delivery; the
-  dimensions, crop and depicted map content were not changed.
+- Satellite modification: converted from PNG to WebP for faster website
+  delivery; the dimensions, crop and depicted map content were not changed.
+- Enhanced Roads modification: enlarged to 4096 × 4096, desaturated, brightened,
+  contrast adjusted and sharpened to make existing roads and buildings easier
+  to distinguish. It does not add or redraw geographic features.
+
+The iZurvive Chernarus+ and Tourist Map artwork is not included, copied,
+embedded or requested by this website.
 
 This independent, non-commercial community website uses the asset only for a
 DayZ server map. The adapted map asset is distributed under ADPL-SA.

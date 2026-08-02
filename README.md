@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add interactive Chernarus map`
+4. Enter the commit message: `Add clearer Chernarus road layer`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -34,7 +34,7 @@ GitHub may take a few minutes to publish the first version.
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
 - `dashboard.js` — Railway status, Discord session, role visibility and member data
-- `chernarus-map.js` — public POI search, filters, markers, pan and zoom
+- `chernarus-map.js` — map layers, public POI search, filters, markers, pan and zoom
 - `privacy.html` — current dashboard authentication and privacy information
 - `changelog.html` — browser-readable website release history
 - `pages.css` — shared privacy and changelog page design
@@ -42,6 +42,7 @@ GitHub may take a few minutes to publish the first version.
 - `site.webmanifest` — website metadata
 - `assets/world-war-z-banner.png` — supplied World War Z banner
 - `assets/chernarus-map.webp` — locally hosted official ChernarusPlus map image
+- `assets/chernarus-roads.webp` — enhanced 4096px Roads view derived from the official image
 - `assets/chernarus-pois.json` — validated public map locations
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates

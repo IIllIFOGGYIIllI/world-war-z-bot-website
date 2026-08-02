@@ -4,6 +4,9 @@
   const frame = document.querySelector('[data-map-frame]');
   const stage = document.querySelector('[data-map-stage]');
   const image = document.querySelector('[data-map-image]');
+  const layerImages = Array.from(document.querySelectorAll('[data-map-layer-image]'));
+  const layerButtons = Array.from(document.querySelectorAll('[data-map-layer-button]'));
+  const layerNote = document.querySelector('[data-map-layer-note]');
   const markersLayer = document.querySelector('[data-map-markers]');
   const loading = document.querySelector('[data-map-loading]');
   const search = document.querySelector('[data-map-search]');
@@ -29,6 +32,8 @@
   let imageReady = false;
   let hasFitted = false;
   let dragState = null;
+  let activeLayerId = 'roads';
+  let mapLayers = new Map();
 
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
@@ -45,6 +50,42 @@
   const validText = (value, maximumLength) => {
     const text = String(value || '').trim();
     return text && text.length <= maximumLength ? text : null;
+  };
+
+  const validateLayer = (rawLayer) => {
+    const id = validText(rawLayer?.id, 40);
+    const name = validText(rawLayer?.name, 60);
+    const imagePath = validText(rawLayer?.image, 160);
+    const note = validText(rawLayer?.note, 240);
+    const maxZoom = Number(rawLayer?.max_zoom);
+    if (!id || !name || !imagePath?.startsWith('assets/') || !note) return null;
+    if (!Number.isFinite(maxZoom) || maxZoom < 1 || maxZoom > 4) return null;
+    return { id, name, image: imagePath, note, maxZoom };
+  };
+
+  const setMapLayer = (layerId, { remember = true } = {}) => {
+    const layer = mapLayers.get(layerId);
+    const nextImage = layerImages.find((element) => element.dataset.mapLayerImage === layerId);
+    if (!layer || !nextImage) return;
+
+    activeLayerId = layerId;
+    view.maxZoom = layer.maxZoom;
+    layerImages.forEach((element) => {
+      const active = element === nextImage;
+      element.classList.toggle('active', active);
+      element.setAttribute('aria-hidden', String(!active));
+    });
+    layerButtons.forEach((button) => {
+      const active = button.dataset.mapLayerButton === layerId;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    if (layerNote) layerNote.textContent = layer.note;
+
+    if (view.zoom > view.maxZoom) zoomAt(view.maxZoom);
+    if (remember) {
+      try { window.sessionStorage.setItem('wwz-map-layer', layerId); } catch (error) { /* Storage is optional. */ }
+    }
   };
 
   const validatePoi = (rawPoi) => {
@@ -295,8 +336,20 @@
       if (!Number.isFinite(configuredSize) || configuredSize <= 0) throw new Error('Invalid map size');
       mapSize = configuredSize;
 
-      const safeImage = String(payload?.map?.image || '');
-      if (safeImage.startsWith('assets/') && image.getAttribute('src') !== safeImage) image.src = safeImage;
+      const validLayers = (Array.isArray(payload?.map?.layers) ? payload.map.layers : [])
+        .map(validateLayer)
+        .filter(Boolean);
+      if (!validLayers.length) throw new Error('No valid map layers');
+      mapLayers = new Map(validLayers.map((layer) => [layer.id, layer]));
+      validLayers.forEach((layer) => {
+        const layerImage = layerImages.find((element) => element.dataset.mapLayerImage === layer.id);
+        if (layerImage && layerImage.getAttribute('src') !== layer.image) layerImage.src = layer.image;
+      });
+
+      let preferredLayer = String(payload?.map?.default_layer || 'roads');
+      try { preferredLayer = window.sessionStorage.getItem('wwz-map-layer') || preferredLayer; } catch (error) { /* Storage is optional. */ }
+      if (!mapLayers.has(preferredLayer)) preferredLayer = validLayers[0].id;
+      setMapLayer(preferredLayer, { remember: false });
 
       const seenIds = new Set();
       publicPois = (Array.isArray(payload?.pois) ? payload.pois : [])
@@ -325,6 +378,9 @@
   if (image.complete && image.naturalWidth > 0) imageReady = true;
 
   search?.addEventListener('input', applyFilters);
+  layerButtons.forEach((button) => {
+    button.addEventListener('click', () => setMapLayer(button.dataset.mapLayerButton));
+  });
   document.querySelector('[data-map-zoom-in]')?.addEventListener('click', () => zoomAt(view.zoom * 1.35));
   document.querySelector('[data-map-zoom-out]')?.addEventListener('click', () => zoomAt(view.zoom / 1.35));
   document.querySelector('[data-map-reset]')?.addEventListener('click', fitMap);
