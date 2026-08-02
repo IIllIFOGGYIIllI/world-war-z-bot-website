@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add secure Discord login`
+4. Enter the commit message: `Connect member dashboard data`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -31,9 +31,9 @@ GitHub may take a few minutes to publish the first version.
 - `index.html` — website content and structure
 - `styles.css` — full visual design and mobile layout
 - `script.js` — navigation, header and scroll effects
-- `dashboard.html` — live status dashboard with secure Discord sign-in
+- `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
-- `dashboard.js` — Railway status, Discord session, navigation and command search
+- `dashboard.js` — Railway status, Discord session, role visibility and member data
 - `privacy.html` — current dashboard authentication and privacy information
 - `changelog.html` — browser-readable website release history
 - `pages.css` — shared privacy and changelog page design
@@ -42,10 +42,11 @@ GitHub may take a few minutes to publish the first version.
 - `assets/world-war-z-banner.png` — supplied World War Z banner
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates
+- `CHERNARUS_MAP_PLAN.md` — secure interactive POI-map roadmap
 
 ## Security
 
-Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth is handled by Railway. The website keeps only an opaque dashboard session in the current tab; private account data and protected actions remain unavailable.
+Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth and member-data queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab and can request only the signed-in member's allowlisted profile and economy summary. Protected actions remain unavailable.
 
 ## Disclaimer
 

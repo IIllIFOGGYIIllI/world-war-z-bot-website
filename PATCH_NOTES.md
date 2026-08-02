@@ -1,12 +1,38 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.4.0 — Member Profile & Economy
+
+### Added
+
+- Live read-only survivor profile for the signed-in member.
+- PlayStation ID, online state, playtime, sessions, server history,
+  faction, reputation and PvP statistics.
+- Live wallet, community jackpot, heat, daily streak, lifetime totals
+  and six recent personal ledger entries.
+- Clear linked, unlinked, loading and unavailable account states.
+- A future interactive Chernarus POI-map foundation on Server Status.
+
+### Access and security
+
+- Admin and Owner tabs and buttons are hidden unless Railway verifies
+  the corresponding Discord access.
+- The backend still enforces authorization; hidden UI is not treated as
+  the security boundary.
+- The browser cannot choose another member's Discord ID.
+- Warnings, Admin notes, Discord IDs and transaction counterparties are
+  not returned.
+- The connected-account **Sign in with Discord** button now correctly
+  disappears while **Sign out** remains available.
+- The existing backend `staff` key is displayed as **Admin** throughout
+  the website for compatibility with current Railway configuration.
+
 ## Version 1.3.0 — Secure Discord Sign-In
 
 ### Added
 
 - Real Discord OAuth sign-in through the existing Railway bot service.
 - Live World War Z Discord membership and role verification.
-- Verified member, staff and owner access labels in the dashboard.
+- Verified member, Admin and owner access labels in the dashboard.
 - Automatic session restoration within the same browser tab.
 - Secure sign-out and clear sign-in error messages.
 - Updated homepage, privacy information and browser changelog.
@@ -40,7 +66,7 @@
 
 - The public website cannot perform server-changing actions.
 - Online player names, Discord member records, bot credentials and Nitrado credentials are not requested or displayed.
-- Discord authentication and all protected account, staff and owner features remain locked for future stages.
+- Discord authentication and all protected account, Admin and owner features remain locked for future stages.
 
 ## Version 1.1.0 — Dashboard Preview
 
@@ -48,12 +74,12 @@
 
 - Interactive dashboard preview designed for the future Railway backend.
 - Responsive dashboard navigation for desktop, tablet and mobile devices.
-- Overview, server status, commands, economy, players, tickets, staff, configuration and settings views.
+- Overview, server status, commands, economy, players, tickets, Admin, configuration and settings views.
 - Searchable 25-command preview catalogue with category filters.
 - Discord login preview explaining the future authentication process.
-- Visitor, member, staff and owner access-level previews.
+- Visitor, member, Admin and owner access-level previews.
 - Clearly labelled fictional server, player, activity, economy and backup data.
-- Disabled owner and staff controls showing the planned secure workflows.
+- Disabled owner and Admin controls showing the planned secure workflows.
 - Frequently asked questions on the public homepage.
 - Dedicated privacy and browser-readable changelog pages.
 - Dashboard links in the public navigation, hero and footer.
