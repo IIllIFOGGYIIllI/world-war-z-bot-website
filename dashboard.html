@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/world-war-z-banner.png">
   <title>Dashboard | World War Z Bot</title>
-  <link rel="stylesheet" href="dashboard.css?v=1.8.0">
+  <link rel="stylesheet" href="dashboard.css?v=1.8.1">
 </head>
 <body>
   <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -240,7 +240,7 @@
       <section class="dashboard-view" data-view-panel="settings" aria-labelledby="settings-title" hidden>
         <div class="view-heading"><div><p class="breadcrumb">Dashboard / Settings &amp; help</p><h1 id="settings-title">Settings &amp; help.</h1><p>Connection status, privacy information and answers about the dashboard.</p></div></div>
         <div class="dashboard-grid settings-grid"><article class="panel connection-panel"><div class="panel-heading"><div><p class="panel-kicker">Account</p><h2>Discord connection</h2></div><span class="status-badge" data-auth-badge><i></i><span data-auth-badge-label>Checking connection</span></span></div><div class="account-summary" data-account-summary hidden><span class="account-avatar" data-account-avatar aria-hidden="true">WZ</span><div><strong data-account-display-name>Survivor</strong><small><span data-account-username>Discord account</span> · <span data-account-level>Member</span></small></div></div><p data-auth-description>Discord sign-in securely verifies your World War Z membership and current access level.</p><div class="auth-actions"><button class="primary-action" type="button" data-open-login data-auth-guest-action>Sign in with Discord</button><button class="secondary-action" type="button" data-sign-out hidden>Sign out</button></div><a class="inline-link" href="privacy.html">Read the privacy information <span aria-hidden="true">→</span></a></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Access levels</p><h2>Role-based permissions</h2></div></div><ul class="role-list"><li><span>Visitor</span><small>Public server information</small></li><li><span>Member</span><small>Verified profile and personal economy data</small></li><li><span>Admin</span><small>Moderation and protected server controls</small></li><li><span>Owner</span><small>Verified access to owner-only configuration</small></li></ul></article></div>
-        <article class="panel help-panel"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open><summary>Why are some buttons still locked?</summary><p>The protected Restart server action is now connected for verified Admins and the Owner. Stop, Start, ticket, moderation and configuration actions remain locked until their own protected endpoints are completed.</p></details><details><summary>Which displayed information is live?</summary><p>Server status, population, map and platform are public and live. After sign-in, your Discord access, linked PlayStation profile, activity, PvP statistics, wallet and personal ledger are also live.</p></details><details><summary>Who can use the restart control?</summary><p>Only a signed-in Admin or Owner can see it. Railway rechecks current Discord membership and permissions, requires an exact confirmation and records every accepted or rejected request.</p></details><details><summary>How does the Chernarus map work?</summary><p>The dedicated public map uses one locally hosted vector road map with pan, zoom, search, filters and read-only public markers. It stays sharp at every zoom and does not contact a third-party map service. Private or live operational locations are not published.</p></details></article>
+        <article class="panel help-panel"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open><summary>Why are some buttons still locked?</summary><p>The protected Restart server action is now connected for verified Admins and the Owner. Stop, Start, ticket, moderation and configuration actions remain locked until their own protected endpoints are completed.</p></details><details><summary>Which displayed information is live?</summary><p>Server status, population, map and platform are public and live. After sign-in, your Discord access, linked PlayStation profile, activity, PvP statistics, wallet and personal ledger are also live.</p></details><details><summary>Who can use the restart control?</summary><p>Only a signed-in Admin or Owner can see it. Railway rechecks current Discord membership and permissions after the confirmation prompt and records every accepted or rejected request.</p></details><details><summary>How does the Chernarus map work?</summary><p>The dedicated public map uses one locally hosted vector road map with pan, zoom, search, filters and read-only public markers. It stays sharp at every zoom and does not contact a third-party map service. Private or live operational locations are not published.</p></details></article>
       </section>
 
       <footer class="dashboard-footer"><p class="bohemia-disclaimer">This website is not affiliated or authorized by Bohemia Interactive a.s. Bohemia Interactive, ARMA, DAYZ and all associated logos and designs are trademarks or registered trademarks of Bohemia Interactive a.s.</p><p>Live server status, secure member self-service and audited Admin restart control.</p><div><a href="index.html">Website</a><a href="changelog.html">Changelog</a><a href="privacy.html">Privacy</a><a href="https://discord.gg/worldwarzps" target="_blank" rel="noreferrer">Discord</a></div><p>&copy; <span data-year></span> World War Z Community</p></footer>
@@ -267,17 +267,17 @@
       <span class="restart-mark" aria-hidden="true">↻</span>
       <p class="panel-kicker">Protected Admin operation</p>
       <h2 id="restart-dialog-title">Restart the DayZ server?</h2>
-      <p>This disconnects all current players while Nitrado restarts the server. Railway will recheck your Discord access and permanently audit the request.</p>
-      <div class="restart-warning"><strong>Confirmation required</strong><span>Type <code>RESTART</code> exactly to unlock the action.</span></div>
-      <label class="dialog-field"><span>Confirmation</span><input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="7" placeholder="RESTART" data-restart-confirmation></label>
+      <p>This disconnects all current players while Nitrado restarts the server. Please review the warning and confirm only when the server is safe to restart.</p>
+      <div class="restart-warning"><strong>Are you sure?</strong><span>Selecting Yes will immediately submit the protected restart request.</span></div>
+      <ul class="restart-confirmation-list"><li><span aria-hidden="true">!</span>Current players may be disconnected</li><li><span aria-hidden="true">✓</span>Railway will recheck your Admin access</li><li><span aria-hidden="true">✓</span>The request and outcome will be audited</li></ul>
       <label class="dialog-field"><span>Reason <small>Optional · 200 characters maximum</small></span><textarea rows="3" maxlength="200" placeholder="Example: Scheduled community maintenance" data-restart-reason></textarea></label>
       <div class="restart-dialog-message" role="status" data-restart-dialog-message hidden></div>
-      <button class="primary-action danger-action wide" type="submit" data-confirm-restart disabled>Confirm server restart</button>
-      <button class="dialog-cancel" type="button" data-restart-cancel>Cancel and return</button>
+      <button class="primary-action danger-action wide" type="submit" data-confirm-restart disabled>Yes, restart server</button>
+      <button class="dialog-cancel" type="button" data-restart-cancel>No, cancel and return</button>
     </form>
   </dialog>
 
-  <script src="dashboard.js?v=1.8.0"></script>
+  <script src="dashboard.js?v=1.8.1"></script>
   <script src="chernarus-map.js?v=1.7.0"></script>
 </body>
 </html>

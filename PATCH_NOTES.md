@@ -1,5 +1,23 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.8.1 — Restart Confirmation Prompt
+
+### Changed
+
+- Replaced the typed `RESTART` requirement with a clear confirmation prompt.
+- Admins now choose **Yes, restart server** or **No, cancel and return**.
+- Added a short checklist explaining player disconnection, fresh permission
+  verification and audit logging before confirmation.
+- Kept the optional restart reason.
+
+### Security
+
+- The browser still sends Railway's required internal confirmation value only
+  after the Admin selects **Yes, restart server**.
+- Railway continues to perform the real authorization check, shared cooldown,
+  in-progress protection and permanent audit logging.
+- The change removes typing only; it does not weaken the protected backend.
+
 ## Version 1.8.0 — Secure Admin Restart
 
 ### Added

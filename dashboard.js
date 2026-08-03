@@ -100,7 +100,6 @@ const signOutButton = document.querySelector('[data-sign-out]');
 const authDialogNotice = document.querySelector('[data-auth-dialog-notice]');
 const restartDialog = document.querySelector('[data-restart-dialog]');
 const restartForm = document.querySelector('[data-restart-form]');
-const restartConfirmationInput = document.querySelector('[data-restart-confirmation]');
 const restartReasonInput = document.querySelector('[data-restart-reason]');
 const confirmRestartButton = document.querySelector('[data-confirm-restart]');
 const restartDialogMessage = document.querySelector('[data-restart-dialog-message]');
@@ -166,13 +165,10 @@ const syncRestartControls = () => {
     button.disabled = restartRequestInProgress;
   });
   if (confirmRestartButton) {
-    confirmRestartButton.disabled = (
-      !enabled
-      || restartConfirmationInput?.value !== 'RESTART'
-    );
+    confirmRestartButton.disabled = !enabled;
     confirmRestartButton.textContent = restartRequestInProgress
       ? 'Submitting protected restart…'
-      : 'Confirm server restart';
+      : 'Yes, restart server';
   }
 };
 
@@ -370,7 +366,7 @@ const openRestartDialog = () => {
   resetRestartDialog();
   if (typeof restartDialog?.showModal === 'function') restartDialog.showModal();
   else restartDialog?.setAttribute('open', '');
-  window.setTimeout(() => restartConfirmationInput?.focus(), 0);
+  window.setTimeout(() => restartReasonInput?.focus(), 0);
 };
 
 restartButtons.forEach((button) => {
@@ -382,8 +378,6 @@ restartCancelButtons.forEach((button) => {
     if (!restartRequestInProgress) restartDialog?.close?.();
   });
 });
-
-restartConfirmationInput?.addEventListener('input', syncRestartControls);
 
 restartDialog?.addEventListener('click', (event) => {
   if (event.target === restartDialog && !restartRequestInProgress) {
@@ -405,7 +399,6 @@ restartForm?.addEventListener('submit', async (event) => {
   if (
     restartRequestInProgress
     || !hasRestartAccess()
-    || restartConfirmationInput?.value !== 'RESTART'
   ) {
     return;
   }

@@ -824,14 +824,15 @@ td:first-child { color: #e7dfd7; font-weight: 700; }
 .restart-warning { display: grid; gap: 3px; margin: 22px 0 18px; padding: 13px; border-left: 3px solid var(--red-bright); background: rgba(212,36,24,0.08); }
 .restart-warning strong { color: #f2eae2; font-size: 9px; text-transform: uppercase; }
 .restart-warning span { color: #8f8781; font-size: 9px; }
-.restart-warning code { color: #ff9c91; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; }
+.restart-confirmation-list { display: grid; gap: 8px; margin: 0 0 19px; padding: 0; list-style: none; }
+.restart-confirmation-list li { display: flex; align-items: center; gap: 9px; padding: 0; color: #aaa29b; font-size: 9px; }
+.restart-confirmation-list li span { width: 20px; height: 20px; flex: 0 0 auto; display: grid; place-items: center; background: rgba(212,36,24,0.1); color: var(--red-bright); font-size: 8px; font-weight: 900; }
 .dialog-field { display: grid; gap: 7px; margin-top: 14px; }
 .dialog-field > span { display: flex; justify-content: space-between; gap: 14px; color: #817974; font-size: 8px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
 .dialog-field > span small { color: #5f5853; font-size: 7px; font-weight: 700; letter-spacing: 0.04em; }
-.dialog-field input, .dialog-field textarea { width: 100%; border: 1px solid var(--line-strong); outline: 0; background: #0a0808; color: var(--paper); font-family: inherit; font-size: 10px; line-height: 1.5; }
-.dialog-field input { min-height: 44px; padding: 0 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 850; letter-spacing: 0.12em; }
+.dialog-field textarea { width: 100%; border: 1px solid var(--line-strong); outline: 0; background: #0a0808; color: var(--paper); font-family: inherit; font-size: 10px; line-height: 1.5; }
 .dialog-field textarea { min-height: 78px; padding: 10px 12px; resize: vertical; }
-.dialog-field input:focus, .dialog-field textarea:focus { border-color: rgba(243,58,40,0.58); box-shadow: 0 0 0 3px rgba(212,36,24,0.08); }
+.dialog-field textarea:focus { border-color: rgba(243,58,40,0.58); box-shadow: 0 0 0 3px rgba(212,36,24,0.08); }
 .restart-dialog-message { margin: 14px 0; padding: 11px 12px; border: 1px solid rgba(243,58,40,0.3); background: rgba(212,36,24,0.08); color: #ff9c91; font-size: 9px; }
 .restart-dialog-message[data-state="info"] { border-color: rgba(212,161,43,0.3); background: rgba(212,161,43,0.07); color: #e7bf62; }
 .restart-dialog-message[data-state="success"] { border-color: rgba(78,178,106,0.3); background: rgba(78,178,106,0.07); color: #86d898; }
