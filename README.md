@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Move server controls to Admin tools`
+4. Enter the commit message: `Replace maps with vector roads`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -34,16 +34,14 @@ GitHub may take a few minutes to publish the first version.
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
 - `dashboard.js` — Railway status, Discord session, role visibility and member data
-- `chernarus-map.js` — map layers, public POI search, filters, markers, pan and zoom
+- `chernarus-map.js` — public POI search, filters, markers, pan and vector zoom
 - `privacy.html` — current dashboard authentication and privacy information
 - `changelog.html` — browser-readable website release history
 - `pages.css` — shared privacy and changelog page design
 - `404.html` — custom missing-page screen
 - `site.webmanifest` — website metadata
 - `assets/world-war-z-banner.png` — supplied World War Z banner
-- `assets/chernarus-map.webp` — locally hosted official ChernarusPlus map image
-- `assets/chernarus-tactical.webp` — custom 4096px high-contrast tactical view derived from the official image
-- `assets/chernarus-roads.webp` — enhanced 4096px Roads view derived from the official image
+- `assets/chernarus-vector.svg` — custom vector Chernarus road overview
 - `assets/chernarus-pois.json` — validated public map locations
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates
@@ -58,4 +56,4 @@ The public map intentionally excludes live players, private bases, Admin positio
 
 ## Disclaimer
 
-World War Z Bot is an independent community project and is not affiliated with or endorsed by Bohemia Interactive, Discord, Nitrado, Saber Interactive or Paramount Pictures. All trademarks belong to their respective owners.
+This website is not affiliated or authorized by Bohemia Interactive a.s. Bohemia Interactive, ARMA, DAYZ and all associated logos and designs are trademarks or registered trademarks of Bohemia Interactive a.s.

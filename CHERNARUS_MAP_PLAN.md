@@ -1,19 +1,19 @@
 # Interactive Chernarus POI Map
 
-Map Stage 1 is implemented as a dedicated public dashboard view.
+The dashboard now uses one custom vector road map instead of multiple raster
+layers.
 
 ## Current implementation
 
-- Official ChernarusPlus satellite image hosted inside this website repository.
-- Custom 4096px WWZ Tactical view with pale terrain, stronger real feature edges
-  and restrained amber emphasis for clearer roads and structures.
-- Tactical, Roads and Satellite layer switch with Tactical opening by default.
+- One locally hosted `assets/chernarus-vector.svg` base map.
+- Highlighted major and secondary roads, tracks, coastline, forests, grid,
+  settlement labels and CE settlement footprints.
+- Vector line work and text stay sharp at every zoom level.
 - No third-party map scripts, embeds, tiles, cookies or tracking.
 - Native mouse, touch and keyboard pan and zoom.
 - Validated public JSON POIs with search, filters and accessible details.
 - DayZ X/Z coordinate readout and marker positioning on a 15360 m map.
 - Responsive desktop, tablet and mobile layouts.
-- The current position and approved markers remain aligned when layers change.
 
 Public markers live in `assets/chernarus-pois.json`. Every entry must contain a
 unique ID, category, name, description, X/Z DayZ coordinates and
@@ -43,5 +43,6 @@ unpublished event coordinates.
 
 ## Sources
 
-- Official map source: https://github.com/BohemiaInteractive/DayZ-Central-Economy/tree/master/CETool/ChernarusPlus
-- ADPL-SA licence: https://www.bohemia.net/community/licenses/arma-and-dayz-public-license-share-alike-adpl-sa
+- Official source repository: https://github.com/BohemiaInteractive/DayZ-Central-Economy
+- ADPL-SA licence: https://www.bohemia.net/en/licenses/arma-and-dayz-public-license-share-alike-adpl-sa
+- Full attribution and modification notice: `MAP_ATTRIBUTION.md`

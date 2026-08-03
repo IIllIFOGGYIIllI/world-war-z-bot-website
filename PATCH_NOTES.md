@@ -1,5 +1,31 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.7.0 — Vector Road Map
+
+### Added and improved
+
+- Replaced the raster map stack with one custom **WWZ Vector Road Map**.
+- Added crisp highlighted major roads, secondary roads, tracks, labels,
+  forests, coastline, grid and official CE settlement footprints.
+- Increased supported zoom while keeping the existing POIs aligned to DayZ
+  X/Z coordinates.
+- Added the official Bohemia Interactive fan-project disclaimer to the site.
+
+### Removed
+
+- Removed the blurry Tactical, Roads and Satellite image files.
+- Removed the unused three-way map layer selector and duplicate coordinate
+  grid overlay.
+
+### Source and privacy
+
+- The vector map is a schematic adaptation based on the official Bohemia
+  Interactive DayZ Central Economy repository and is distributed under
+  ADPL-SA.
+- iZurvive artwork, labels and tiles are not included, copied or requested.
+- The SVG and POI data are locally hosted; no third-party map service receives
+  visitor requests.
+
 ## Version 1.6.0 — WWZ Tactical Map
 
 ### Added and improved

@@ -32,7 +32,7 @@
   let imageReady = false;
   let hasFitted = false;
   let dragState = null;
-  let activeLayerId = 'tactical';
+  let activeLayerId = 'vector';
   let mapLayers = new Map();
 
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
@@ -346,7 +346,7 @@
         if (layerImage && layerImage.getAttribute('src') !== layer.image) layerImage.src = layer.image;
       });
 
-      let preferredLayer = String(payload?.map?.default_layer || 'tactical');
+      let preferredLayer = String(payload?.map?.default_layer || 'vector');
       try { preferredLayer = window.sessionStorage.getItem('wwz-map-layer') || preferredLayer; } catch (error) { /* Storage is optional. */ }
       if (!mapLayers.has(preferredLayer)) preferredLayer = validLayers[0].id;
       setMapLayer(preferredLayer, { remember: false });

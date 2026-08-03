@@ -1,0 +1,9 @@
+DELETE THESE THREE OLD FILES FROM THE GITHUB REPOSITORY
+
+assets/chernarus-map.webp
+assets/chernarus-roads.webp
+assets/chernarus-tactical.webp
+
+GitHub uploads do not delete existing files automatically. Delete each file
+from the repository after uploading this patch. The complete v1.7.0 package
+already excludes them.

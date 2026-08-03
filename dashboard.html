@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/world-war-z-banner.png">
   <title>Dashboard | World War Z Bot</title>
-  <link rel="stylesheet" href="dashboard.css?v=1.5.1">
+  <link rel="stylesheet" href="dashboard.css?v=1.7.0">
 </head>
 <body>
   <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -127,7 +127,7 @@
       <section class="dashboard-view" data-view-panel="server" aria-labelledby="server-title" hidden>
         <div class="view-heading"><div><p class="breadcrumb">Dashboard / Server status</p><h1 id="server-title">Server status.</h1><p>Live public information supplied by the World War Z Bot on Railway.</p></div><span class="status-badge large" data-server-status-badge><i></i><span data-status-label>Loading live status</span></span></div>
         <div class="dashboard-grid server-detail-grid">
-          <article class="panel map-preview-card"><img src="assets/chernarus-tactical.webp" alt="WWZ tactical overview of Chernarus" loading="lazy"><div><p class="panel-kicker">ChernarusPlus</p><h2 data-map-name>CHERNARUS</h2><p><span data-map-server-name>World War Z</span> · <span data-map-platform>PlayStation</span></p><button class="primary-action" type="button" data-jump="map">Open interactive map</button></div></article>
+          <article class="panel map-preview-card"><img src="assets/chernarus-vector.svg" alt="WWZ vector road overview of Chernarus" loading="lazy"><div><p class="panel-kicker">ChernarusPlus</p><h2 data-map-name>CHERNARUS</h2><p><span data-map-server-name>World War Z</span> · <span data-map-platform>PlayStation</span></p><button class="primary-action" type="button" data-jump="map">Open interactive map</button></div></article>
           <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Server details</p><h2>Current session</h2></div></div><dl class="detail-list"><div><dt>Status</dt><dd data-detail-status>Loading…</dd></div><div><dt>Players</dt><dd data-detail-players>— / —</dd></div><div><dt>Platform</dt><dd data-detail-platform>PlayStation 4 &amp; 5</dd></div><div><dt>Map</dt><dd data-detail-map>Chernarus</dd></div><div><dt>Last API update</dt><dd data-live-updated>Loading…</dd></div><div><dt>Information source</dt><dd data-information-source>Railway dashboard API</dd></div></dl></article>
           <article class="panel full-width"><div class="panel-heading"><div><p class="panel-kicker">Server connection</p><h2>Public status</h2></div><span class="lock-label">Safe read-only information</span></div><div class="operation-grid"><button type="button" data-refresh-status><strong>Refresh live status</strong><small>Safe public read-only request</small></button></div></article>
         </div>
@@ -135,7 +135,7 @@
 
       <section class="dashboard-view" data-view-panel="map" aria-labelledby="map-title" hidden>
         <div class="view-heading map-view-heading">
-          <div><p class="breadcrumb">Dashboard / Chernarus map</p><h1 id="map-title">Chernarus tactical map.</h1><p>Explore public landmarks and approved community points of interest. Use the custom high-contrast tactical view, enhanced roads or satellite terrain, then drag to move, scroll to zoom and select a marker for details.</p></div>
+          <div><p class="breadcrumb">Dashboard / Chernarus map</p><h1 id="map-title">Chernarus road map.</h1><p>Explore public landmarks and approved community points of interest on a custom vector map. Roads, labels and settlement footprints stay sharp while you drag, zoom and select markers for details.</p></div>
           <span class="status-badge online map-public-badge"><i></i>Public read only</span>
         </div>
 
@@ -149,21 +149,10 @@
           <article class="panel interactive-map-panel">
             <div class="map-frame" data-map-frame tabindex="0" aria-label="Interactive Chernarus map. Use arrow keys to pan, plus and minus to zoom, and zero to reset.">
               <div class="map-stage" data-map-stage>
-                <img class="map-layer active" src="assets/chernarus-tactical.webp" alt="Custom high-contrast WWZ tactical map of ChernarusPlus" draggable="false" data-map-image data-map-layer-image="tactical">
-                <img class="map-layer" src="assets/chernarus-roads.webp" alt="Enhanced ChernarusPlus road map" draggable="false" aria-hidden="true" data-map-layer-image="roads">
-                <img class="map-layer" src="assets/chernarus-map.webp" alt="ChernarusPlus satellite map" draggable="false" aria-hidden="true" data-map-layer-image="satellite">
-                <div class="map-coordinate-grid" aria-hidden="true"></div>
+                <img class="map-layer active" src="assets/chernarus-vector.svg" alt="Custom WWZ vector road map of ChernarusPlus" draggable="false" data-map-image data-map-layer-image="vector">
                 <div class="map-markers" data-map-markers></div>
               </div>
               <div class="map-loading" data-map-loading role="status"><span></span><strong>Loading Chernarus map…</strong></div>
-              <div class="map-layer-switch" role="group" aria-label="Map view">
-                <span>Map view</span>
-                <div>
-                  <button class="active" type="button" data-map-layer-button="tactical" aria-pressed="true">Tactical</button>
-                  <button type="button" data-map-layer-button="roads" aria-pressed="false">Roads</button>
-                  <button type="button" data-map-layer-button="satellite" aria-pressed="false">Satellite</button>
-                </div>
-              </div>
               <div class="map-controls" aria-label="Map controls">
                 <button type="button" data-map-zoom-in aria-label="Zoom in">+</button>
                 <button type="button" data-map-zoom-out aria-label="Zoom out">−</button>
@@ -172,7 +161,7 @@
               <div class="map-coordinate-readout"><span>Cursor</span><strong data-map-coordinates>X — · Z —</strong></div>
             </div>
             <footer class="map-source-note">
-              <span data-map-layer-note>WWZ Tactical view · custom high-contrast adaptation of the official map © Bohemia Interactive, used under ADPL-SA.</span>
+              <span data-map-layer-note>WWZ Vector Road Map · custom schematic adaptation using official CE data © Bohemia Interactive, used under ADPL-SA.</span>
               <a href="https://github.com/BohemiaInteractive/DayZ-Central-Economy/tree/master/CETool/ChernarusPlus" target="_blank" rel="noreferrer">Official source</a>
             </footer>
           </article>
@@ -251,10 +240,10 @@
       <section class="dashboard-view" data-view-panel="settings" aria-labelledby="settings-title" hidden>
         <div class="view-heading"><div><p class="breadcrumb">Dashboard / Settings &amp; help</p><h1 id="settings-title">Settings &amp; help.</h1><p>Connection status, privacy information and answers about the dashboard.</p></div></div>
         <div class="dashboard-grid settings-grid"><article class="panel connection-panel"><div class="panel-heading"><div><p class="panel-kicker">Account</p><h2>Discord connection</h2></div><span class="status-badge" data-auth-badge><i></i><span data-auth-badge-label>Checking connection</span></span></div><div class="account-summary" data-account-summary hidden><span class="account-avatar" data-account-avatar aria-hidden="true">WZ</span><div><strong data-account-display-name>Survivor</strong><small><span data-account-username>Discord account</span> · <span data-account-level>Member</span></small></div></div><p data-auth-description>Discord sign-in securely verifies your World War Z membership and current access level.</p><div class="auth-actions"><button class="primary-action" type="button" data-open-login data-auth-guest-action>Sign in with Discord</button><button class="secondary-action" type="button" data-sign-out hidden>Sign out</button></div><a class="inline-link" href="privacy.html">Read the privacy information <span aria-hidden="true">→</span></a></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Access levels</p><h2>Role-based permissions</h2></div></div><ul class="role-list"><li><span>Visitor</span><small>Public server information</small></li><li><span>Member</span><small>Verified profile and personal economy data</small></li><li><span>Admin</span><small>Moderation and protected server controls</small></li><li><span>Owner</span><small>Verified access to owner-only configuration</small></li></ul></article></div>
-        <article class="panel help-panel"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open><summary>Why are some buttons still locked?</summary><p>Your profile and economy information are now live and read only. Server-changing, ticket and moderation actions remain locked until their protected endpoints, confirmations and audit logging are completed.</p></details><details><summary>Which displayed information is live?</summary><p>Server status, population, map and platform are public and live. After sign-in, your Discord access, linked PlayStation profile, activity, PvP statistics, wallet and personal ledger are also live.</p></details><details><summary>Who can see Admin tools?</summary><p>Admin navigation and buttons are completely hidden unless Railway verifies an Admin role or Owner access. Backend permission checks will still protect every future Admin operation.</p></details><details><summary>How does the Chernarus map work?</summary><p>The dedicated public map uses locally hosted ChernarusPlus imagery with Tactical, Roads and Satellite views, plus pan, zoom, search, filters and read-only public markers. Private or live operational locations are not published.</p></details></article>
+        <article class="panel help-panel"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open><summary>Why are some buttons still locked?</summary><p>Your profile and economy information are now live and read only. Server-changing, ticket and moderation actions remain locked until their protected endpoints, confirmations and audit logging are completed.</p></details><details><summary>Which displayed information is live?</summary><p>Server status, population, map and platform are public and live. After sign-in, your Discord access, linked PlayStation profile, activity, PvP statistics, wallet and personal ledger are also live.</p></details><details><summary>Who can see Admin tools?</summary><p>Admin navigation and buttons are completely hidden unless Railway verifies an Admin role or Owner access. Backend permission checks will still protect every future Admin operation.</p></details><details><summary>How does the Chernarus map work?</summary><p>The dedicated public map uses one locally hosted vector road map with pan, zoom, search, filters and read-only public markers. It stays sharp at every zoom and does not contact a third-party map service. Private or live operational locations are not published.</p></details></article>
       </section>
 
-      <footer class="dashboard-footer"><p>Live server status and secure member self-service. Protected operations remain locked.</p><div><a href="index.html">Website</a><a href="changelog.html">Changelog</a><a href="privacy.html">Privacy</a><a href="https://discord.gg/worldwarzps" target="_blank" rel="noreferrer">Discord</a></div><p>&copy; <span data-year></span> World War Z Community</p></footer>
+      <footer class="dashboard-footer"><p class="bohemia-disclaimer">This website is not affiliated or authorized by Bohemia Interactive a.s. Bohemia Interactive, ARMA, DAYZ and all associated logos and designs are trademarks or registered trademarks of Bohemia Interactive a.s.</p><p>Live server status and secure member self-service. Protected operations remain locked.</p><div><a href="index.html">Website</a><a href="changelog.html">Changelog</a><a href="privacy.html">Privacy</a><a href="https://discord.gg/worldwarzps" target="_blank" rel="noreferrer">Discord</a></div><p>&copy; <span data-year></span> World War Z Community</p></footer>
     </main>
   </div>
 
@@ -273,6 +262,6 @@
   </dialog>
 
   <script src="dashboard.js"></script>
-  <script src="chernarus-map.js?v=1.5.1"></script>
+  <script src="chernarus-map.js?v=1.7.0"></script>
 </body>
 </html>

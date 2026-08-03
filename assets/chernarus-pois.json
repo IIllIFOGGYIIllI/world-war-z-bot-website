@@ -3,28 +3,14 @@
   "map": {
     "name": "ChernarusPlus",
     "size_meters": 15360,
-    "default_layer": "tactical",
+    "default_layer": "vector",
     "layers": [
       {
-        "id": "tactical",
-        "name": "WWZ Tactical",
-        "image": "assets/chernarus-tactical.webp",
-        "max_zoom": 3.2,
-        "note": "WWZ Tactical view · custom high-contrast adaptation of the official map © Bohemia Interactive, used under ADPL-SA."
-      },
-      {
-        "id": "roads",
-        "name": "Enhanced Roads",
-        "image": "assets/chernarus-roads.webp",
-        "max_zoom": 2.6,
-        "note": "Enhanced Roads view · derived from the official map © Bohemia Interactive, used under ADPL-SA."
-      },
-      {
-        "id": "satellite",
-        "name": "Satellite",
-        "image": "assets/chernarus-map.webp",
-        "max_zoom": 1.8,
-        "note": "Satellite view · official map © Bohemia Interactive, used under ADPL-SA."
+        "id": "vector",
+        "name": "WWZ Vector Road Map",
+        "image": "assets/chernarus-vector.svg",
+        "max_zoom": 4,
+        "note": "WWZ Vector Road Map · custom schematic adaptation using official CE data © Bohemia Interactive, used under ADPL-SA."
       }
     ],
     "source_name": "BohemiaInteractive/DayZ-Central-Economy",
