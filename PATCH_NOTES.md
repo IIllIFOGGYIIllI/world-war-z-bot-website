@@ -1,5 +1,19 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.12.1 — Player Action Confirmation Hotfix
+
+### Fixed
+
+- Action-level `403` responses no longer remove verified Admin access, hide Admin Tools or redirect to Overview.
+- Rejected actions now keep the confirmation dialog open and show the real Railway reason, such as self-target, Owner-only, role-hierarchy or bot-permission protection.
+- Genuine expired sessions and confirmed loss of Admin access still sign out or downgrade the dashboard correctly.
+
+### Improved
+
+- Admins no longer need to type the selected PlayStation ID for every player action.
+- The confirmation dialog now displays the selected PlayStation ID and requires only the reason plus the confirmation button.
+- Railway continues to validate the selected target and permanently audit accepted and rejected actions.
+
 ## Version 1.12.0 — Controlled Player Administration
 
 ### Added

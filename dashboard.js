@@ -194,7 +194,7 @@ const playerActionMark = document.querySelector('[data-player-action-mark]');
 const playerActionReason = document.querySelector('[data-player-action-reason]');
 const playerActionReasonLabel = document.querySelector('[data-player-action-reason-label]');
 const playerActionReasonHelp = document.querySelector('[data-player-action-reason-help]');
-const playerActionConfirmation = document.querySelector('[data-player-action-confirmation]');
+const playerActionTarget = document.querySelector('[data-player-action-target]');
 const playerActionEconomyFields = document.querySelector('[data-player-action-economy-fields]');
 const playerActionEconomyOperation = document.querySelector('[data-player-action-economy-operation]');
 const playerActionAmount = document.querySelector('[data-player-action-amount]');
@@ -861,7 +861,11 @@ const resetAdminPlayerAdministration = () => {
   setAdminPlayerSearchState('Enter at least three characters to search.');
 };
 
-const handleAdminPlayerAuthorizationResponse = (response) => {
+const handleAdminPlayerAuthorizationResponse = (
+  response,
+  payload = {},
+  { actionRequest = false } = {}
+) => {
   if (response.status === 401) {
     storageRemove(AUTH_SESSION_KEY);
     applySignedOutState();
@@ -870,7 +874,11 @@ const handleAdminPlayerAuthorizationResponse = (response) => {
     return true;
   }
 
-  if (response.status === 403) {
+  const explicitAdminAccessFailure =
+    response.status === 403 && payload?.error_code === 'admin_access_required';
+  const readEndpointAdminFailure = response.status === 403 && !actionRequest;
+
+  if (explicitAdminAccessFailure || readEndpointAdminFailure) {
     if (authenticatedUser?.membership) authenticatedUser.membership.access_level = 'member';
     applyAccessVisibility('member');
     showView('overview', false);
@@ -1118,7 +1126,7 @@ const loadAdminPlayerDetails = async (psnId) => {
       headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
     });
     const payload = await response.json().catch(() => ({}));
-    if (handleAdminPlayerAuthorizationResponse(response)) return;
+    if (handleAdminPlayerAuthorizationResponse(response, payload)) return;
     if (response.status === 404) {
       setAdminPlayerSearchState('That player record is no longer available. Search again.', 'error');
       return;
@@ -1162,7 +1170,7 @@ const openPlayerActionDialog = (action, referenceId = null, initialText = '') =>
     playerActionReason.value = String(initialText || '');
   }
   if (playerActionEconomyFields) playerActionEconomyFields.hidden = !specification.economy;
-  setText('[data-player-action-confirmation-help]', `Type ${selectedAdminPlayer.psnId}`);
+  if (playerActionTarget) playerActionTarget.textContent = selectedAdminPlayer.psnId;
   syncPlayerActionControls();
 
   if (typeof playerActionDialog?.showModal === 'function') playerActionDialog.showModal();
@@ -1217,17 +1225,12 @@ playerActionForm?.addEventListener('submit', async (event) => {
     return;
   }
 
-  const confirmation = String(playerActionConfirmation?.value || '').trim().replace(/\s+/g, ' ');
-  if (confirmation.toLocaleLowerCase() !== selectedAdminPlayer.psnId.toLocaleLowerCase()) {
-    showPlayerActionDialogMessage(`Type ${selectedAdminPlayer.psnId} exactly to confirm.`);
-    playerActionConfirmation?.focus();
-    return;
-  }
-
   const requestPayload = {
     action,
     psn: selectedAdminPlayer.psnId,
-    confirmation,
+    // Railway still validates the selected target against the protected record.
+    // The Admin confirms through the action dialog instead of retyping the PSN.
+    confirmation: selectedAdminPlayer.psnId,
     reason
   };
   if (['edit_warning', 'remove_warning'].includes(action)) requestPayload.warning_case_id = selectedWarningCaseId;
@@ -1264,7 +1267,7 @@ playerActionForm?.addEventListener('submit', async (event) => {
       body: JSON.stringify(requestPayload)
     });
     const payload = await response.json().catch(() => ({}));
-    if (handleAdminPlayerAuthorizationResponse(response)) {
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) {
       closePlayerActionDialog();
       return;
     }
@@ -1329,7 +1332,7 @@ adminPlayerSearchForm?.addEventListener('submit', async (event) => {
       headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
     });
     const payload = await response.json().catch(() => ({}));
-    if (handleAdminPlayerAuthorizationResponse(response)) return;
+    if (handleAdminPlayerAuthorizationResponse(response, payload)) return;
     if (response.status === 400) {
       setAdminPlayerSearchState(String(payload.message || 'The player search is invalid.'), 'error');
       return;

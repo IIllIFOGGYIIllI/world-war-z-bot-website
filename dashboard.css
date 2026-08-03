@@ -1136,3 +1136,28 @@ td:first-child { color: #e7dfd7; font-weight: 700; }
   .activity-list li.has-row-actions { grid-template-columns: 31px minmax(0, 1fr); }
   .activity-list .activity-row-actions { grid-column: 2; margin-left: 0; justify-content: flex-start; }
 }
+.player-action-target {
+  display: grid;
+  gap: 5px;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border: 1px solid rgba(243, 58, 40, 0.28);
+  background: rgba(212, 36, 24, 0.06);
+}
+.player-action-target span {
+  color: #817974;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.player-action-target strong {
+  color: var(--paper);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.player-action-target small {
+  color: #817974;
+  font-size: 8px;
+  line-height: 1.5;
+}
