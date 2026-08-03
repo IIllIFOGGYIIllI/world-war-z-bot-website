@@ -1,5 +1,30 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.11.0 — Secure Read-Only Player Administration
+
+### Added
+
+- Added Admin-only player search by partial PlayStation ID or Discord display
+  name.
+- Requires at least three characters, caps results at 15 and never offers a
+  database-wide player listing.
+- Added protected player details for allowlisted identity, activity, playtime,
+  sessions, PvP summary, warning count and the latest 10 sanitized moderation
+  records.
+- Added clear loading, no-results, unlinked, unavailable and expired-session
+  states.
+
+### Security
+
+- Railway repeats current Discord membership and Admin/Owner authorization for
+  every search and details request.
+- Raw Discord IDs, database IDs, private notes, DayZ UIDs, positions, moderator
+  identities, evidence metadata and credentials are excluded.
+- Dynamic player and moderation values are rendered as text rather than
+  injected HTML.
+- Stage 7B1 is read-only. Warning, note, ban, kick, balance, unlink and delete
+  controls remain unavailable.
+
 ## Version 1.10.0 — Live Server Operations
 
 ### Added

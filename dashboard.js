@@ -84,6 +84,8 @@ const AUTH_ME_URL = `${DASHBOARD_API_BASE}/api/auth/me`;
 const AUTH_LOGOUT_URL = `${DASHBOARD_API_BASE}/api/auth/logout`;
 const ACCOUNT_SUMMARY_URL = `${DASHBOARD_API_BASE}/api/account/summary`;
 const SERVER_ACTION_HISTORY_URL = `${DASHBOARD_API_BASE}/api/admin/server/actions`;
+const ADMIN_PLAYER_SEARCH_URL = `${DASHBOARD_API_BASE}/api/admin/players/search`;
+const ADMIN_PLAYER_DETAILS_URL = `${DASHBOARD_API_BASE}/api/admin/players/details`;
 const SERVER_ACTIONS = {
   restart: {
     url: `${DASHBOARD_API_BASE}/api/admin/server/restart`,
@@ -149,6 +151,16 @@ const serverActionHistory = document.querySelector('[data-server-action-history]
 const serverActionHistoryEmpty = document.querySelector('[data-server-action-history-empty]');
 const serverActionHistoryError = document.querySelector('[data-server-action-history-error]');
 const refreshServerActionsButton = document.querySelector('[data-refresh-server-actions]');
+const adminPlayerSearchForm = document.querySelector('[data-admin-player-search-form]');
+const adminPlayerSearchInput = document.querySelector('[data-admin-player-search-input]');
+const adminPlayerSearchButton = document.querySelector('[data-admin-player-search-button]');
+const adminPlayerSearchState = document.querySelector('[data-admin-player-search-state]');
+const adminPlayerResults = document.querySelector('[data-admin-player-results]');
+const adminPlayerEmpty = document.querySelector('[data-admin-player-empty]');
+const adminPlayerError = document.querySelector('[data-admin-player-error]');
+const adminPlayerDetail = document.querySelector('[data-admin-player-detail]');
+const adminPlayerModerationHistory = document.querySelector('[data-admin-player-moderation-history]');
+const adminPlayerModerationEmpty = document.querySelector('[data-admin-player-moderation-empty]');
 let discordAuthEnabled = false;
 let authenticatedUser = null;
 let authRequestInProgress = false;
@@ -158,6 +170,8 @@ let serverActionRequestInProgress = false;
 let serverActionLockedUntil = 0;
 let serverActionLockTimer = null;
 let serverActionHistoryRequestInProgress = false;
+let adminPlayerSearchRequestInProgress = false;
+let adminPlayerDetailRequestInProgress = false;
 
 const storageGet = (key) => {
   try {
@@ -288,6 +302,7 @@ const applyAccessVisibility = (level) => {
   });
 
   syncServerActionControls();
+  if (!hasAdminAccess) resetAdminPlayerAdministration();
 
   const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel;
   if (activeView && !canOpenView(activeView)) showView('overview', false);
@@ -704,6 +719,226 @@ const formatAccountDate = (value, fallback = 'Not recorded') => {
     minute: '2-digit'
   }).format(date);
 };
+
+const setAdminPlayerSearchState = (message, state = 'idle') => {
+  if (!adminPlayerSearchState) return;
+  adminPlayerSearchState.textContent = message;
+  adminPlayerSearchState.dataset.state = state;
+};
+
+const resetAdminPlayerAdministration = () => {
+  adminPlayerSearchRequestInProgress = false;
+  adminPlayerDetailRequestInProgress = false;
+  if (adminPlayerSearchInput) adminPlayerSearchInput.value = '';
+  adminPlayerSearchButton?.removeAttribute('disabled');
+  adminPlayerSearchButton?.removeAttribute('aria-busy');
+  adminPlayerResults?.replaceChildren();
+  adminPlayerDetail?.setAttribute('hidden', '');
+  if (adminPlayerEmpty) adminPlayerEmpty.hidden = true;
+  if (adminPlayerError) adminPlayerError.hidden = true;
+  setAdminPlayerSearchState('Enter at least three characters to search.');
+};
+
+const handleAdminPlayerAuthorizationResponse = (response) => {
+  if (response.status === 401) {
+    storageRemove(AUTH_SESSION_KEY);
+    applySignedOutState();
+    showView('overview', false);
+    showAuthMessage('Your dashboard session expired. Sign in again to continue.', 'error');
+    return true;
+  }
+
+  if (response.status === 403) {
+    if (authenticatedUser?.membership) authenticatedUser.membership.access_level = 'member';
+    applyAccessVisibility('member');
+    showView('overview', false);
+    showAuthMessage('Your current Discord account no longer has Admin access.', 'error');
+    return true;
+  }
+
+  return false;
+};
+
+const renderAdminPlayerResults = (players) => {
+  if (!adminPlayerResults) return;
+  const safePlayers = Array.isArray(players) ? players : [];
+  adminPlayerResults.replaceChildren();
+  if (adminPlayerEmpty) adminPlayerEmpty.hidden = safePlayers.length !== 0;
+  if (adminPlayerError) adminPlayerError.hidden = true;
+
+  safePlayers.forEach((player) => {
+    const psnId = String(player?.psn_id || '').trim();
+    if (!psnId) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'admin-player-result';
+
+    const copy = document.createElement('span');
+    const title = document.createElement('strong');
+    const detail = document.createElement('small');
+    title.textContent = psnId;
+    detail.textContent = player.linked
+      ? `${String(player.discord_name || 'Discord name unavailable')} · ${player.online ? 'Online now' : `Last seen ${formatAccountDate(player.last_seen)}`}`
+      : `Unlinked DayZ player · Last seen ${formatAccountDate(player.last_seen)}`;
+    copy.append(title, detail);
+
+    const state = document.createElement('span');
+    state.className = `result-state ${player.online ? 'online' : player.linked ? '' : 'unlinked'}`;
+    state.textContent = player.online ? 'Online' : player.linked ? 'Linked' : 'Unlinked';
+
+    button.append(copy, state);
+    button.addEventListener('click', () => loadAdminPlayerDetails(psnId));
+    adminPlayerResults.append(button);
+  });
+};
+
+const renderAdminModerationHistory = (history) => {
+  if (!adminPlayerModerationHistory) return;
+  const safeHistory = Array.isArray(history) ? history : [];
+  adminPlayerModerationHistory.replaceChildren();
+  if (adminPlayerModerationEmpty) adminPlayerModerationEmpty.hidden = safeHistory.length !== 0;
+
+  safeHistory.forEach((record) => {
+    const action = String(record?.action || 'record');
+    const status = String(record?.status || 'completed');
+    const item = document.createElement('li');
+    const symbol = document.createElement('span');
+    const content = document.createElement('div');
+    const title = document.createElement('strong');
+    const details = document.createElement('small');
+
+    symbol.className = `activity-symbol ${action === 'warn' ? 'warning' : status === 'removed' || status === 'reversed' ? 'removed' : ''}`;
+    symbol.textContent = action === 'warn' ? '!' : action.includes('ban') ? '⊘' : '≡';
+    title.textContent = `${titleCaseState(action)} · ${titleCaseState(status)}`;
+    const duration = record?.duration_seconds == null ? '' : ` · Duration ${formatDuration(record.duration_seconds)}`;
+    const expiry = record?.expires_at ? ` · Expires ${formatAccountDate(record.expires_at)}` : '';
+    details.textContent = `${String(record?.reason || 'No public reason recorded')} · ${formatAccountDate(record?.created_at)}${duration}${expiry}`;
+    content.append(title, details);
+    item.append(symbol, content);
+    adminPlayerModerationHistory.append(item);
+  });
+};
+
+const renderAdminPlayerDetails = (payload) => {
+  const player = payload?.player;
+  const identity = player?.identity;
+  const activity = player?.activity;
+  const pvp = player?.pvp;
+  const moderation = player?.moderation;
+  if (!identity || !activity || !pvp || !moderation) throw new Error('Unexpected player-details response');
+
+  adminPlayerDetail?.removeAttribute('hidden');
+  document.querySelector('[data-admin-player-unlinked]')?.toggleAttribute('hidden', Boolean(identity.linked));
+  setText('[data-admin-player-psn]', String(identity.psn_id || 'Unknown player'));
+  setText('[data-admin-player-discord]', identity.discord_name ? String(identity.discord_name) : 'Discord profile unavailable');
+  setText('[data-admin-player-status]', activity.online ? 'Online now' : 'Offline');
+  setText('[data-admin-player-link-state]', identity.linked ? 'Linked Discord account' : 'Unlinked DayZ record');
+  setText('[data-admin-player-verified]', identity.verified ? 'Verified' : 'Not verified');
+  setText('[data-admin-player-badge-label]', activity.online ? 'Online' : identity.linked ? 'Linked player' : 'Unlinked player');
+  setStatusClass(document.querySelector('[data-admin-player-badge]'), activity.online ? 'online' : 'offline');
+  document.querySelector('[data-admin-player-online-state]')?.classList.toggle('online', Boolean(activity.online));
+
+  setText('[data-admin-player-playtime]', activity.playtime_seconds == null ? 'Unavailable' : formatDuration(activity.playtime_seconds));
+  setText('[data-admin-player-sessions]', new Intl.NumberFormat('en-AU').format(Number(activity.total_sessions) || 0));
+  setText('[data-admin-player-kd]', pvp.available ? Number(pvp.kd_ratio || 0).toFixed(2) : 'Unavailable');
+  setText('[data-admin-player-kills]', new Intl.NumberFormat('en-AU').format(Number(pvp.kills) || 0));
+  setText('[data-admin-player-deaths]', new Intl.NumberFormat('en-AU').format(Number(pvp.deaths) || 0));
+  setText('[data-admin-player-warnings]', new Intl.NumberFormat('en-AU').format(Number(moderation.warning_count) || 0));
+  setText('[data-admin-player-first-seen]', formatAccountDate(activity.first_seen));
+  setText('[data-admin-player-last-seen]', activity.online ? 'Currently online' : formatAccountDate(activity.last_seen));
+  setText('[data-admin-player-linked-at]', identity.linked ? formatAccountDate(activity.linked_at) : 'Not linked');
+  setText('[data-admin-player-session-start]', activity.online ? formatAccountDate(activity.session_started_at, 'Session time unavailable') : 'Offline');
+  setText('[data-admin-player-streak]', pvp.available ? new Intl.NumberFormat('en-AU').format(Number(pvp.current_streak) || 0) : 'Unavailable');
+  setText('[data-admin-player-longest]', pvp.longest_kill_metres == null ? 'Not recorded' : `${Number(pvp.longest_kill_metres).toFixed(1)} m`);
+  setText('[data-admin-player-weapon]', String(pvp.favourite_weapon || 'Not recorded'));
+  renderAdminModerationHistory(moderation.history);
+  adminPlayerDetail?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+const loadAdminPlayerDetails = async (psnId) => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!hasServerActionAccess() || !sessionToken || adminPlayerDetailRequestInProgress) return;
+  adminPlayerDetailRequestInProgress = true;
+  adminPlayerDetail?.setAttribute('hidden', '');
+  setAdminPlayerSearchState(`Loading protected details for ${psnId}…`, 'loading');
+
+  try {
+    const response = await authFetch(`${ADMIN_PLAYER_DETAILS_URL}?psn=${encodeURIComponent(psnId)}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response)) return;
+    if (response.status === 404) {
+      setAdminPlayerSearchState('That player record is no longer available. Search again.', 'error');
+      return;
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error('Player details unavailable');
+    renderAdminPlayerDetails(payload);
+    setAdminPlayerSearchState(`Showing protected read-only details for ${psnId}.`, 'success');
+  } catch (error) {
+    adminPlayerDetail?.setAttribute('hidden', '');
+    setAdminPlayerSearchState('Player details are temporarily unavailable. No data was changed.', 'error');
+  } finally {
+    adminPlayerDetailRequestInProgress = false;
+  }
+};
+
+adminPlayerSearchForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (adminPlayerSearchRequestInProgress) return;
+
+  const query = String(adminPlayerSearchInput?.value || '').trim().replace(/\s+/g, ' ');
+  if (query.length < 3) {
+    setAdminPlayerSearchState('Enter at least three characters of a PlayStation ID or Discord display name.', 'error');
+    adminPlayerSearchInput?.focus();
+    return;
+  }
+
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!hasServerActionAccess() || !sessionToken) {
+    setAdminPlayerSearchState('A verified Admin session is required.', 'error');
+    return;
+  }
+
+  adminPlayerSearchRequestInProgress = true;
+  adminPlayerSearchButton?.setAttribute('disabled', '');
+  adminPlayerSearchButton?.setAttribute('aria-busy', 'true');
+  adminPlayerResults?.replaceChildren();
+  adminPlayerDetail?.setAttribute('hidden', '');
+  if (adminPlayerEmpty) adminPlayerEmpty.hidden = true;
+  if (adminPlayerError) adminPlayerError.hidden = true;
+  setAdminPlayerSearchState(`Searching securely for “${query}”…`, 'loading');
+
+  try {
+    const response = await authFetch(`${ADMIN_PLAYER_SEARCH_URL}?q=${encodeURIComponent(query)}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response)) return;
+    if (response.status === 400) {
+      setAdminPlayerSearchState(String(payload.message || 'The player search is invalid.'), 'error');
+      return;
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error('Player search unavailable');
+    renderAdminPlayerResults(payload.players);
+    setAdminPlayerSearchState(
+      payload.result_count === 0
+        ? `No player records matched “${query}”.`
+        : `${payload.result_count} protected result${payload.result_count === 1 ? '' : 's'} found. Select a player to view details.`,
+      payload.result_count === 0 ? 'idle' : 'success'
+    );
+  } catch (error) {
+    if (adminPlayerError) adminPlayerError.hidden = false;
+    setAdminPlayerSearchState('Player search is temporarily unavailable. No data was changed.', 'error');
+  } finally {
+    adminPlayerSearchRequestInProgress = false;
+    adminPlayerSearchButton?.removeAttribute('disabled');
+    adminPlayerSearchButton?.removeAttribute('aria-busy');
+  }
+});
 
 const renderTransactions = (transactions) => {
   const list = document.querySelector('[data-economy-transactions]');
