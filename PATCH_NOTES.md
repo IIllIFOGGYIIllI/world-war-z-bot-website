@@ -1,5 +1,30 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.8.0 — Secure Admin Restart
+
+### Added
+
+- Connected the verified Admin **Restart server** control to Railway's
+  protected restart endpoint.
+- Added an explicit confirmation dialog requiring `RESTART` exactly.
+- Added an optional 200-character audit reason.
+- Added clear accepted, cooldown, already-in-progress, expired-session,
+  unavailable and failed-request states.
+- Connected both the Admin tools control and Admin-only Overview shortcut.
+- Added delayed live-status refreshes after an accepted request.
+
+### Security
+
+- The control is visible only to verified Admins and the Owner.
+- Railway still performs a fresh Discord membership and role check for every
+  restart request; hidden website controls are not the security boundary.
+- The browser submits only the opaque dashboard session, confirmation and
+  optional reason. Nitrado, Discord and OAuth secrets remain on Railway.
+- The button locks while a request is running to prevent double submission.
+- Railway shares cooldown and in-progress protection with Discord controls and
+  writes the permanent database and Discord audit records.
+- Stop and Start remain disabled until separate protected endpoints exist.
+
 ## Version 1.7.0 — Vector Road Map
 
 ### Added and improved

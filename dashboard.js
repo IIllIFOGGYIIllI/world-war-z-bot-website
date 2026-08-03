@@ -83,6 +83,7 @@ const AUTH_COMPLETE_URL = `${DASHBOARD_API_BASE}/api/auth/discord/complete`;
 const AUTH_ME_URL = `${DASHBOARD_API_BASE}/api/auth/me`;
 const AUTH_LOGOUT_URL = `${DASHBOARD_API_BASE}/api/auth/logout`;
 const ACCOUNT_SUMMARY_URL = `${DASHBOARD_API_BASE}/api/account/summary`;
+const RESTART_SERVER_URL = `${DASHBOARD_API_BASE}/api/admin/server/restart`;
 const AUTH_SESSION_KEY = 'wwz_dashboard_session';
 const AUTH_RETURN_VIEW_KEY = 'wwz_dashboard_return_view';
 const LIVE_STATUS_REFRESH_MS = 30_000;
@@ -97,9 +98,18 @@ const authMessage = document.querySelector('[data-auth-message]');
 const startDiscordLoginButton = document.querySelector('[data-start-discord-login]');
 const signOutButton = document.querySelector('[data-sign-out]');
 const authDialogNotice = document.querySelector('[data-auth-dialog-notice]');
+const restartDialog = document.querySelector('[data-restart-dialog]');
+const restartForm = document.querySelector('[data-restart-form]');
+const restartConfirmationInput = document.querySelector('[data-restart-confirmation]');
+const restartReasonInput = document.querySelector('[data-restart-reason]');
+const confirmRestartButton = document.querySelector('[data-confirm-restart]');
+const restartDialogMessage = document.querySelector('[data-restart-dialog-message]');
+const restartButtons = [...document.querySelectorAll('[data-restart-server]')];
+const restartCancelButtons = [...document.querySelectorAll('[data-restart-cancel]')];
 let discordAuthEnabled = false;
 let authenticatedUser = null;
 let authRequestInProgress = false;
+let restartRequestInProgress = false;
 
 const storageGet = (key) => {
   try {
@@ -143,6 +153,29 @@ const accessLabel = (level) => {
   return 'Member';
 };
 
+const hasRestartAccess = () => ['staff', 'owner'].includes(dashboardAccessLevel);
+
+const syncRestartControls = () => {
+  const enabled = hasRestartAccess() && !restartRequestInProgress;
+  restartButtons.forEach((button) => {
+    button.disabled = !enabled;
+    button.classList.toggle('is-loading', restartRequestInProgress);
+    button.setAttribute('aria-busy', String(restartRequestInProgress));
+  });
+  restartCancelButtons.forEach((button) => {
+    button.disabled = restartRequestInProgress;
+  });
+  if (confirmRestartButton) {
+    confirmRestartButton.disabled = (
+      !enabled
+      || restartConfirmationInput?.value !== 'RESTART'
+    );
+    confirmRestartButton.textContent = restartRequestInProgress
+      ? 'Submitting protected restart…'
+      : 'Confirm server restart';
+  }
+};
+
 const applyAccessVisibility = (level) => {
   dashboardAccessLevel = level;
   const hasAdminAccess = ['staff', 'owner'].includes(level);
@@ -154,6 +187,8 @@ const applyAccessVisibility = (level) => {
   document.querySelectorAll('[data-owner-only]').forEach((element) => {
     element.hidden = !hasOwnerAccess;
   });
+
+  syncRestartControls();
 
   const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel;
   if (activeView && !canOpenView(activeView)) showView('overview', false);
@@ -296,6 +331,165 @@ const authFetch = async (url, options = {}) => {
     window.clearTimeout(timeout);
   }
 };
+
+const protectedActionFetch = async (url, options = {}) => {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 60_000);
+
+  try {
+    return await fetch(url, {
+      cache: 'no-store',
+      credentials: 'omit',
+      ...options,
+      signal: controller.signal
+    });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+};
+
+const showRestartDialogMessage = (message, state = 'error') => {
+  if (!restartDialogMessage) return;
+  restartDialogMessage.textContent = message;
+  restartDialogMessage.dataset.state = state;
+  restartDialogMessage.hidden = false;
+};
+
+const resetRestartDialog = () => {
+  restartForm?.reset();
+  if (restartDialogMessage) {
+    restartDialogMessage.hidden = true;
+    restartDialogMessage.textContent = '';
+    delete restartDialogMessage.dataset.state;
+  }
+  syncRestartControls();
+};
+
+const openRestartDialog = () => {
+  if (!hasRestartAccess() || restartRequestInProgress) return;
+  resetRestartDialog();
+  if (typeof restartDialog?.showModal === 'function') restartDialog.showModal();
+  else restartDialog?.setAttribute('open', '');
+  window.setTimeout(() => restartConfirmationInput?.focus(), 0);
+};
+
+restartButtons.forEach((button) => {
+  button.addEventListener('click', openRestartDialog);
+});
+
+restartCancelButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (!restartRequestInProgress) restartDialog?.close?.();
+  });
+});
+
+restartConfirmationInput?.addEventListener('input', syncRestartControls);
+
+restartDialog?.addEventListener('click', (event) => {
+  if (event.target === restartDialog && !restartRequestInProgress) {
+    restartDialog.close?.();
+  }
+});
+
+restartDialog?.addEventListener('cancel', (event) => {
+  if (restartRequestInProgress) event.preventDefault();
+});
+
+restartDialog?.addEventListener('close', () => {
+  if (!restartRequestInProgress) resetRestartDialog();
+});
+
+restartForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  if (
+    restartRequestInProgress
+    || !hasRestartAccess()
+    || restartConfirmationInput?.value !== 'RESTART'
+  ) {
+    return;
+  }
+
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+
+  if (!sessionToken) {
+    restartDialog?.close?.();
+    applySignedOutState();
+    showAuthMessage('Your dashboard session has expired. Sign in again before using Admin controls.', 'error');
+    return;
+  }
+
+  restartRequestInProgress = true;
+  syncRestartControls();
+  showRestartDialogMessage('Railway is rechecking your Admin access and recording this request.', 'info');
+
+  try {
+    const response = await protectedActionFetch(RESTART_SERVER_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        confirmation: 'RESTART',
+        reason: restartReasonInput?.value.trim() || ''
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+
+    if (response.status === 401 || response.status === 403) {
+      storageRemove(AUTH_SESSION_KEY);
+      restartDialog?.close?.();
+      applySignedOutState();
+      showAuthMessage(
+        response.status === 403
+          ? 'Your current Discord account does not have Admin access for this operation.'
+          : 'Your dashboard session expired. Sign in again before using Admin controls.',
+        'error'
+      );
+      return;
+    }
+
+    if (response.status === 429) {
+      const retryAfter = Math.max(1, Number(payload.retry_after_seconds) || 1);
+      showRestartDialogMessage(`The control centre is cooling down. Try again in about ${retryAfter} seconds.`);
+      return;
+    }
+
+    if (response.status === 409) {
+      showRestartDialogMessage(payload.message || 'Another protected server action is already in progress.');
+      return;
+    }
+
+    if (!response.ok || payload.status !== 'accepted') {
+      showRestartDialogMessage(payload.message || 'The restart request could not be completed safely.');
+      return;
+    }
+
+    const auditNumber = Number(payload.audit_record_id);
+    const successMessage = Number.isInteger(auditNumber)
+      ? `Server restart accepted and recorded as audit #${auditNumber}.`
+      : 'Server restart accepted and recorded by Railway.';
+
+    restartDialog?.close?.();
+    showAuthMessage(successMessage, 'success');
+    setText('[data-restart-control-status]', 'Restart submitted · audit recorded');
+    setText('[data-restart-status-note]', 'Restart request accepted');
+    restartButtons.forEach((button) => button.classList.add('action-accepted'));
+    window.setTimeout(refreshLiveStatus, 3_000);
+    window.setTimeout(refreshLiveStatus, 15_000);
+  } catch (error) {
+    showRestartDialogMessage(
+      error?.name === 'AbortError'
+        ? 'Railway did not answer in time. Check server status before trying again.'
+        : 'The protected Railway service could not be reached. No second request was sent.'
+    );
+  } finally {
+    restartRequestInProgress = false;
+    syncRestartControls();
+  }
+});
 
 const formatMoney = (value) => {
   const amount = Math.max(0, Math.trunc(Number(value) || 0));

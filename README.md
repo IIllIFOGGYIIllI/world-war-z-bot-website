@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Replace maps with vector roads`
+4. Enter the commit message: `Connect secure website restart`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -33,7 +33,7 @@ GitHub may take a few minutes to publish the first version.
 - `script.js` — navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
-- `dashboard.js` — Railway status, Discord session, role visibility and member data
+- `dashboard.js` — Railway status, Discord session, role visibility, member data and protected Admin restart flow
 - `chernarus-map.js` — public POI search, filters, markers, pan and vector zoom
 - `privacy.html` — current dashboard authentication and privacy information
 - `changelog.html` — browser-readable website release history
@@ -50,7 +50,7 @@ GitHub may take a few minutes to publish the first version.
 
 ## Security
 
-Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth and member-data queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab and can request only the signed-in member's allowlisted profile and economy summary. Protected actions remain unavailable.
+Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth, member-data queries and the protected server restart are handled by Railway. The website keeps only an opaque dashboard session in the current tab. Restart requires fresh Admin/Owner authorization, exact confirmation, duplicate protection and backend audit logging. Stop, Start and all other protected actions remain unavailable.
 
 The public map intentionally excludes live players, private bases, Admin positions and unpublished event coordinates. Only entries marked `public` in `assets/chernarus-pois.json` are displayed.
 
