@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add read-only player administration`
+4. Enter the commit message: `Add controlled player administration`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -33,7 +33,7 @@ GitHub may take a few minutes to publish the first version.
 - `script.js` — navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
-- `dashboard.js` — Railway health, Discord session, role visibility, member data, secure read-only player lookup, protected Admin controls and audit history
+- `dashboard.js` — Railway health, Discord session, role visibility, member data, secure player lookup, controlled moderation actions and protected audit history
 - `chernarus-map.js` — public POI search, filters, markers, pan and vector zoom
 - `privacy.html` — current dashboard authentication and privacy information
 - `changelog.html` — browser-readable website release history
@@ -50,7 +50,7 @@ GitHub may take a few minutes to publish the first version.
 
 ## Security
 
-Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth, member-data queries, protected read-only player administration, Start, Stop and Restart requests, and protected audit-history queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab. Every protected player lookup requires fresh Admin/Owner authorization and returns only allowlisted fields. Every server action requires an explicit confirmation prompt, fresh Admin/Owner authorization, a safe live state, duplicate protection and backend audit logging.
+Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth, member-data queries, protected player administration, Start, Stop and Restart requests, and protected audit-history queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab. Every protected player request requires fresh Admin/Owner authorization and returns only allowlisted fields. Player write actions also require a reason, exact PlayStation ID confirmation, target protection and permanent audit logging. Every server action requires an explicit confirmation prompt, fresh Admin/Owner authorization, a safe live state, duplicate protection and backend audit logging.
 
 The public map intentionally excludes live players, private bases, Admin positions and unpublished event coordinates. Only entries marked `public` in `assets/chernarus-pois.json` are displayed.
 

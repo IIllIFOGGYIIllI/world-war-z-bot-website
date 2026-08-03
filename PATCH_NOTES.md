@@ -1,5 +1,36 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.12.0 — Controlled Player Administration
+
+### Added
+
+- Added private Admin note creation and audited updates.
+- Added active warning creation, audited reason editing and removal.
+- Added verified economy balance add, remove and set controls.
+- Added Discord kick, permanent ban and unban controls.
+- Added real Nitrado DayZ ban and unban controls for PlayStation IDs.
+- Added Owner-only account unlinking after Railway creates a recovery snapshot.
+- Added editable private notes, editable/removable active warnings, DayZ ban
+  history and permanent dashboard action history to each protected player
+  record.
+
+### Confirmation and safety
+
+- Every action requires a staff reason and the exact selected PlayStation ID.
+- Railway repeats Discord Admin/Owner authorization and target protection after
+  confirmation.
+- Self, Owner and unauthorized staff targets are blocked.
+- Discord role hierarchy and bot permissions are verified server-side.
+- Simultaneous player write requests are rejected by a server-side lock.
+- Accepted and rejected actions are permanently audited.
+
+### Not included
+
+- No fake DayZ kick control is shown because no supported console operation was
+  available.
+- Temporary-ban expiry, evidence uploads, appeals, bulk actions and account
+  deletion remain future stages.
+
 ## Version 1.11.0 — Secure Read-Only Player Administration
 
 ### Added

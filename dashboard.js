@@ -86,6 +86,21 @@ const ACCOUNT_SUMMARY_URL = `${DASHBOARD_API_BASE}/api/account/summary`;
 const SERVER_ACTION_HISTORY_URL = `${DASHBOARD_API_BASE}/api/admin/server/actions`;
 const ADMIN_PLAYER_SEARCH_URL = `${DASHBOARD_API_BASE}/api/admin/players/search`;
 const ADMIN_PLAYER_DETAILS_URL = `${DASHBOARD_API_BASE}/api/admin/players/details`;
+const ADMIN_PLAYER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/players/action`;
+const PLAYER_ACTIONS = {
+  add_note: { mark: '≡', title: 'Add private staff note?', description: 'The note will be visible only inside protected Admin player administration.', warning: 'Private notes remain in the Railway database and are included in the player audit view.', reasonLabel: 'Private staff note', reasonHelp: '1–1,500 characters', submitLabel: 'Add private note' },
+  update_note: { mark: '✎', title: 'Update this private staff note?', description: 'The selected note will be replaced with the revised staff-only text.', warning: 'The previous note text is retained inside the private Railway audit record.', reasonLabel: 'Updated private note', reasonHelp: '1–1,500 characters', submitLabel: 'Update private note' },
+  add_warning: { mark: '!', title: 'Add an active warning?', description: 'This creates a Discord moderation case and updates the player warning count.', warning: 'The warning remains active until an Admin explicitly removes it.', reasonLabel: 'Warning reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Add warning' },
+  edit_warning: { mark: '✎', title: 'Edit this active warning?', description: 'The selected active warning reason will be replaced with the revised reason.', warning: 'A related warning-edit case preserves who changed it and the previous reason remains in private audit metadata.', reasonLabel: 'Updated warning reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Update warning' },
+  remove_warning: { mark: '−', title: 'Remove this warning?', description: 'The original warning will be marked removed and a linked removal case will be recorded.', warning: 'The warning history is preserved; this does not delete the original case.', reasonLabel: 'Removal reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Remove warning' },
+  economy_adjust: { mark: '$', title: 'Adjust this player’s balance?', description: 'Choose whether to add, remove or set the verified economy balance.', warning: 'Every adjustment creates an economy transaction and permanent dashboard audit record.', reasonLabel: 'Adjustment reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Apply balance adjustment', economy: true },
+  discord_kick: { mark: '↥', title: 'Kick this member from Discord?', description: 'The linked Discord member will be removed from the World War Z Discord server.', warning: 'They can rejoin later unless they are also banned.', reasonLabel: 'Kick reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Kick from Discord' },
+  discord_ban: { mark: '⊘', title: 'Permanently ban this member from Discord?', description: 'The linked Discord member will be added to the Discord server ban list.', warning: 'This remains in effect until an authorized Admin unbans the account.', reasonLabel: 'Ban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Ban from Discord' },
+  discord_unban: { mark: '♻', title: 'Unban this account from Discord?', description: 'The linked Discord account will be removed from the Discord server ban list.', warning: 'This allows the account to rejoin the Discord server.', reasonLabel: 'Unban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Unban from Discord' },
+  dayz_ban: { mark: '⊘', title: 'Ban this PlayStation ID from DayZ?', description: 'Railway will add the selected PlayStation ID to the Nitrado game ban list.', warning: 'This is a real Nitrado ban-list change, not a local database-only marker.', reasonLabel: 'DayZ ban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Ban from DayZ' },
+  dayz_unban: { mark: '♻', title: 'Unban this PlayStation ID from DayZ?', description: 'Railway will remove the selected PlayStation ID from the Nitrado game ban list.', warning: 'The removal is permanent unless the player is banned again.', reasonLabel: 'DayZ unban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Unban from DayZ' },
+  unlink: { mark: '⌁', title: 'Unlink this Discord and PlayStation account?', description: 'The verified identity link will be removed after Railway stores a recovery snapshot.', warning: 'Economy and linked profile rows are removed from active use. Only the Owner can submit this action.', reasonLabel: 'Unlink reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Create recovery snapshot and unlink' }
+};
 const SERVER_ACTIONS = {
   restart: {
     url: `${DASHBOARD_API_BASE}/api/admin/server/restart`,
@@ -161,6 +176,31 @@ const adminPlayerError = document.querySelector('[data-admin-player-error]');
 const adminPlayerDetail = document.querySelector('[data-admin-player-detail]');
 const adminPlayerModerationHistory = document.querySelector('[data-admin-player-moderation-history]');
 const adminPlayerModerationEmpty = document.querySelector('[data-admin-player-moderation-empty]');
+const adminPlayerNotes = document.querySelector('[data-admin-player-notes]');
+const adminPlayerNotesEmpty = document.querySelector('[data-admin-player-notes-empty]');
+const adminPlayerActiveWarnings = document.querySelector('[data-admin-player-active-warnings]');
+const adminPlayerWarningsEmpty = document.querySelector('[data-admin-player-warnings-empty]');
+const adminPlayerDayzBans = document.querySelector('[data-admin-player-dayz-bans]');
+const adminPlayerDayzBansEmpty = document.querySelector('[data-admin-player-dayz-bans-empty]');
+const adminPlayerActionHistory = document.querySelector('[data-admin-player-action-history]');
+const adminPlayerActionHistoryEmpty = document.querySelector('[data-admin-player-action-history-empty]');
+const playerActionButtons = [...document.querySelectorAll('[data-player-action]')];
+const playerActionDialog = document.querySelector('[data-player-action-dialog]');
+const playerActionForm = document.querySelector('[data-player-action-form]');
+const playerActionTitle = document.querySelector('[data-player-action-title]');
+const playerActionDescription = document.querySelector('[data-player-action-description]');
+const playerActionWarning = document.querySelector('[data-player-action-warning]');
+const playerActionMark = document.querySelector('[data-player-action-mark]');
+const playerActionReason = document.querySelector('[data-player-action-reason]');
+const playerActionReasonLabel = document.querySelector('[data-player-action-reason-label]');
+const playerActionReasonHelp = document.querySelector('[data-player-action-reason-help]');
+const playerActionConfirmation = document.querySelector('[data-player-action-confirmation]');
+const playerActionEconomyFields = document.querySelector('[data-player-action-economy-fields]');
+const playerActionEconomyOperation = document.querySelector('[data-player-action-economy-operation]');
+const playerActionAmount = document.querySelector('[data-player-action-amount]');
+const playerActionDialogMessage = document.querySelector('[data-player-action-dialog-message]');
+const confirmPlayerActionButton = document.querySelector('[data-confirm-player-action]');
+const playerActionCancelButtons = [...document.querySelectorAll('[data-player-action-cancel]')];
 let discordAuthEnabled = false;
 let authenticatedUser = null;
 let authRequestInProgress = false;
@@ -172,6 +212,11 @@ let serverActionLockTimer = null;
 let serverActionHistoryRequestInProgress = false;
 let adminPlayerSearchRequestInProgress = false;
 let adminPlayerDetailRequestInProgress = false;
+let selectedAdminPlayer = null;
+let selectedPlayerAction = null;
+let selectedWarningCaseId = null;
+let selectedNoteId = null;
+let playerActionRequestInProgress = false;
 
 const storageGet = (key) => {
   try {
@@ -726,16 +771,93 @@ const setAdminPlayerSearchState = (message, state = 'idle') => {
   adminPlayerSearchState.dataset.state = state;
 };
 
+const showPlayerActionDialogMessage = (message, state = 'error') => {
+  if (!playerActionDialogMessage) return;
+  playerActionDialogMessage.textContent = message;
+  playerActionDialogMessage.dataset.state = state;
+  playerActionDialogMessage.hidden = false;
+};
+
+const resetPlayerActionDialog = ({ clearSelection = false } = {}) => {
+  playerActionForm?.reset();
+  if (playerActionEconomyFields) playerActionEconomyFields.hidden = true;
+  if (playerActionDialogMessage) {
+    playerActionDialogMessage.hidden = true;
+    playerActionDialogMessage.textContent = '';
+    delete playerActionDialogMessage.dataset.state;
+  }
+  if (clearSelection) {
+    selectedPlayerAction = null;
+    selectedWarningCaseId = null;
+    selectedNoteId = null;
+  }
+};
+
+const playerActionIsAllowed = (action) => {
+  const specification = PLAYER_ACTIONS[action];
+  if (!specification || !selectedAdminPlayer || !hasServerActionAccess() || playerActionRequestInProgress) return false;
+  if (action === 'unlink' && dashboardAccessLevel !== 'owner') return false;
+  if (['add_warning', 'discord_kick', 'discord_ban', 'discord_unban', 'unlink'].includes(action) && !selectedAdminPlayer.linked) return false;
+  if (action === 'economy_adjust' && !selectedAdminPlayer.economyAvailable) return false;
+  if (action === 'dayz_ban' && selectedAdminPlayer.dayzBanned) return false;
+  if (action === 'dayz_unban' && !selectedAdminPlayer.dayzBanned) return false;
+  if (['edit_warning', 'remove_warning'].includes(action) && !Number.isInteger(Number(selectedWarningCaseId))) return false;
+  if (action === 'update_note' && !Number.isInteger(Number(selectedNoteId))) return false;
+  return true;
+};
+
+const syncPlayerActionControls = () => {
+  playerActionButtons.forEach((button) => {
+    const action = button.dataset.playerAction;
+    button.disabled = !playerActionIsAllowed(action);
+    button.classList.toggle('is-loading', playerActionRequestInProgress);
+    button.setAttribute('aria-busy', String(playerActionRequestInProgress));
+  });
+  playerActionCancelButtons.forEach((button) => {
+    button.disabled = playerActionRequestInProgress;
+  });
+  const specification = PLAYER_ACTIONS[selectedPlayerAction];
+  if (confirmPlayerActionButton) {
+    confirmPlayerActionButton.disabled = !playerActionIsAllowed(selectedPlayerAction);
+    confirmPlayerActionButton.textContent = playerActionRequestInProgress
+      ? 'Submitting protected player action…'
+      : specification?.submitLabel || 'Confirm protected action';
+  }
+};
+
+const closePlayerActionDialog = () => {
+  if (typeof playerActionDialog?.close === 'function') playerActionDialog.close();
+  else playerActionDialog?.removeAttribute('open');
+};
+
 const resetAdminPlayerAdministration = () => {
   adminPlayerSearchRequestInProgress = false;
   adminPlayerDetailRequestInProgress = false;
+  selectedAdminPlayer = null;
+  selectedPlayerAction = null;
+  selectedWarningCaseId = null;
+  selectedNoteId = null;
+  playerActionRequestInProgress = false;
   if (adminPlayerSearchInput) adminPlayerSearchInput.value = '';
   adminPlayerSearchButton?.removeAttribute('disabled');
   adminPlayerSearchButton?.removeAttribute('aria-busy');
   adminPlayerResults?.replaceChildren();
+  adminPlayerNotes?.replaceChildren();
+  adminPlayerActiveWarnings?.replaceChildren();
+  adminPlayerModerationHistory?.replaceChildren();
+  adminPlayerDayzBans?.replaceChildren();
+  adminPlayerActionHistory?.replaceChildren();
   adminPlayerDetail?.setAttribute('hidden', '');
   if (adminPlayerEmpty) adminPlayerEmpty.hidden = true;
   if (adminPlayerError) adminPlayerError.hidden = true;
+  if (adminPlayerNotesEmpty) adminPlayerNotesEmpty.hidden = true;
+  if (adminPlayerWarningsEmpty) adminPlayerWarningsEmpty.hidden = true;
+  if (adminPlayerModerationEmpty) adminPlayerModerationEmpty.hidden = true;
+  if (adminPlayerDayzBansEmpty) adminPlayerDayzBansEmpty.hidden = true;
+  if (adminPlayerActionHistoryEmpty) adminPlayerActionHistoryEmpty.hidden = true;
+  resetPlayerActionDialog({ clearSelection: true });
+  closePlayerActionDialog();
+  syncPlayerActionControls();
   setAdminPlayerSearchState('Enter at least three characters to search.');
 };
 
@@ -793,6 +915,84 @@ const renderAdminPlayerResults = (players) => {
   });
 };
 
+const appendAdminActivity = (list, { symbolText, symbolClass = '', titleText, detailText, actionButton = null, actionButtons = [] }) => {
+  if (!list) return;
+  const item = document.createElement('li');
+  const symbol = document.createElement('span');
+  const content = document.createElement('div');
+  const title = document.createElement('strong');
+  const details = document.createElement('small');
+
+  symbol.className = `activity-symbol ${symbolClass}`.trim();
+  symbol.textContent = symbolText;
+  title.textContent = titleText;
+  details.textContent = detailText;
+  content.append(title, details);
+  item.append(symbol, content);
+  const safeButtons = [...(Array.isArray(actionButtons) ? actionButtons : []), ...(actionButton ? [actionButton] : [])];
+  if (safeButtons.length) {
+    item.classList.add('has-row-actions');
+    const actions = document.createElement('div');
+    actions.className = 'activity-row-actions';
+    actions.append(...safeButtons);
+    item.append(actions);
+  }
+  list.append(item);
+};
+
+const renderAdminNotes = (notes) => {
+  if (!adminPlayerNotes) return;
+  const safeNotes = Array.isArray(notes) ? notes : [];
+  adminPlayerNotes.replaceChildren();
+  if (adminPlayerNotesEmpty) adminPlayerNotesEmpty.hidden = safeNotes.length !== 0;
+
+  safeNotes.forEach((note) => {
+    const noteId = Number(note?.note_id);
+    const editButton = document.createElement('button');
+    editButton.type = 'button';
+    editButton.className = 'activity-row-action';
+    editButton.textContent = 'Edit';
+    editButton.disabled = !Number.isInteger(noteId);
+    editButton.addEventListener('click', () => openPlayerActionDialog('update_note', noteId, String(note?.note || '')));
+    appendAdminActivity(adminPlayerNotes, {
+      symbolText: '≡',
+      titleText: `Private note · ${String(note?.author_name || 'Staff')}`,
+      detailText: `${String(note?.note || 'No note text')} · ${formatAccountDate(note?.created_at)}`,
+      actionButtons: [editButton]
+    });
+  });
+};
+
+const renderAdminActiveWarnings = (warnings) => {
+  if (!adminPlayerActiveWarnings) return;
+  const safeWarnings = Array.isArray(warnings) ? warnings : [];
+  adminPlayerActiveWarnings.replaceChildren();
+  if (adminPlayerWarningsEmpty) adminPlayerWarningsEmpty.hidden = safeWarnings.length !== 0;
+
+  safeWarnings.forEach((warning) => {
+    const caseId = Number(warning?.case_id);
+    const editButton = document.createElement('button');
+    editButton.type = 'button';
+    editButton.className = 'activity-row-action';
+    editButton.textContent = 'Edit';
+    editButton.disabled = !Number.isInteger(caseId) || !selectedAdminPlayer?.linked;
+    editButton.addEventListener('click', () => openPlayerActionDialog('edit_warning', caseId, String(warning?.reason || '')));
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'activity-row-action danger';
+    removeButton.textContent = 'Remove';
+    removeButton.disabled = !Number.isInteger(caseId) || !selectedAdminPlayer?.linked;
+    removeButton.addEventListener('click', () => openPlayerActionDialog('remove_warning', caseId));
+    appendAdminActivity(adminPlayerActiveWarnings, {
+      symbolText: '!',
+      symbolClass: 'warning',
+      titleText: `Warning #${Number.isInteger(caseId) ? caseId : '—'} · ${String(warning?.moderator_name || 'Staff')}`,
+      detailText: `${String(warning?.reason || 'No reason recorded')} · ${formatAccountDate(warning?.created_at)}`,
+      actionButtons: [editButton, removeButton]
+    });
+  });
+};
+
 const renderAdminModerationHistory = (history) => {
   if (!adminPlayerModerationHistory) return;
   const safeHistory = Array.isArray(history) ? history : [];
@@ -802,21 +1002,50 @@ const renderAdminModerationHistory = (history) => {
   safeHistory.forEach((record) => {
     const action = String(record?.action || 'record');
     const status = String(record?.status || 'completed');
-    const item = document.createElement('li');
-    const symbol = document.createElement('span');
-    const content = document.createElement('div');
-    const title = document.createElement('strong');
-    const details = document.createElement('small');
-
-    symbol.className = `activity-symbol ${action === 'warn' ? 'warning' : status === 'removed' || status === 'reversed' ? 'removed' : ''}`;
-    symbol.textContent = action === 'warn' ? '!' : action.includes('ban') ? '⊘' : '≡';
-    title.textContent = `${titleCaseState(action)} · ${titleCaseState(status)}`;
     const duration = record?.duration_seconds == null ? '' : ` · Duration ${formatDuration(record.duration_seconds)}`;
     const expiry = record?.expires_at ? ` · Expires ${formatAccountDate(record.expires_at)}` : '';
-    details.textContent = `${String(record?.reason || 'No public reason recorded')} · ${formatAccountDate(record?.created_at)}${duration}${expiry}`;
-    content.append(title, details);
-    item.append(symbol, content);
-    adminPlayerModerationHistory.append(item);
+    appendAdminActivity(adminPlayerModerationHistory, {
+      symbolText: action === 'warn' ? '!' : action.includes('ban') ? '⊘' : '≡',
+      symbolClass: action === 'warn' ? 'warning' : status === 'removed' || status === 'reversed' ? 'removed' : '',
+      titleText: `${titleCaseState(action)} · ${titleCaseState(status)}`,
+      detailText: `${String(record?.reason || 'No public reason recorded')} · ${formatAccountDate(record?.created_at)}${duration}${expiry}`
+    });
+  });
+};
+
+const renderAdminDayzBans = (dayzBan) => {
+  if (!adminPlayerDayzBans) return;
+  const history = Array.isArray(dayzBan?.history) ? dayzBan.history : [];
+  const active = Boolean(dayzBan?.active);
+  adminPlayerDayzBans.replaceChildren();
+  setText('[data-admin-player-dayz-ban-state]', active ? 'Currently banned' : 'Not banned');
+  if (adminPlayerDayzBansEmpty) adminPlayerDayzBansEmpty.hidden = history.length !== 0;
+
+  history.forEach((record) => {
+    const action = String(record?.action || 'record');
+    appendAdminActivity(adminPlayerDayzBans, {
+      symbolText: action === 'ban' ? '⊘' : '♻',
+      symbolClass: action === 'ban' ? 'red' : 'green',
+      titleText: `DayZ ${titleCaseState(action)} · ${String(record?.administrator_name || 'Staff')}`,
+      detailText: `${String(record?.reason || 'No reason recorded')} · ${formatAccountDate(record?.created_at)}`
+    });
+  });
+};
+
+const renderAdminActionHistory = (history) => {
+  if (!adminPlayerActionHistory) return;
+  const safeHistory = Array.isArray(history) ? history : [];
+  adminPlayerActionHistory.replaceChildren();
+  if (adminPlayerActionHistoryEmpty) adminPlayerActionHistoryEmpty.hidden = safeHistory.length !== 0;
+
+  safeHistory.forEach((record) => {
+    const success = Boolean(record?.success);
+    appendAdminActivity(adminPlayerActionHistory, {
+      symbolText: success ? '✓' : '×',
+      symbolClass: success ? 'green' : 'red',
+      titleText: `${titleCaseState(record?.action)} · ${success ? 'Completed' : 'Rejected'} · ${String(record?.actor_name || 'Staff')}`,
+      detailText: `${String(record?.reason || 'No reason recorded')} · ${String(record?.outcome || 'No outcome recorded')} · ${formatAccountDate(record?.created_at)}`
+    });
   });
 };
 
@@ -826,7 +1055,20 @@ const renderAdminPlayerDetails = (payload) => {
   const activity = player?.activity;
   const pvp = player?.pvp;
   const moderation = player?.moderation;
-  if (!identity || !activity || !pvp || !moderation) throw new Error('Unexpected player-details response');
+  const administration = player?.administration;
+  if (!identity || !activity || !pvp || !moderation || !administration) throw new Error('Unexpected player-details response');
+
+  selectedAdminPlayer = {
+    psnId: String(identity.psn_id || ''),
+    linked: Boolean(identity.linked),
+    verified: Boolean(identity.verified),
+    economyAvailable: Boolean(administration?.economy?.available),
+    dayzBanned: Boolean(administration?.dayz_ban?.active),
+    capabilities: administration?.capabilities || {}
+  };
+  selectedPlayerAction = null;
+  selectedWarningCaseId = null;
+  selectedNoteId = null;
 
   adminPlayerDetail?.removeAttribute('hidden');
   document.querySelector('[data-admin-player-unlinked]')?.toggleAttribute('hidden', Boolean(identity.linked));
@@ -845,6 +1087,7 @@ const renderAdminPlayerDetails = (payload) => {
   setText('[data-admin-player-kills]', new Intl.NumberFormat('en-AU').format(Number(pvp.kills) || 0));
   setText('[data-admin-player-deaths]', new Intl.NumberFormat('en-AU').format(Number(pvp.deaths) || 0));
   setText('[data-admin-player-warnings]', new Intl.NumberFormat('en-AU').format(Number(moderation.warning_count) || 0));
+  setText('[data-admin-player-balance]', administration?.economy?.available ? formatMoney(administration.economy.balance) : 'Unavailable');
   setText('[data-admin-player-first-seen]', formatAccountDate(activity.first_seen));
   setText('[data-admin-player-last-seen]', activity.online ? 'Currently online' : formatAccountDate(activity.last_seen));
   setText('[data-admin-player-linked-at]', identity.linked ? formatAccountDate(activity.linked_at) : 'Not linked');
@@ -852,17 +1095,23 @@ const renderAdminPlayerDetails = (payload) => {
   setText('[data-admin-player-streak]', pvp.available ? new Intl.NumberFormat('en-AU').format(Number(pvp.current_streak) || 0) : 'Unavailable');
   setText('[data-admin-player-longest]', pvp.longest_kill_metres == null ? 'Not recorded' : `${Number(pvp.longest_kill_metres).toFixed(1)} m`);
   setText('[data-admin-player-weapon]', String(pvp.favourite_weapon || 'Not recorded'));
+  renderAdminNotes(administration.notes);
+  renderAdminActiveWarnings(administration.active_warnings);
   renderAdminModerationHistory(moderation.history);
+  renderAdminDayzBans(administration.dayz_ban);
+  renderAdminActionHistory(administration.action_history);
+  syncPlayerActionControls();
   adminPlayerDetail?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
 const loadAdminPlayerDetails = async (psnId) => {
   const sessionToken = storageGet(AUTH_SESSION_KEY);
   if (!hasServerActionAccess() || !sessionToken || adminPlayerDetailRequestInProgress) return;
-  adminPlayerDetailRequestInProgress = true;
-  adminPlayerDetail?.setAttribute('hidden', '');
-  setAdminPlayerSearchState(`Loading protected details for ${psnId}…`, 'loading');
 
+  adminPlayerDetailRequestInProgress = true;
+  selectedAdminPlayer = null;
+  syncPlayerActionControls();
+  setAdminPlayerSearchState(`Loading protected administration details for ${psnId}…`, 'loading');
   try {
     const response = await authFetch(`${ADMIN_PLAYER_DETAILS_URL}?psn=${encodeURIComponent(psnId)}`, {
       method: 'GET',
@@ -876,14 +1125,177 @@ const loadAdminPlayerDetails = async (psnId) => {
     }
     if (!response.ok || payload.status !== 'ok') throw new Error('Player details unavailable');
     renderAdminPlayerDetails(payload);
-    setAdminPlayerSearchState(`Showing protected read-only details for ${psnId}.`, 'success');
+    setAdminPlayerSearchState(`Showing protected administration controls for ${psnId}.`, 'success');
   } catch (error) {
+    selectedAdminPlayer = null;
     adminPlayerDetail?.setAttribute('hidden', '');
+    syncPlayerActionControls();
     setAdminPlayerSearchState('Player details are temporarily unavailable. No data was changed.', 'error');
   } finally {
     adminPlayerDetailRequestInProgress = false;
   }
 };
+
+const openPlayerActionDialog = (action, referenceId = null, initialText = '') => {
+  const specification = PLAYER_ACTIONS[action];
+  if (!specification || !selectedAdminPlayer) return;
+  selectedPlayerAction = action;
+  selectedWarningCaseId = ['edit_warning', 'remove_warning'].includes(action) && referenceId != null ? Number(referenceId) : null;
+  selectedNoteId = action === 'update_note' && referenceId != null ? Number(referenceId) : null;
+  resetPlayerActionDialog();
+  if (!playerActionIsAllowed(action)) {
+    selectedPlayerAction = null;
+    selectedWarningCaseId = null;
+    selectedNoteId = null;
+    return;
+  }
+
+  if (playerActionTitle) playerActionTitle.textContent = specification.title;
+  if (playerActionDescription) playerActionDescription.textContent = specification.description;
+  if (playerActionWarning) playerActionWarning.textContent = specification.warning;
+  if (playerActionMark) playerActionMark.textContent = specification.mark;
+  if (playerActionReasonLabel) playerActionReasonLabel.firstChild.textContent = `${specification.reasonLabel} `;
+  if (playerActionReasonHelp) playerActionReasonHelp.textContent = specification.reasonHelp;
+  const isNoteAction = ['add_note', 'update_note'].includes(action);
+  if (playerActionReason) {
+    playerActionReason.maxLength = isNoteAction ? 1500 : 1000;
+    playerActionReason.value = String(initialText || '');
+  }
+  if (playerActionEconomyFields) playerActionEconomyFields.hidden = !specification.economy;
+  setText('[data-player-action-confirmation-help]', `Type ${selectedAdminPlayer.psnId}`);
+  syncPlayerActionControls();
+
+  if (typeof playerActionDialog?.showModal === 'function') playerActionDialog.showModal();
+  else playerActionDialog?.setAttribute('open', '');
+  window.setTimeout(() => playerActionReason?.focus(), 0);
+};
+
+playerActionButtons.forEach((button) => {
+  button.addEventListener('click', () => openPlayerActionDialog(button.dataset.playerAction));
+});
+
+playerActionCancelButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (!playerActionRequestInProgress) closePlayerActionDialog();
+  });
+});
+
+playerActionDialog?.addEventListener('click', (event) => {
+  if (event.target === playerActionDialog && !playerActionRequestInProgress) closePlayerActionDialog();
+});
+
+playerActionDialog?.addEventListener('cancel', (event) => {
+  if (playerActionRequestInProgress) event.preventDefault();
+});
+
+playerActionDialog?.addEventListener('close', () => {
+  if (!playerActionRequestInProgress) resetPlayerActionDialog({ clearSelection: true });
+  syncPlayerActionControls();
+});
+
+playerActionForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const action = selectedPlayerAction;
+  const specification = PLAYER_ACTIONS[action];
+  if (!specification || !playerActionIsAllowed(action) || !selectedAdminPlayer) return;
+
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken) {
+    closePlayerActionDialog();
+    applySignedOutState();
+    showAuthMessage('Your dashboard session expired. Sign in again before using Admin controls.', 'error');
+    return;
+  }
+
+  const reason = String(playerActionReason?.value || '').trim().replace(/\s+/g, ' ');
+  const isNoteAction = ['add_note', 'update_note'].includes(action);
+  const minimumReason = isNoteAction ? 1 : 3;
+  const maximumReason = isNoteAction ? 1500 : 1000;
+  if (reason.length < minimumReason || reason.length > maximumReason) {
+    showPlayerActionDialogMessage(`Enter between ${minimumReason} and ${maximumReason} characters.`);
+    playerActionReason?.focus();
+    return;
+  }
+
+  const confirmation = String(playerActionConfirmation?.value || '').trim().replace(/\s+/g, ' ');
+  if (confirmation.toLocaleLowerCase() !== selectedAdminPlayer.psnId.toLocaleLowerCase()) {
+    showPlayerActionDialogMessage(`Type ${selectedAdminPlayer.psnId} exactly to confirm.`);
+    playerActionConfirmation?.focus();
+    return;
+  }
+
+  const requestPayload = {
+    action,
+    psn: selectedAdminPlayer.psnId,
+    confirmation,
+    reason
+  };
+  if (['edit_warning', 'remove_warning'].includes(action)) requestPayload.warning_case_id = selectedWarningCaseId;
+  if (action === 'update_note') requestPayload.note_id = selectedNoteId;
+  if (specification.economy) {
+    const operation = String(playerActionEconomyOperation?.value || '');
+    const amount = Number(playerActionAmount?.value);
+    if (!['add', 'remove', 'set'].includes(operation) || !Number.isInteger(amount) || amount < 0 || amount > 2_000_000_000) {
+      showPlayerActionDialogMessage('Choose a balance operation and enter a valid whole-dollar amount.');
+      playerActionAmount?.focus();
+      return;
+    }
+    if (operation !== 'set' && amount === 0) {
+      showPlayerActionDialogMessage('Add and remove operations require an amount greater than zero.');
+      playerActionAmount?.focus();
+      return;
+    }
+    requestPayload.economy_action = operation;
+    requestPayload.amount = amount;
+  }
+
+  playerActionRequestInProgress = true;
+  syncPlayerActionControls();
+  showPlayerActionDialogMessage('Railway is rechecking your Admin access, target protections and audit record.', 'info');
+
+  try {
+    const response = await protectedActionFetch(ADMIN_PLAYER_ACTION_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestPayload)
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response)) {
+      closePlayerActionDialog();
+      return;
+    }
+    if (!response.ok || payload.status !== 'ok' || payload.action !== action) {
+      showPlayerActionDialogMessage(String(payload.message || 'The protected player action could not be completed safely.'));
+      return;
+    }
+
+    const successMessage = String(payload.message || 'The protected player action was completed and audited.');
+    closePlayerActionDialog();
+    showAuthMessage(successMessage, 'success');
+    setAdminPlayerSearchState(successMessage, 'success');
+    if (payload.player) {
+      renderAdminPlayerDetails({ player: payload.player });
+    } else {
+      selectedAdminPlayer = null;
+      adminPlayerDetail?.setAttribute('hidden', '');
+      syncPlayerActionControls();
+      setAdminPlayerSearchState(`${successMessage} Search again to view the remaining DayZ record.`, 'success');
+    }
+  } catch (error) {
+    showPlayerActionDialogMessage(
+      error?.name === 'AbortError'
+        ? 'Railway did not answer in time. Refresh the selected player before trying again.'
+        : 'The protected Railway service could not be reached. No second request was sent.'
+    );
+  } finally {
+    playerActionRequestInProgress = false;
+    syncPlayerActionControls();
+  }
+});
 
 adminPlayerSearchForm?.addEventListener('submit', async (event) => {
   event.preventDefault();

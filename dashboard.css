@@ -1049,3 +1049,90 @@ td:first-child { color: #e7dfd7; font-weight: 700; }
   .admin-player-result { grid-template-columns: 1fr; }
   .admin-player-result .result-state { justify-self: start; }
 }
+
+/* Stage 7B2 — controlled player administration */
+.player-action-panel { margin: 16px 0; }
+.player-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.player-action-grid button {
+  display: grid;
+  gap: 5px;
+  min-height: 76px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.018);
+  color: var(--paper);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.player-action-grid button:hover:not(:disabled),
+.player-action-grid button:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(238,122,39,0.45);
+  background: rgba(238,122,39,0.045);
+}
+.player-action-grid button strong { font-size: 9px; }
+.player-action-grid button small { color: #817974; font-size: 8px; line-height: 1.5; }
+.player-action-grid button.danger-outline { border-color: rgba(215,71,58,0.3); }
+.player-action-grid button.danger-outline strong { color: #ff9c91; }
+.player-action-grid button:disabled { cursor: not-allowed; opacity: 0.38; }
+.admin-private-grid { margin-top: 16px; }
+.admin-private-grid .activity-list { margin-top: 2px; }
+.activity-list li.has-row-actions { grid-template-columns: 31px minmax(0, 1fr) auto; }
+.activity-list .activity-row-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.activity-list .activity-row-action {
+  padding: 5px 7px;
+  border: 1px solid rgba(238,122,39,0.35);
+  background: transparent;
+  color: #f4b27f;
+  font: inherit;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.activity-list .activity-row-action:hover { background: rgba(238,122,39,0.08); }
+.activity-list .activity-row-action.danger {
+  border-color: rgba(215,71,58,0.35);
+  color: #ff9c91;
+}
+.activity-list .activity-row-action.danger:hover { background: rgba(215,71,58,0.08); }
+.activity-list .activity-row-action:disabled { cursor: not-allowed; opacity: 0.4; }
+.player-action-dialog .dialog-field input,
+.player-action-dialog .dialog-field select {
+  width: 100%;
+  min-height: 43px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  outline: 0;
+  background: #12100f;
+  color: var(--paper);
+}
+.player-action-dialog .dialog-field textarea { resize: vertical; }
+.player-action-economy-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.player-action-economy-fields[hidden] { display: none; }
+
+@media (max-width: 900px) {
+  .player-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .player-action-grid, .player-action-economy-fields { grid-template-columns: 1fr; }
+  .activity-list li.has-row-actions { grid-template-columns: 31px minmax(0, 1fr); }
+  .activity-list .activity-row-actions { grid-column: 2; margin-left: 0; justify-content: flex-start; }
+}
