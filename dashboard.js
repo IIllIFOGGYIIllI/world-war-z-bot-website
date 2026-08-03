@@ -83,7 +83,41 @@ const AUTH_COMPLETE_URL = `${DASHBOARD_API_BASE}/api/auth/discord/complete`;
 const AUTH_ME_URL = `${DASHBOARD_API_BASE}/api/auth/me`;
 const AUTH_LOGOUT_URL = `${DASHBOARD_API_BASE}/api/auth/logout`;
 const ACCOUNT_SUMMARY_URL = `${DASHBOARD_API_BASE}/api/account/summary`;
-const RESTART_SERVER_URL = `${DASHBOARD_API_BASE}/api/admin/server/restart`;
+const SERVER_ACTIONS = {
+  restart: {
+    url: `${DASHBOARD_API_BASE}/api/admin/server/restart`,
+    confirmation: 'RESTART',
+    allowedStatuses: ['online'],
+    mark: '↻',
+    title: 'Restart the DayZ server?',
+    description: 'This disconnects current players while Nitrado restarts the server. Confirm only when the server is safe to restart.',
+    warning: 'Selecting Yes will immediately submit the protected restart request.',
+    impact: 'Current players may be disconnected',
+    confirmLabel: 'Yes, restart server'
+  },
+  stop: {
+    url: `${DASHBOARD_API_BASE}/api/admin/server/stop`,
+    confirmation: 'STOP',
+    allowedStatuses: ['online'],
+    mark: '■',
+    title: 'Stop the DayZ server?',
+    description: 'This takes the DayZ server offline and disconnects every current player. It will remain offline until an Admin starts it again.',
+    warning: 'Selecting Yes will immediately submit the protected stop request.',
+    impact: 'All current players will be disconnected',
+    confirmLabel: 'Yes, stop server'
+  },
+  start: {
+    url: `${DASHBOARD_API_BASE}/api/admin/server/start`,
+    confirmation: 'START',
+    allowedStatuses: ['offline'],
+    mark: '▶',
+    title: 'Start the DayZ server?',
+    description: 'This asks Nitrado to bring the offline DayZ server back online. Startup can take several minutes.',
+    warning: 'Selecting Yes will immediately submit the protected start request.',
+    impact: 'Players must wait until Nitrado finishes starting',
+    confirmLabel: 'Yes, start server'
+  }
+};
 const AUTH_SESSION_KEY = 'wwz_dashboard_session';
 const AUTH_RETURN_VIEW_KEY = 'wwz_dashboard_return_view';
 const LIVE_STATUS_REFRESH_MS = 30_000;
@@ -98,17 +132,26 @@ const authMessage = document.querySelector('[data-auth-message]');
 const startDiscordLoginButton = document.querySelector('[data-start-discord-login]');
 const signOutButton = document.querySelector('[data-sign-out]');
 const authDialogNotice = document.querySelector('[data-auth-dialog-notice]');
-const restartDialog = document.querySelector('[data-restart-dialog]');
-const restartForm = document.querySelector('[data-restart-form]');
-const restartReasonInput = document.querySelector('[data-restart-reason]');
-const confirmRestartButton = document.querySelector('[data-confirm-restart]');
-const restartDialogMessage = document.querySelector('[data-restart-dialog-message]');
-const restartButtons = [...document.querySelectorAll('[data-restart-server]')];
-const restartCancelButtons = [...document.querySelectorAll('[data-restart-cancel]')];
+const serverActionDialog = document.querySelector('[data-server-action-dialog]');
+const serverActionForm = document.querySelector('[data-server-action-form]');
+const serverActionReasonInput = document.querySelector('[data-server-action-reason]');
+const confirmServerActionButton = document.querySelector('[data-confirm-server-action]');
+const serverActionDialogMessage = document.querySelector('[data-server-action-dialog-message]');
+const serverActionTitle = document.querySelector('[data-server-action-title]');
+const serverActionDescription = document.querySelector('[data-server-action-description]');
+const serverActionWarning = document.querySelector('[data-server-action-warning]');
+const serverActionImpact = document.querySelector('[data-server-action-impact]');
+const serverActionMark = document.querySelector('[data-server-action-mark]');
+const serverActionButtons = [...document.querySelectorAll('[data-server-action]')];
+const serverActionCancelButtons = [...document.querySelectorAll('[data-server-action-cancel]')];
 let discordAuthEnabled = false;
 let authenticatedUser = null;
 let authRequestInProgress = false;
-let restartRequestInProgress = false;
+let currentServerStatus = 'unavailable';
+let selectedServerAction = null;
+let serverActionRequestInProgress = false;
+let serverActionLockedUntil = 0;
+let serverActionLockTimer = null;
 
 const storageGet = (key) => {
   try {
@@ -152,24 +195,78 @@ const accessLabel = (level) => {
   return 'Member';
 };
 
-const hasRestartAccess = () => ['staff', 'owner'].includes(dashboardAccessLevel);
+const hasServerActionAccess = () => ['staff', 'owner'].includes(dashboardAccessLevel);
 
-const syncRestartControls = () => {
-  const enabled = hasRestartAccess() && !restartRequestInProgress;
-  restartButtons.forEach((button) => {
-    button.disabled = !enabled;
-    button.classList.toggle('is-loading', restartRequestInProgress);
-    button.setAttribute('aria-busy', String(restartRequestInProgress));
-  });
-  restartCancelButtons.forEach((button) => {
-    button.disabled = restartRequestInProgress;
-  });
-  if (confirmRestartButton) {
-    confirmRestartButton.disabled = !enabled;
-    confirmRestartButton.textContent = restartRequestInProgress
-      ? 'Submitting protected restart…'
-      : 'Yes, restart server';
+const serverActionIsAllowed = (action) => {
+  const specification = SERVER_ACTIONS[action];
+  return Boolean(
+    specification
+    && hasServerActionAccess()
+    && !serverActionRequestInProgress
+    && Date.now() >= serverActionLockedUntil
+    && specification.allowedStatuses.includes(currentServerStatus)
+  );
+};
+
+const serverActionNote = (action) => {
+  if (serverActionRequestInProgress) return 'Protected request in progress';
+  if (Date.now() < serverActionLockedUntil) return 'Control centre cooldown active';
+  if (currentServerStatus === 'unavailable') return 'Live server state unavailable';
+  if (currentServerStatus === 'restarting') return 'Server state is currently changing';
+  if (action === 'start') {
+    return currentServerStatus === 'offline'
+      ? 'Confirmation and audit logging active'
+      : 'Server is already online';
   }
+  return currentServerStatus === 'online'
+    ? 'Confirmation and audit logging active'
+    : 'Server must be online';
+};
+
+const syncServerActionControls = () => {
+  serverActionButtons.forEach((button) => {
+    const action = button.dataset.serverAction;
+    const enabled = serverActionIsAllowed(action);
+    button.disabled = !enabled;
+    button.classList.toggle('is-loading', serverActionRequestInProgress);
+    button.setAttribute('aria-busy', String(serverActionRequestInProgress));
+    const note = button.querySelector('[data-server-action-note]');
+    if (note) note.textContent = serverActionNote(action);
+  });
+
+  serverActionCancelButtons.forEach((button) => {
+    button.disabled = serverActionRequestInProgress;
+  });
+
+  const selected = SERVER_ACTIONS[selectedServerAction];
+  if (confirmServerActionButton) {
+    confirmServerActionButton.disabled = !selected || !serverActionIsAllowed(selectedServerAction);
+    confirmServerActionButton.textContent = serverActionRequestInProgress
+      ? `Submitting protected ${selectedServerAction || 'server'} request…`
+      : selected?.confirmLabel || 'Yes, continue';
+  }
+
+  const controlStatus = document.querySelector('[data-server-control-status]');
+  if (controlStatus) {
+    controlStatus.textContent = serverActionRequestInProgress
+      ? 'Protected request in progress'
+      : currentServerStatus === 'unavailable'
+        ? 'Admin verified · live state unavailable'
+        : currentServerStatus === 'restarting'
+          ? 'Admin verified · server state changing'
+          : 'Admin verified · controls connected';
+  }
+};
+
+const lockServerActions = (seconds) => {
+  const duration = Math.max(1, Number(seconds) || 1) * 1000;
+  serverActionLockedUntil = Math.max(serverActionLockedUntil, Date.now() + duration);
+  if (serverActionLockTimer) window.clearTimeout(serverActionLockTimer);
+  serverActionLockTimer = window.setTimeout(() => {
+    serverActionLockTimer = null;
+    syncServerActionControls();
+  }, Math.max(0, serverActionLockedUntil - Date.now()) + 50);
+  syncServerActionControls();
 };
 
 const applyAccessVisibility = (level) => {
@@ -184,7 +281,7 @@ const applyAccessVisibility = (level) => {
     element.hidden = !hasOwnerAccess;
   });
 
-  syncRestartControls();
+  syncServerActionControls();
 
   const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel;
   if (activeView && !canOpenView(activeView)) showView('overview', false);
@@ -344,80 +441,90 @@ const protectedActionFetch = async (url, options = {}) => {
   }
 };
 
-const showRestartDialogMessage = (message, state = 'error') => {
-  if (!restartDialogMessage) return;
-  restartDialogMessage.textContent = message;
-  restartDialogMessage.dataset.state = state;
-  restartDialogMessage.hidden = false;
+const showServerActionDialogMessage = (message, state = 'error') => {
+  if (!serverActionDialogMessage) return;
+  serverActionDialogMessage.textContent = message;
+  serverActionDialogMessage.dataset.state = state;
+  serverActionDialogMessage.hidden = false;
 };
 
-const resetRestartDialog = () => {
-  restartForm?.reset();
-  if (restartDialogMessage) {
-    restartDialogMessage.hidden = true;
-    restartDialogMessage.textContent = '';
-    delete restartDialogMessage.dataset.state;
+const resetServerActionDialog = ({ clearSelection = false } = {}) => {
+  serverActionForm?.reset();
+  if (serverActionDialogMessage) {
+    serverActionDialogMessage.hidden = true;
+    serverActionDialogMessage.textContent = '';
+    delete serverActionDialogMessage.dataset.state;
   }
-  syncRestartControls();
+  if (clearSelection) selectedServerAction = null;
+  syncServerActionControls();
 };
 
-const openRestartDialog = () => {
-  if (!hasRestartAccess() || restartRequestInProgress) return;
-  resetRestartDialog();
-  if (typeof restartDialog?.showModal === 'function') restartDialog.showModal();
-  else restartDialog?.setAttribute('open', '');
-  window.setTimeout(() => restartReasonInput?.focus(), 0);
+const openServerActionDialog = (action) => {
+  const specification = SERVER_ACTIONS[action];
+  if (!specification || !serverActionIsAllowed(action)) return;
+
+  selectedServerAction = action;
+  resetServerActionDialog();
+  if (serverActionTitle) serverActionTitle.textContent = specification.title;
+  if (serverActionDescription) serverActionDescription.textContent = specification.description;
+  if (serverActionWarning) serverActionWarning.textContent = specification.warning;
+  if (serverActionImpact) serverActionImpact.textContent = specification.impact;
+  if (serverActionMark) serverActionMark.textContent = specification.mark;
+  syncServerActionControls();
+
+  if (typeof serverActionDialog?.showModal === 'function') serverActionDialog.showModal();
+  else serverActionDialog?.setAttribute('open', '');
+  window.setTimeout(() => serverActionReasonInput?.focus(), 0);
 };
 
-restartButtons.forEach((button) => {
-  button.addEventListener('click', openRestartDialog);
-});
-
-restartCancelButtons.forEach((button) => {
+serverActionButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    if (!restartRequestInProgress) restartDialog?.close?.();
+    openServerActionDialog(button.dataset.serverAction);
   });
 });
 
-restartDialog?.addEventListener('click', (event) => {
-  if (event.target === restartDialog && !restartRequestInProgress) {
-    restartDialog.close?.();
+serverActionCancelButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (!serverActionRequestInProgress) serverActionDialog?.close?.();
+  });
+});
+
+serverActionDialog?.addEventListener('click', (event) => {
+  if (event.target === serverActionDialog && !serverActionRequestInProgress) {
+    serverActionDialog.close?.();
   }
 });
 
-restartDialog?.addEventListener('cancel', (event) => {
-  if (restartRequestInProgress) event.preventDefault();
+serverActionDialog?.addEventListener('cancel', (event) => {
+  if (serverActionRequestInProgress) event.preventDefault();
 });
 
-restartDialog?.addEventListener('close', () => {
-  if (!restartRequestInProgress) resetRestartDialog();
+serverActionDialog?.addEventListener('close', () => {
+  if (!serverActionRequestInProgress) resetServerActionDialog({ clearSelection: true });
 });
 
-restartForm?.addEventListener('submit', async (event) => {
+serverActionForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  if (
-    restartRequestInProgress
-    || !hasRestartAccess()
-  ) {
-    return;
-  }
+  const action = selectedServerAction;
+  const specification = SERVER_ACTIONS[action];
+  if (!specification || !serverActionIsAllowed(action)) return;
 
   const sessionToken = storageGet(AUTH_SESSION_KEY);
 
   if (!sessionToken) {
-    restartDialog?.close?.();
+    serverActionDialog?.close?.();
     applySignedOutState();
     showAuthMessage('Your dashboard session has expired. Sign in again before using Admin controls.', 'error');
     return;
   }
 
-  restartRequestInProgress = true;
-  syncRestartControls();
-  showRestartDialogMessage('Railway is rechecking your Admin access and recording this request.', 'info');
+  serverActionRequestInProgress = true;
+  syncServerActionControls();
+  showServerActionDialogMessage('Railway is rechecking your Admin access, live server state and audit record.', 'info');
 
   try {
-    const response = await protectedActionFetch(RESTART_SERVER_URL, {
+    const response = await protectedActionFetch(specification.url, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -425,15 +532,15 @@ restartForm?.addEventListener('submit', async (event) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        confirmation: 'RESTART',
-        reason: restartReasonInput?.value.trim() || ''
+        confirmation: specification.confirmation,
+        reason: serverActionReasonInput?.value.trim() || ''
       })
     });
     const payload = await response.json().catch(() => ({}));
 
     if (response.status === 401 || response.status === 403) {
       storageRemove(AUTH_SESSION_KEY);
-      restartDialog?.close?.();
+      serverActionDialog?.close?.();
       applySignedOutState();
       showAuthMessage(
         response.status === 403
@@ -446,41 +553,45 @@ restartForm?.addEventListener('submit', async (event) => {
 
     if (response.status === 429) {
       const retryAfter = Math.max(1, Number(payload.retry_after_seconds) || 1);
-      showRestartDialogMessage(`The control centre is cooling down. Try again in about ${retryAfter} seconds.`);
+      lockServerActions(retryAfter);
+      showServerActionDialogMessage(`The control centre is cooling down. Try again in about ${retryAfter} seconds.`);
       return;
     }
 
     if (response.status === 409) {
-      showRestartDialogMessage(payload.message || 'Another protected server action is already in progress.');
+      showServerActionDialogMessage(payload.message || 'Another protected server action is already in progress.');
+      window.setTimeout(refreshLiveStatus, 1_000);
       return;
     }
 
-    if (!response.ok || payload.status !== 'accepted') {
-      showRestartDialogMessage(payload.message || 'The restart request could not be completed safely.');
+    if (!response.ok || payload.status !== 'accepted' || payload.action !== action) {
+      showServerActionDialogMessage(payload.message || `The ${action} request could not be completed safely.`);
       return;
     }
 
     const auditNumber = Number(payload.audit_record_id);
     const successMessage = Number.isInteger(auditNumber)
-      ? `Server restart accepted and recorded as audit #${auditNumber}.`
-      : 'Server restart accepted and recorded by Railway.';
+      ? `Server ${action} accepted and recorded as audit #${auditNumber}.`
+      : `Server ${action} accepted and recorded by Railway.`;
 
-    restartDialog?.close?.();
+    lockServerActions(30);
+    serverActionDialog?.close?.();
     showAuthMessage(successMessage, 'success');
-    setText('[data-restart-control-status]', 'Restart submitted · audit recorded');
-    setText('[data-restart-status-note]', 'Restart request accepted');
-    restartButtons.forEach((button) => button.classList.add('action-accepted'));
+    const submittedButton = serverActionButtons.find((button) => button.dataset.serverAction === action);
+    submittedButton?.classList.add('action-accepted');
+    window.setTimeout(() => submittedButton?.classList.remove('action-accepted'), 30_000);
     window.setTimeout(refreshLiveStatus, 3_000);
     window.setTimeout(refreshLiveStatus, 15_000);
+    window.setTimeout(refreshLiveStatus, 32_000);
   } catch (error) {
-    showRestartDialogMessage(
+    showServerActionDialogMessage(
       error?.name === 'AbortError'
         ? 'Railway did not answer in time. Check server status before trying again.'
         : 'The protected Railway service could not be reached. No second request was sent.'
     );
   } finally {
-    restartRequestInProgress = false;
-    syncRestartControls();
+    serverActionRequestInProgress = false;
+    syncServerActionControls();
   }
 });
 
@@ -826,6 +937,7 @@ const applyLiveStatus = (payload) => {
   }
 
   const status = payload.status;
+  currentServerStatus = status;
   const statusLabel = STATUS_LABELS[status];
   const currentPlayers = Math.max(0, Math.trunc(Number(payload.players.current) || 0));
   const maximumPlayers = Math.max(0, Math.trunc(Number(payload.players.maximum) || 0));
@@ -875,9 +987,11 @@ const applyLiveStatus = (payload) => {
     element.classList.remove('online-text', 'restarting-text', 'offline-text', 'unavailable-text');
     element.classList.add(`${status}-text`);
   });
+  syncServerActionControls();
 };
 
 const showStatusUnavailable = () => {
+  currentServerStatus = 'unavailable';
   setConnectionState('unavailable', 'Bot API unavailable');
   if (dashboardMode) dashboardMode.textContent = 'Status unavailable';
   liveBanner?.classList.remove('live');
@@ -901,6 +1015,7 @@ const showStatusUnavailable = () => {
     element.classList.remove('online-text', 'restarting-text', 'offline-text', 'unavailable-text');
     element.classList.add('unavailable-text');
   });
+  syncServerActionControls();
 };
 
 const refreshLiveStatus = async () => {

@@ -1,5 +1,31 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.9.0 — Complete Protected Server Controls
+
+### Added
+
+- Connected **Start server** and **Stop server** beside Restart for verified
+  Admins and the Owner.
+- Reused one clear Yes/Cancel confirmation window for all three actions.
+- Added action-specific warnings, optional reasons and accepted audit messages.
+- Added delayed live-status refreshes after every accepted action.
+
+### State-aware controls
+
+- Start is enabled only while the server is offline.
+- Stop and Restart are enabled only while the server is online.
+- Every control is locked while the server is changing state, the API is
+  unavailable, a request is running or Railway's cooldown is active.
+
+### Security
+
+- Railway rechecks the current Discord member, Admin/Owner access and Nitrado
+  server state after confirmation.
+- The browser sends the matching internal confirmation only after **Yes** is
+  selected.
+- Nitrado, Discord bot and OAuth credentials remain only on Railway.
+- Backend authorization and audit logging remain the real security boundary.
+
 ## Version 1.8.1 — Restart Confirmation Prompt
 
 ### Changed

@@ -826,7 +826,7 @@ td:first-child { color: #e7dfd7; font-weight: 700; }
 .restart-warning span { color: #8f8781; font-size: 9px; }
 .restart-confirmation-list { display: grid; gap: 8px; margin: 0 0 19px; padding: 0; list-style: none; }
 .restart-confirmation-list li { display: flex; align-items: center; gap: 9px; padding: 0; color: #aaa29b; font-size: 9px; }
-.restart-confirmation-list li span { width: 20px; height: 20px; flex: 0 0 auto; display: grid; place-items: center; background: rgba(212,36,24,0.1); color: var(--red-bright); font-size: 8px; font-weight: 900; }
+.restart-confirmation-list li > span:first-child { width: 20px; height: 20px; flex: 0 0 auto; display: grid; place-items: center; background: rgba(212,36,24,0.1); color: var(--red-bright); font-size: 8px; font-weight: 900; }
 .dialog-field { display: grid; gap: 7px; margin-top: 14px; }
 .dialog-field > span { display: flex; justify-content: space-between; gap: 14px; color: #817974; font-size: 8px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
 .dialog-field > span small { color: #5f5853; font-size: 7px; font-weight: 700; letter-spacing: 0.04em; }
