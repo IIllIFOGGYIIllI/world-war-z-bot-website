@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/world-war-z-banner.png">
   <title>Dashboard | World War Z Bot</title>
-  <link rel="stylesheet" href="dashboard.css?v=1.9.0">
+  <link rel="stylesheet" href="dashboard.css?v=1.10.0">
 </head>
 <body>
   <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -129,6 +129,7 @@
         <div class="dashboard-grid server-detail-grid">
           <article class="panel map-preview-card"><img src="assets/chernarus-vector.svg" alt="WWZ vector road overview of Chernarus" loading="lazy"><div><p class="panel-kicker">ChernarusPlus</p><h2 data-map-name>CHERNARUS</h2><p><span data-map-server-name>World War Z</span> · <span data-map-platform>PlayStation</span></p><button class="primary-action" type="button" data-jump="map">Open interactive map</button></div></article>
           <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Server details</p><h2>Current session</h2></div></div><dl class="detail-list"><div><dt>Status</dt><dd data-detail-status>Loading…</dd></div><div><dt>Players</dt><dd data-detail-players>— / —</dd></div><div><dt>Platform</dt><dd data-detail-platform>PlayStation 4 &amp; 5</dd></div><div><dt>Map</dt><dd data-detail-map>Chernarus</dd></div><div><dt>Last API update</dt><dd data-live-updated>Loading…</dd></div><div><dt>Information source</dt><dd data-information-source>Railway dashboard API</dd></div></dl></article>
+          <article class="panel full-width"><div class="panel-heading"><div><p class="panel-kicker">Live operations</p><h2>Operational health</h2></div><span class="lock-label">Sanitized public health</span></div><div class="operations-health-grid"><dl class="detail-list"><div><dt>Railway bot uptime</dt><dd data-operations-uptime>Loading…</dd></div><div><dt>Discord gateway</dt><dd data-operations-discord>Loading…</dd></div><div><dt>Nitrado state</dt><dd data-operations-nitrado>Loading…</dd></div></dl><dl class="detail-list"><div><dt>Last successful update</dt><dd data-operations-updated>Loading…</dd></div><div><dt>Next scheduled restart</dt><dd data-operations-next-restart>Not exposed</dd></div><div><dt>Privacy</dt><dd>Names and credentials excluded</dd></div></dl></div></article>
           <article class="panel full-width"><div class="panel-heading"><div><p class="panel-kicker">Server connection</p><h2>Public status</h2></div><span class="lock-label">Safe read-only information</span></div><div class="operation-grid"><button type="button" data-refresh-status><strong>Refresh live status</strong><small>Safe public read-only request</small></button></div></article>
         </div>
       </section>
@@ -228,6 +229,7 @@
         <div class="metric-grid three"><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">⚑</span><small>Open cases</small></div><strong>—</strong><p>Live data unavailable</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">!</span><small>Warnings</small></div><strong>—</strong><p>Admin access required</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">≡</span><small>Audit records</small></div><strong>Ready</strong><p>Every action will be recorded</p></article></div>
         <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Planned workflow</p><h2>Player administration</h2></div><span class="lock-label">Controls disabled</span></div><div class="admin-preview"><label><span>Player lookup</span><input type="text" placeholder="Discord name or PSN ID" disabled></label><div class="operation-grid"><button disabled><strong>Add warning</strong><small>Reason required</small></button><button disabled><strong>Add admin note</strong><small>Audit logged</small></button><button disabled><strong>View history</strong><small>Admin only</small></button><button disabled><strong>Open case</strong><small>Evidence supported</small></button></div></div></article>
         <article class="panel" data-staff-only data-admin-server-controls hidden><div class="panel-heading"><div><p class="panel-kicker">Admin operations</p><h2>Protected server controls</h2></div><span class="lock-label" data-server-control-status>Admin verified · controls connected</span></div><div class="operation-grid"><button type="button" data-server-action="restart"><strong>Restart server</strong><small data-server-action-note>Checking live server state</small></button><button type="button" data-server-action="stop"><strong>Stop server</strong><small data-server-action-note>Checking live server state</small></button><button type="button" data-server-action="start"><strong>Start server</strong><small data-server-action-note>Checking live server state</small></button></div></article>
+        <article class="panel" data-staff-only data-server-action-history-panel hidden><div class="panel-heading"><div><p class="panel-kicker">Protected audit</p><h2>Recent server operations</h2></div><button class="secondary-action compact-action" type="button" data-refresh-server-actions>Refresh history</button></div><ol class="activity-list server-action-history" data-server-action-history aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading protected history</strong><small>Railway is verifying Admin access</small></div></li></ol><p class="table-note" data-server-action-history-empty hidden>No Start, Stop or Restart actions have been recorded yet.</p><p class="table-note history-error" data-server-action-history-error hidden>History is temporarily unavailable. Use Refresh history to try again.</p></article>
       </section>
 
       <section class="dashboard-view" data-view-panel="configuration" aria-labelledby="configuration-title" hidden>
@@ -277,7 +279,7 @@
     </form>
   </dialog>
 
-  <script src="dashboard.js?v=1.9.0"></script>
+  <script src="dashboard.js?v=1.10.0"></script>
   <script src="chernarus-map.js?v=1.7.0"></script>
 </body>
 </html>

@@ -83,6 +83,7 @@ const AUTH_COMPLETE_URL = `${DASHBOARD_API_BASE}/api/auth/discord/complete`;
 const AUTH_ME_URL = `${DASHBOARD_API_BASE}/api/auth/me`;
 const AUTH_LOGOUT_URL = `${DASHBOARD_API_BASE}/api/auth/logout`;
 const ACCOUNT_SUMMARY_URL = `${DASHBOARD_API_BASE}/api/account/summary`;
+const SERVER_ACTION_HISTORY_URL = `${DASHBOARD_API_BASE}/api/admin/server/actions`;
 const SERVER_ACTIONS = {
   restart: {
     url: `${DASHBOARD_API_BASE}/api/admin/server/restart`,
@@ -144,6 +145,10 @@ const serverActionImpact = document.querySelector('[data-server-action-impact]')
 const serverActionMark = document.querySelector('[data-server-action-mark]');
 const serverActionButtons = [...document.querySelectorAll('[data-server-action]')];
 const serverActionCancelButtons = [...document.querySelectorAll('[data-server-action-cancel]')];
+const serverActionHistory = document.querySelector('[data-server-action-history]');
+const serverActionHistoryEmpty = document.querySelector('[data-server-action-history-empty]');
+const serverActionHistoryError = document.querySelector('[data-server-action-history-error]');
+const refreshServerActionsButton = document.querySelector('[data-refresh-server-actions]');
 let discordAuthEnabled = false;
 let authenticatedUser = null;
 let authRequestInProgress = false;
@@ -152,6 +157,7 @@ let selectedServerAction = null;
 let serverActionRequestInProgress = false;
 let serverActionLockedUntil = 0;
 let serverActionLockTimer = null;
+let serverActionHistoryRequestInProgress = false;
 
 const storageGet = (key) => {
   try {
@@ -580,6 +586,7 @@ serverActionForm?.addEventListener('submit', async (event) => {
     const submittedButton = serverActionButtons.find((button) => button.dataset.serverAction === action);
     submittedButton?.classList.add('action-accepted');
     window.setTimeout(() => submittedButton?.classList.remove('action-accepted'), 30_000);
+    window.setTimeout(() => loadServerActionHistory(sessionToken), 1_000);
     window.setTimeout(refreshLiveStatus, 3_000);
     window.setTimeout(refreshLiveStatus, 15_000);
     window.setTimeout(refreshLiveStatus, 32_000);
@@ -608,6 +615,82 @@ const formatDuration = (value) => {
   if (days > 0) return `${days}d ${hours}h ${minutes}m`;
   return `${hours}h ${minutes}m`;
 };
+
+const titleCaseState = (value) => String(value || 'unknown')
+  .replace(/_/g, ' ')
+  .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const renderServerActionHistory = (actions) => {
+  if (!serverActionHistory) return;
+  serverActionHistory.replaceChildren();
+  const safeActions = Array.isArray(actions) ? actions : [];
+
+  safeActions.forEach((record) => {
+    const item = document.createElement('li');
+    const symbol = document.createElement('span');
+    const details = document.createElement('div');
+    const title = document.createElement('strong');
+    const meta = document.createElement('small');
+    const outcome = document.createElement('span');
+    const action = ['start', 'stop', 'restart'].includes(record?.action)
+      ? record.action
+      : 'server action';
+    const result = ['accepted', 'rejected', 'pending'].includes(record?.outcome)
+      ? record.outcome
+      : 'rejected';
+    const reason = record?.reason ? ` · ${String(record.reason)}` : '';
+
+    symbol.className = `activity-symbol ${result === 'accepted' ? 'green' : result === 'rejected' ? 'red' : ''}`;
+    symbol.textContent = action === 'start' ? '▶' : action === 'stop' ? '■' : '↻';
+    title.textContent = `${titleCaseState(action)} requested by ${String(record?.requested_by || 'Administrator')}`;
+    meta.textContent = `${formatUpdatedAt(record?.requested_at)} · ${titleCaseState(record?.state_before)} → ${titleCaseState(record?.state_after)}${reason}`;
+    outcome.className = `audit-outcome ${result}`;
+    outcome.textContent = result;
+    details.append(title, meta);
+    item.append(symbol, details, outcome);
+    serverActionHistory.append(item);
+  });
+
+  serverActionHistory.hidden = safeActions.length === 0;
+  if (serverActionHistoryEmpty) serverActionHistoryEmpty.hidden = safeActions.length !== 0;
+  if (serverActionHistoryError) serverActionHistoryError.hidden = true;
+};
+
+const loadServerActionHistory = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!hasServerActionAccess() || !sessionToken || serverActionHistoryRequestInProgress) return;
+  serverActionHistoryRequestInProgress = true;
+  refreshServerActionsButton?.setAttribute('disabled', '');
+  refreshServerActionsButton?.setAttribute('aria-busy', 'true');
+
+  try {
+    const response = await authFetch(SERVER_ACTION_HISTORY_URL, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionToken}`
+      }
+    });
+    const payload = await response.json().catch(() => ({}));
+
+    if (response.status === 401 || response.status === 403) {
+      storageRemove(AUTH_SESSION_KEY);
+      applySignedOutState();
+      return;
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error('History unavailable');
+    renderServerActionHistory(payload.actions);
+  } catch (error) {
+    if (serverActionHistory) serverActionHistory.hidden = true;
+    if (serverActionHistoryEmpty) serverActionHistoryEmpty.hidden = true;
+    if (serverActionHistoryError) serverActionHistoryError.hidden = false;
+  } finally {
+    serverActionHistoryRequestInProgress = false;
+    refreshServerActionsButton?.removeAttribute('disabled');
+    refreshServerActionsButton?.removeAttribute('aria-busy');
+  }
+};
+
+refreshServerActionsButton?.addEventListener('click', () => loadServerActionHistory());
 
 const formatAccountDate = (value, fallback = 'Not recorded') => {
   if (!value) return fallback;
@@ -772,6 +855,7 @@ const loadCurrentAccount = async (sessionToken) => {
 
     applyAuthenticatedState(await response.json());
     await loadAccountSummary(sessionToken);
+    await loadServerActionHistory(sessionToken);
   } catch (error) {
     applySignedOutState({ unavailable: true });
   }
@@ -803,6 +887,7 @@ const completeDiscordLogin = async (loginTicket) => {
 
     applyAuthenticatedState(payload);
     await loadAccountSummary(payload.session_token);
+    await loadServerActionHistory(payload.session_token);
     const returnView = clearCallbackFragment();
     showView(returnView, false);
     showAuthMessage(`Signed in as ${payload.user.display_name || payload.user.username}.`, 'success');
@@ -945,6 +1030,13 @@ const applyLiveStatus = (payload) => {
   const serverMap = String(payload.server.map || 'Chernarus');
   const platform = String(payload.server.platform || 'PlayStation 4 & 5');
   const updatedAt = formatUpdatedAt(payload.updated_at);
+  const operations = payload.operations || {};
+  const operationUpdatedAt = formatUpdatedAt(operations.last_successful_update || payload.updated_at);
+  const discordHealthy = Boolean(operations.discord_connected && operations.discord_ready);
+  const nitradoState = titleCaseState(operations.nitrado_state || 'unknown');
+  const nextRestart = operations.next_scheduled_restart
+    ? formatUpdatedAt(operations.next_scheduled_restart)
+    : 'Not provided by Nitrado';
 
   setConnectionState('online', 'Bot API connected');
   if (dashboardMode) dashboardMode.textContent = 'Live status';
@@ -969,6 +1061,11 @@ const applyLiveStatus = (payload) => {
   setText('[data-detail-platform]', platform);
   setText('[data-detail-map]', serverMap);
   setText('[data-information-source]', 'Railway dashboard API · live');
+  setText('[data-operations-uptime]', formatDuration(operations.api_uptime_seconds));
+  setText('[data-operations-discord]', discordHealthy ? 'Connected and ready' : 'Connection degraded');
+  setText('[data-operations-nitrado]', nitradoState);
+  setText('[data-operations-updated]', operationUpdatedAt);
+  setText('[data-operations-next-restart]', nextRestart);
   setText('[data-map-name]', serverMap.toUpperCase());
   setText('[data-map-server-name]', serverName);
   setText('[data-map-platform]', platform);
@@ -1008,6 +1105,11 @@ const showStatusUnavailable = () => {
   setText('[data-live-updated]', 'Unable to refresh');
   setText('[data-detail-status]', 'Unavailable');
   setText('[data-information-source]', 'Railway API · connection unavailable');
+  setText('[data-operations-uptime]', 'Unavailable');
+  setText('[data-operations-discord]', 'Unavailable');
+  setText('[data-operations-nitrado]', 'Unavailable');
+  setText('[data-operations-updated]', 'Unable to refresh');
+  setText('[data-operations-next-restart]', 'Not provided by Nitrado');
   document.querySelectorAll('[data-server-status-badge], [data-live-status-class]').forEach((element) => {
     setStatusClass(element, 'unavailable');
   });

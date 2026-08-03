@@ -1,5 +1,23 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.10.0 — Live Server Operations
+
+### Added
+
+- Added a public operational-health panel with Railway bot uptime, Discord
+  gateway health, sanitized Nitrado state and last successful update.
+- Shows the next scheduled restart only when Railway can provide a reliable
+  value; it is never guessed.
+- Added protected recent Start, Stop and Restart history in Admin Tools.
+- Added loading, empty, unavailable, expired-session and manual-refresh states.
+
+### Security
+
+- Members cannot see the Admin history panel or receive its API data.
+- Railway performs a fresh Discord role check for every history request.
+- Discord IDs, request IDs, raw Nitrado messages and credentials are excluded.
+- History is rendered as text, not injected HTML.
+
 ## Version 1.9.0 — Complete Protected Server Controls
 
 ### Added
