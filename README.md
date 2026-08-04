@@ -57,6 +57,12 @@ GitHub may take a few minutes to publish the first version.
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+## Version 1.15.1 moderation case dialog hotfix
+
+The protected moderation case dialog now uses the existing Admin authorization handler for
+case-detail reads and case actions. This fixes the undefined-function error without changing
+the Railway API, moderation permissions or database schema.
+
 ## Version 1.15.0 moderation evidence, reviews and appeals
 
 Verified Admins can open any numbered moderation case, attach safe evidence references,

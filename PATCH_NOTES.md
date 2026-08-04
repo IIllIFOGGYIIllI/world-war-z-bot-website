@@ -1,5 +1,20 @@
 # Website Patch Notes
 
+## Version 1.15.1 — Moderation Case Dialog Hotfix
+
+### Fixed
+
+- Fixed the moderation case dialog failing with `handleProtectedAuthFailure is not defined`.
+- Restored the existing protected-session and Admin authorization handler for case-detail reads and case actions.
+- Rejected case actions continue to show their real Railway response without incorrectly removing valid Admin access.
+
+### Deployment
+
+- Website-only update.
+- No bot update, database migration or Railway setting change is required.
+- Upload the version 1.15.1 patch and hard refresh after GitHub Pages publishes.
+
+
 ## Version 1.15.0 — Moderation Evidence, Reviews and Appeals
 
 ### Added

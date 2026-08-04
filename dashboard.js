@@ -1307,7 +1307,7 @@ const openModerationCase = async (caseId) => {
       headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
     });
     const payload = await response.json().catch(() => ({}));
-    if (handleProtectedAuthFailure(response, payload, { actionRequest: false })) {
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) {
       closeModerationCaseDialog();
       return;
     }
@@ -1333,7 +1333,7 @@ const submitModerationCaseAction = async (requestPayload) => {
       body: JSON.stringify({ ...requestPayload, case_id: selectedModerationCase.caseId })
     });
     const payload = await response.json().catch(() => ({}));
-    if (handleProtectedAuthFailure(response, payload, { actionRequest: true })) return null;
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return null;
     if (!response.ok || payload.status !== 'ok') throw new Error(payload?.message || 'The protected case action was rejected.');
     renderModerationCaseDetail(payload);
     showCaseDialogMessage(payload.message || 'Moderation case updated.', 'success');
