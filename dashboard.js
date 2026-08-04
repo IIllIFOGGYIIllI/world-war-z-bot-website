@@ -4,6 +4,12 @@ const sidebarScrim = document.querySelector('[data-sidebar-scrim]');
 const viewButtons = [...document.querySelectorAll('[data-view]')];
 const viewPanels = [...document.querySelectorAll('[data-view-panel]')];
 const loginDialog = document.querySelector('[data-login-dialog]');
+const workspaceLabel = document.querySelector('[data-workspace-label]');
+const commandPalette = document.querySelector('[data-command-palette]');
+const commandPaletteInput = document.querySelector('[data-dashboard-search]');
+const commandPaletteResults = document.querySelector('[data-dashboard-search-results]');
+const commandPaletteOpeners = [...document.querySelectorAll('[data-open-command-search]')];
+const commandPaletteClosers = [...document.querySelectorAll('[data-close-command-search]')];
 let dashboardAccessLevel = 'guest';
 let activeDashboardSection = '';
 
@@ -80,8 +86,11 @@ const showView = (viewOrKey, updateHistory = true, explicitSection = '') => {
   activeDashboardSection = selectedSection;
   const activePanel = viewPanels.find((panel) => panel.dataset.viewPanel === selectedView);
   const breadcrumb = activePanel?.querySelector('.breadcrumb');
-  const navLabel = activeButton?.dataset.navLabel;
+  const navLabel = activeButton?.dataset.navLabel || selectedView.replace(/[-_]/g, ' ');
   if (breadcrumb && navLabel) breadcrumb.textContent = `Dashboard / ${navLabel}`;
+  if (workspaceLabel) workspaceLabel.textContent = navLabel;
+  const activeGroup = activeButton?.closest('[data-nav-group]');
+  if (activeGroup && 'open' in activeGroup) activeGroup.open = true;
 
   const key = navigationKey(selectedView, selectedSection);
   if (updateHistory) history.pushState({ view: selectedView, section: selectedSection }, '', `#${key}`);
@@ -99,6 +108,105 @@ const showView = (viewOrKey, updateHistory = true, explicitSection = '') => {
 viewButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view, true, button.dataset.section)));
 document.querySelectorAll('[data-jump]').forEach((button) => button.addEventListener('click', () => showView(button.dataset.jump, true, button.dataset.jumpSection || '')));
 
+let commandPaletteIndex = 0;
+let commandPaletteMatches = [];
+
+const isDashboardDestinationVisible = (button) => {
+  if (!button || button.hidden || button.closest('[hidden]')) return false;
+  if (button.dataset.staffOnly !== undefined && !['staff', 'owner'].includes(dashboardAccessLevel)) return false;
+  if (button.dataset.ownerOnly !== undefined && dashboardAccessLevel !== 'owner') return false;
+  return true;
+};
+
+const dashboardDestinationText = (button) => [
+  button.dataset.navLabel,
+  button.querySelector('strong')?.textContent,
+  button.querySelector('small')?.textContent,
+  button.closest('[data-nav-group]')?.querySelector('summary strong')?.textContent,
+  button.dataset.view,
+  button.dataset.section
+].filter(Boolean).join(' ').toLowerCase();
+
+const renderCommandPalette = (query = '') => {
+  if (!commandPaletteResults) return;
+  const needle = String(query || '').trim().toLowerCase();
+  commandPaletteMatches = viewButtons
+    .filter(isDashboardDestinationVisible)
+    .filter((button) => !needle || dashboardDestinationText(button).includes(needle))
+    .slice(0, 24);
+  commandPaletteIndex = Math.min(commandPaletteIndex, Math.max(0, commandPaletteMatches.length - 1));
+  commandPaletteResults.replaceChildren();
+  if (!commandPaletteMatches.length) {
+    const empty = document.createElement('p');
+    empty.className = 'command-search-empty';
+    empty.textContent = 'No matching dashboard tools were found.';
+    commandPaletteResults.append(empty);
+    return;
+  }
+  commandPaletteMatches.forEach((button, index) => {
+    const result = document.createElement('button');
+    result.type = 'button';
+    result.className = 'command-search-result';
+    result.classList.toggle('selected', index === commandPaletteIndex);
+    const group = button.closest('[data-nav-group]')?.querySelector('summary strong')?.textContent || 'Dashboard';
+    const label = button.dataset.navLabel || button.querySelector('strong')?.textContent || 'Dashboard tool';
+    const description = button.querySelector('small')?.textContent || `${button.dataset.view || 'dashboard'} workspace`;
+    const groupLabel = document.createElement('span');
+    groupLabel.textContent = group;
+    const copy = document.createElement('div');
+    const strong = document.createElement('strong');
+    strong.textContent = label;
+    const small = document.createElement('small');
+    small.textContent = description;
+    copy.append(strong, small);
+    const key = document.createElement('kbd');
+    key.textContent = index === commandPaletteIndex ? 'Enter' : '↵';
+    result.append(groupLabel, copy, key);
+    result.addEventListener('mouseenter', () => {
+      commandPaletteIndex = index;
+      renderCommandPalette(commandPaletteInput?.value || '');
+    });
+    result.addEventListener('click', () => {
+      commandPalette?.close?.();
+      showView(button.dataset.view, true, button.dataset.section || '');
+    });
+    commandPaletteResults.append(result);
+  });
+};
+
+const openCommandPalette = () => {
+  if (!commandPalette) return;
+  commandPaletteIndex = 0;
+  if (commandPaletteInput) commandPaletteInput.value = '';
+  renderCommandPalette('');
+  commandPalette.showModal?.();
+  window.requestAnimationFrame(() => commandPaletteInput?.focus());
+};
+
+commandPaletteOpeners.forEach((button) => button.addEventListener('click', openCommandPalette));
+commandPaletteClosers.forEach((button) => button.addEventListener('click', () => commandPalette?.close?.()));
+commandPalette?.addEventListener('click', (event) => {
+  if (event.target === commandPalette) commandPalette.close?.();
+});
+commandPaletteInput?.addEventListener('input', () => {
+  commandPaletteIndex = 0;
+  renderCommandPalette(commandPaletteInput.value);
+});
+commandPaletteInput?.addEventListener('keydown', (event) => {
+  if (!commandPaletteMatches.length) return;
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    const direction = event.key === 'ArrowDown' ? 1 : -1;
+    commandPaletteIndex = (commandPaletteIndex + direction + commandPaletteMatches.length) % commandPaletteMatches.length;
+    renderCommandPalette(commandPaletteInput.value);
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    const button = commandPaletteMatches[commandPaletteIndex];
+    commandPalette.close?.();
+    showView(button.dataset.view, true, button.dataset.section || '');
+  }
+});
+
 window.addEventListener('popstate', () => showView(location.hash.slice(1), false));
 
 document.querySelectorAll('[data-open-login]').forEach((button) => {
@@ -112,7 +220,18 @@ loginDialog?.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
+  const target = event.target;
+  const isTyping = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    openCommandPalette();
+    return;
+  }
   if (event.key === 'Escape') closeSidebar();
+  if (!isTyping && event.key === '/' && !commandPalette?.open) {
+    event.preventDefault();
+    openCommandPalette();
+  }
 });
 
 document.querySelectorAll('[data-year]').forEach((item) => {

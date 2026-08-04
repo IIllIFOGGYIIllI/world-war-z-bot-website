@@ -56,6 +56,10 @@ GitHub may take a few minutes to publish the first version.
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+## Version 1.20.0 command centre layout overhaul
+
+Version 1.20.0 reorganises the full dashboard around collapsible workspaces, direct navigation and global search while preserving the economy-linked shop and all protected tools.
+
 ## Version 1.19.0 economy-linked survivor shop
 
 The dashboard now includes a public catalogue, protected linked-member wallet

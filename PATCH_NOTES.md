@@ -1,4 +1,14 @@
-# Website Patch Notes
+# World War Z Bot Website Patch Notes
+
+## Version 1.20.0 — Command Centre Layout Overhaul
+
+- Rebuilt the dashboard sidebar into collapsible, task-focused workspaces.
+- Added direct Shop catalogue, order, fulfilment and configuration navigation.
+- Added a persistent service context card and active workspace label.
+- Added Ctrl+K and `/` global dashboard search with permission-aware results.
+- Improved table density, settings cards, filters, buttons and responsive behaviour.
+- Preserved all existing authentication, moderation, appeals, webhook and shop functions.
+- No API, database or Railway configuration change is required.
 
 ## Version 1.19.0 — Economy-Linked Survivor Shop
 
