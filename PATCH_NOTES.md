@@ -1,5 +1,42 @@
 # World War Z Bot Website Patch Notes
 
+## Version 1.21.0 — Trader Delivery and DayZ Control Centre
+
+**Release date:** 5 August 2026
+
+### Git commit message
+
+```text
+Add trader delivery and server control
+```
+
+### Member account and delivery locations
+
+- Added real Discord profile avatars with safe initials fallback.
+- Added an Account Centre card with direct wallet, order, location and appeal links.
+- Added private named Chernarus X, Y, Z and rotation locations for future orders.
+- Event-item checkout accepts a saved location or new exact coordinates and can save the new point.
+
+### Event items and delivery operations
+
+- Added separate Event Items catalogue management for vehicles, containers and restart-bound orders.
+- Added Owner profile fields for child classname, lifetime, event flags, attachments and cargo.
+- Added an Admin event-delivery queue with approval, XML preview, stopped-server staging, Nitrado start, verification and rollback actions.
+- Preserved the existing manual fulfilment queue for normal trader orders.
+
+### DayZ server configuration
+
+- Added an Owner service overview, live mission-file editor, validation and exact diff output.
+- Added live Central Economy event, child, population, position and zone summaries.
+- Added an empty `.nojekyll` marker so GitHub Pages deploys the custom static application directly.
+
+### Deployment
+
+- Deploy bot version 1.18.0 before this website version.
+- Upload the version 1.21.0 website patch and use Ctrl+F5 after GitHub Pages publishes.
+- No existing website file needs to be deleted.
+
+
 ## Version 1.20.0 — Command Centre Layout Overhaul
 
 - Rebuilt the dashboard sidebar into collapsible, task-focused workspaces.

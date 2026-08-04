@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add economy-linked survivor shop`
+4. Enter the commit message: `Add trader delivery and server control`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -56,6 +56,21 @@ GitHub may take a few minutes to publish the first version.
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+
+## Version 1.21.0 trader delivery and DayZ control centre
+
+The dashboard now supports real player-entered Chernarus coordinates, private
+named saved delivery locations, restart-bound vehicle and container orders, an
+Admin deployment queue and an Owner mission-file workspace. Event checkout can
+select a saved location or enter X, Y, Z and rotation directly.
+
+The Owner catalogue editor can mark an item as a manual trader order or an event
+spawn and define its Central Economy profile. Staff can approve the paid order,
+preview exact changes to `events.xml`, `cfgeventspawns.xml` and
+`cfgspawnabletypes.xml`, stage backed-up files, start the stopped Nitrado server, verify
+the result in game and retire the temporary event. The account centre now uses
+the member's Discord avatar where available.
+
 ## Version 1.20.0 command centre layout overhaul
 
 Version 1.20.0 reorganises the full dashboard around collapsible workspaces, direct navigation and global search while preserving the economy-linked shop and all protected tools.
@@ -71,7 +86,7 @@ Finite stock, per-order and per-player limits are validated again by the API.
 Admins can move orders into processing, record fulfilment, cancel or refund with
 a required note. Refunds restore the full virtual balance and finite stock while
 retaining the original ledger and order history. The searchable command library
-now reflects the complete 87-command bot layout, including `/shop`, `/buy`,
+now reflects the complete 90-command bot layout, including `/shop`, `/buy`,
 `/orders` and `/order`.
 
 ## Version 1.18.0 member appeals and complete command access

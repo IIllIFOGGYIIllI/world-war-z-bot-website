@@ -2979,3 +2979,214 @@ tbody tr:hover { background: rgba(22,136,248,.045); }
   .command-palette-heading { grid-template-columns: 34px minmax(0,1fr) 34px; padding: 13px; }
   .command-palette-heading h2 { font-size: 14px; }
 }
+
+/* v1.21.0 — account centre, saved coordinates and DayZ delivery operations */
+.account-avatar,
+.profile-discord-avatar,
+.discord-button [data-topbar-avatar] {
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.account-avatar img,
+.profile-discord-avatar img,
+.discord-button [data-topbar-avatar] img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.discord-button [data-topbar-avatar] {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  font-size: 9px;
+  font-weight: 900;
+}
+.discord-profile-card {
+  display: grid;
+  grid-template-columns: 74px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+  background:
+    linear-gradient(120deg, rgba(88,101,242,.14), transparent 48%),
+    var(--panel);
+}
+.profile-discord-avatar {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(129,140,248,.38);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #5865f2, #343b99);
+  box-shadow: 0 12px 30px rgba(44,52,139,.28);
+  color: #fff;
+  font-family: var(--display-font);
+  font-size: 24px;
+}
+.discord-profile-card h2 { margin: 2px 0 5px; }
+.discord-profile-card p { margin: 0; }
+.profile-quick-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+
+.delivery-location-layout { grid-template-columns: minmax(300px,.82fr) minmax(360px,1.18fr); align-items: start; }
+.coordinate-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }
+.location-form { display: grid; gap: 13px; }
+.saved-location-list { display: grid; gap: 9px; }
+.saved-location-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(255,255,255,.025), rgba(255,65,54,.025));
+}
+.saved-location-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.saved-location-heading > div { display: grid; gap: 3px; }
+.saved-location-heading small { color: var(--muted); }
+.saved-location-card p { margin: 9px 0 12px; color: #777d86; font-size: 10px; }
+.danger-outline { border-color: rgba(255,72,67,.42) !important; color: #ff8e89 !important; }
+
+.event-delivery-fields,
+.event-profile-editor {
+  display: grid;
+  gap: 13px;
+  margin: 14px 0;
+  padding: 16px;
+  border: 1px solid rgba(255,69,59,.25);
+  border-radius: 10px;
+  background: rgba(44,12,13,.24);
+}
+.event-delivery-fields[hidden],
+.event-profile-editor[hidden],
+[data-shop-coordinate-inputs][hidden] { display: none !important; }
+.event-delivery-fields legend,
+.event-profile-editor legend {
+  padding: 0 8px;
+  color: #ff8b84;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.coordinate-confirmation { border-color: rgba(255,179,71,.28); background: rgba(255,159,28,.055); }
+
+.delivery-summary { grid-template-columns: repeat(5,minmax(0,1fr)); margin-bottom: 14px; }
+.delivery-order-list { display: grid; gap: 12px; }
+.delivery-order-card {
+  position: relative;
+  overflow: hidden;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(140deg, rgba(255,255,255,.025), rgba(13,14,17,.86));
+}
+.delivery-order-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: #626872;
+}
+.delivery-awaiting_approval::before { background: #f0b94d; }
+.delivery-ready::before,
+.delivery-previewed::before { background: #459eff; }
+.delivery-restart_pending::before { background: #d99033; }
+.delivery-verification::before { background: #9f7aea; }
+.delivery-failed::before { background: #ff4c46; }
+.delivery-order-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.delivery-order-heading h2 { margin: 2px 0 0; font-size: clamp(17px,2vw,23px); }
+.delivery-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+  margin: 15px 0;
+}
+.delivery-detail-grid > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 7px;
+  background: rgba(255,255,255,.018);
+}
+.delivery-detail-grid span { color: #747a83; font-size: 8px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.delivery-detail-grid strong { overflow-wrap: anywhere; font-size: 11px; }
+.delivery-error-copy { padding: 10px; border: 1px solid rgba(255,75,68,.24); border-radius: 6px; background: rgba(255,40,35,.055); color: #ffaaa5; }
+.delivery-actions { padding-top: 3px; }
+
+.service-overview-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 14px; margin-bottom: 14px; }
+.service-readiness-card h2 { overflow-wrap: anywhere; }
+.mission-file-panel,
+.events-zone-panel { margin-top: 14px; }
+.config-file-select { min-width: min(340px,42vw); }
+.file-editor-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+.file-editor-meta span {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: #8c929b;
+  font: 700 9px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+.mission-file-editor,
+.config-diff-output {
+  width: 100%;
+  min-height: 420px;
+  padding: 14px;
+  border: 1px solid #34373d;
+  border-radius: 7px;
+  background: #090a0d;
+  color: #d8dde5;
+  font: 12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;
+  tab-size: 4;
+  resize: vertical;
+}
+.config-diff-output {
+  min-height: 180px;
+  max-height: 520px;
+  overflow: auto;
+  margin: 13px 0 0;
+  white-space: pre-wrap;
+  color: #aeb7c4;
+}
+.events-zone-panel .command-search { max-width: 540px; margin: 12px 0; }
+.shop-item-form-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+
+@media (max-width: 1100px) {
+  .discord-profile-card { grid-template-columns: 64px minmax(0,1fr); }
+  .profile-quick-links { grid-column: 1 / -1; justify-content: flex-start; }
+  .delivery-location-layout,
+  .service-overview-grid { grid-template-columns: 1fr; }
+  .delivery-summary { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .delivery-detail-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .shop-item-form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width: 720px) {
+  .coordinate-grid,
+  .delivery-summary,
+  .delivery-detail-grid,
+  .shop-item-form-grid { grid-template-columns: 1fr 1fr; }
+  .delivery-order-heading { display: grid; }
+  .mission-file-panel .panel-heading { align-items: stretch; }
+  .mission-file-panel .panel-heading .heading-actions { width: 100%; }
+  .config-file-select { min-width: 0; width: 100%; }
+  .mission-file-editor { min-height: 320px; font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+  .discord-profile-card,
+  .coordinate-grid,
+  .delivery-summary,
+  .delivery-detail-grid,
+  .shop-item-form-grid { grid-template-columns: 1fr; }
+  .profile-discord-avatar { width: 58px; height: 58px; border-radius: 14px; }
+  .profile-quick-links .secondary-action { width: 100%; }
+}
