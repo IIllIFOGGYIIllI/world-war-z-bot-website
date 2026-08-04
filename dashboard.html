@@ -14,7 +14,7 @@
   <link rel="manifest" href="site.webmanifest">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/world-war-z-icon.png">
-  <link rel="stylesheet" href="dashboard.css?v=1.14.0">
+  <link rel="stylesheet" href="dashboard.css?v=1.14.1">
 </head>
 <body>
   <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -238,6 +238,15 @@
           <p class="table-note" data-moderation-case-empty hidden>No active moderation cases are recorded.</p>
           <p class="table-note history-error" data-moderation-case-error hidden>Moderation cases are temporarily unavailable. Use Refresh cases to try again.</p>
         </article>
+        <article class="panel current-banlists-panel" data-staff-only data-current-banlists-panel>
+          <div class="panel-heading"><div><p class="panel-kicker">Live enforcement state</p><h2>Current ban lists</h2></div><button class="secondary-action compact-action" type="button" data-refresh-banlists>Refresh ban lists</button></div>
+          <p class="panel-intro">Read the current Discord and Nitrado DayZ ban lists directly from their live services. Entries created outside the dashboard remain visible but may not have a numbered case or linked expiry.</p>
+          <div class="dashboard-grid admin-private-grid current-banlist-grid">
+            <article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Discord enforcement</p><h3>Discord ban list</h3></div><span class="muted-label" data-discord-banlist-count>—</span></div><ol class="activity-list current-banlist-list" data-discord-banlist-list aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading Discord bans</strong><small>Railway is verifying current Admin access</small></div></li></ol><p class="table-note" data-discord-banlist-empty hidden>No accounts are currently banned from Discord.</p><p class="table-note history-error" data-discord-banlist-error hidden>The Discord ban list is temporarily unavailable.</p></article>
+            <article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Nitrado enforcement</p><h3>DayZ ban list</h3></div><span class="muted-label" data-dayz-banlist-count>—</span></div><ol class="activity-list current-banlist-list" data-dayz-banlist-list aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading DayZ bans</strong><small>Railway is contacting the Nitrado ban list</small></div></li></ol><p class="table-note" data-dayz-banlist-empty hidden>No PlayStation IDs are currently banned from DayZ.</p><p class="table-note history-error" data-dayz-banlist-error hidden>The Nitrado DayZ ban list is temporarily unavailable.</p></article>
+          </div>
+          <p class="table-note banlist-checked" data-banlist-checked>Ban lists have not been refreshed during this session.</p>
+        </article>
         <div class="metric-grid three"><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">⌕</span><small>Player search</small></div><strong>Live</strong><p>PSN or Discord display name</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">15</span><small>Result limit</small></div><strong>15</strong><p>No database-wide listings</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">✓</span><small>Write controls</small></div><strong>Protected</strong><p>Confirmation and audit required</p></article></div>
 
         <article class="panel admin-player-search-panel" data-admin-player-search-panel>
@@ -336,7 +345,7 @@
     </form>
   </dialog>
 
-  <script src="dashboard.js?v=1.14.0"></script>
+  <script src="dashboard.js?v=1.14.1"></script>
   <script src="chernarus-map.js?v=1.7.0"></script>
 </body>
 </html>

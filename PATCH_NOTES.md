@@ -1,5 +1,21 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.14.1 — Current Ban Lists
+
+### Added
+
+- Added an Admin-only current Discord ban list and current Nitrado DayZ ban list.
+- Shows linked PlayStation IDs, numbered cases, reasons, issuing Admins and scheduled expiries where available.
+- Keeps external or legacy bans visible even when they do not have a dashboard case.
+- Added safe Open player shortcuts that reuse the existing protected player administration view.
+- Both lists refresh after ban or unban actions and can be refreshed manually.
+
+### Safety
+
+- Railway rechecks current Admin/Owner access before every ban-list request.
+- Raw Discord IDs, moderator IDs, credentials and unfiltered Nitrado responses are never returned to GitHub Pages.
+- A Discord or Nitrado outage affects only that source; the other current ban list can still be displayed.
+
 ## Version 1.14.0 — Moderation Cases and Temporary Bans
 
 ### Added

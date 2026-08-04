@@ -88,6 +88,7 @@ const ADMIN_PLAYER_SEARCH_URL = `${DASHBOARD_API_BASE}/api/admin/players/search`
 const ADMIN_PLAYER_DETAILS_URL = `${DASHBOARD_API_BASE}/api/admin/players/details`;
 const ADMIN_PLAYER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/players/action`;
 const ADMIN_MODERATION_CASES_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/cases`;
+const ADMIN_BANLISTS_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/banlists`;
 const PLAYER_ACTIONS = {
   add_note: { mark: '≡', title: 'Add private staff note?', description: 'The note will be visible only inside protected Admin player administration.', warning: 'Private notes remain in the Railway database and are included in the player audit view.', reasonLabel: 'Private staff note', reasonHelp: '1–1,500 characters', submitLabel: 'Add private note' },
   update_note: { mark: '✎', title: 'Update this private staff note?', description: 'The selected note will be replaced with the revised staff-only text.', warning: 'The previous note text is retained inside the private Railway audit record.', reasonLabel: 'Updated private note', reasonHelp: '1–1,500 characters', submitLabel: 'Update private note' },
@@ -171,6 +172,14 @@ const moderationCaseList = document.querySelector('[data-moderation-case-list]')
 const moderationCaseEmpty = document.querySelector('[data-moderation-case-empty]');
 const moderationCaseError = document.querySelector('[data-moderation-case-error]');
 const refreshModerationCasesButton = document.querySelector('[data-refresh-moderation-cases]');
+const discordBanlist = document.querySelector('[data-discord-banlist-list]');
+const discordBanlistEmpty = document.querySelector('[data-discord-banlist-empty]');
+const discordBanlistError = document.querySelector('[data-discord-banlist-error]');
+const dayzBanlist = document.querySelector('[data-dayz-banlist-list]');
+const dayzBanlistEmpty = document.querySelector('[data-dayz-banlist-empty]');
+const dayzBanlistError = document.querySelector('[data-dayz-banlist-error]');
+const refreshBanlistsButton = document.querySelector('[data-refresh-banlists]');
+const banlistChecked = document.querySelector('[data-banlist-checked]');
 const adminPlayerSearchForm = document.querySelector('[data-admin-player-search-form]');
 const adminPlayerSearchInput = document.querySelector('[data-admin-player-search-input]');
 const adminPlayerSearchButton = document.querySelector('[data-admin-player-search-button]');
@@ -220,6 +229,7 @@ let serverActionLockedUntil = 0;
 let serverActionLockTimer = null;
 let serverActionHistoryRequestInProgress = false;
 let moderationCaseRequestInProgress = false;
+let banlistRequestInProgress = false;
 let adminPlayerSearchRequestInProgress = false;
 let adminPlayerDetailRequestInProgress = false;
 let selectedAdminPlayer = null;
@@ -862,6 +872,15 @@ const resetAdminPlayerAdministration = () => {
   adminPlayerModerationHistory?.replaceChildren();
   adminPlayerDayzBans?.replaceChildren();
   adminPlayerActionHistory?.replaceChildren();
+  discordBanlist?.replaceChildren();
+  dayzBanlist?.replaceChildren();
+  if (discordBanlistEmpty) discordBanlistEmpty.hidden = true;
+  if (discordBanlistError) discordBanlistError.hidden = true;
+  if (dayzBanlistEmpty) dayzBanlistEmpty.hidden = true;
+  if (dayzBanlistError) dayzBanlistError.hidden = true;
+  setText('[data-discord-banlist-count]', '—');
+  setText('[data-dayz-banlist-count]', '—');
+  if (banlistChecked) banlistChecked.textContent = 'Ban lists have not been refreshed during this session.';
   adminPlayerDetail?.setAttribute('hidden', '');
   if (adminPlayerEmpty) adminPlayerEmpty.hidden = true;
   if (adminPlayerError) adminPlayerError.hidden = true;
@@ -1035,8 +1054,116 @@ const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
 };
 
 refreshModerationCasesButton?.addEventListener('click', () => loadModerationCases());
+
+const banlistOpenPlayerButton = (psnId) => {
+  const cleanPsn = String(psnId || '').trim();
+  if (!cleanPsn) return null;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'activity-row-action';
+  button.textContent = 'Open player';
+  button.addEventListener('click', () => loadAdminPlayerDetails(cleanPsn));
+  return button;
+};
+
+const banScheduleLabel = (entry) => {
+  if (entry?.expires_at) return `Expires ${formatAccountDate(entry.expires_at)}`;
+  if (entry?.case_id) return 'Permanent until manually reversed';
+  return 'Current external or legacy ban';
+};
+
+const renderBanlistSource = (source, type) => {
+  const isDiscord = type === 'discord';
+  const list = isDiscord ? discordBanlist : dayzBanlist;
+  const empty = isDiscord ? discordBanlistEmpty : dayzBanlistEmpty;
+  const error = isDiscord ? discordBanlistError : dayzBanlistError;
+  const countSelector = isDiscord ? '[data-discord-banlist-count]' : '[data-dayz-banlist-count]';
+  if (!list) return;
+
+  list.replaceChildren();
+  const available = Boolean(source?.available);
+  const entries = available && Array.isArray(source?.entries) ? source.entries : [];
+  const reportedCount = Number(source?.count);
+  const count = Number.isFinite(reportedCount) ? Math.max(0, Math.trunc(reportedCount)) : entries.length;
+  setText(countSelector, source?.truncated ? `${entries.length}+ shown` : `${count} current`);
+  if (empty) empty.hidden = !available || entries.length !== 0;
+  if (error) {
+    error.hidden = available;
+    if (!available && source?.message) error.textContent = String(source.message);
+  }
+  list.hidden = !available || entries.length === 0;
+  if (!available) return;
+
+  entries.forEach((entry) => {
+    const psnId = String(entry?.psn_id || '').trim();
+    const caseId = Number(entry?.case_id);
+    const caseLabel = Number.isInteger(caseId) ? `Case #${caseId}` : 'No dashboard case';
+    const reason = String(entry?.reason || 'No reason supplied by the source');
+    const moderator = entry?.moderator_name ? ` · Issued by ${String(entry.moderator_name)}` : '';
+    const created = entry?.created_at ? ` · ${formatAccountDate(entry.created_at)}` : '';
+    const title = isDiscord
+      ? String(entry?.discord_name || 'Banned Discord account')
+      : psnId || 'Banned PlayStation ID';
+    const identity = isDiscord
+      ? (psnId ? `PSN ${psnId}` : 'No linked PSN account')
+      : 'Nitrado game ban list';
+    appendAdminActivity(list, {
+      symbolText: '⊘',
+      symbolClass: 'red',
+      titleText: title,
+      detailText: `${identity} · ${caseLabel} · ${banScheduleLabel(entry)} · ${reason}${moderator}${created}`,
+      actionButton: banlistOpenPlayerButton(psnId)
+    });
+  });
+};
+
+const renderCurrentBanlists = (payload) => {
+  renderBanlistSource(payload?.discord, 'discord');
+  renderBanlistSource(payload?.dayz, 'dayz');
+  if (banlistChecked) {
+    const partial = !payload?.discord?.available || !payload?.dayz?.available;
+    banlistChecked.textContent = payload?.checked_at
+      ? `${partial ? 'Partially refreshed' : 'Refreshed'} ${formatAccountDate(payload.checked_at)}. Live sources are not cached.`
+      : 'The current ban lists could not be fully refreshed.';
+  }
+};
+
+const loadCurrentBanlists = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!hasServerActionAccess() || !sessionToken || banlistRequestInProgress) return;
+  banlistRequestInProgress = true;
+  refreshBanlistsButton?.setAttribute('disabled', '');
+  refreshBanlistsButton?.setAttribute('aria-busy', 'true');
+
+  try {
+    const response = await authFetch(ADMIN_BANLISTS_URL, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionToken}`
+      }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload)) return;
+    if (!payload?.discord || !payload?.dayz) throw new Error('Ban lists unavailable');
+    renderCurrentBanlists(payload);
+  } catch (error) {
+    renderCurrentBanlists({
+      discord: { available: false, message: 'The Discord ban list is temporarily unavailable.' },
+      dayz: { available: false, message: 'The Nitrado DayZ ban list is temporarily unavailable.' }
+    });
+  } finally {
+    banlistRequestInProgress = false;
+    refreshBanlistsButton?.removeAttribute('disabled');
+    refreshBanlistsButton?.removeAttribute('aria-busy');
+  }
+};
+
+refreshBanlistsButton?.addEventListener('click', () => loadCurrentBanlists());
 window.addEventListener('wwz:viewchange', (event) => {
-  if (event.detail?.view === 'staff') loadModerationCases();
+  if (event.detail?.view === 'staff') {
+    loadModerationCases();
+    loadCurrentBanlists();
+  }
 });
 
 const renderAdminNotes = (notes) => {
@@ -1415,7 +1542,10 @@ playerActionForm?.addEventListener('submit', async (event) => {
     closePlayerActionDialog();
     showAuthMessage(successMessage, 'success');
     setAdminPlayerSearchState(successMessage, 'success');
-    window.setTimeout(() => loadModerationCases(sessionToken), 250);
+    window.setTimeout(() => {
+      loadModerationCases(sessionToken);
+      loadCurrentBanlists(sessionToken);
+    }, 250);
     if (payload.player) {
       renderAdminPlayerDetails({ player: payload.player });
     } else {
@@ -1643,6 +1773,7 @@ const loadCurrentAccount = async (sessionToken) => {
     await loadAccountSummary(sessionToken);
     await loadServerActionHistory(sessionToken);
     await loadModerationCases(sessionToken);
+    await loadCurrentBanlists(sessionToken);
   } catch (error) {
     applySignedOutState({ unavailable: true });
   }
@@ -1676,6 +1807,7 @@ const completeDiscordLogin = async (loginTicket) => {
     await loadAccountSummary(payload.session_token);
     await loadServerActionHistory(payload.session_token);
     await loadModerationCases(payload.session_token);
+    await loadCurrentBanlists(payload.session_token);
     const returnView = clearCallbackFragment();
     showView(returnView, false);
     showAuthMessage(`Signed in as ${payload.user.display_name || payload.user.username}.`, 'success');

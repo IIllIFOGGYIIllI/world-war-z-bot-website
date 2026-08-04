@@ -53,6 +53,13 @@ GitHub may take a few minutes to publish the first version.
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected stages
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+## Version 1.14.1 current ban lists
+
+Verified Admins can now view the live Discord and Nitrado DayZ ban lists from
+Admin Tools. Dashboard-issued bans include their case number, reason and expiry;
+external or legacy bans remain visible without fabricated metadata. Raw Discord
+IDs and Nitrado response internals remain server-side on Railway.
+
 ## Version 1.14.0 moderation cases
 
 The redesigned command centre now includes an Admin-only active moderation-case queue and permanent or temporary Discord/DayZ ban schedules. Preset and timezone-aware custom expiries are validated again by Railway. Automatic unbans are performed by the bot service, not by GitHub Pages, and the resulting action is linked to the original numbered case.

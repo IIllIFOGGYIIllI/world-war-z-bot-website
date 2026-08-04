@@ -1688,3 +1688,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .player-action-ban-fields { grid-template-columns: 1fr; }
   .case-summary-grid > div { min-height: 68px; }
 }
+
+/* --------------------------------------------------------------------------
+   Version 1.14.1 — Current Ban Lists
+   -------------------------------------------------------------------------- */
+.current-banlists-panel { margin-bottom: 18px; }
+.current-banlist-grid { margin-top: 16px; align-items: start; }
+.current-banlist-grid > .inset-panel { min-width: 0; }
+.current-banlist-list { max-height: 430px; overflow: auto; padding-right: 4px; }
+.current-banlist-list .has-row-actions { align-items: center; }
+.banlist-checked { margin-top: 14px; }
+
+@media (max-width: 760px) {
+  .current-banlist-list { max-height: none; }
+}
