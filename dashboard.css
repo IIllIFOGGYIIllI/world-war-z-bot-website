@@ -1161,3 +1161,466 @@ td:first-child { color: #e7dfd7; font-weight: 700; }
   font-size: 8px;
   line-height: 1.5;
 }
+
+/* ========================================================================== 
+   Version 1.13.0 — Control Centre UI Overhaul
+   ========================================================================== */
+:root {
+  --ink: #050505;
+  --ink-deep: #030303;
+  --panel: rgba(16, 14, 14, 0.88);
+  --panel-raised: rgba(24, 20, 20, 0.92);
+  --panel-soft: rgba(31, 26, 25, 0.9);
+  --paper: #f5efe7;
+  --muted: #aaa09a;
+  --muted-dark: #766d68;
+  --line: rgba(255, 241, 231, 0.11);
+  --line-strong: rgba(255, 241, 231, 0.21);
+  --red: #d9271b;
+  --red-bright: #ff4534;
+  --red-dark: #7d100b;
+  --green: #5bc878;
+  --amber: #e2ad39;
+  --purple: #5865f2;
+  --sidebar: 276px;
+  --topbar: 82px;
+  --radius: 14px;
+  --radius-small: 9px;
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.48);
+}
+
+body {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(2, 2, 2, 0.55), #050505 78%),
+    url("assets/world-war-z-dashboard-bg.webp") center top / cover fixed no-repeat,
+    #050505;
+}
+
+body::before {
+  z-index: 999;
+  opacity: 0.17;
+  mix-blend-mode: overlay;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 7%, rgba(217, 39, 27, 0.18), transparent 27%),
+    radial-gradient(circle at 18% 76%, rgba(125, 16, 11, 0.18), transparent 30%),
+    linear-gradient(90deg, rgba(0,0,0,0.74), rgba(0,0,0,0.33) 48%, rgba(0,0,0,0.75));
+}
+
+button, input, textarea, select { border-radius: 0; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid rgba(255, 69, 52, 0.8);
+  outline-offset: 3px;
+}
+
+.dashboard-topbar {
+  height: var(--topbar);
+  gap: 18px;
+  padding: 0 26px;
+  border-bottom-color: rgba(255, 69, 52, 0.2);
+  background: linear-gradient(90deg, rgba(5,5,5,0.97), rgba(10,8,8,0.92));
+  box-shadow: 0 12px 45px rgba(0,0,0,0.42), inset 0 -1px rgba(255,255,255,0.025);
+  backdrop-filter: blur(24px) saturate(1.25);
+}
+.dashboard-topbar::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 2%, var(--red-bright) 19%, rgba(255,69,52,0.12) 52%, transparent 96%);
+}
+
+.dashboard-brand { gap: 13px; }
+.dashboard-brand-mark {
+  width: 56px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 69, 52, 0.42);
+  background: #080707;
+  box-shadow: 0 0 0 4px rgba(217,39,27,0.06), 0 0 34px rgba(217,39,27,0.24);
+}
+.dashboard-brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dashboard-brand strong { font-size: 15px; letter-spacing: 0.18em; text-shadow: 0 2px 12px #000; }
+.dashboard-brand small { margin-top: 6px; color: #8f8580; font-size: 8px; letter-spacing: 0.26em; }
+
+.preview-pill,
+.catalogue-count,
+.restricted-badge {
+  border-radius: 999px;
+  border-color: rgba(255, 69, 52, 0.3);
+  background: linear-gradient(180deg, rgba(217,39,27,0.16), rgba(125,16,11,0.08));
+  box-shadow: inset 0 0 18px rgba(217,39,27,0.05);
+  color: #ff9a90;
+}
+
+.connection-state {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.025);
+  color: #c1b8b1;
+  font-size: 11px;
+  backdrop-filter: blur(12px);
+}
+.connection-state > span:first-child { width: 8px; height: 8px; }
+
+.discord-button,
+.primary-action,
+.secondary-action {
+  border-radius: 7px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.22);
+}
+.discord-button { border: 1px solid rgba(137,145,255,0.38); background: linear-gradient(135deg, #6671ff, #4b55dc); }
+.primary-action { border-color: rgba(255,105,91,0.25); background: linear-gradient(135deg, var(--red-bright), #a71810); }
+.secondary-action { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); }
+.discord-button:not(:disabled):hover, .primary-action:hover, .secondary-action:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(0,0,0,0.32);
+}
+
+.dashboard-sidebar {
+  top: var(--topbar);
+  width: var(--sidebar);
+  padding: 22px 17px 18px;
+  border-right-color: rgba(255,69,52,0.15);
+  background:
+    linear-gradient(180deg, rgba(9,8,8,0.97), rgba(5,5,5,0.94)),
+    url("assets/world-war-z-dashboard-bg-mobile.webp") center / cover no-repeat;
+  box-shadow: 20px 0 70px rgba(0,0,0,0.32);
+  backdrop-filter: blur(22px);
+}
+.dashboard-sidebar::before {
+  content: "WWZ // COMMAND NETWORK";
+  display: block;
+  margin: 0 10px 18px;
+  color: rgba(255,255,255,0.22);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+}
+.nav-label { margin: 19px 12px 8px; color: #6f6661; font-size: 8px; letter-spacing: 0.21em; }
+.side-link {
+  min-height: 48px;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  margin: 3px 0;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-left-width: 1px;
+  border-radius: 8px;
+  color: #a9a09a;
+  font-size: 12px;
+}
+.side-link > span {
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 7px;
+  background: rgba(255,255,255,0.025);
+  color: #766d68;
+  font-size: 14px;
+}
+.side-link:hover, .side-link:focus-visible {
+  border-color: rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.035);
+  color: #f2ebe4;
+}
+.side-link.active {
+  border-color: rgba(255,69,52,0.28);
+  background: linear-gradient(100deg, rgba(217,39,27,0.2), rgba(217,39,27,0.035));
+  box-shadow: inset 3px 0 var(--red-bright), 0 10px 26px rgba(0,0,0,0.18);
+}
+.side-link.active > span {
+  border-color: rgba(255,69,52,0.42);
+  background: rgba(217,39,27,0.13);
+  color: #ff7668;
+  box-shadow: 0 0 20px rgba(217,39,27,0.12);
+}
+.access-card {
+  border-radius: var(--radius-small);
+  border-color: rgba(88,101,242,0.22);
+  background: linear-gradient(140deg, rgba(88,101,242,0.11), rgba(255,255,255,0.018));
+  box-shadow: 0 16px 36px rgba(0,0,0,0.2);
+}
+.access-icon { border-radius: 8px; }
+.sidebar-footer { padding-top: 12px; border-top: 1px solid var(--line); }
+
+.dashboard-main {
+  grid-column: 2;
+  padding: clamp(24px, 3vw, 48px);
+  background: linear-gradient(180deg, rgba(5,5,5,0.28), rgba(5,5,5,0.91) 32%, #050505 100%);
+}
+.preview-banner,
+.auth-message {
+  max-width: 1540px;
+  border-radius: var(--radius-small);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+  backdrop-filter: blur(18px);
+}
+.preview-banner {
+  padding: 15px 17px;
+  border-color: rgba(91,200,120,0.24);
+  background: linear-gradient(90deg, rgba(91,200,120,0.09), rgba(7,12,8,0.7));
+}
+.preview-banner > span { box-shadow: 0 0 0 7px rgba(91,200,120,0.08); }
+.auth-message { padding: 14px 17px; }
+.auth-message[data-state="error"] {
+  border-color: rgba(255,69,52,0.35);
+  background: linear-gradient(90deg, rgba(217,39,27,0.13), rgba(41,8,6,0.62));
+}
+
+.dashboard-view { max-width: 1540px; }
+.view-heading {
+  position: relative;
+  min-height: 132px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 26px 30px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(110deg, rgba(217,39,27,0.13), rgba(10,9,9,0.84) 46%, rgba(10,9,9,0.72)),
+    url("assets/world-war-z-dashboard-bg.webp") center 42% / cover no-repeat;
+  box-shadow: var(--shadow);
+}
+.view-heading::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(var(--red-bright), var(--red-dark));
+  box-shadow: 0 0 24px rgba(255,69,52,0.5);
+}
+.view-heading::after {
+  content: "";
+  position: absolute;
+  inset: auto 24px 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,69,52,0.7), transparent 62%);
+}
+.view-heading > * { position: relative; z-index: 1; }
+.view-heading h1 { font-size: clamp(44px, 4.7vw, 76px); text-shadow: 0 6px 28px #000; }
+.view-heading > div > p:last-child { color: #b9afa9; }
+.breadcrumb { color: #ff7668; }
+.overview-command-mark {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding-right: 6px;
+  opacity: 0.88;
+}
+.overview-command-mark img {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.65));
+}
+.overview-command-mark span { color: rgba(255,255,255,0.5); font-size: 7px; font-weight: 900; letter-spacing: 0.22em; }
+
+.metric-grid { gap: 14px; margin-bottom: 14px; }
+.metric-card,
+.panel {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(255,255,255,0.105);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.048), transparent 42%),
+    linear-gradient(180deg, rgba(20,17,17,0.92), rgba(10,9,9,0.94));
+  box-shadow: 0 24px 70px rgba(0,0,0,0.31), inset 0 1px rgba(255,255,255,0.025);
+  backdrop-filter: blur(18px);
+}
+.metric-card::before,
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,69,52,0.86), rgba(255,69,52,0.08) 42%, transparent 76%);
+  opacity: 0.7;
+}
+.metric-card {
+  min-height: 156px;
+  padding: 21px;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+.metric-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,69,52,0.27);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.42), 0 0 35px rgba(217,39,27,0.06);
+}
+.metric-icon {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255,69,52,0.18);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(217,39,27,0.18), rgba(217,39,27,0.04));
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+.metric-card > strong { margin-top: 19px; font-size: 31px; text-shadow: 0 3px 16px #000; }
+.metric-card > p { color: #827872; }
+
+.dashboard-grid { gap: 14px; margin-top: 14px; }
+.panel { padding: 25px; }
+.panel-heading { margin-bottom: 24px; }
+.panel-kicker { color: #ff7668; }
+.panel h2, .login-dialog h2 { font-size: 28px; text-shadow: 0 4px 16px rgba(0,0,0,0.55); }
+.status-badge, .lock-label, .muted-label {
+  border-radius: 999px;
+  background: rgba(255,255,255,0.024);
+}
+.server-hero > div,
+.quick-grid button,
+.operation-grid button,
+.player-action-grid button,
+.admin-player-result,
+.command-card,
+.balance-preview,
+.inset-panel,
+.admin-player-identity {
+  border-radius: var(--radius-small);
+}
+.server-hero > div { background: rgba(255,255,255,0.021); }
+.restart-track { height: 7px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.055); }
+.restart-progress { border-radius: inherit; box-shadow: 0 0 20px rgba(255,69,52,0.4); }
+.text-action { color: #ff8174; }
+.quick-grid { gap: 10px; }
+.quick-grid button,
+.operation-grid button {
+  border-color: rgba(255,255,255,0.085);
+  background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008));
+}
+.quick-grid button:not(:disabled):hover,
+.operation-grid button:not(:disabled):hover {
+  border-color: rgba(255,69,52,0.34);
+  background: linear-gradient(145deg, rgba(217,39,27,0.12), rgba(255,255,255,0.015));
+  box-shadow: 0 16px 34px rgba(0,0,0,0.25);
+}
+.activity-symbol, .avatar, .survivor-mark, .map-location-symbol { border-radius: 8px; }
+.activity-list li { transition: background 160ms ease; }
+.activity-list li:hover { background: rgba(255,255,255,0.018); }
+
+.command-toolbar, .admin-player-search { align-items: stretch; }
+.command-search, .small-search, .admin-player-search input,
+.player-action-dialog .dialog-field input,
+.player-action-dialog .dialog-field select,
+.dialog-field textarea {
+  border-radius: 8px;
+  background: rgba(4,4,4,0.45);
+  box-shadow: inset 0 1px 10px rgba(0,0,0,0.25);
+}
+.command-card {
+  border-color: rgba(255,255,255,0.09);
+  background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(9,8,8,0.82));
+}
+.command-card:hover { border-color: rgba(255,69,52,0.31); box-shadow: 0 20px 48px rgba(0,0,0,0.3); }
+.filter-list button { border-radius: 999px; }
+.filter-list button.active { box-shadow: inset 0 0 20px rgba(217,39,27,0.08); }
+
+.player-action-grid button {
+  min-height: 88px;
+  border-color: rgba(255,255,255,0.09);
+  background: linear-gradient(145deg, rgba(255,255,255,0.032), rgba(6,5,5,0.72));
+}
+.player-action-grid button:hover:not(:disabled),
+.player-action-grid button:focus-visible:not(:disabled) {
+  transform: translateY(-3px);
+  border-color: rgba(255,69,52,0.4);
+  background: linear-gradient(145deg, rgba(217,39,27,0.13), rgba(8,6,6,0.86));
+  box-shadow: 0 18px 38px rgba(0,0,0,0.3);
+}
+.admin-player-result:hover,
+.admin-player-result:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(255,69,52,0.4);
+  background: rgba(217,39,27,0.075);
+}
+.activity-list .activity-row-action { border-radius: 6px; }
+
+.map-stage, .map-controls, .map-details, .map-location-panel { border-radius: var(--radius); }
+.map-stage { overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,0.42); }
+.map-frame { background: #070606; }
+
+.login-dialog {
+  border: 1px solid rgba(255,69,52,0.25);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.05), transparent 44%),
+    rgba(13,11,11,0.97);
+  box-shadow: 0 40px 120px rgba(0,0,0,0.7), 0 0 70px rgba(217,39,27,0.08);
+  backdrop-filter: blur(24px);
+}
+.login-dialog::backdrop { background: rgba(0,0,0,0.82); backdrop-filter: blur(8px); }
+.dialog-close { border-radius: 8px; }
+.restart-warning, .dialog-notice, .player-action-target { border-radius: 9px; }
+.danger-action { background: linear-gradient(135deg, #f13a2a, #8d100a); }
+
+.dashboard-footer {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top-color: rgba(255,69,52,0.14);
+}
+
+@media (max-width: 1180px) {
+  :root { --sidebar: 246px; }
+  .overview-command-mark { display: none; }
+  .view-heading { align-items: flex-end; }
+}
+
+@media (max-width: 980px) {
+  body { background-image: linear-gradient(180deg, rgba(2,2,2,0.48), #050505 65%), url("assets/world-war-z-dashboard-bg-mobile.webp"); }
+  .dashboard-topbar { padding: 0 14px; }
+  .dashboard-brand-mark { width: 48px; }
+  .dashboard-brand small, .preview-pill { display: none; }
+  .connection-state span:last-child { max-width: 126px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dashboard-sidebar { width: min(88vw, 300px); }
+  .dashboard-main { grid-column: 1; padding: 22px 16px 34px; }
+  .view-heading { min-height: 0; padding: 24px; }
+}
+
+@media (max-width: 720px) {
+  :root { --topbar: 72px; }
+  .dashboard-topbar { gap: 10px; }
+  .dashboard-brand > span:last-child { display: none; }
+  .dashboard-brand-mark { width: 46px; }
+  .connection-state { display: none; }
+  .discord-button { margin-left: auto; min-height: 40px; padding-inline: 12px; }
+  .discord-button [data-auth-button-label] { max-width: 126px; }
+  .preview-banner { margin-bottom: 18px; }
+  .auth-message { margin-top: -8px; }
+  .view-heading { display: block; padding: 22px; }
+  .view-heading h1 { font-size: 46px; }
+  .heading-actions { margin-top: 20px; }
+  .metric-grid, .metric-grid.three { gap: 10px; }
+  .metric-card { min-height: 136px; padding: 17px; }
+  .panel { padding: 19px; }
+  .panel-heading { gap: 12px; }
+}
+
+@media (max-width: 480px) {
+  .dashboard-main { padding-inline: 11px; }
+  .dashboard-topbar { padding-inline: 10px; }
+  .mobile-menu { width: 39px; height: 39px; }
+  .dashboard-brand-mark { width: 42px; }
+  .discord-button { font-size: 9px; }
+  .view-heading { border-radius: 10px; padding: 19px 17px; }
+  .view-heading h1 { font-size: 40px; }
+  .view-heading > div > p:last-child { font-size: 11px; }
+  .metric-card, .panel { border-radius: 10px; }
+  .metric-card > strong { font-size: 27px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metric-card, .command-card, .quick-grid button, .operation-grid button, .player-action-grid button { transition: none; }
+}

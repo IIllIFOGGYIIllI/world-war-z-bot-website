@@ -1,9 +1,21 @@
 {
-  "name": "World War Z Bot",
-  "short_name": "WWZ Bot",
-  "description": "The World War Z community's unofficial DayZ Discord bot and dashboard preview.",
-  "start_url": "./",
+  "name": "World War Z Bot Control Centre",
+  "short_name": "WWZ Control",
+  "description": "Live DayZ server status, member self-service and protected World War Z administration.",
+  "start_url": "./dashboard.html",
   "display": "standalone",
-  "background_color": "#090808",
-  "theme_color": "#0a0808"
+  "background_color": "#050505",
+  "theme_color": "#090707",
+  "icons": [
+    {
+      "src": "assets/world-war-z-icon.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
 }

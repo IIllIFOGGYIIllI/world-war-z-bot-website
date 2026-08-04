@@ -13,8 +13,9 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Fix player action confirmations`
-5. Select **Commit changes**.
+4. If `DELETE_THESE_FILES.txt` still exists in the repository, delete it; it is an obsolete instruction file and is intentionally absent from this release.
+5. Enter the commit message: `Overhaul command centre interface`
+6. Select **Commit changes**.
 
 ## Enabling GitHub Pages
 
@@ -40,13 +41,21 @@ GitHub may take a few minutes to publish the first version.
 - `pages.css` — shared privacy and changelog page design
 - `404.html` — custom missing-page screen
 - `site.webmanifest` — website metadata
-- `assets/world-war-z-banner.png` — supplied World War Z banner
+- `assets/world-war-z-banner.png` — social sharing banner
+- `assets/world-war-z-logo.webp` — refined local header and interface logo
+- `assets/world-war-z-icon.png` and `assets/favicon.png` — local application icons
+- `assets/world-war-z-dashboard-bg.webp` — desktop command-centre atmosphere
+- `assets/world-war-z-dashboard-bg-mobile.webp` — mobile command-centre atmosphere
 - `assets/chernarus-vector.svg` — custom vector Chernarus road overview
 - `assets/chernarus-pois.json` — validated public map locations
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected stages
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
+
+## Version 1.13.0 visual system
+
+The website now uses one consistent command-centre design across the public landing page, dashboard, privacy information, changelog and 404 page. The background and logo assets are hosted locally, so the visual overhaul adds no third-party image or font requests. Existing dashboard selectors and API behaviour are preserved.
 
 ## Security
 

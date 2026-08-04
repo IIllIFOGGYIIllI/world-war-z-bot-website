@@ -11,7 +11,10 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/world-war-z-banner.png">
   <title>Dashboard | World War Z Bot</title>
-  <link rel="stylesheet" href="dashboard.css?v=1.12.1">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/world-war-z-icon.png">
+  <link rel="stylesheet" href="dashboard.css?v=1.13.0">
 </head>
 <body>
   <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -21,7 +24,7 @@
       <span aria-hidden="true">☰</span><span class="sr-only">Open dashboard menu</span>
     </button>
     <a class="dashboard-brand" href="index.html" aria-label="World War Z Bot home">
-      <span class="dashboard-brand-mark" aria-hidden="true">W<span>Z</span></span>
+      <span class="dashboard-brand-mark" aria-hidden="true"><img src="assets/world-war-z-logo.webp" alt=""></span>
       <span><strong>WORLD WAR Z</strong><small>BOT CONTROL CENTRE</small></span>
     </a>
     <span class="preview-pill" data-dashboard-mode>Live status</span>
@@ -72,7 +75,8 @@
 
       <section class="dashboard-view active" data-view-panel="overview" aria-labelledby="overview-title">
         <div class="view-heading">
-          <div><p class="breadcrumb">Dashboard / Overview</p><h1 id="overview-title">Welcome, survivor.</h1><p data-welcome-copy>Live server information and a secure path into your World War Z community account.</p></div>
+          <div class="overview-heading-copy"><p class="breadcrumb">Dashboard / Overview</p><h1 id="overview-title">Welcome, survivor.</h1><p data-welcome-copy>Live server information and a secure path into your World War Z community account.</p></div>
+          <div class="overview-command-mark" aria-hidden="true"><img src="assets/world-war-z-logo.webp" alt=""><span>CONTROL CENTRE</span></div>
           <div class="heading-actions"><button class="secondary-action" type="button" data-jump="commands">View commands</button><button class="primary-action" type="button" data-open-login data-auth-cta>Connect Discord</button></div>
         </div>
 
@@ -323,7 +327,7 @@
     </form>
   </dialog>
 
-  <script src="dashboard.js?v=1.12.1"></script>
+  <script src="dashboard.js?v=1.13.0"></script>
   <script src="chernarus-map.js?v=1.7.0"></script>
 </body>
 </html>

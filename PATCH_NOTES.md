@@ -1,5 +1,21 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.13.0 — Command Centre UI Overhaul
+
+### Redesigned
+
+- Rebuilt the dashboard visual system with a cinematic Chernarus-inspired background, layered control-centre panels and clearer status hierarchy.
+- Replaced the temporary W/Z text mark with a dedicated locally hosted World War Z logo across the dashboard, public website and supporting pages.
+- Redesigned the dashboard top bar, navigation, view headers, cards, Admin controls, dialogs, mobile layouts and public landing page.
+- Added local favicon, application icon and responsive background assets.
+- Preserved every existing Stage 7B2 data attribute, API workflow and protected action.
+
+### Repository cleanup
+
+- Removed the obsolete `DELETE_THESE_FILES.txt` instruction file from the complete backup. Patch deployments should delete the existing repository copy manually because ZIP uploads cannot remove files.
+- The three retired raster map files remain excluded.
+- No runtime database, credential or Railway volume file is included.
+
 ## Version 1.12.1 — Player Action Confirmation Hotfix
 
 ### Fixed
