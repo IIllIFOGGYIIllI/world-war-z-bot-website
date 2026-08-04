@@ -1,3 +1,11 @@
+# Version 1.22.0
+
+- Split trader catalogue into Items and Event Items.
+- Added click-to-coordinate checkout using the local Chernarus vector map.
+- Replaced the public interactive map with a Coming Soon workspace.
+- Added rich Discord/social link preview metadata and a 1200×630 preview asset.
+- Added owner search/filter tables and 30,000 restart limits.
+
 # World War Z Bot Website Patch Notes
 
 ## Version 1.21.0 — Trader Delivery and DayZ Control Centre

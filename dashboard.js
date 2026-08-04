@@ -3728,6 +3728,20 @@ const shopEventProfileEditor = document.querySelector('[data-shop-event-profile]
 const ownerEventItemList = document.querySelector('[data-owner-event-item-list]');
 const ownerEventItemEmpty = document.querySelector('[data-owner-event-item-empty]');
 const newEventItemButton = document.querySelector('[data-new-event-item]');
+const shopModeButtons = [...document.querySelectorAll('[data-shop-mode]')];
+const shopManualCount = document.querySelector('[data-shop-manual-count]');
+const shopEventCount = document.querySelector('[data-shop-event-count]');
+const shopQuantityLabel = document.querySelector('[data-shop-quantity-label]');
+const shopQuantityHelp = document.querySelector('[data-shop-quantity-help]');
+const shopCoordinateMap = document.querySelector('[data-shop-coordinate-map]');
+const shopCoordinateStage = document.querySelector('[data-shop-coordinate-stage]');
+const shopCoordinateImage = document.querySelector('[data-shop-coordinate-image]');
+const shopCoordinateMarker = document.querySelector('[data-shop-coordinate-marker]');
+const shopMapSelected = document.querySelector('[data-shop-map-selected]');
+const ownerShopSearch = document.querySelector('[data-owner-shop-search]');
+const ownerShopCategory = document.querySelector('[data-owner-shop-category]');
+const ownerEventSearch = document.querySelector('[data-owner-event-search]');
+const ownerEventCategory = document.querySelector('[data-owner-event-category]');
 
 let shopItems = [];
 let memberShopOrders = [];
@@ -3743,6 +3757,11 @@ let adminShopRequestInProgress = false;
 let shopOrderActionInProgress = false;
 let ownerShopRequestInProgress = false;
 let savedDeliveryLocations = [];
+let shopCatalogueMode = 'manual';
+let coordinatePickerZoom = 1;
+let coordinatePickerX = 0;
+let coordinatePickerY = 0;
+let coordinatePickerDrag = null;
 
 const shopStatusLabel = (status) => titleCaseState(status || 'unknown');
 const shopStockText = (item) => item.stock_quantity == null ? 'Unlimited stock' : `${Number(item.stock_quantity)} in stock`;
@@ -3770,7 +3789,7 @@ const populateShopCategories = () => {
   all.value = 'all';
   all.textContent = 'All categories';
   shopCategory.append(all);
-  [...new Set(shopItems.map((item) => String(item.category)))].sort((a, b) => a.localeCompare(b)).forEach((category) => {
+  [...new Set(shopItems.filter((item) => (item.delivery_type === 'event' ? 'event' : 'manual') === shopCatalogueMode).map((item) => String(item.category)))].sort((a, b) => a.localeCompare(b)).forEach((category) => {
     const option = document.createElement('option');
     option.value = category;
     option.textContent = category;
@@ -3801,6 +3820,43 @@ const populatePurchaseLocationSelect = () => {
   }
 };
 
+const clampCoordinatePicker = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
+const updateCoordinatePickerTransform = () => {
+  if (!shopCoordinateStage) return;
+  shopCoordinateStage.style.transform = `translate(${coordinatePickerX}px, ${coordinatePickerY}px) scale(${coordinatePickerZoom})`;
+};
+const resetCoordinatePicker = () => {
+  coordinatePickerZoom = 1;
+  coordinatePickerX = 0;
+  coordinatePickerY = 0;
+  updateCoordinatePickerTransform();
+};
+const updateCoordinateMarker = () => {
+  if (!shopCoordinateMarker || !shopDeliveryX || !shopDeliveryZ) return;
+  const x = Number(shopDeliveryX.value);
+  const z = Number(shopDeliveryZ.value);
+  if (!Number.isFinite(x) || !Number.isFinite(z) || x < 0 || x > 15360 || z < 0 || z > 15360) {
+    shopCoordinateMarker.hidden = true;
+    if (shopMapSelected) shopMapSelected.textContent = 'No coordinates selected';
+    return;
+  }
+  shopCoordinateMarker.hidden = false;
+  shopCoordinateMarker.style.left = `${(x / 15360) * 100}%`;
+  shopCoordinateMarker.style.top = `${(1 - z / 15360) * 100}%`;
+  if (shopMapSelected) shopMapSelected.textContent = `X ${x.toFixed(3)} · Z ${z.toFixed(3)}`;
+};
+const setCoordinatesFromMap = (clientX, clientY) => {
+  if (!shopCoordinateImage || shopDeliveryLocation?.value) return;
+  const rect = shopCoordinateImage.getBoundingClientRect();
+  if (!rect.width || !rect.height || clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return;
+  const x = clampCoordinatePicker(((clientX - rect.left) / rect.width) * 15360, 0, 15360);
+  const z = clampCoordinatePicker((1 - ((clientY - rect.top) / rect.height)) * 15360, 0, 15360);
+  if (shopDeliveryX) shopDeliveryX.value = x.toFixed(3);
+  if (shopDeliveryZ) shopDeliveryZ.value = z.toFixed(3);
+  if (shopDeliveryY && shopDeliveryY.value === '') shopDeliveryY.value = '0';
+  updateCoordinateMarker();
+};
+
 const syncShopDeliveryForm = () => {
   const isEvent = selectedShopItem?.delivery_type === 'event' || selectedShopItem?.requires_coordinates;
   if (shopEventDeliveryFields) shopEventDeliveryFields.hidden = !isEvent;
@@ -3817,6 +3873,17 @@ const syncShopDeliveryForm = () => {
   if (shopSaveNameField) shopSaveNameField.hidden = usesSavedLocation || !shopSaveLocation?.checked;
   if (shopSaveLocationName) shopSaveLocationName.required = !usesSavedLocation && Boolean(shopSaveLocation?.checked);
   if (shopCoordinateConfirm) shopCoordinateConfirm.required = true;
+  shopCoordinateMap?.classList.toggle('saved-location-active', usesSavedLocation);
+  if (usesSavedLocation) {
+    const location = savedDeliveryLocations.find((entry) => String(entry.location_id) === String(shopDeliveryLocation?.value));
+    if (location) {
+      if (shopDeliveryX) shopDeliveryX.value = String(location.x);
+      if (shopDeliveryY) shopDeliveryY.value = String(location.y);
+      if (shopDeliveryZ) shopDeliveryZ.value = String(location.z);
+      if (shopDeliveryRotation) shopDeliveryRotation.value = String(location.rotation);
+    }
+  }
+  updateCoordinateMarker();
 };
 
 const openShopPurchase = (item) => {
@@ -3829,22 +3896,30 @@ const openShopPurchase = (item) => {
   shopPurchaseForm?.reset();
   const isEvent = item.delivery_type === 'event' || item.requires_coordinates;
   if (shopPurchaseQuantity) {
-    shopPurchaseQuantity.value = '1';
-    shopPurchaseQuantity.max = String(isEvent ? 1 : Math.max(1, Math.min(
+    const minimumRestarts = Math.max(1, Number(item.delivery?.minimum_restarts || 1));
+    const maximumRestarts = Math.min(30000, Math.max(minimumRestarts, Number(item.delivery?.maximum_restarts || 30000)));
+    shopPurchaseQuantity.value = String(isEvent ? minimumRestarts : 1);
+    shopPurchaseQuantity.min = String(isEvent ? minimumRestarts : 1);
+    shopPurchaseQuantity.max = String(isEvent ? maximumRestarts : Math.max(1, Math.min(
       Number(item.max_per_order || 1),
       item.stock_quantity == null ? 100 : Number(item.stock_quantity),
       item.remaining_member_limit == null ? 100 : Number(item.remaining_member_limit)
     )));
-    shopPurchaseQuantity.disabled = isEvent;
+    shopPurchaseQuantity.disabled = false;
+    if (shopQuantityLabel) shopQuantityLabel.textContent = isEvent ? 'Number of restarts' : 'Quantity';
+    if (shopQuantityHelp) shopQuantityHelp.textContent = isEvent ? `Price is per restart · allowed ${minimumRestarts.toLocaleString()}–${maximumRestarts.toLocaleString()}.` : 'Number of items to purchase.';
   }
+  if (shopDeliveryY) shopDeliveryY.value = '0';
   if (shopDeliveryRotation) shopDeliveryRotation.value = '0';
+  resetCoordinatePicker();
+  updateCoordinateMarker();
   populatePurchaseLocationSelect();
   if (isEvent && !savedDeliveryLocations.length) loadDeliveryLocations(undefined, { quiet: true }).then(() => { populatePurchaseLocationSelect(); syncShopDeliveryForm(); });
   syncShopDeliveryForm();
   setText('[data-shop-purchase-title]', `Buy ${item.name}?`);
   setText('[data-shop-purchase-item]', `${item.name} · ${item.sku}`);
   const deliveryText = isEvent ? 'Restart-bound event spawn' : 'Manual trader fulfilment';
-  setText('[data-shop-purchase-price]', `${formatMoney(item.price)} each · ${shopStockText(item)} · ${deliveryText}`);
+  setText('[data-shop-purchase-price]', `${formatMoney(item.price)} ${isEvent ? 'per restart' : 'each'} · ${shopStockText(item)} · ${deliveryText}`);
   showInlineMessage(shopPurchaseMessage, '');
   updateShopPurchaseTotal();
   if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal();
@@ -3859,15 +3934,38 @@ const updateShopPurchaseTotal = () => {
 shopPurchaseQuantity?.addEventListener('input', updateShopPurchaseTotal);
 shopDeliveryLocation?.addEventListener('change', syncShopDeliveryForm);
 shopSaveLocation?.addEventListener('change', syncShopDeliveryForm);
+[shopDeliveryX, shopDeliveryZ].forEach((input) => input?.addEventListener('input', updateCoordinateMarker));
+shopCoordinateMap?.addEventListener('pointerdown', (event) => {
+  if (event.target.closest('button')) return;
+  coordinatePickerDrag = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY };
+  shopCoordinateMap.setPointerCapture?.(event.pointerId);
+});
+shopCoordinateMap?.addEventListener('pointermove', (event) => {
+  if (!coordinatePickerDrag || coordinatePickerDrag.id !== event.pointerId) return;
+  coordinatePickerX += event.clientX - coordinatePickerDrag.x; coordinatePickerY += event.clientY - coordinatePickerDrag.y;
+  coordinatePickerDrag.x = event.clientX; coordinatePickerDrag.y = event.clientY; updateCoordinatePickerTransform();
+});
+shopCoordinateMap?.addEventListener('pointerup', (event) => {
+  if (!coordinatePickerDrag || coordinatePickerDrag.id !== event.pointerId) return;
+  const moved = Math.hypot(event.clientX - coordinatePickerDrag.startX, event.clientY - coordinatePickerDrag.startY);
+  shopCoordinateMap.releasePointerCapture?.(event.pointerId); coordinatePickerDrag = null;
+  if (moved < 7) setCoordinatesFromMap(event.clientX, event.clientY);
+});
+shopCoordinateMap?.addEventListener('pointercancel', () => { coordinatePickerDrag = null; });
+document.querySelector('[data-shop-map-zoom-in]')?.addEventListener('click', () => { coordinatePickerZoom = clampCoordinatePicker(coordinatePickerZoom * 1.35, 1, 5); updateCoordinatePickerTransform(); });
+document.querySelector('[data-shop-map-zoom-out]')?.addEventListener('click', () => { coordinatePickerZoom = clampCoordinatePicker(coordinatePickerZoom / 1.35, 1, 5); if (coordinatePickerZoom === 1) { coordinatePickerX = 0; coordinatePickerY = 0; } updateCoordinatePickerTransform(); });
+document.querySelector('[data-shop-map-reset]')?.addEventListener('click', resetCoordinatePicker);
 
 const renderShopCatalogue = () => {
   if (!shopCatalogue) return;
   const query = String(shopSearch?.value || '').trim().toLowerCase();
   const category = shopCategory?.value || 'all';
   const visible = shopItems.filter((item) => {
+    const type = item.delivery_type === 'event' ? 'event' : 'manual';
+    const matchesMode = type === shopCatalogueMode;
     const matchesCategory = category === 'all' || String(item.category) === category;
-    const haystack = `${item.name} ${item.sku} ${item.category} ${item.description}`.toLowerCase();
-    return matchesCategory && (!query || haystack.includes(query));
+    const haystack = `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.description}`.toLowerCase();
+    return matchesMode && matchesCategory && (!query || haystack.includes(query));
   });
   shopCatalogue.replaceChildren();
   visible.forEach((item) => {
@@ -3884,14 +3982,14 @@ const renderShopCatalogue = () => {
     copy.append(categoryText, title);
     const price = document.createElement('strong');
     price.className = 'shop-item-price';
-    price.textContent = formatMoney(item.price);
+    price.textContent = item.delivery_type === 'event' ? `${formatMoney(item.price)}/restart` : formatMoney(item.price);
     heading.append(copy, price);
     const description = document.createElement('p');
     description.textContent = item.description;
     const meta = document.createElement('div');
     meta.className = 'shop-item-meta';
     [
-      item.delivery_type === 'event' ? 'Event spawn · exact coordinates' : 'Manual trader order',
+      item.delivery_type === 'event' ? `Event item · ${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts` : 'Manual trader order',
       shopStockText(item),
       `Max ${item.max_per_order}/order`,
       shopMemberLimitText(item)
@@ -3923,7 +4021,7 @@ const renderMemberShopOrders = (orders) => {
     card.className = 'shop-order-card';
     const heading = document.createElement('div');
     const title = document.createElement('strong');
-    title.textContent = `Order #${order.order_id} · ${order.quantity} × ${order.item.name}`;
+    title.textContent = order.delivery_type === 'event' ? `Order #${order.order_id} · ${Number(order.event_restarts || 1).toLocaleString()} restart(s) · ${order.item.name}` : `Order #${order.order_id} · ${order.quantity} × ${order.item.name}`;
     const status = document.createElement('span');
     status.className = `shop-order-status ${String(order.status)}`;
     status.textContent = shopStatusLabel(order.status);
@@ -3934,7 +4032,7 @@ const renderMemberShopOrders = (orders) => {
     if (order.delivery) {
       const delivery = document.createElement('small');
       const point = order.delivery.location || {};
-      delivery.textContent = `Event delivery: ${shopStatusLabel(order.delivery.status)} · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`;
+      delivery.textContent = `Event delivery: ${shopStatusLabel(order.delivery.status)} · ${Number(order.delivery.remaining_restarts ?? order.event_restarts ?? 1).toLocaleString()} restart(s) remaining · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`;
       card.append(delivery);
     }
     if (order.buyer_note) {
@@ -3960,6 +4058,8 @@ const applyShopPayload = (payload, { member = false } = {}) => {
   setText('[data-shop-description]', settings.description || 'Spend your verified community balance on approved goods and services.');
   setText('[data-shop-instructions]', settings.purchase_instructions || 'Staff will arrange fulfilment after purchase.');
   setText('[data-shop-item-count]', String(shopItems.length));
+  if (shopManualCount) shopManualCount.textContent = String(shopItems.filter((item) => item.delivery_type !== 'event').length);
+  if (shopEventCount) shopEventCount.textContent = String(shopItems.filter((item) => item.delivery_type === 'event').length);
   setText('[data-shop-status-label]', settings.enabled ? 'Shop open' : 'Purchases paused');
   setStatusClass(document.querySelector('[data-shop-status-badge]'), settings.enabled ? 'online' : 'unavailable');
   populateShopCategories();
@@ -4032,6 +4132,16 @@ const loadMemberShop = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
   }
 };
 
+shopModeButtons.forEach((button) => button.addEventListener('click', () => {
+  shopCatalogueMode = button.dataset.shopMode === 'event' ? 'event' : 'manual';
+  shopModeButtons.forEach((entry) => { const active = entry === button; entry.classList.toggle('active', active); entry.setAttribute('aria-selected', String(active)); });
+  if (shopSearch) shopSearch.value = '';
+  if (shopCategory) shopCategory.value = 'all';
+  populateShopCategories();
+  setText('[data-shop-mode-label]', shopCatalogueMode === 'event' ? 'Event items' : 'Items');
+  setText('[data-shop-mode-help]', shopCatalogueMode === 'event' ? 'Price per restart · exact coordinates' : 'Manual trader catalogue');
+  renderShopCatalogue();
+}));
 shopSearch?.addEventListener('input', renderShopCatalogue);
 shopCategory?.addEventListener('change', renderShopCatalogue);
 refreshShopButton?.addEventListener('click', () => storageGet(AUTH_SESSION_KEY) ? loadMemberShop() : loadPublicShop());
@@ -4050,7 +4160,8 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
       body: JSON.stringify({
         item_id: Number(selectedShopItem.item_id),
-        quantity: Number(shopPurchaseQuantity?.value || 1),
+        quantity: (selectedShopItem.delivery_type === 'event' ? 1 : Number(shopPurchaseQuantity?.value || 1)),
+        event_restarts: (selectedShopItem.delivery_type === 'event' ? Number(shopPurchaseQuantity?.value || 1) : 1),
         buyer_note: shopPurchaseNote?.value.trim() || '',
         purchase_key: `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`,
         delivery: (selectedShopItem.delivery_type === 'event' || selectedShopItem.requires_coordinates) ? (() => {
@@ -4125,7 +4236,7 @@ const renderAdminShopOrders = (payload) => {
     card.className = 'shop-order-card admin-order';
     const heading = document.createElement('div');
     const title = document.createElement('strong');
-    title.textContent = `#${order.order_id} · ${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`;
+    title.textContent = order.delivery_type === 'event' ? `#${order.order_id} · ${order.buyer.psn_id} · ${Number(order.event_restarts || 1).toLocaleString()} restart(s) · ${order.item.name}` : `#${order.order_id} · ${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`;
     const status = document.createElement('span');
     status.className = `shop-order-status ${order.status}`;
     status.textContent = shopStatusLabel(order.status);
@@ -4220,43 +4331,29 @@ const ownerShopEditButton = (item) => {
   return button;
 };
 
+const populateOwnerShopCategories = () => {
+  [[ownerShopCategory, 'manual'], [ownerEventCategory, 'event']].forEach(([select, type]) => {
+    if (!select) return;
+    const selected = select.value || 'all';
+    select.replaceChildren();
+    const all = document.createElement('option'); all.value = 'all'; all.textContent = 'All categories'; select.append(all);
+    [...new Set(ownerShopItems.filter((item) => (item.fulfilment_type === 'event' ? 'event' : 'manual') === type).map((item) => String(item.category)))].sort().forEach((category) => { const option = document.createElement('option'); option.value = category; option.textContent = category; select.append(option); });
+    select.value = [...select.options].some((option) => option.value === selected) ? selected : 'all';
+  });
+};
+
 const renderOwnerShopItems = () => {
   if (!ownerShopItemList) return;
-  ownerShopItemList.replaceChildren();
-  if (ownerEventItemList) ownerEventItemList.replaceChildren();
-  ownerShopItems.forEach((item) => {
-    const row = document.createElement('tr');
-    const itemCell = document.createElement('td');
-    const strong = document.createElement('strong');
-    strong.textContent = item.name;
-    const small = document.createElement('small');
-    small.textContent = `${item.sku} · ${item.fulfilment_type === 'event' ? 'Event spawn' : 'Manual'}`;
-    itemCell.append(strong, document.createElement('br'), small);
-    const category = document.createElement('td'); category.textContent = item.category;
-    const price = document.createElement('td'); price.textContent = formatMoney(item.price);
-    const stock = document.createElement('td'); stock.textContent = item.stock_quantity == null ? 'Unlimited' : String(item.stock_quantity);
-    const limits = document.createElement('td'); limits.textContent = `${item.max_per_order}/order · ${item.max_per_player == null ? 'No player limit' : `${item.max_per_player}/player`}`;
-    const state = document.createElement('td');
-    const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill);
-    const action = document.createElement('td'); action.append(ownerShopEditButton(item));
-    row.append(itemCell, category, price, stock, limits, state, action);
-    ownerShopItemList.append(row);
-
-    if (item.fulfilment_type === 'event' && ownerEventItemList) {
-      const profile = item.delivery_profile || {};
-      const eventRow = document.createElement('tr');
-      const name = document.createElement('td'); name.append(document.createElement('strong')); name.querySelector('strong').textContent = item.name;
-      const child = document.createElement('td'); child.textContent = profile.child_type || 'Missing profile';
-      const profileName = document.createElement('td'); profileName.textContent = profile.profile_name || '—';
-      const approval = document.createElement('td'); approval.textContent = profile.requires_approval ? 'Admin approval' : 'Automatic queue';
-      const eventState = document.createElement('td'); const eventPill = document.createElement('span'); eventPill.className = `table-status ${item.active ? 'online' : 'offline'}`; eventPill.textContent = item.active ? 'Active' : 'Inactive'; eventState.append(eventPill);
-      const eventAction = document.createElement('td'); eventAction.append(ownerShopEditButton(item));
-      eventRow.append(name, child, profileName, approval, eventState, eventAction);
-      ownerEventItemList.append(eventRow);
-    }
-  });
-  if (ownerShopEmpty) ownerShopEmpty.hidden = ownerShopItems.length !== 0;
-  if (ownerEventItemEmpty) ownerEventItemEmpty.hidden = !ownerShopItems.some((item) => item.fulfilment_type === 'event');
+  ownerShopItemList.replaceChildren(); if (ownerEventItemList) ownerEventItemList.replaceChildren();
+  const manualQuery = String(ownerShopSearch?.value || '').trim().toLowerCase();
+  const eventQuery = String(ownerEventSearch?.value || '').trim().toLowerCase();
+  const manualCategory = ownerShopCategory?.value || 'all'; const eventCategory = ownerEventCategory?.value || 'all';
+  const manualItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && (manualCategory === 'all' || item.category === manualCategory) && (!manualQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category}`.toLowerCase().includes(manualQuery)));
+  const eventItems = ownerShopItems.filter((item) => item.fulfilment_type === 'event' && (eventCategory === 'all' || item.category === eventCategory) && (!eventQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(eventQuery)));
+  manualItems.forEach((item) => { const row=document.createElement('tr'); const itemCell=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; itemCell.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const stock=document.createElement('td'); stock.textContent=item.stock_quantity==null?'Unlimited':String(item.stock_quantity); const limits=document.createElement('td'); limits.textContent=`${item.max_per_order}/order · ${item.max_per_player==null?'No player limit':`${item.max_per_player}/player`}`; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(itemCell,category,price,stock,limits,state,action); ownerShopItemList.append(row); });
+  eventItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=`${formatMoney(item.price)} / restart`; const restarts=document.createElement('td'); restarts.textContent=`${Number(profile.minimum_restarts||1).toLocaleString()}–${Number(profile.maximum_restarts||30000).toLocaleString()}`; const approval=document.createElement('td'); approval.textContent=profile.requires_approval?'Admin approval':'Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,restarts,approval,state,action); ownerEventItemList.append(row); });
+  if (ownerShopEmpty) ownerShopEmpty.hidden = manualItems.length !== 0;
+  if (ownerEventItemEmpty) ownerEventItemEmpty.hidden = eventItems.length !== 0;
 };
 
 const profileListText = (items) => (Array.isArray(items) ? items : []).map((entry) => {
@@ -4277,7 +4374,9 @@ const syncShopItemDeliveryEditor = () => {
     field.disabled = !isEvent;
   });
   const maxOrder = document.querySelector('[data-shop-item-max-order]');
-  if (maxOrder && isEvent) maxOrder.value = '1';
+  const priceLabel = document.querySelector('[data-shop-item-price]')?.closest('label')?.querySelector('span');
+  if (maxOrder) { maxOrder.disabled = isEvent; if (isEvent) maxOrder.value = '1'; }
+  if (priceLabel) priceLabel.textContent = isEvent ? 'Price per restart' : 'Price';
 };
 
 const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
@@ -4293,7 +4392,7 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
     '[data-shop-item-description]': item?.description || '', '[data-shop-item-fulfilment]': item?.fulfilment_instructions || '',
     '[data-shop-profile-name]': profile.profile_name || item?.name || '', '[data-shop-profile-child]': profile.child_type || '',
     '[data-shop-profile-secondary]': profile.secondary_event || '', '[data-shop-profile-lifetime]': profile.lifetime ?? 3888000,
-    '[data-shop-profile-restock]': profile.restock ?? 0, '[data-shop-profile-limit]': profile.event_limit || 'custom',
+    '[data-shop-profile-restock]': profile.restock ?? 0, '[data-shop-profile-min-restarts]': profile.minimum_restarts ?? 1, '[data-shop-profile-max-restarts]': profile.maximum_restarts ?? 30000, '[data-shop-profile-limit]': profile.event_limit || 'custom',
     '[data-shop-profile-saferadius]': profile.saferadius ?? 0, '[data-shop-profile-distanceradius]': profile.distanceradius ?? 0,
     '[data-shop-profile-cleanupradius]': profile.cleanupradius ?? 0, '[data-shop-profile-attachments]': profileListText(profile.attachments),
     '[data-shop-profile-cargo]': profileListText(profile.cargo)
@@ -4334,6 +4433,7 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
     if (ownerShopDescription) ownerShopDescription.value = String(settings.description || '');
     if (ownerShopInstructions) ownerShopInstructions.value = String(settings.purchase_instructions || '');
     ownerShopItems = Array.isArray(payload.items) ? payload.items : [];
+    populateOwnerShopCategories();
     renderOwnerShopItems();
     if (ownerShopError) ownerShopError.hidden = true;
     return true;
@@ -4345,6 +4445,8 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
     refreshShopConfigButton?.removeAttribute('disabled');
   }
 };
+[ownerShopSearch, ownerEventSearch].forEach((input) => input?.addEventListener('input', renderOwnerShopItems));
+[ownerShopCategory, ownerEventCategory].forEach((select) => select?.addEventListener('change', renderOwnerShopItems));
 refreshShopConfigButton?.addEventListener('click', () => loadOwnerShopConfig());
 saveShopSettingsButton?.addEventListener('click', async () => {
   const sessionToken = storageGet(AUTH_SESSION_KEY);
@@ -4396,7 +4498,7 @@ shopItemForm?.addEventListener('submit', async (event) => {
         delivery_profile: shopItemDeliveryType?.value === 'event' ? {
           profile_name: value('[data-shop-profile-name]'), child_type: value('[data-shop-profile-child]'),
           secondary_event: value('[data-shop-profile-secondary]'), lifetime: value('[data-shop-profile-lifetime]'),
-          restock: value('[data-shop-profile-restock]'), event_limit: value('[data-shop-profile-limit]'),
+          restock: value('[data-shop-profile-restock]'), minimum_restarts: value('[data-shop-profile-min-restarts]'), maximum_restarts: value('[data-shop-profile-max-restarts]'), event_limit: value('[data-shop-profile-limit]'),
           saferadius: value('[data-shop-profile-saferadius]'), distanceradius: value('[data-shop-profile-distanceradius]'),
           cleanupradius: value('[data-shop-profile-cleanupradius]'), attachments: parseProfileList(value('[data-shop-profile-attachments]')),
           cargo: parseProfileList(value('[data-shop-profile-cargo]')),
@@ -4611,7 +4713,9 @@ const deliveryStatusActions = {
   ready: [['Preview XML', 'preview'], ['Stage files', 'stage']],
   previewed: [['Refresh preview', 'preview'], ['Stage files', 'stage']],
   restart_pending: [['Start server', 'restart'], ['Rollback files', 'rollback']],
-  verification: [['Verify & fulfil', 'verify'], ['Rollback files', 'rollback']],
+  verification: [['Verify spawn', 'verify'], ['Rollback files', 'rollback']],
+  active: [['Record restart manually', 'record_restart'], ['Rollback files', 'rollback']],
+  cleanup_due: [['Clean up & fulfil', 'cleanup'], ['Rollback files', 'rollback']],
   failed: [['Retry preview', 'preview'], ['Retry staging', 'stage'], ['Rollback files', 'rollback']]
 };
 
@@ -4627,9 +4731,13 @@ const performDeliveryAction = async (order, action) => {
   const token = storageGet(AUTH_SESSION_KEY);
   if (!token || deliveryActionInProgress) return;
   let note = '';
-  if (['verify', 'rollback', 'cancel'].includes(action)) {
+  if (['verify', 'record_restart', 'cleanup', 'rollback', 'cancel'].includes(action)) {
     note = window.prompt(action === 'verify'
       ? 'Enter the in-game verification note:'
+      : action === 'record_restart'
+        ? 'Enter why this restart is being counted manually:'
+        : action === 'cleanup'
+          ? 'Enter the final cleanup and fulfilment note:'
       : action === 'rollback'
         ? 'Enter the rollback reason:'
         : 'Enter the cancellation note:', '') || '';
@@ -4638,7 +4746,8 @@ const performDeliveryAction = async (order, action) => {
   const warnings = {
     stage: 'The DayZ server must already be stopped. This will back up and upload events.xml, cfgeventspawns.xml and cfgspawnabletypes.xml.',
     restart: 'This will start the stopped Nitrado server so the staged delivery can spawn. Continue?',
-    verify: 'This will retire the temporary event entries and mark the shop order fulfilled.',
+    verify: 'This verifies the initial spawn. Multi-restart rentals remain active until their restart count reaches zero.',
+    cleanup: 'The DayZ server must be fully stopped. This will retire the temporary event entries and mark the completed rental fulfilled.',
     rollback: 'This will restore the recorded pre-deployment backups.'
   };
   if (warnings[action] && !window.confirm(warnings[action])) return;
@@ -4669,7 +4778,7 @@ const performDeliveryAction = async (order, action) => {
 const deliveryActionButton = (order, label, action) => {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = `${['stage', 'restart', 'verify'].includes(action) ? 'primary-action' : 'secondary-action'} compact-action`;
+  button.className = `${['stage', 'restart', 'verify', 'cleanup'].includes(action) ? 'primary-action' : 'secondary-action'} compact-action`;
   button.textContent = label;
   button.addEventListener('click', () => performDeliveryAction(order, action));
   return button;
@@ -4682,7 +4791,7 @@ const renderDeliveryQueue = (payload) => {
   setText('[data-delivery-open]', String(Number(summary.open || 0)));
   setText('[data-delivery-awaiting]', String(Number(summary.awaiting_approval || 0)));
   setText('[data-delivery-restart]', String(Number(summary.restart_pending || 0)));
-  setText('[data-delivery-verification]', String(Number(summary.verification || 0)));
+  setText('[data-delivery-verification]', String(Number(summary.verification || 0) + Number(summary.active || 0) + Number(summary.cleanup_due || 0)));
   setText('[data-delivery-failed]', String(Number(summary.failed || 0)));
   const openCount = Number(summary.open || 0);
   if (deliveryNavBadge) {
@@ -4714,6 +4823,7 @@ const renderDeliveryQueue = (payload) => {
       ['Rotation', `${order.location.rotation}°`],
       ['Value', formatMoney(order.total_price)],
       ['Created', formatAccountDate(order.created_at)],
+      ['Restarts', `${Number(order.remaining_restarts ?? order.purchased_restarts ?? 1).toLocaleString()} of ${Number(order.purchased_restarts || 1).toLocaleString()} remaining`],
       ['Approval', order.requires_approval ? 'Required' : 'Not required']
     ].forEach(([label, value]) => {
       const block = document.createElement('div');

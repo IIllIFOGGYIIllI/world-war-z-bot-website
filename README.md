@@ -34,7 +34,6 @@ GitHub may take a few minutes to publish the first version.
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
 - `dashboard.js` — Railway health, Discord session, role visibility, member data, survivor-shop purchases, fulfilment controls, secure player lookup, moderation actions and protected audit history
-- `chernarus-map.js` — public POI search, filters, markers, pan and vector zoom
 - `legal.html` — legal and policy document hub
 - `terms.html` — community Terms of Service
 - `privacy.html` — privacy, storage, service-provider and data-request information
@@ -50,12 +49,20 @@ GitHub may take a few minutes to publish the first version.
 - `assets/world-war-z-dashboard-bg.webp` — desktop command-centre atmosphere
 - `assets/world-war-z-dashboard-bg-mobile.webp` — mobile command-centre atmosphere
 - `assets/chernarus-vector.svg` — custom vector Chernarus road overview
-- `assets/chernarus-pois.json` — validated public map locations
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+
+## Version 1.22.0 trader workspace and coordinate checkout
+
+- Separate regular Items and Event Items catalogue workspaces.
+- Event-item prices are charged per purchased server restart, capped at 30,000.
+- Click/tap Chernarus coordinate selection automatically fills X and Z.
+- The main public map is a Coming Soon workspace pending its high-detail rebuild.
+- Rich Open Graph and Twitter metadata supplies a branded Discord link preview.
+- `.nojekyll` explicitly publishes the project as a static GitHub Pages site.
 
 ## Version 1.21.0 trader delivery and DayZ control centre
 
@@ -148,7 +155,7 @@ The redesigned command centre now includes an Admin-only active moderation-case 
 
 Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth, member-data queries, protected player administration, Start, Stop and Restart requests, and protected audit-history queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab. Every protected player request requires fresh Admin/Owner authorization and returns only allowlisted fields. Player write actions require a reason, a clear confirmation dialog for the selected PlayStation ID, target protection and permanent audit logging. Railway still validates the selected PSN internally; Admins no longer need to retype it for every action. Ban actions may be permanent or scheduled; Railway validates the expiry and a persistent worker performs and audits automatic Discord or Nitrado unbans. Every server action requires an explicit confirmation prompt, fresh Admin/Owner authorization, a safe live state, duplicate protection and backend audit logging.
 
-The public map intentionally excludes live players, private bases, Admin positions and unpublished event coordinates. Only entries marked `public` in `assets/chernarus-pois.json` are displayed.
+The main public map is currently a Coming Soon workspace. The local Chernarus vector remains active in trader checkout for click-to-coordinate selection and does not publish private bases, live players, Admin positions or unpublished event coordinates.
 
 ## Disclaimer
 

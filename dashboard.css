@@ -2980,7 +2980,7 @@ tbody tr:hover { background: rgba(22,136,248,.045); }
   .command-palette-heading h2 { font-size: 14px; }
 }
 
-/* v1.21.0 — account centre, saved coordinates and DayZ delivery operations */
+/* v1.22.0 — account centre, saved coordinates and DayZ delivery operations */
 .account-avatar,
 .profile-discord-avatar,
 .discord-button [data-topbar-avatar] {
@@ -3190,3 +3190,50 @@ tbody tr:hover { background: rgba(22,136,248,.045); }
   .profile-discord-avatar { width: 58px; height: 58px; border-radius: 14px; }
   .profile-quick-links .secondary-action { width: 100%; }
 }
+
+
+/* v1.22.0 trader workspace, coordinate picker and map roadmap */
+.map-coming-preview { grid-template-columns: 150px 1fr; min-height: 250px; }
+.map-coming-symbol { display:grid; place-items:center; min-height:250px; background:radial-gradient(circle,rgba(255,61,48,.18),transparent 58%),linear-gradient(145deg,#17191c,#090a0c); color:#ff5548; font-size:68px; }
+.map-coming-soon { display:grid; grid-template-columns:minmax(280px,.9fr) minmax(0,1.1fr); gap:0; padding:0; overflow:hidden; }
+.map-coming-art { position:relative; min-height:520px; overflow:hidden; background:#090a0c; }
+.map-coming-art::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(12,13,15,.94)); }
+.map-coming-art img { width:100%; height:100%; object-fit:cover; filter:grayscale(.65) brightness(.37) contrast(1.18); transform:scale(1.12); }
+.map-coming-art span { position:absolute; z-index:2; inset:50% auto auto 50%; transform:translate(-50%,-50%); width:92px; height:92px; display:grid; place-items:center; border:1px solid rgba(255,83,70,.42); border-radius:50%; background:rgba(18,15,16,.84); color:#ff594c; font-size:42px; box-shadow:0 0 0 18px rgba(255,60,45,.05),0 20px 55px rgba(0,0,0,.5); }
+.map-coming-copy { display:grid; align-content:center; gap:16px; padding:clamp(28px,5vw,70px); }
+.map-coming-copy h2 { margin:0; font-size:clamp(34px,5vw,70px); }
+.map-coming-copy>p:not(.panel-kicker) { max-width:700px; color:#a2a6ad; line-height:1.7; }
+.map-coming-features { display:flex; flex-wrap:wrap; gap:8px; }
+.map-coming-features span { padding:8px 11px; border:1px solid var(--line); border-radius:999px; background:#202226; color:#d4d7db; font-size:9px; font-weight:850; text-transform:uppercase; letter-spacing:.07em; }
+.shop-mode-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:14px 0; }
+.shop-mode-tabs button { position:relative; display:grid; grid-template-columns:42px minmax(0,1fr) auto; grid-template-rows:auto auto; gap:2px 12px; align-items:center; padding:15px; border:1px solid var(--line); border-radius:9px; background:linear-gradient(145deg,#202226,#17191c); color:var(--paper); cursor:pointer; text-align:left; }
+.shop-mode-tabs button>span { grid-row:1/3; width:40px; height:40px; display:grid; place-items:center; border-radius:8px; background:rgba(75,155,255,.11); color:#6ab6ff; font-size:18px; }
+.shop-mode-tabs button strong { font-size:13px; }
+.shop-mode-tabs button small { color:#777d86; font-size:9px; }
+.shop-mode-tabs button b { grid-row:1/3; grid-column:3; min-width:34px; padding:5px 8px; border-radius:999px; background:#292c31; color:#b8bdc6; text-align:center; }
+.shop-mode-tabs button.active { border-color:rgba(255,73,61,.58); box-shadow:inset 3px 0 #ff493d,0 12px 34px rgba(0,0,0,.2); }
+.shop-mode-tabs button.active>span { background:rgba(255,69,58,.13); color:#ff6b61; }
+.shop-management-toolbar { display:grid; grid-template-columns:minmax(260px,1fr) minmax(180px,260px); gap:12px; margin:14px 0 10px; }
+.shop-quantity-field small { display:block; margin-top:5px; color:#777d86; font-size:9px; }
+.shop-purchase-dialog { width:min(1180px,calc(100vw - 24px)); }
+.event-purchase-layout { display:grid; grid-template-columns:minmax(300px,.72fr) minmax(420px,1.28fr); gap:14px; align-items:start; }
+.event-coordinate-form { display:grid; gap:12px; }
+.shop-coordinate-picker { min-width:0; overflow:hidden; border:1px solid rgba(255,255,255,.09); border-radius:10px; background:#0d0f12; }
+.coordinate-picker-heading { display:flex; justify-content:space-between; gap:12px; padding:12px 14px; border-bottom:1px solid var(--line); }
+.coordinate-picker-heading div { display:grid; gap:3px; }
+.coordinate-picker-heading span,.coordinate-picker-heading small { color:#777d86; font-size:9px; }
+.coordinate-picker-heading strong { font:800 12px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.coordinate-picker-frame { position:relative; min-height:500px; overflow:hidden; background:#080a0c; touch-action:none; cursor:crosshair; }
+.coordinate-picker-stage { position:absolute; inset:0; transform-origin:center; will-change:transform; }
+.coordinate-picker-stage img { width:100%; height:100%; display:block; object-fit:contain; user-select:none; pointer-events:none; }
+.coordinate-picker-marker { position:absolute; z-index:3; transform:translate(-50%,-88%) rotate(-45deg); width:34px; height:34px; display:grid; place-items:center; border:2px solid #fff; border-radius:50% 50% 50% 0; background:#e8382d; color:#fff; font-size:17px; box-shadow:0 0 0 8px rgba(232,56,45,.2),0 8px 22px rgba(0,0,0,.7); }
+.coordinate-picker-controls { position:absolute; z-index:5; top:12px; right:12px; display:grid; gap:6px; }
+.coordinate-picker-controls button { width:38px; height:38px; border:1px solid rgba(255,255,255,.14); border-radius:6px; background:rgba(12,14,17,.9); color:#fff; font-size:18px; cursor:pointer; }
+.coordinate-picker-hint { position:absolute; z-index:5; right:12px; bottom:12px; padding:8px 10px; border:1px solid rgba(255,255,255,.11); border-radius:6px; background:rgba(7,8,10,.86); color:#b7bcc4; font-size:9px; }
+.coordinate-picker-frame.saved-location-active::after { content:'Saved location selected'; position:absolute; z-index:6; inset:0; display:grid; place-items:center; background:rgba(5,6,8,.3); color:#fff; font-weight:900; letter-spacing:.08em; text-transform:uppercase; pointer-events:none; }
+.delivery-active::before { background:#4cbd7a; }
+.delivery-cleanup_due::before { background:#c76bff; }
+.shop-order-status.active { color:#8ae6a1; border-color:rgba(138,230,161,.32); }
+.shop-order-status.cleanup_due { color:#dda0ff; border-color:rgba(221,160,255,.35); }
+@media(max-width:980px){.map-coming-soon,.event-purchase-layout{grid-template-columns:1fr}.map-coming-art{min-height:300px}.coordinate-picker-frame{min-height:430px}}
+@media(max-width:680px){.shop-mode-tabs,.shop-management-toolbar{grid-template-columns:1fr}.coordinate-picker-frame{min-height:340px}.map-coming-preview{grid-template-columns:1fr}.map-coming-symbol{min-height:150px}.event-delivery-fields{padding:11px}.shop-purchase-dialog form{padding-inline:12px}}
