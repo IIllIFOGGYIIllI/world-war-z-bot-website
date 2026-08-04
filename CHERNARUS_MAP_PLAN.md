@@ -33,7 +33,7 @@ out-of-bounds or non-public entries.
 Never publish live player locations, private bases, Admin positions or
 unpublished event coordinates.
 
-## Future stages
+## Future versions
 
 1. Replace the initial navigation landmarks with confirmed World War Z
    community POIs such as traders, safe zones and event areas.

@@ -1,4 +1,33 @@
-# World War Z Bot Website — Patch Notes
+# Website Patch Notes
+
+## Version 1.14.2 — Policy Suite and Version-Only Releases
+
+### Added
+
+- Added `legal.html` as the central Legal & Policies hub.
+- Added community Terms of Service.
+- Added Community Guidelines covering safety, fair play, account misuse, scams,
+  evidence and ban evasion.
+- Added a Moderation & Appeals Policy covering numbered cases, evidence, temporary
+  and permanent bans, automatic expiry, review outcomes and technical errors.
+- Expanded the Privacy Policy with browser storage, service providers, cross-border
+  processing, retention, access/correction/deletion requests and younger-user guidance.
+- Added legal and policy links across the public website and dashboard.
+
+### Changed
+
+- Public release, roadmap and interface wording now uses version numbers instead of
+  development phase labels.
+- Strengthened independent-project, third-party platform and virtual-economy notices.
+- Preserved all version 1.14.1 current-ban-list functionality.
+
+### Deployment
+
+- Website-only update.
+- No Railway variable, bot update or database migration is required.
+- Replace the website files with the version 1.14.2 patch and hard refresh after
+  GitHub Pages publishes.
+
 
 ## Version 1.14.1 — Current Ban Lists
 
@@ -41,7 +70,7 @@
 - Replaced the temporary W/Z text mark with a dedicated locally hosted World War Z logo across the dashboard, public website and supporting pages.
 - Redesigned the dashboard top bar, navigation, view headers, cards, Admin controls, dialogs, mobile layouts and public landing page.
 - Added local favicon, application icon and responsive background assets.
-- Preserved every existing Stage 7B2 data attribute, API workflow and protected action.
+- Preserved every existing version 1.12 data attribute, API workflow and protected action.
 
 ### Repository cleanup
 
@@ -92,7 +121,7 @@
 - No fake DayZ kick control is shown because no supported console operation was
   available.
 - Temporary-ban expiry, evidence uploads, appeals, bulk actions and account
-  deletion remain future stages.
+  deletion remain future versions.
 
 ## Version 1.11.0 — Secure Read-Only Player Administration
 
@@ -116,7 +145,7 @@
   identities, evidence metadata and credentials are excluded.
 - Dynamic player and moderation values are rendered as text rather than
   injected HTML.
-- Stage 7B1 is read-only. Warning, note, ban, kick, balance, unlink and delete
+- version 1.11 is read-only. Warning, note, ban, kick, balance, unlink and delete
   controls remain unavailable.
 
 ## Version 1.10.0 — Live Server Operations
@@ -363,7 +392,7 @@
 - Railway rechecks current guild membership and roles before returning
   authenticated identity information.
 - Private profiles, economy records, moderation information and all
-  server-changing controls remain locked for later stages.
+  server-changing controls remain locked for later versions.
 
 ## Version 1.2.0 — Live Server Status
 
@@ -380,7 +409,7 @@
 
 - The public website cannot perform server-changing actions.
 - Online player names, Discord member records, bot credentials and Nitrado credentials are not requested or displayed.
-- Discord authentication and all protected account, Admin and owner features remain locked for future stages.
+- Discord authentication and all protected account, Admin and owner features remain locked for future versions.
 
 ## Version 1.1.0 — Dashboard Preview
 

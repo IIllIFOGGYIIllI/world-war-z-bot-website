@@ -939,7 +939,7 @@ td:first-child { color: #e7dfd7; font-weight: 700; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
-/* Stage 7B1 — secure read-only player administration */
+/* Version 1.11 — secure read-only player administration */
 .admin-player-search {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1050,7 +1050,7 @@ td:first-child { color: #e7dfd7; font-weight: 700; }
   .admin-player-result .result-state { justify-self: start; }
 }
 
-/* Stage 7B2 — controlled player administration */
+/* Version 1.12 — controlled player administration */
 .player-action-panel { margin: 16px 0; }
 .player-action-grid {
   display: grid;
@@ -1626,7 +1626,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 /* ========================================================================== 
-   Version 1.14.0 — Stage 7B3A Moderation Case Management
+   Version 1.14.0 — Moderation Case Management
    ========================================================================== */
 .moderation-case-panel { margin-bottom: 18px; }
 .panel-intro {

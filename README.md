@@ -14,7 +14,7 @@ After GitHub Pages is enabled, the site will be available at:
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
 4. If `DELETE_THESE_FILES.txt` still exists in the repository, delete it; it is an obsolete instruction file and is intentionally absent from this release.
-5. Enter the commit message: `Add temporary ban case management`
+5. Enter the commit message: `Add community policy suite`
 6. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -36,7 +36,11 @@ GitHub may take a few minutes to publish the first version.
 - `dashboard.css` — dashboard layout and responsive design
 - `dashboard.js` — Railway health, Discord session, role visibility, member data, secure player lookup, controlled moderation actions and protected audit history
 - `chernarus-map.js` — public POI search, filters, markers, pan and vector zoom
-- `privacy.html` — current dashboard authentication and privacy information
+- `legal.html` — legal and policy document hub
+- `terms.html` — community Terms of Service
+- `privacy.html` — privacy, storage, service-provider and data-request information
+- `community-guidelines.html` — acceptable conduct and safety rules
+- `moderation-policy.html` — cases, evidence, bans, expiry and appeal practices
 - `changelog.html` — browser-readable website release history
 - `pages.css` — shared privacy and changelog page design
 - `404.html` — custom missing-page screen
@@ -50,8 +54,15 @@ GitHub may take a few minutes to publish the first version.
 - `assets/chernarus-pois.json` — validated public map locations
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates
-- `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected stages
+- `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
+
+## Version 1.14.2 policy suite and release naming
+
+The public website now includes a Legal & Policies hub, Terms of Service, expanded
+Privacy Policy, Community Guidelines and Moderation & Appeals Policy. Public and
+dashboard footers link to the policy suite. Visible release and roadmap language
+uses version numbers instead of development phase labels.
 
 ## Version 1.14.1 current ban lists
 
@@ -72,4 +83,4 @@ The public map intentionally excludes live players, private bases, Admin positio
 
 ## Disclaimer
 
-This website is not affiliated or authorized by Bohemia Interactive a.s. Bohemia Interactive, ARMA, DAYZ and all associated logos and designs are trademarks or registered trademarks of Bohemia Interactive a.s.
+This independent community website is not affiliated with or endorsed by Bohemia Interactive, Discord, Sony Interactive Entertainment, Nitrado, GitHub or Railway. Relevant names, games, services and trademarks belong to their respective owners.
