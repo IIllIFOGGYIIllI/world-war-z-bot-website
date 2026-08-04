@@ -1,20 +1,18 @@
 {
-  "version": 1,
+  "version": 2,
   "map": {
     "name": "ChernarusPlus",
     "size_meters": 15360,
-    "default_layer": "vector",
-    "layers": [
-      {
-        "id": "vector",
-        "name": "WWZ Vector Road Map",
-        "image": "assets/chernarus-vector.svg",
-        "max_zoom": 4,
-        "note": "WWZ Vector Road Map · custom schematic adaptation using official CE data © Bohemia Interactive, used under ADPL-SA."
-      }
-    ],
-    "source_name": "BohemiaInteractive/DayZ-Central-Economy",
-    "source_url": "https://github.com/BohemiaInteractive/DayZ-Central-Economy/tree/master/CETool/ChernarusPlus"
+    "tile_pyramid": {
+      "base_path": "assets/chernarus-map/tiles",
+      "format": "webp",
+      "tile_size": 512,
+      "min_zoom": 0,
+      "max_zoom": 5,
+      "native_pixels": 16384,
+      "source": "User-supplied Chernarus satellite layers"
+    },
+    "attribution": "Chernarus and DayZ imagery \u00a9 Bohemia Interactive. Unofficial community dashboard; not affiliated with or endorsed by Bohemia Interactive."
   },
   "pois": [
     {
