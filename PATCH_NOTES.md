@@ -1,5 +1,22 @@
 # World War Z Bot Website — Patch Notes
 
+## Version 1.14.0 — Moderation Cases and Temporary Bans
+
+### Added
+
+- Added an Admin-only active moderation-case queue with case numbers, player, action, reason, issuing Admin, creation time and expiry.
+- Added summary counts for active cases, temporary bans and bans expiring within 24 hours.
+- Added permanent, preset and custom expiry options to Discord and DayZ ban confirmations.
+- Added case references, related-case information, automatic actions and expiry state to protected player history.
+- Added clear permanent, scheduled, expired and unavailable states without exposing raw Discord or database IDs.
+
+### Safety
+
+- Railway remains the authorization and validation boundary for every case and ban request.
+- Custom expiries must be at least five minutes in the future and no more than 365 days.
+- The selected PlayStation ID is sent internally; Admins still enter a required reason and explicitly confirm the action.
+- Failed automatic unbans remain active on Railway and are retried rather than being displayed as completed.
+
 ## Version 1.13.0 — Command Centre UI Overhaul
 
 ### Redesigned

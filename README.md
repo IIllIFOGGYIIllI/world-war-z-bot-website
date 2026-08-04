@@ -14,7 +14,7 @@ After GitHub Pages is enabled, the site will be available at:
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
 4. If `DELETE_THESE_FILES.txt` still exists in the repository, delete it; it is an obsolete instruction file and is intentionally absent from this release.
-5. Enter the commit message: `Overhaul command centre interface`
+5. Enter the commit message: `Add temporary ban case management`
 6. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -53,13 +53,13 @@ GitHub may take a few minutes to publish the first version.
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected stages
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
-## Version 1.13.0 visual system
+## Version 1.14.0 moderation cases
 
-The website now uses one consistent command-centre design across the public landing page, dashboard, privacy information, changelog and 404 page. The background and logo assets are hosted locally, so the visual overhaul adds no third-party image or font requests. Existing dashboard selectors and API behaviour are preserved.
+The redesigned command centre now includes an Admin-only active moderation-case queue and permanent or temporary Discord/DayZ ban schedules. Preset and timezone-aware custom expiries are validated again by Railway. Automatic unbans are performed by the bot service, not by GitHub Pages, and the resulting action is linked to the original numbered case.
 
 ## Security
 
-Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth, member-data queries, protected player administration, Start, Stop and Restart requests, and protected audit-history queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab. Every protected player request requires fresh Admin/Owner authorization and returns only allowlisted fields. Player write actions require a reason, a clear confirmation dialog for the selected PlayStation ID, target protection and permanent audit logging. Railway still validates the selected PSN internally; Admins no longer need to retype it for every action. Every server action requires an explicit confirmation prompt, fresh Admin/Owner authorization, a safe live state, duplicate protection and backend audit logging.
+Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth, member-data queries, protected player administration, Start, Stop and Restart requests, and protected audit-history queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab. Every protected player request requires fresh Admin/Owner authorization and returns only allowlisted fields. Player write actions require a reason, a clear confirmation dialog for the selected PlayStation ID, target protection and permanent audit logging. Railway still validates the selected PSN internally; Admins no longer need to retype it for every action. Ban actions may be permanent or scheduled; Railway validates the expiry and a persistent worker performs and audits automatic Discord or Nitrado unbans. Every server action requires an explicit confirmation prompt, fresh Admin/Owner authorization, a safe live state, duplicate protection and backend audit logging.
 
 The public map intentionally excludes live players, private bases, Admin positions and unpublished event coordinates. Only entries marked `public` in `assets/chernarus-pois.json` are displayed.
 

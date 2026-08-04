@@ -87,6 +87,7 @@ const SERVER_ACTION_HISTORY_URL = `${DASHBOARD_API_BASE}/api/admin/server/action
 const ADMIN_PLAYER_SEARCH_URL = `${DASHBOARD_API_BASE}/api/admin/players/search`;
 const ADMIN_PLAYER_DETAILS_URL = `${DASHBOARD_API_BASE}/api/admin/players/details`;
 const ADMIN_PLAYER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/players/action`;
+const ADMIN_MODERATION_CASES_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/cases`;
 const PLAYER_ACTIONS = {
   add_note: { mark: '≡', title: 'Add private staff note?', description: 'The note will be visible only inside protected Admin player administration.', warning: 'Private notes remain in the Railway database and are included in the player audit view.', reasonLabel: 'Private staff note', reasonHelp: '1–1,500 characters', submitLabel: 'Add private note' },
   update_note: { mark: '✎', title: 'Update this private staff note?', description: 'The selected note will be replaced with the revised staff-only text.', warning: 'The previous note text is retained inside the private Railway audit record.', reasonLabel: 'Updated private note', reasonHelp: '1–1,500 characters', submitLabel: 'Update private note' },
@@ -95,9 +96,9 @@ const PLAYER_ACTIONS = {
   remove_warning: { mark: '−', title: 'Remove this warning?', description: 'The original warning will be marked removed and a linked removal case will be recorded.', warning: 'The warning history is preserved; this does not delete the original case.', reasonLabel: 'Removal reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Remove warning' },
   economy_adjust: { mark: '$', title: 'Adjust this player’s balance?', description: 'Choose whether to add, remove or set the verified economy balance.', warning: 'Every adjustment creates an economy transaction and permanent dashboard audit record.', reasonLabel: 'Adjustment reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Apply balance adjustment', economy: true },
   discord_kick: { mark: '↥', title: 'Kick this member from Discord?', description: 'The linked Discord member will be removed from the World War Z Discord server.', warning: 'They can rejoin later unless they are also banned.', reasonLabel: 'Kick reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Kick from Discord' },
-  discord_ban: { mark: '⊘', title: 'Permanently ban this member from Discord?', description: 'The linked Discord member will be added to the Discord server ban list.', warning: 'This remains in effect until an authorized Admin unbans the account.', reasonLabel: 'Ban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Ban from Discord' },
+  discord_ban: { mark: '⊘', title: 'Ban this member from Discord?', description: 'Choose a permanent ban or schedule an automatic unban through Railway.', warning: 'A numbered active case will remain open until it is manually reversed or automatically expires.', reasonLabel: 'Ban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Ban from Discord', banSchedule: true },
   discord_unban: { mark: '♻', title: 'Unban this account from Discord?', description: 'The linked Discord account will be removed from the Discord server ban list.', warning: 'This allows the account to rejoin the Discord server.', reasonLabel: 'Unban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Unban from Discord' },
-  dayz_ban: { mark: '⊘', title: 'Ban this PlayStation ID from DayZ?', description: 'Railway will add the selected PlayStation ID to the Nitrado game ban list.', warning: 'This is a real Nitrado ban-list change, not a local database-only marker.', reasonLabel: 'DayZ ban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Ban from DayZ' },
+  dayz_ban: { mark: '⊘', title: 'Ban this PlayStation ID from DayZ?', description: 'Choose a permanent Nitrado ban or schedule an automatic removal through Railway.', warning: 'This is a real Nitrado ban-list change linked to a numbered moderation case.', reasonLabel: 'DayZ ban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Ban from DayZ', banSchedule: true },
   dayz_unban: { mark: '♻', title: 'Unban this PlayStation ID from DayZ?', description: 'Railway will remove the selected PlayStation ID from the Nitrado game ban list.', warning: 'The removal is permanent unless the player is banned again.', reasonLabel: 'DayZ unban reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Unban from DayZ' },
   unlink: { mark: '⌁', title: 'Unlink this Discord and PlayStation account?', description: 'The verified identity link will be removed after Railway stores a recovery snapshot.', warning: 'Economy and linked profile rows are removed from active use. Only the Owner can submit this action.', reasonLabel: 'Unlink reason', reasonHelp: 'Required · 3–1,000 characters', submitLabel: 'Create recovery snapshot and unlink' }
 };
@@ -166,6 +167,10 @@ const serverActionHistory = document.querySelector('[data-server-action-history]
 const serverActionHistoryEmpty = document.querySelector('[data-server-action-history-empty]');
 const serverActionHistoryError = document.querySelector('[data-server-action-history-error]');
 const refreshServerActionsButton = document.querySelector('[data-refresh-server-actions]');
+const moderationCaseList = document.querySelector('[data-moderation-case-list]');
+const moderationCaseEmpty = document.querySelector('[data-moderation-case-empty]');
+const moderationCaseError = document.querySelector('[data-moderation-case-error]');
+const refreshModerationCasesButton = document.querySelector('[data-refresh-moderation-cases]');
 const adminPlayerSearchForm = document.querySelector('[data-admin-player-search-form]');
 const adminPlayerSearchInput = document.querySelector('[data-admin-player-search-input]');
 const adminPlayerSearchButton = document.querySelector('[data-admin-player-search-button]');
@@ -198,6 +203,10 @@ const playerActionTarget = document.querySelector('[data-player-action-target]')
 const playerActionEconomyFields = document.querySelector('[data-player-action-economy-fields]');
 const playerActionEconomyOperation = document.querySelector('[data-player-action-economy-operation]');
 const playerActionAmount = document.querySelector('[data-player-action-amount]');
+const playerActionBanFields = document.querySelector('[data-player-action-ban-fields]');
+const playerActionBanDuration = document.querySelector('[data-player-action-ban-duration]');
+const playerActionCustomExpiry = document.querySelector('[data-player-action-custom-expiry]');
+const playerActionExpiry = document.querySelector('[data-player-action-expiry]');
 const playerActionDialogMessage = document.querySelector('[data-player-action-dialog-message]');
 const confirmPlayerActionButton = document.querySelector('[data-confirm-player-action]');
 const playerActionCancelButtons = [...document.querySelectorAll('[data-player-action-cancel]')];
@@ -210,6 +219,7 @@ let serverActionRequestInProgress = false;
 let serverActionLockedUntil = 0;
 let serverActionLockTimer = null;
 let serverActionHistoryRequestInProgress = false;
+let moderationCaseRequestInProgress = false;
 let adminPlayerSearchRequestInProgress = false;
 let adminPlayerDetailRequestInProgress = false;
 let selectedAdminPlayer = null;
@@ -781,6 +791,10 @@ const showPlayerActionDialogMessage = (message, state = 'error') => {
 const resetPlayerActionDialog = ({ clearSelection = false } = {}) => {
   playerActionForm?.reset();
   if (playerActionEconomyFields) playerActionEconomyFields.hidden = true;
+  if (playerActionBanFields) playerActionBanFields.hidden = true;
+  if (playerActionCustomExpiry) playerActionCustomExpiry.hidden = true;
+  if (playerActionBanDuration) playerActionBanDuration.value = 'permanent';
+  if (playerActionExpiry) playerActionExpiry.value = '';
   if (playerActionDialogMessage) {
     playerActionDialogMessage.hidden = true;
     playerActionDialogMessage.textContent = '';
@@ -799,6 +813,7 @@ const playerActionIsAllowed = (action) => {
   if (action === 'unlink' && dashboardAccessLevel !== 'owner') return false;
   if (['add_warning', 'discord_kick', 'discord_ban', 'discord_unban', 'unlink'].includes(action) && !selectedAdminPlayer.linked) return false;
   if (action === 'economy_adjust' && !selectedAdminPlayer.economyAvailable) return false;
+  if (action === 'discord_ban' && selectedAdminPlayer.discordBanned) return false;
   if (action === 'dayz_ban' && selectedAdminPlayer.dayzBanned) return false;
   if (action === 'dayz_unban' && !selectedAdminPlayer.dayzBanned) return false;
   if (['edit_warning', 'remove_warning'].includes(action) && !Number.isInteger(Number(selectedWarningCaseId))) return false;
@@ -948,6 +963,82 @@ const appendAdminActivity = (list, { symbolText, symbolClass = '', titleText, de
   list.append(item);
 };
 
+const renderModerationCases = (payload) => {
+  const cases = Array.isArray(payload?.cases) ? payload.cases : [];
+  const summary = payload?.summary || {};
+  setText('[data-moderation-case-active]', String(Number(summary.active_cases) || 0));
+  setText('[data-moderation-case-temporary]', String(Number(summary.temporary_bans) || 0));
+  setText('[data-moderation-case-expiring]', String(Number(summary.expiring_within_24_hours) || 0));
+  if (!moderationCaseList) return;
+
+  moderationCaseList.replaceChildren();
+  cases.forEach((record) => {
+    const caseId = Number(record?.case_id);
+    const action = String(record?.action || 'record');
+    const status = String(record?.status || 'completed');
+    const psn = String(record?.psn_id || record?.target_name || 'Player');
+    const permanent = ['ban', 'dayz_ban'].includes(action) && !record?.expires_at;
+    const schedule = record?.expires_at
+      ? `Expires ${formatAccountDate(record.expires_at)}`
+      : permanent
+        ? 'Permanent until manually reversed'
+        : record?.duration_seconds != null
+          ? `Duration ${formatDuration(record.duration_seconds)}`
+          : 'No scheduled expiry';
+    appendAdminActivity(moderationCaseList, {
+      symbolText: action.includes('ban') ? '⊘' : action === 'warn' ? '!' : '≡',
+      symbolClass: action.includes('ban') ? 'red' : action === 'warn' ? 'warning' : '',
+      titleText: `Case #${Number.isInteger(caseId) ? caseId : '—'} · ${titleCaseState(action)} · ${titleCaseState(status)}`,
+      detailText: `${psn} · ${String(record?.reason || 'No reason recorded')} · ${schedule} · Opened by ${String(record?.moderator_name || 'Administrator')} on ${formatAccountDate(record?.created_at)}`
+    });
+  });
+
+  moderationCaseList.hidden = cases.length === 0;
+  if (moderationCaseEmpty) moderationCaseEmpty.hidden = cases.length !== 0;
+  if (moderationCaseError) moderationCaseError.hidden = true;
+};
+
+const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!hasServerActionAccess() || !sessionToken || moderationCaseRequestInProgress) return;
+  moderationCaseRequestInProgress = true;
+  refreshModerationCasesButton?.setAttribute('disabled', '');
+  refreshModerationCasesButton?.setAttribute('aria-busy', 'true');
+
+  try {
+    const response = await authFetch(`${ADMIN_MODERATION_CASES_URL}?scope=active&limit=25`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionToken}`
+      }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) {
+      storageRemove(AUTH_SESSION_KEY);
+      applySignedOutState();
+      return;
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error('Moderation cases unavailable');
+    renderModerationCases(payload);
+  } catch (error) {
+    if (moderationCaseList) moderationCaseList.hidden = true;
+    if (moderationCaseEmpty) moderationCaseEmpty.hidden = true;
+    if (moderationCaseError) moderationCaseError.hidden = false;
+    setText('[data-moderation-case-active]', '—');
+    setText('[data-moderation-case-temporary]', '—');
+    setText('[data-moderation-case-expiring]', '—');
+  } finally {
+    moderationCaseRequestInProgress = false;
+    refreshModerationCasesButton?.removeAttribute('disabled');
+    refreshModerationCasesButton?.removeAttribute('aria-busy');
+  }
+};
+
+refreshModerationCasesButton?.addEventListener('click', () => loadModerationCases());
+window.addEventListener('wwz:viewchange', (event) => {
+  if (event.detail?.view === 'staff') loadModerationCases();
+});
+
 const renderAdminNotes = (notes) => {
   if (!adminPlayerNotes) return;
   const safeNotes = Array.isArray(notes) ? notes : [];
@@ -1010,13 +1101,15 @@ const renderAdminModerationHistory = (history) => {
   safeHistory.forEach((record) => {
     const action = String(record?.action || 'record');
     const status = String(record?.status || 'completed');
+    const caseId = Number(record?.case_id);
     const duration = record?.duration_seconds == null ? '' : ` · Duration ${formatDuration(record.duration_seconds)}`;
     const expiry = record?.expires_at ? ` · Expires ${formatAccountDate(record.expires_at)}` : '';
+    const related = Number.isInteger(Number(record?.related_case_id)) ? ` · Related to #${Number(record.related_case_id)}` : '';
     appendAdminActivity(adminPlayerModerationHistory, {
       symbolText: action === 'warn' ? '!' : action.includes('ban') ? '⊘' : '≡',
-      symbolClass: action === 'warn' ? 'warning' : status === 'removed' || status === 'reversed' ? 'removed' : '',
-      titleText: `${titleCaseState(action)} · ${titleCaseState(status)}`,
-      detailText: `${String(record?.reason || 'No public reason recorded')} · ${formatAccountDate(record?.created_at)}${duration}${expiry}`
+      symbolClass: action === 'warn' ? 'warning' : ['removed', 'reversed', 'expired'].includes(status) ? 'removed' : '',
+      titleText: `Case #${Number.isInteger(caseId) ? caseId : '—'} · ${titleCaseState(action)} · ${titleCaseState(status)}`,
+      detailText: `${String(record?.reason || 'No public reason recorded')} · ${String(record?.moderator_name || 'Administrator')} · ${formatAccountDate(record?.created_at)}${duration}${expiry}${related}`
     });
   });
 };
@@ -1031,11 +1124,14 @@ const renderAdminDayzBans = (dayzBan) => {
 
   history.forEach((record) => {
     const action = String(record?.action || 'record');
+    const caseId = Number(record?.case_id);
+    const expiry = record?.expires_at ? ` · Expires ${formatAccountDate(record.expires_at)}` : '';
+    const automatic = Boolean(record?.automatic) ? ' · Automatic expiry' : '';
     appendAdminActivity(adminPlayerDayzBans, {
       symbolText: action === 'ban' ? '⊘' : '♻',
       symbolClass: action === 'ban' ? 'red' : 'green',
-      titleText: `DayZ ${titleCaseState(action)} · ${String(record?.administrator_name || 'Staff')}`,
-      detailText: `${String(record?.reason || 'No reason recorded')} · ${formatAccountDate(record?.created_at)}`
+      titleText: `DayZ ${titleCaseState(action)}${Number.isInteger(caseId) ? ` · Case #${caseId}` : ''} · ${String(record?.administrator_name || 'Staff')}`,
+      detailText: `${String(record?.reason || 'No reason recorded')} · ${formatAccountDate(record?.created_at)}${expiry}${automatic}`
     });
   });
 };
@@ -1071,6 +1167,7 @@ const renderAdminPlayerDetails = (payload) => {
     linked: Boolean(identity.linked),
     verified: Boolean(identity.verified),
     economyAvailable: Boolean(administration?.economy?.available),
+    discordBanned: Boolean(administration?.discord_ban?.active),
     dayzBanned: Boolean(administration?.dayz_ban?.active),
     capabilities: administration?.capabilities || {}
   };
@@ -1170,6 +1267,10 @@ const openPlayerActionDialog = (action, referenceId = null, initialText = '') =>
     playerActionReason.value = String(initialText || '');
   }
   if (playerActionEconomyFields) playerActionEconomyFields.hidden = !specification.economy;
+  if (playerActionBanFields) playerActionBanFields.hidden = !specification.banSchedule;
+  if (playerActionCustomExpiry) playerActionCustomExpiry.hidden = true;
+  if (playerActionBanDuration) playerActionBanDuration.value = 'permanent';
+  if (playerActionExpiry) playerActionExpiry.value = '';
   if (playerActionTarget) playerActionTarget.textContent = selectedAdminPlayer.psnId;
   syncPlayerActionControls();
 
@@ -1177,6 +1278,15 @@ const openPlayerActionDialog = (action, referenceId = null, initialText = '') =>
   else playerActionDialog?.setAttribute('open', '');
   window.setTimeout(() => playerActionReason?.focus(), 0);
 };
+
+playerActionBanDuration?.addEventListener('change', () => {
+  const custom = playerActionBanDuration.value === 'custom';
+  if (playerActionCustomExpiry) playerActionCustomExpiry.hidden = !custom;
+  if (playerActionExpiry) {
+    playerActionExpiry.required = custom;
+    if (!custom) playerActionExpiry.value = '';
+  }
+});
 
 playerActionButtons.forEach((button) => {
   button.addEventListener('click', () => openPlayerActionDialog(button.dataset.playerAction));
@@ -1235,6 +1345,31 @@ playerActionForm?.addEventListener('submit', async (event) => {
   };
   if (['edit_warning', 'remove_warning'].includes(action)) requestPayload.warning_case_id = selectedWarningCaseId;
   if (action === 'update_note') requestPayload.note_id = selectedNoteId;
+  if (specification.banSchedule) {
+    const duration = String(playerActionBanDuration?.value || 'permanent');
+    if (duration === 'custom') {
+      const customValue = String(playerActionExpiry?.value || '');
+      const expiry = new Date(customValue);
+      const now = Date.now();
+      const maximum = now + (365 * 24 * 60 * 60 * 1000);
+      if (!customValue || Number.isNaN(expiry.getTime()) || expiry.getTime() < now + (5 * 60 * 1000) || expiry.getTime() > maximum) {
+        showPlayerActionDialogMessage('Choose a custom expiry at least five minutes from now and no more than 365 days away.');
+        playerActionExpiry?.focus();
+        return;
+      }
+      requestPayload.expires_at = expiry.toISOString();
+    } else if (duration === 'permanent') {
+      requestPayload.duration_seconds = null;
+    } else {
+      const durationSeconds = Number(duration);
+      if (!Number.isInteger(durationSeconds) || durationSeconds < 300 || durationSeconds > 31_536_000) {
+        showPlayerActionDialogMessage('Choose a valid permanent or temporary ban duration.');
+        playerActionBanDuration?.focus();
+        return;
+      }
+      requestPayload.duration_seconds = durationSeconds;
+    }
+  }
   if (specification.economy) {
     const operation = String(playerActionEconomyOperation?.value || '');
     const amount = Number(playerActionAmount?.value);
@@ -1280,6 +1415,7 @@ playerActionForm?.addEventListener('submit', async (event) => {
     closePlayerActionDialog();
     showAuthMessage(successMessage, 'success');
     setAdminPlayerSearchState(successMessage, 'success');
+    window.setTimeout(() => loadModerationCases(sessionToken), 250);
     if (payload.player) {
       renderAdminPlayerDetails({ player: payload.player });
     } else {
@@ -1506,6 +1642,7 @@ const loadCurrentAccount = async (sessionToken) => {
     applyAuthenticatedState(await response.json());
     await loadAccountSummary(sessionToken);
     await loadServerActionHistory(sessionToken);
+    await loadModerationCases(sessionToken);
   } catch (error) {
     applySignedOutState({ unavailable: true });
   }
@@ -1538,6 +1675,7 @@ const completeDiscordLogin = async (loginTicket) => {
     applyAuthenticatedState(payload);
     await loadAccountSummary(payload.session_token);
     await loadServerActionHistory(payload.session_token);
+    await loadModerationCases(payload.session_token);
     const returnView = clearCallbackFragment();
     showView(returnView, false);
     showAuthMessage(`Signed in as ${payload.user.display_name || payload.user.username}.`, 'success');

@@ -1624,3 +1624,67 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 @media (prefers-reduced-motion: reduce) {
   .metric-card, .command-card, .quick-grid button, .operation-grid button, .player-action-grid button { transition: none; }
 }
+
+/* ========================================================================== 
+   Version 1.14.0 — Stage 7B3A Moderation Case Management
+   ========================================================================== */
+.moderation-case-panel { margin-bottom: 18px; }
+.panel-intro {
+  margin: -4px 0 16px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+.case-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.case-summary-grid > div {
+  display: grid;
+  gap: 5px;
+  min-height: 78px;
+  padding: 14px;
+  border: 1px solid rgba(255, 69, 52, 0.14);
+  border-radius: 9px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.025), rgba(217,39,27,0.025));
+}
+.case-summary-grid span {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.case-summary-grid strong {
+  color: var(--paper);
+  font-family: var(--heading);
+  font-size: 25px;
+  letter-spacing: 0.02em;
+}
+.moderation-case-list { margin-top: 2px; }
+.player-action-ban-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+.player-action-ban-fields[hidden],
+.player-action-ban-fields [hidden] { display: none; }
+.player-action-ban-fields .ban-expiry-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 2px solid rgba(255, 69, 52, 0.55);
+  background: rgba(217, 39, 27, 0.045);
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .case-summary-grid,
+  .player-action-ban-fields { grid-template-columns: 1fr; }
+  .case-summary-grid > div { min-height: 68px; }
+}
