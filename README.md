@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Polish shop and Discord logs`
+4. Enter the commit message: `Add Chernarus satellite map`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -49,12 +49,21 @@ GitHub may take a few minutes to publish the first version.
 - `assets/world-war-z-icon.png` and `assets/favicon.png` — local application icons
 - `assets/world-war-z-dashboard-bg.webp` — desktop command-centre atmosphere
 - `assets/world-war-z-dashboard-bg-mobile.webp` — mobile command-centre atmosphere
-- `assets/chernarus-vector.svg` — custom vector Chernarus road overview
+- `assets/chernarus-map/tiles/` — locally generated multilevel WebP Chernarus satellite tiles
+- `assets/chernarus-map/overview.webp` — 4,096 px satellite overview used by compact coordinate selectors
+- `assets/chernarus-map/tile-report.json` — source-tile validation and generated-pyramid report
+- `assets/chernarus-vector.svg` — retained legacy vector fallback; no deletion is required
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
-- `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
+- `CHERNARUS_MAP_PLAN.md` — implemented satellite map architecture and operating notes
+- `CHERNARUS_MAP_VALIDATION.md` — tile completeness, orientation and output validation
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+
+
+## Version 1.22.3 Chernarus satellite map
+
+The public dashboard now uses the complete user-supplied 32 × 32 Chernarus satellite grid. A 1,365-file WebP tile pyramid supplies sharp local zoom levels without contacting DayZ++, iZurvive or another map service. The map supports mouse, touch, pinch, keyboard, fullscreen and accurate X/Z selection, while ordinary member and Admin visibility rules remain unchanged.
 
 
 ## Version 1.22.2 compact catalogue windows

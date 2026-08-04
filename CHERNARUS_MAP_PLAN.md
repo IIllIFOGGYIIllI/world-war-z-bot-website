@@ -1,19 +1,51 @@
-# Chernarus Map Plan
+# Chernarus Satellite Map Implementation
 
-The previous schematic public map runtime was retired in version 1.22.0.
-The main dashboard map now displays a Coming Soon workspace while a clearer,
-high-detail public map is prepared.
+## Current implementation
 
-The locally hosted `assets/chernarus-vector.svg` remains in active use for the
-trader checkout coordinate selector. Clicking or tapping the selector converts
-the selected image point into Chernarus X and Z coordinates across the official
-0–15360 map range. Y/terrain height remains a manual field because a flat image
-does not provide reliable terrain elevation.
+Version 1.22.3 replaces the public Coming Soon map with a locally hosted satellite explorer generated from the uploaded Chernarus layer tiles.
 
-The rebuilt public map should prioritise:
+The source tiles are ordered as follows:
 
-- sharp roads and settlement detail at useful zoom levels;
-- readable labels and search;
-- public points of interest only;
-- desktop and touch-friendly pan/zoom controls;
-- no private bases, live players, staff positions or unpublished event data.
+- first filename number: horizontal column, west to east;
+- second filename number: vertical row, north to south;
+- horizontal flip: none;
+- vertical flip: none;
+- source grid: 32 × 32;
+- native source square: 16,384 × 16,384 pixels;
+- DayZ coordinate square: X/Z 0 through 15,360.
+
+The complete 16,384 px source square maps linearly to the 15,360 metre Chernarus coordinate system. X increases from west to east. Z increases from south to north.
+
+## Browser tile pyramid
+
+The generated pyramid uses 512 px WebP tiles:
+
+- zoom 0: 1 tile;
+- zoom 1: 4 tiles;
+- zoom 2: 16 tiles;
+- zoom 3: 64 tiles;
+- zoom 4: 256 tiles;
+- zoom 5: 1,024 tiles;
+- total: 1,365 tiles.
+
+Only visible tiles and a one-tile buffer are inserted into the page. This prevents the browser from downloading the complete high-resolution map during ordinary use.
+
+## Controls
+
+The public map supports:
+
+- mouse-wheel zoom;
+- pointer and touch dragging;
+- two-finger pinch zoom;
+- keyboard arrows, plus, minus and zero;
+- Reset and Fullscreen controls;
+- pointer coordinate display;
+- click/tap coordinate selection;
+- copied X/Z values with three decimal places;
+- public POI search, category filtering and centring.
+
+## Privacy and access
+
+The map is public and read only. It renders only POIs explicitly marked `visibility: public` in `assets/chernarus-pois.json`. Private bases, live player locations, Admin positions and protected Railway data are not loaded by the map.
+
+Admin-only and Owner-only dashboard functions continue to use the existing Railway-verified visibility controls.

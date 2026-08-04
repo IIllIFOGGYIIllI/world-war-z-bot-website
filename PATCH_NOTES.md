@@ -1,3 +1,18 @@
+# Version 1.22.3
+
+- Validated all 1,024 uploaded Chernarus satellite PNG tiles as a complete 32 × 32 grid of 512 × 512 RGBA images.
+- Confirmed there are no missing coordinates, extra coordinates or duplicate file hashes.
+- Confirmed the correct north-up layout: the first filename number is the column, the second is the row, and no horizontal or vertical flip is required.
+- Generated a locally hosted 512 px WebP tile pyramid from zoom 0 through zoom 5, containing 1,365 browser tiles plus a 4,096 px overview image.
+- Added a high-detail responsive satellite map with smooth wheel, pointer, touch, pinch and keyboard navigation.
+- Added Zoom In, Zoom Out, Reset and Fullscreen map controls.
+- Added accurate DayZ X/Z selection, a visible pointer and selected-coordinate readout, and a Copy button.
+- Restored searchable and filterable public POI markers without exposing private bases, live players or operational locations.
+- Updated the event-item checkout coordinate selector to use the uploaded satellite imagery rather than the legacy vector preview.
+- Added Bohemia Interactive attribution and documented the tile validation, orientation and output structure.
+- No bot, Railway API, permission or database change is required.
+- No website files need to be deleted.
+
 # Version 1.22.2
 
 - Reworked the Create Item and Create Event Item dialogs into compact application windows based on the supplied reference screens.
