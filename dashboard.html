@@ -14,7 +14,7 @@
   <link rel="manifest" href="site.webmanifest">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/world-war-z-icon.png">
-  <link rel="stylesheet" href="dashboard.css?v=1.14.2">
+  <link rel="stylesheet" href="dashboard.css?v=1.15.0">
 </head>
 <body>
   <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -232,9 +232,9 @@
         <div class="view-heading"><div><p class="breadcrumb">Dashboard / Admin tools</p><h1 id="staff-title">Administration centre.</h1><p>Protected player moderation, economy administration and server operations for verified Admins.</p></div><span class="restricted-badge">Admin verified</span></div>
         <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Fresh authorization on every request</strong><p>Railway rechecks your current Discord membership and Admin or Owner access before every player search, moderation action and server operation. All player changes require a recorded reason and an explicit confirmation for the selected player.</p></div></div>
         <article class="panel moderation-case-panel" data-staff-only data-moderation-case-panel>
-          <div class="panel-heading"><div><p class="panel-kicker">Moderation case management</p><h2>Active moderation cases</h2></div><button class="secondary-action compact-action" type="button" data-refresh-moderation-cases>Refresh cases</button></div>
-          <p class="panel-intro">Warnings, permanent bans and scheduled temporary bans remain attached to numbered cases. Railway processes due temporary unbans automatically.</p>
-          <div class="case-summary-grid"><div><span>Active cases</span><strong data-moderation-case-active>—</strong></div><div><span>Temporary bans</span><strong data-moderation-case-temporary>—</strong></div><div><span>Expiring within 24h</span><strong data-moderation-case-expiring>—</strong></div></div>
+          <div class="panel-heading moderation-case-heading"><div><p class="panel-kicker">Moderation case management</p><h2 data-moderation-case-heading>Active moderation cases</h2></div><div class="moderation-case-toolbar"><label><span class="sr-only">Moderation case view</span><select data-moderation-case-scope aria-label="Moderation case view"><option value="active">Active cases</option><option value="recent">Recent cases</option></select></label><button class="secondary-action compact-action" type="button" data-refresh-moderation-cases>Refresh cases</button></div></div>
+          <p class="panel-intro">Warnings, bans, evidence, reviews and appeals remain attached to numbered cases. Switch to Recent cases to review resolved or expired records. Railway processes due temporary unbans automatically and preserves every review outcome.</p>
+          <div class="case-summary-grid"><div><span>Active cases</span><strong data-moderation-case-active>—</strong></div><div><span>Temporary bans</span><strong data-moderation-case-temporary>—</strong></div><div><span>Expiring within 24h</span><strong data-moderation-case-expiring>—</strong></div><div><span>Under review</span><strong data-moderation-case-reviewing>—</strong></div><div><span>Appealed</span><strong data-moderation-case-appealed>—</strong></div></div>
           <ol class="activity-list moderation-case-list" data-moderation-case-list aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading protected cases</strong><small>Railway is verifying current Admin access</small></div></li></ol>
           <p class="table-note" data-moderation-case-empty hidden>No active moderation cases are recorded.</p>
           <p class="table-note history-error" data-moderation-case-error hidden>Moderation cases are temporarily unavailable. Use Refresh cases to try again.</p>
@@ -346,7 +346,58 @@
     </form>
   </dialog>
 
-  <script src="dashboard.js?v=1.14.2"></script>
+
+  <dialog class="login-dialog moderation-case-dialog" data-moderation-case-dialog aria-labelledby="moderation-case-dialog-title">
+    <div class="moderation-case-dialog-shell">
+      <button class="dialog-close" type="button" aria-label="Close moderation case" data-moderation-case-close>×</button>
+      <div class="case-dialog-heading">
+        <div><p class="panel-kicker">Protected moderation record</p><h2 id="moderation-case-dialog-title" data-case-dialog-title>Moderation case</h2><p data-case-dialog-subtitle>Loading protected case information…</p></div>
+        <span class="restricted-badge" data-case-dialog-state>Verifying</span>
+      </div>
+      <div class="case-detail-grid"><div><span>Player</span><strong data-case-dialog-player>—</strong></div><div><span>Issued by</span><strong data-case-dialog-moderator>—</strong></div><div><span>Opened</span><strong data-case-dialog-created>—</strong></div><div><span>Expiry</span><strong data-case-dialog-expiry>—</strong></div></div>
+      <article class="case-reason-card"><span>Original reason</span><p data-case-dialog-reason>—</p></article>
+      <div class="case-management-grid">
+        <section class="case-management-section">
+          <div class="panel-heading"><div><p class="panel-kicker">Evidence register</p><h3>Case evidence</h3></div><span class="muted-label" data-case-evidence-count>0 active</span></div>
+          <ol class="activity-list case-evidence-list" data-case-evidence-list></ol>
+          <p class="table-note" data-case-evidence-empty>No evidence has been attached to this case.</p>
+          <div class="case-editor" data-case-evidence-editor>
+            <div class="panel-heading"><div><p class="panel-kicker">Evidence action</p><h3 data-case-evidence-editor-title>Add evidence</h3></div><button class="text-action" type="button" data-case-evidence-cancel hidden>Cancel edit</button></div>
+            <div data-case-evidence-fields>
+              <label class="dialog-field"><span>Evidence type</span><select data-case-evidence-type><option value="discord_message">Discord message</option><option value="screenshot">Screenshot</option><option value="video">Video</option><option value="adm_log">ADM log</option><option value="nitrado_record">Nitrado record</option><option value="player_report">Player report</option><option value="staff_observation">Staff observation</option><option value="other">Other reference</option></select></label>
+              <label class="dialog-field"><span>Link or reference <small>HTTP(S), message link or log reference</small></span><input type="text" maxlength="500" placeholder="https://… or ADM log 2026-08-04 20:15" data-case-evidence-reference></label>
+              <label class="dialog-field"><span>Evidence summary <small>3–1,000 characters</small></span><textarea rows="3" maxlength="1000" placeholder="Explain what this evidence shows and why it matters" data-case-evidence-summary></textarea></label>
+            </div>
+            <label class="dialog-field" data-case-evidence-remove-field hidden><span>Removal reason <small>The prior entry remains in the audit trail</small></span><textarea rows="3" maxlength="1000" data-case-evidence-remove-reason></textarea></label>
+            <button class="secondary-action wide" type="button" data-case-evidence-submit>Attach evidence</button>
+          </div>
+        </section>
+        <section class="case-management-section">
+          <div class="panel-heading"><div><p class="panel-kicker">Independent review</p><h3>Reviews &amp; appeals</h3></div><span class="muted-label" data-case-review-state>No review</span></div>
+          <ol class="activity-list case-review-list" data-case-review-list></ol>
+          <p class="table-note" data-case-review-empty>No review or appeal has been opened.</p>
+          <div class="case-editor" data-case-review-start>
+            <p class="case-editor-copy">Open a staff quality review or record an appeal received through an official community contact route.</p>
+            <label class="dialog-field"><span>Review type</span><select data-case-review-type><option value="staff_review">Staff review</option><option value="appeal">Player appeal</option></select></label>
+            <label class="dialog-field" data-case-review-source-field hidden><span>Appeal source</span><select data-case-review-source><option value="discord_ticket">Discord ticket</option><option value="discord_message">Discord message</option><option value="email">Email</option><option value="external">External contact</option><option value="other">Other official route</option></select></label>
+            <label class="dialog-field"><span>Review request <small>Explain the dispute, new evidence or quality concern</small></span><textarea rows="3" maxlength="1000" data-case-review-reason></textarea></label>
+            <button class="secondary-action wide" type="button" data-case-review-start-button>Open review</button>
+          </div>
+          <div class="case-editor case-decision-editor" data-case-review-decision hidden>
+            <div class="restart-warning"><strong>Independent decision</strong><span>A regular Admin cannot decide a case they originally issued. Owner overrides are recorded.</span></div>
+            <label class="dialog-field"><span>Outcome</span><select data-case-review-outcome><option value="upheld">Upheld</option><option value="reduced">Reduced</option><option value="overturned">Overturned</option></select></label>
+            <label class="dialog-field" data-case-review-reduction-field hidden><span>Reduced expiry <small>Your local date and time</small></span><input type="datetime-local" step="60" data-case-review-expiry></label>
+            <label class="dialog-field"><span>Decision reason <small>Required · preserved in case history</small></span><textarea rows="3" maxlength="1000" data-case-review-decision-reason></textarea></label>
+            <button class="primary-action danger-action wide" type="button" data-case-review-decide>Record review outcome</button>
+          </div>
+        </section>
+      </div>
+      <div class="restart-dialog-message" role="status" data-case-dialog-message hidden></div>
+      <button class="dialog-cancel" type="button" data-moderation-case-close>Close moderation case</button>
+    </div>
+  </dialog>
+
+  <script src="dashboard.js?v=1.15.0"></script>
   <script src="chernarus-map.js?v=1.7.0"></script>
 </body>
 </html>

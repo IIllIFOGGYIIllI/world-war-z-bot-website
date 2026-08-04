@@ -88,6 +88,7 @@ const ADMIN_PLAYER_SEARCH_URL = `${DASHBOARD_API_BASE}/api/admin/players/search`
 const ADMIN_PLAYER_DETAILS_URL = `${DASHBOARD_API_BASE}/api/admin/players/details`;
 const ADMIN_PLAYER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/players/action`;
 const ADMIN_MODERATION_CASES_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/cases`;
+const ADMIN_MODERATION_CASE_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/cases/action`;
 const ADMIN_BANLISTS_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/banlists`;
 const PLAYER_ACTIONS = {
   add_note: { mark: '≡', title: 'Add private staff note?', description: 'The note will be visible only inside protected Admin player administration.', warning: 'Private notes remain in the Railway database and are included in the player audit view.', reasonLabel: 'Private staff note', reasonHelp: '1–1,500 characters', submitLabel: 'Add private note' },
@@ -172,6 +173,35 @@ const moderationCaseList = document.querySelector('[data-moderation-case-list]')
 const moderationCaseEmpty = document.querySelector('[data-moderation-case-empty]');
 const moderationCaseError = document.querySelector('[data-moderation-case-error]');
 const refreshModerationCasesButton = document.querySelector('[data-refresh-moderation-cases]');
+const moderationCaseScope = document.querySelector('[data-moderation-case-scope]');
+const moderationCaseDialog = document.querySelector('[data-moderation-case-dialog]');
+const moderationCaseCloseButtons = [...document.querySelectorAll('[data-moderation-case-close]')];
+const caseDialogMessage = document.querySelector('[data-case-dialog-message]');
+const caseEvidenceList = document.querySelector('[data-case-evidence-list]');
+const caseEvidenceEmpty = document.querySelector('[data-case-evidence-empty]');
+const caseEvidenceType = document.querySelector('[data-case-evidence-type]');
+const caseEvidenceReference = document.querySelector('[data-case-evidence-reference]');
+const caseEvidenceSummary = document.querySelector('[data-case-evidence-summary]');
+const caseEvidenceFields = document.querySelector('[data-case-evidence-fields]');
+const caseEvidenceRemoveField = document.querySelector('[data-case-evidence-remove-field]');
+const caseEvidenceRemoveReason = document.querySelector('[data-case-evidence-remove-reason]');
+const caseEvidenceSubmit = document.querySelector('[data-case-evidence-submit]');
+const caseEvidenceCancel = document.querySelector('[data-case-evidence-cancel]');
+const caseEvidenceEditorTitle = document.querySelector('[data-case-evidence-editor-title]');
+const caseReviewList = document.querySelector('[data-case-review-list]');
+const caseReviewEmpty = document.querySelector('[data-case-review-empty]');
+const caseReviewStart = document.querySelector('[data-case-review-start]');
+const caseReviewDecision = document.querySelector('[data-case-review-decision]');
+const caseReviewType = document.querySelector('[data-case-review-type]');
+const caseReviewSourceField = document.querySelector('[data-case-review-source-field]');
+const caseReviewSource = document.querySelector('[data-case-review-source]');
+const caseReviewReason = document.querySelector('[data-case-review-reason]');
+const caseReviewStartButton = document.querySelector('[data-case-review-start-button]');
+const caseReviewOutcome = document.querySelector('[data-case-review-outcome]');
+const caseReviewReductionField = document.querySelector('[data-case-review-reduction-field]');
+const caseReviewExpiry = document.querySelector('[data-case-review-expiry]');
+const caseReviewDecisionReason = document.querySelector('[data-case-review-decision-reason]');
+const caseReviewDecide = document.querySelector('[data-case-review-decide]');
 const discordBanlist = document.querySelector('[data-discord-banlist-list]');
 const discordBanlistEmpty = document.querySelector('[data-discord-banlist-empty]');
 const discordBanlistError = document.querySelector('[data-discord-banlist-error]');
@@ -229,6 +259,11 @@ let serverActionLockedUntil = 0;
 let serverActionLockTimer = null;
 let serverActionHistoryRequestInProgress = false;
 let moderationCaseRequestInProgress = false;
+let moderationCaseDetailRequestInProgress = false;
+let moderationCaseActionRequestInProgress = false;
+let selectedModerationCase = null;
+let selectedCaseEvidenceId = null;
+let caseEvidenceMode = 'add';
 let banlistRequestInProgress = false;
 let adminPlayerSearchRequestInProgress = false;
 let adminPlayerDetailRequestInProgress = false;
@@ -983,11 +1018,14 @@ const appendAdminActivity = (list, { symbolText, symbolClass = '', titleText, de
 };
 
 const renderModerationCases = (payload) => {
+  const scope = String(payload?.scope || moderationCaseScope?.value || 'active');
   const cases = Array.isArray(payload?.cases) ? payload.cases : [];
   const summary = payload?.summary || {};
   setText('[data-moderation-case-active]', String(Number(summary.active_cases) || 0));
   setText('[data-moderation-case-temporary]', String(Number(summary.temporary_bans) || 0));
   setText('[data-moderation-case-expiring]', String(Number(summary.expiring_within_24_hours) || 0));
+  setText('[data-moderation-case-reviewing]', String(Number(summary.under_review) || 0));
+  setText('[data-moderation-case-appealed]', String(Number(summary.appealed) || 0));
   if (!moderationCaseList) return;
 
   moderationCaseList.replaceChildren();
@@ -1004,16 +1042,33 @@ const renderModerationCases = (payload) => {
         : record?.duration_seconds != null
           ? `Duration ${formatDuration(record.duration_seconds)}`
           : 'No scheduled expiry';
+    const openButton = document.createElement('button');
+    openButton.type = 'button';
+    openButton.className = 'activity-row-action';
+    openButton.textContent = 'Open case';
+    openButton.disabled = !Number.isInteger(caseId);
+    openButton.addEventListener('click', () => openModerationCase(caseId));
+    const evidenceCount = Math.max(0, Number(record?.evidence_count) || 0);
+    const reviewState = record?.review_status
+      ? ` · ${titleCaseState(record.review_type || 'review')} ${titleCaseState(record.review_status)}`
+      : '';
     appendAdminActivity(moderationCaseList, {
       symbolText: action.includes('ban') ? '⊘' : action === 'warn' ? '!' : '≡',
       symbolClass: action.includes('ban') ? 'red' : action === 'warn' ? 'warning' : '',
       titleText: `Case #${Number.isInteger(caseId) ? caseId : '—'} · ${titleCaseState(action)} · ${titleCaseState(status)}`,
-      detailText: `${psn} · ${String(record?.reason || 'No reason recorded')} · ${schedule} · Opened by ${String(record?.moderator_name || 'Administrator')} on ${formatAccountDate(record?.created_at)}`
+      detailText: `${psn} · ${String(record?.reason || 'No reason recorded')} · ${schedule} · ${evidenceCount} active evidence${reviewState} · Opened by ${String(record?.moderator_name || 'Administrator')} on ${formatAccountDate(record?.created_at)}`,
+      actionButton: openButton
     });
   });
 
   moderationCaseList.hidden = cases.length === 0;
-  if (moderationCaseEmpty) moderationCaseEmpty.hidden = cases.length !== 0;
+  setText('[data-moderation-case-heading]', scope === 'recent' ? 'Recent moderation cases' : 'Active moderation cases');
+  if (moderationCaseEmpty) {
+    moderationCaseEmpty.hidden = cases.length !== 0;
+    moderationCaseEmpty.textContent = scope === 'recent'
+      ? 'No moderation cases have been recorded.'
+      : 'No active moderation cases are recorded.';
+  }
   if (moderationCaseError) moderationCaseError.hidden = true;
 };
 
@@ -1024,7 +1079,8 @@ const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
   refreshModerationCasesButton?.setAttribute('aria-busy', 'true');
 
   try {
-    const response = await authFetch(`${ADMIN_MODERATION_CASES_URL}?scope=active&limit=25`, {
+    const scope = moderationCaseScope?.value === 'recent' ? 'recent' : 'active';
+    const response = await authFetch(`${ADMIN_MODERATION_CASES_URL}?scope=${scope}&limit=25`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -1046,6 +1102,8 @@ const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
     setText('[data-moderation-case-active]', '—');
     setText('[data-moderation-case-temporary]', '—');
     setText('[data-moderation-case-expiring]', '—');
+    setText('[data-moderation-case-reviewing]', '—');
+    setText('[data-moderation-case-appealed]', '—');
   } finally {
     moderationCaseRequestInProgress = false;
     refreshModerationCasesButton?.removeAttribute('disabled');
@@ -1054,6 +1112,343 @@ const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
 };
 
 refreshModerationCasesButton?.addEventListener('click', () => loadModerationCases());
+moderationCaseScope?.addEventListener('change', () => loadModerationCases());
+
+const showCaseDialogMessage = (message = '', tone = 'error') => {
+  if (!caseDialogMessage) return;
+  caseDialogMessage.hidden = !message;
+  caseDialogMessage.textContent = message;
+  caseDialogMessage.dataset.tone = tone;
+};
+
+const closeModerationCaseDialog = () => {
+  if (moderationCaseActionRequestInProgress || moderationCaseDetailRequestInProgress) return;
+  if (typeof moderationCaseDialog?.close === 'function') moderationCaseDialog.close();
+  else moderationCaseDialog?.removeAttribute('open');
+};
+
+const setCaseEvidenceMode = (mode = 'add', evidence = null) => {
+  caseEvidenceMode = mode;
+  selectedCaseEvidenceId = Number.isInteger(Number(evidence?.evidence_id)) ? Number(evidence.evidence_id) : null;
+  const removing = mode === 'remove';
+  const editing = mode === 'edit';
+  if (caseEvidenceFields) caseEvidenceFields.hidden = removing;
+  if (caseEvidenceRemoveField) caseEvidenceRemoveField.hidden = !removing;
+  if (caseEvidenceCancel) caseEvidenceCancel.hidden = mode === 'add';
+  if (caseEvidenceEditorTitle) caseEvidenceEditorTitle.textContent = removing
+    ? `Remove evidence #${selectedCaseEvidenceId || '—'}`
+    : editing
+      ? `Edit evidence #${selectedCaseEvidenceId || '—'}`
+      : 'Add evidence';
+  if (caseEvidenceSubmit) {
+    caseEvidenceSubmit.textContent = removing ? 'Remove evidence' : editing ? 'Update evidence' : 'Attach evidence';
+    caseEvidenceSubmit.classList.toggle('danger-outline', removing);
+  }
+  if (caseEvidenceType) caseEvidenceType.value = String(evidence?.evidence_type || 'discord_message');
+  if (caseEvidenceReference) caseEvidenceReference.value = String(evidence?.reference || '');
+  if (caseEvidenceSummary) caseEvidenceSummary.value = String(evidence?.summary || '');
+  if (caseEvidenceRemoveReason) caseEvidenceRemoveReason.value = '';
+};
+
+const evidenceReferenceElement = (reference) => {
+  const value = String(reference || '').trim();
+  try {
+    const parsed = new URL(value);
+    if (['http:', 'https:'].includes(parsed.protocol)) {
+      const link = document.createElement('a');
+      link.href = parsed.href;
+      link.target = '_blank';
+      link.rel = 'noreferrer';
+      link.className = 'case-evidence-link';
+      link.textContent = 'Open evidence';
+      return link;
+    }
+  } catch (error) {
+    // Non-URL references are intentionally rendered as plain text.
+  }
+  const text = document.createElement('span');
+  text.className = 'case-evidence-reference';
+  text.textContent = value || 'Reference unavailable';
+  return text;
+};
+
+const renderCaseEvidence = (entries = []) => {
+  if (!caseEvidenceList) return;
+  const evidence = Array.isArray(entries) ? entries : [];
+  caseEvidenceList.replaceChildren();
+  evidence.forEach((entry) => {
+    const active = String(entry?.status || '') === 'active';
+    const buttons = [];
+    if (active) {
+      const edit = document.createElement('button');
+      edit.type = 'button';
+      edit.className = 'activity-row-action';
+      edit.textContent = 'Edit';
+      edit.addEventListener('click', () => {
+        setCaseEvidenceMode('edit', entry);
+        caseEvidenceReference?.focus();
+      });
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'activity-row-action danger-outline';
+      remove.textContent = 'Remove';
+      remove.addEventListener('click', () => {
+        setCaseEvidenceMode('remove', entry);
+        caseEvidenceRemoveReason?.focus();
+      });
+      buttons.push(edit, remove);
+    }
+    const item = document.createElement('li');
+    item.className = active ? '' : 'case-evidence-removed';
+    const symbol = document.createElement('span');
+    symbol.className = `activity-symbol ${active ? '' : 'removed'}`.trim();
+    symbol.textContent = active ? '◫' : '−';
+    const content = document.createElement('div');
+    const title = document.createElement('strong');
+    const details = document.createElement('small');
+    title.textContent = `Evidence #${Number(entry?.evidence_id) || '—'} · ${titleCaseState(entry?.evidence_type || 'other')} · ${titleCaseState(entry?.status || 'active')}`;
+    details.textContent = `${String(entry?.summary || 'No summary')} · Added by ${String(entry?.added_by_name || 'Administrator')} on ${formatAccountDate(entry?.created_at)}`;
+    const reference = evidenceReferenceElement(entry?.reference);
+    content.append(title, details, reference);
+    item.append(symbol, content);
+    if (buttons.length) {
+      item.classList.add('has-row-actions');
+      const actions = document.createElement('div');
+      actions.className = 'activity-row-actions';
+      actions.append(...buttons);
+      item.append(actions);
+    }
+    caseEvidenceList.append(item);
+  });
+  const activeCount = evidence.filter((entry) => String(entry?.status || '') === 'active').length;
+  setText('[data-case-evidence-count]', `${activeCount} active`);
+  if (caseEvidenceEmpty) caseEvidenceEmpty.hidden = evidence.length !== 0;
+};
+
+const renderCaseReviews = (entries = [], capabilities = {}) => {
+  if (!caseReviewList) return;
+  const reviews = Array.isArray(entries) ? entries : [];
+  caseReviewList.replaceChildren();
+  reviews.forEach((review) => {
+    const status = String(review?.status || 'under_review');
+    const decision = review?.decision_reason
+      ? ` · Decision: ${String(review.decision_reason)}`
+      : '';
+    const expiry = review?.new_expires_at
+      ? ` · New expiry ${formatAccountDate(review.new_expires_at)}`
+      : '';
+    appendAdminActivity(caseReviewList, {
+      symbolText: status === 'under_review' ? '⌕' : status === 'overturned' ? '↶' : status === 'reduced' ? '↓' : '✓',
+      symbolClass: status === 'overturned' ? 'red' : status === 'under_review' ? 'warning' : '',
+      titleText: `Review #${Number(review?.review_id) || '—'} · ${titleCaseState(review?.review_type || 'review')} · ${titleCaseState(status)}`,
+      detailText: `${String(review?.request_reason || 'No request reason')} · Opened by ${String(review?.requested_by_name || 'Administrator')} on ${formatAccountDate(review?.created_at)}${decision}${expiry}`
+    });
+  });
+  const activeReview = reviews.find((review) => String(review?.status || '') === 'under_review') || null;
+  if (caseReviewEmpty) caseReviewEmpty.hidden = reviews.length !== 0;
+  if (caseReviewStart) caseReviewStart.hidden = !Boolean(capabilities?.can_start_review);
+  if (caseReviewDecision) caseReviewDecision.hidden = !activeReview;
+  if (caseReviewDecision) caseReviewDecision.dataset.reviewId = activeReview ? String(activeReview.review_id) : '';
+  const reducedOption = caseReviewOutcome?.querySelector('option[value="reduced"]');
+  const overturnedOption = caseReviewOutcome?.querySelector('option[value="overturned"]');
+  if (reducedOption) reducedOption.disabled = !Boolean(capabilities?.can_reduce);
+  if (overturnedOption) overturnedOption.disabled = !Boolean(capabilities?.can_overturn);
+  if (caseReviewOutcome?.selectedOptions?.[0]?.disabled) caseReviewOutcome.value = 'upheld';
+  if (caseReviewReductionField) caseReviewReductionField.hidden = caseReviewOutcome?.value !== 'reduced';
+  setText('[data-case-review-state]', activeReview
+    ? `${titleCaseState(activeReview.review_type)} active`
+    : reviews[0]
+      ? titleCaseState(reviews[0].status)
+      : 'No review');
+};
+
+const renderModerationCaseDetail = (payload) => {
+  const record = payload?.case;
+  if (!record) return;
+  selectedModerationCase = {
+    caseId: Number(record.case_id),
+    record,
+    evidence: Array.isArray(payload?.evidence) ? payload.evidence : [],
+    reviews: Array.isArray(payload?.reviews) ? payload.reviews : [],
+    capabilities: payload?.capabilities || {}
+  };
+  setText('[data-case-dialog-title]', `Case #${selectedModerationCase.caseId} · ${titleCaseState(record.action)}`);
+  setText('[data-case-dialog-subtitle]', `${titleCaseState(record.status)} · ${titleCaseState(record.review_state || 'open')}`);
+  setText('[data-case-dialog-state]', titleCaseState(record.review_state || record.status));
+  setText('[data-case-dialog-player]', String(record.psn_id || record.target_name || 'Player'));
+  setText('[data-case-dialog-moderator]', String(record.moderator_name || 'Administrator'));
+  setText('[data-case-dialog-created]', formatAccountDate(record.created_at));
+  setText('[data-case-dialog-expiry]', record.expires_at ? formatAccountDate(record.expires_at) : ['ban', 'dayz_ban'].includes(String(record.action)) ? 'Permanent' : 'Not scheduled');
+  setText('[data-case-dialog-reason]', String(record.reason || 'No reason recorded'));
+  renderCaseEvidence(selectedModerationCase.evidence);
+  renderCaseReviews(selectedModerationCase.reviews, selectedModerationCase.capabilities);
+  setCaseEvidenceMode('add');
+  if (caseReviewReason) caseReviewReason.value = '';
+  if (caseReviewDecisionReason) caseReviewDecisionReason.value = '';
+  if (caseReviewOutcome) caseReviewOutcome.value = 'upheld';
+  if (caseReviewReductionField) caseReviewReductionField.hidden = true;
+  if (caseReviewExpiry) caseReviewExpiry.value = '';
+  showCaseDialogMessage('');
+};
+
+const openModerationCase = async (caseId) => {
+  const cleanCaseId = Number(caseId);
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!Number.isInteger(cleanCaseId) || !sessionToken || moderationCaseDetailRequestInProgress) return;
+  moderationCaseDetailRequestInProgress = true;
+  selectedModerationCase = null;
+  setText('[data-case-dialog-title]', `Case #${cleanCaseId}`);
+  setText('[data-case-dialog-subtitle]', 'Railway is verifying current Admin access…');
+  if (typeof moderationCaseDialog?.showModal === 'function') moderationCaseDialog.showModal();
+  else moderationCaseDialog?.setAttribute('open', '');
+  try {
+    const response = await authFetch(`${ADMIN_MODERATION_CASES_URL}/${cleanCaseId}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleProtectedAuthFailure(response, payload, { actionRequest: false })) {
+      closeModerationCaseDialog();
+      return;
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload?.message || 'Moderation case unavailable');
+    renderModerationCaseDetail(payload);
+  } catch (error) {
+    showCaseDialogMessage(error?.message || 'That moderation case is temporarily unavailable.');
+  } finally {
+    moderationCaseDetailRequestInProgress = false;
+  }
+};
+
+const submitModerationCaseAction = async (requestPayload) => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || !selectedModerationCase || moderationCaseActionRequestInProgress) return null;
+  moderationCaseActionRequestInProgress = true;
+  showCaseDialogMessage('Submitting protected case action…', 'pending');
+  [caseEvidenceSubmit, caseReviewStartButton, caseReviewDecide].forEach((button) => button?.setAttribute('disabled', ''));
+  try {
+    const response = await protectedActionFetch(ADMIN_MODERATION_CASE_ACTION_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({ ...requestPayload, case_id: selectedModerationCase.caseId })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleProtectedAuthFailure(response, payload, { actionRequest: true })) return null;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload?.message || 'The protected case action was rejected.');
+    renderModerationCaseDetail(payload);
+    showCaseDialogMessage(payload.message || 'Moderation case updated.', 'success');
+    await loadModerationCases();
+    if (['decide_review'].includes(requestPayload.action)) await loadCurrentBanlists();
+    return payload;
+  } catch (error) {
+    showCaseDialogMessage(error?.message || 'The protected case action could not be completed.');
+    return null;
+  } finally {
+    moderationCaseActionRequestInProgress = false;
+    [caseEvidenceSubmit, caseReviewStartButton, caseReviewDecide].forEach((button) => button?.removeAttribute('disabled'));
+  }
+};
+
+caseEvidenceCancel?.addEventListener('click', () => setCaseEvidenceMode('add'));
+caseEvidenceSubmit?.addEventListener('click', async () => {
+  if (!selectedModerationCase) return;
+  if (caseEvidenceMode === 'remove') {
+    const reason = String(caseEvidenceRemoveReason?.value || '').trim().replace(/\s+/g, ' ');
+    if (reason.length < 3 || reason.length > 1000) {
+      showCaseDialogMessage('Enter a removal reason between 3 and 1,000 characters.');
+      caseEvidenceRemoveReason?.focus();
+      return;
+    }
+    await submitModerationCaseAction({ action: 'remove_evidence', evidence_id: selectedCaseEvidenceId, reason });
+    return;
+  }
+  const reference = String(caseEvidenceReference?.value || '').trim();
+  const summary = String(caseEvidenceSummary?.value || '').trim().replace(/\s+/g, ' ');
+  if (reference.length < 3 || reference.length > 500) {
+    showCaseDialogMessage('Enter an evidence link or reference between 3 and 500 characters.');
+    caseEvidenceReference?.focus();
+    return;
+  }
+  if (summary.length < 3 || summary.length > 1000) {
+    showCaseDialogMessage('Enter an evidence summary between 3 and 1,000 characters.');
+    caseEvidenceSummary?.focus();
+    return;
+  }
+  await submitModerationCaseAction({
+    action: caseEvidenceMode === 'edit' ? 'update_evidence' : 'add_evidence',
+    evidence_id: selectedCaseEvidenceId,
+    evidence_type: String(caseEvidenceType?.value || 'other'),
+    reference,
+    summary
+  });
+});
+
+caseReviewType?.addEventListener('change', () => {
+  if (caseReviewSourceField) caseReviewSourceField.hidden = caseReviewType.value !== 'appeal';
+});
+caseReviewStartButton?.addEventListener('click', async () => {
+  const reason = String(caseReviewReason?.value || '').trim().replace(/\s+/g, ' ');
+  if (reason.length < 3 || reason.length > 1000) {
+    showCaseDialogMessage('Enter a review request between 3 and 1,000 characters.');
+    caseReviewReason?.focus();
+    return;
+  }
+  await submitModerationCaseAction({
+    action: 'start_review',
+    review_type: String(caseReviewType?.value || 'staff_review'),
+    source: caseReviewType?.value === 'appeal' ? String(caseReviewSource?.value || 'other') : 'staff',
+    reason
+  });
+});
+caseReviewOutcome?.addEventListener('change', () => {
+  const reduced = caseReviewOutcome.value === 'reduced';
+  if (caseReviewReductionField) caseReviewReductionField.hidden = !reduced;
+  if (caseReviewExpiry) {
+    caseReviewExpiry.required = reduced;
+    if (!reduced) caseReviewExpiry.value = '';
+  }
+});
+caseReviewDecide?.addEventListener('click', async () => {
+  const reviewId = Number(caseReviewDecision?.dataset.reviewId);
+  const outcome = String(caseReviewOutcome?.value || 'upheld');
+  const reason = String(caseReviewDecisionReason?.value || '').trim().replace(/\s+/g, ' ');
+  if (!Number.isInteger(reviewId)) {
+    showCaseDialogMessage('The active review could not be identified. Refresh the case.');
+    return;
+  }
+  if (reason.length < 3 || reason.length > 1000) {
+    showCaseDialogMessage('Enter a decision reason between 3 and 1,000 characters.');
+    caseReviewDecisionReason?.focus();
+    return;
+  }
+  const payload = { action: 'decide_review', review_id: reviewId, outcome, reason };
+  if (outcome === 'reduced') {
+    const expiryValue = String(caseReviewExpiry?.value || '');
+    const expiry = new Date(expiryValue);
+    const now = Date.now();
+    if (!expiryValue || Number.isNaN(expiry.getTime()) || expiry.getTime() < now + (5 * 60 * 1000) || expiry.getTime() > now + (365 * 24 * 60 * 60 * 1000)) {
+      showCaseDialogMessage('Choose a reduced expiry at least five minutes from now and no more than 365 days away.');
+      caseReviewExpiry?.focus();
+      return;
+    }
+    payload.expires_at = expiry.toISOString();
+  }
+  await submitModerationCaseAction(payload);
+});
+
+moderationCaseCloseButtons.forEach((button) => button.addEventListener('click', closeModerationCaseDialog));
+moderationCaseDialog?.addEventListener('click', (event) => {
+  if (event.target === moderationCaseDialog) closeModerationCaseDialog();
+});
+moderationCaseDialog?.addEventListener('cancel', (event) => {
+  if (moderationCaseActionRequestInProgress || moderationCaseDetailRequestInProgress) event.preventDefault();
+});
+moderationCaseDialog?.addEventListener('close', () => {
+  selectedModerationCase = null;
+  setCaseEvidenceMode('add');
+  showCaseDialogMessage('');
+});
+
 
 const banlistOpenPlayerButton = (psnId) => {
   const cleanPsn = String(psnId || '').trim();

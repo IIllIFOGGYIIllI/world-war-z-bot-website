@@ -14,7 +14,7 @@ After GitHub Pages is enabled, the site will be available at:
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
 4. If `DELETE_THESE_FILES.txt` still exists in the repository, delete it; it is an obsolete instruction file and is intentionally absent from this release.
-5. Enter the commit message: `Add community policy suite`
+5. Enter the commit message: `Add moderation reviews and appeals`
 6. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -56,6 +56,13 @@ GitHub may take a few minutes to publish the first version.
 - `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
+
+## Version 1.15.0 moderation evidence, reviews and appeals
+
+Verified Admins can open any numbered moderation case, attach safe evidence references,
+record a staff review or player appeal, and issue an upheld, reduced or overturned
+decision. Supported overturned warnings and bans perform the real reversal while
+retaining the original case and evidence history.
 
 ## Version 1.14.2 policy suite and release naming
 

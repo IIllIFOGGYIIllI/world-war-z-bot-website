@@ -1702,3 +1702,178 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 @media (max-width: 760px) {
   .current-banlist-list { max-height: none; }
 }
+
+/* Version 1.15.0 — moderation evidence, reviews and appeals */
+.moderation-case-dialog {
+  width: min(1120px, calc(100vw - 30px));
+  max-height: calc(100vh - 30px);
+  padding: 0;
+  overflow: auto;
+}
+
+.moderation-case-dialog-shell {
+  position: relative;
+  padding: 30px;
+}
+
+.case-dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-right: 38px;
+}
+
+.case-dialog-heading h2 { margin: 0; }
+.case-dialog-heading p:last-child { max-width: 720px; margin: 8px 0 0; color: #8e8580; }
+
+.case-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 24px 0 16px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.case-detail-grid > div {
+  min-height: 76px;
+  padding: 16px;
+  background: rgba(12, 11, 11, 0.96);
+}
+
+.case-detail-grid span,
+.case-reason-card > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #716964;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.case-detail-grid strong {
+  display: block;
+  color: #e7ddd5;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.case-reason-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(214, 36, 24, 0.05);
+}
+
+.case-reason-card p { margin: 0; color: #c9bfb7; line-height: 1.65; white-space: pre-wrap; }
+
+.case-management-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.case-management-section {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  background: rgba(7, 7, 7, 0.82);
+}
+
+.case-editor {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.018);
+}
+
+.case-editor .dialog-field + .dialog-field { margin-top: 12px; }
+.case-editor-copy { margin: 0 0 14px; color: #857d77; font-size: 11px; line-height: 1.55; }
+.case-decision-editor { border-color: rgba(212,36,24,0.32); }
+.case-evidence-list,
+.case-review-list { max-height: 330px; overflow: auto; padding-right: 4px; }
+.case-evidence-list li,
+.case-review-list li { align-items: flex-start; }
+.case-evidence-link,
+.case-evidence-reference {
+  display: inline-block;
+  margin-top: 7px;
+  color: #cf6d63;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+  text-decoration-color: rgba(212,36,24,0.65);
+  text-underline-offset: 4px;
+}
+.case-evidence-reference { color: #7f7771; }
+.case-evidence-removed { opacity: 0.62; }
+.case-evidence-removed .case-evidence-link { pointer-events: none; }
+
+.restart-dialog-message[data-tone="success"] {
+  border-color: rgba(86, 171, 109, 0.42);
+  background: rgba(86, 171, 109, 0.08);
+  color: #9fd7ad;
+}
+.restart-dialog-message[data-tone="pending"] {
+  border-color: rgba(227, 192, 106, 0.34);
+  background: rgba(227, 192, 106, 0.07);
+  color: #d8c183;
+}
+
+@media (max-width: 900px) {
+  .case-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .case-management-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .moderation-case-dialog { width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
+  .moderation-case-dialog-shell { padding: 22px 14px; }
+  .case-dialog-heading { display: block; padding-right: 32px; }
+  .case-dialog-heading .restricted-badge { margin-top: 12px; }
+  .case-detail-grid { grid-template-columns: 1fr; }
+  .case-management-section { padding: 14px; }
+  .case-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Version 1.15.0 — moderation case queue controls */
+.moderation-case-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.moderation-case-toolbar select {
+  min-height: 2.45rem;
+  min-width: 9.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: rgba(8, 8, 9, 0.88);
+  color: var(--text);
+  padding: 0.55rem 2rem 0.55rem 0.75rem;
+  font: inherit;
+}
+
+.case-decision-editor option:disabled {
+  color: var(--muted);
+}
+
+@media (max-width: 680px) {
+  .moderation-case-heading,
+  .moderation-case-toolbar {
+    align-items: stretch;
+  }
+
+  .moderation-case-toolbar {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .moderation-case-toolbar label,
+  .moderation-case-toolbar select,
+  .moderation-case-toolbar button {
+    width: 100%;
+  }
+}

@@ -1,5 +1,31 @@
 # Website Patch Notes
 
+## Version 1.15.0 — Moderation Evidence, Reviews and Appeals
+
+### Added
+
+- Added protected case-detail views for every numbered moderation case.
+- Added evidence links or references, summaries, editing and audited removal.
+- Added staff reviews and manually recorded player appeals.
+- Added upheld, reduced and overturned review decisions.
+- Added real warning removal, Discord unban and Nitrado DayZ unban for supported overturned active cases.
+- Added Under Review and Appealed case summary counts.
+
+### Safety
+
+- Regular Admins cannot decide reviews of actions they originally issued.
+- Owner overrides are explicitly recorded.
+- Evidence accepts safe HTTP(S) links or plain-text references only; large media is not uploaded.
+- Original cases and previous evidence versions remain preserved.
+- Railway remains the authorization boundary for every read and write.
+
+### Deployment
+
+- Deploy bot version 1.14.0 before this website update.
+- No database reset, replacement or manual migration is required.
+- Replace the website files with the version 1.15.0 patch and hard refresh after GitHub Pages publishes.
+
+
 ## Version 1.14.2 — Policy Suite and Version-Only Releases
 
 ### Added
