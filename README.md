@@ -14,7 +14,7 @@ After GitHub Pages is enabled, the site will be available at:
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
 4. If `DELETE_THESE_FILES.txt` still exists in the repository, delete it; it is an obsolete instruction file and is intentionally absent from this release.
-5. Enter the commit message: `Add moderation reviews and appeals`
+5. Enter the commit message: `Add direct-access dashboard navigation`
 6. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -56,6 +56,13 @@ GitHub may take a few minutes to publish the first version.
 - `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
+
+## Version 1.16.0 direct-access dashboard navigation
+
+The dashboard sidebar now exposes individual destinations for every major public, member,
+Admin, Owner and help function. Section-aware links preserve browser history and allow
+Admins to jump directly to moderation cases, ban lists, player administration, server
+controls or protected audit history without scrolling through one large Admin page.
 
 ## Version 1.15.1 moderation case dialog hotfix
 

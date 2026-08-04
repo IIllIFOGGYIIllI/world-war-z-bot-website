@@ -5,6 +5,7 @@ const viewButtons = [...document.querySelectorAll('[data-view]')];
 const viewPanels = [...document.querySelectorAll('[data-view-panel]')];
 const loginDialog = document.querySelector('[data-login-dialog]');
 let dashboardAccessLevel = 'guest';
+let activeDashboardSection = '';
 
 const closeSidebar = () => {
   sidebar?.classList.remove('open');
@@ -29,9 +30,34 @@ const canOpenView = (view) => {
   return true;
 };
 
-const showView = (view, updateHistory = true) => {
-  const requestedView = availableViews.has(view) ? view : 'overview';
+const parseNavigationKey = (value, explicitSection = '') => {
+  const raw = String(value || '').replace(/^#/, '').trim();
+  const [rawView = '', rawSection = ''] = raw.split('/', 2);
+  return {
+    view: rawView || 'overview',
+    section: String(explicitSection || rawSection || '').trim()
+  };
+};
+
+const defaultSectionForView = (view) =>
+  viewButtons.find((button) => button.dataset.view === view && button.dataset.section)?.dataset.section || '';
+
+const sectionTargetFor = (view, section) => {
+  const panel = viewPanels.find((item) => item.dataset.viewPanel === view);
+  if (!panel || !section) return null;
+  return [...panel.querySelectorAll('[data-dashboard-section]')]
+    .find((item) => item.dataset.dashboardSection === section) || null;
+};
+
+const navigationKey = (view, section = '') => section ? `${view}/${section}` : view;
+
+const showView = (viewOrKey, updateHistory = true, explicitSection = '') => {
+  const requested = parseNavigationKey(viewOrKey, explicitSection);
+  const requestedView = availableViews.has(requested.view) ? requested.view : 'overview';
   const selectedView = canOpenView(requestedView) ? requestedView : 'overview';
+  const requestedTarget = sectionTargetFor(selectedView, requested.section);
+  const selectedSection = requestedTarget ? requested.section : defaultSectionForView(selectedView);
+  const selectedTarget = sectionTargetFor(selectedView, selectedSection);
 
   viewPanels.forEach((panel) => {
     const active = panel.dataset.viewPanel === selectedView;
@@ -39,21 +65,39 @@ const showView = (view, updateHistory = true) => {
     panel.classList.toggle('active', active);
   });
 
+  let activeButton = null;
   viewButtons.forEach((button) => {
-    const active = button.dataset.view === selectedView;
+    const active = button.dataset.view === selectedView && button.dataset.section === selectedSection;
     button.classList.toggle('active', active);
-    if (active) button.setAttribute('aria-current', 'page');
-    else button.removeAttribute('aria-current');
+    if (active) {
+      button.setAttribute('aria-current', 'page');
+      activeButton = button;
+    } else {
+      button.removeAttribute('aria-current');
+    }
   });
 
-  if (updateHistory) history.pushState({ view: selectedView }, '', `#${selectedView}`);
-  document.querySelector('#dashboard-content')?.scrollIntoView({ block: 'start' });
+  activeDashboardSection = selectedSection;
+  const activePanel = viewPanels.find((panel) => panel.dataset.viewPanel === selectedView);
+  const breadcrumb = activePanel?.querySelector('.breadcrumb');
+  const navLabel = activeButton?.dataset.navLabel;
+  if (breadcrumb && navLabel) breadcrumb.textContent = `Dashboard / ${navLabel}`;
+
+  const key = navigationKey(selectedView, selectedSection);
+  if (updateHistory) history.pushState({ view: selectedView, section: selectedSection }, '', `#${key}`);
+
+  window.requestAnimationFrame(() => {
+    const targetVisible = selectedTarget && selectedTarget.getClientRects().length > 0;
+    const scrollTarget = targetVisible ? selectedTarget : activePanel?.querySelector('.view-heading') || activePanel;
+    scrollTarget?.scrollIntoView({ block: 'start', behavior: updateHistory ? 'smooth' : 'auto' });
+  });
+
   closeSidebar();
-  window.dispatchEvent(new CustomEvent('wwz:viewchange', { detail: { view: selectedView } }));
+  window.dispatchEvent(new CustomEvent('wwz:viewchange', { detail: { view: selectedView, section: selectedSection } }));
 };
 
-viewButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view)));
-document.querySelectorAll('[data-jump]').forEach((button) => button.addEventListener('click', () => showView(button.dataset.jump)));
+viewButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view, true, button.dataset.section)));
+document.querySelectorAll('[data-jump]').forEach((button) => button.addEventListener('click', () => showView(button.dataset.jump, true, button.dataset.jumpSection || '')));
 
 window.addEventListener('popstate', () => showView(location.hash.slice(1), false));
 
@@ -524,10 +568,14 @@ const callbackFragment = () => {
 };
 
 const clearCallbackFragment = () => {
-  const returnView = storageGet(AUTH_RETURN_VIEW_KEY) || 'overview';
+  const storedKey = storageGet(AUTH_RETURN_VIEW_KEY) || 'overview/summary';
   storageRemove(AUTH_RETURN_VIEW_KEY);
-  history.replaceState({ view: returnView }, '', `#${availableViews.has(returnView) ? returnView : 'overview'}`);
-  return returnView;
+  const requested = parseNavigationKey(storedKey);
+  const view = availableViews.has(requested.view) ? requested.view : 'overview';
+  const section = sectionTargetFor(view, requested.section) ? requested.section : defaultSectionForView(view);
+  const key = navigationKey(view, section);
+  history.replaceState({ view, section }, '', `#${key}`);
+  return key;
 };
 
 const authFetch = async (url, options = {}) => {
@@ -2266,7 +2314,7 @@ const configureDiscordAuth = async () => {
 startDiscordLoginButton?.addEventListener('click', () => {
   if (!discordAuthEnabled || authRequestInProgress) return;
   const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel || 'overview';
-  storageSet(AUTH_RETURN_VIEW_KEY, activeView);
+  storageSet(AUTH_RETURN_VIEW_KEY, navigationKey(activeView, activeDashboardSection || defaultSectionForView(activeView)));
   window.location.assign(AUTH_LOGIN_URL);
 });
 

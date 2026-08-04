@@ -1,5 +1,34 @@
 # Website Patch Notes
 
+## Version 1.16.0 — Direct-Access Dashboard Navigation
+
+### Added
+
+- Rebuilt the dashboard sidebar around direct links to individual tools and data areas.
+- Added dedicated navigation entries for overview actions, activity, server health, map locations, wallet, ledger, profile activity, moderation cases, current ban lists, player administration, server controls, server audit, configuration workflow, backup history, Discord connection, access levels and help.
+- Added section-aware URLs such as `#staff/cases` and `#economy/ledger` so browser Back/Forward and copied links return to the correct dashboard area.
+- Added section-specific active states and breadcrumbs.
+
+### Improved
+
+- Admin tools no longer require scrolling through the entire Administration Centre to reach a specific function.
+- The sidebar is wider, clearer and independently scrollable on desktop and mobile.
+- Discord sign-in now remembers the exact dashboard section rather than only the broad page.
+- Existing quick-action buttons can route directly to the relevant subsection.
+
+### Safety
+
+- Website-only navigation update.
+- No API route, bot permission, moderation action or Railway database behaviour changed.
+- Existing Admin and Owner navigation remains hidden until Railway verifies the required access level.
+
+### Deployment
+
+- Upload the version 1.16.0 website patch.
+- No bot update, database migration or Railway setting change is required.
+- Hard refresh after GitHub Pages publishes.
+
+
 ## Version 1.15.1 — Moderation Case Dialog Hotfix
 
 ### Fixed
