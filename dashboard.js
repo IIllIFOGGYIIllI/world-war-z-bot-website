@@ -127,6 +127,14 @@ const AUTH_COMPLETE_URL = `${DASHBOARD_API_BASE}/api/auth/discord/complete`;
 const AUTH_ME_URL = `${DASHBOARD_API_BASE}/api/auth/me`;
 const AUTH_LOGOUT_URL = `${DASHBOARD_API_BASE}/api/auth/logout`;
 const ACCOUNT_SUMMARY_URL = `${DASHBOARD_API_BASE}/api/account/summary`;
+const SHOP_CATALOGUE_URL = `${DASHBOARD_API_BASE}/api/shop/catalogue`;
+const ACCOUNT_SHOP_URL = `${DASHBOARD_API_BASE}/api/account/shop`;
+const ACCOUNT_SHOP_PURCHASE_URL = `${DASHBOARD_API_BASE}/api/account/shop/purchase`;
+const ADMIN_SHOP_ORDERS_URL = `${DASHBOARD_API_BASE}/api/admin/shop/orders`;
+const ADMIN_SHOP_ORDER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/shop/orders/action`;
+const OWNER_SHOP_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/shop/config`;
+const OWNER_SHOP_ITEM_URL = `${DASHBOARD_API_BASE}/api/owner/shop/item`;
+const OWNER_SHOP_SETTINGS_URL = `${DASHBOARD_API_BASE}/api/owner/shop/settings`;
 const SERVER_ACTION_HISTORY_URL = `${DASHBOARD_API_BASE}/api/admin/server/actions`;
 const ADMIN_PLAYER_SEARCH_URL = `${DASHBOARD_API_BASE}/api/admin/players/search`;
 const ADMIN_PLAYER_DETAILS_URL = `${DASHBOARD_API_BASE}/api/admin/players/details`;
@@ -516,6 +524,7 @@ const applySignedOutState = ({ unavailable = false } = {}) => {
   applyAccessVisibility('guest');
   resetMemberPanels();
   resetAppealPanels();
+  resetShopPanels();
   setText('[data-auth-button-label]', 'Sign in with Discord');
   setText('[data-access-card-title]', 'Guest access');
   setText('[data-access-card-copy]', 'Sign in will securely verify your community access.');
@@ -3187,7 +3196,12 @@ const loadCurrentAccount = async (sessionToken) => {
     applyAuthenticatedState(await response.json());
     await loadAccountSummary(sessionToken);
     await loadMemberAppeals(sessionToken);
-    if (dashboardAccessLevel === 'owner') await loadOwnerAppealSettings(sessionToken);
+    await loadMemberShop(sessionToken);
+    if (hasServerActionAccess()) await loadAdminShopOrders(sessionToken);
+    if (dashboardAccessLevel === 'owner') {
+      await loadOwnerAppealSettings(sessionToken);
+      await loadOwnerShopConfig(sessionToken);
+    }
     await loadServerActionHistory(sessionToken);
     await loadModerationCases(sessionToken);
     await loadCurrentBanlists(sessionToken);
@@ -3491,6 +3505,611 @@ refreshStatusButton?.addEventListener('click', refreshLiveStatus);
 refreshLiveStatus();
 window.setInterval(refreshLiveStatus, LIVE_STATUS_REFRESH_MS);
 
+const shopCatalogue = document.querySelector('[data-shop-catalogue]');
+const shopSearch = document.querySelector('[data-shop-search]');
+const shopCategory = document.querySelector('[data-shop-category]');
+const shopEmpty = document.querySelector('[data-shop-empty]');
+const shopError = document.querySelector('[data-shop-error]');
+const refreshShopButton = document.querySelector('[data-refresh-shop]');
+const refreshShopOrdersButton = document.querySelector('[data-refresh-shop-orders]');
+const shopOrderGuest = document.querySelector('[data-shop-order-guest]');
+const shopOrderUnlinked = document.querySelector('[data-shop-order-unlinked]');
+const shopOrderContent = document.querySelector('[data-shop-order-content]');
+const shopOrderList = document.querySelector('[data-shop-order-list]');
+const shopOrderEmpty = document.querySelector('[data-shop-order-empty]');
+const shopPurchaseDialog = document.querySelector('[data-shop-purchase-dialog]');
+const shopPurchaseForm = document.querySelector('[data-shop-purchase-form]');
+const shopPurchaseQuantity = document.querySelector('[data-shop-purchase-quantity]');
+const shopPurchaseNote = document.querySelector('[data-shop-purchase-note]');
+const shopPurchaseMessage = document.querySelector('[data-shop-purchase-message]');
+const shopPurchaseCancelButtons = [...document.querySelectorAll('[data-shop-purchase-cancel]')];
+const confirmShopPurchaseButton = document.querySelector('[data-confirm-shop-purchase]');
+const adminShopOrderScope = document.querySelector('[data-admin-shop-order-scope]');
+const adminShopOrderList = document.querySelector('[data-admin-shop-order-list]');
+const adminShopOrderEmpty = document.querySelector('[data-admin-shop-order-empty]');
+const adminShopOrderError = document.querySelector('[data-admin-shop-order-error]');
+const refreshAdminShopOrdersButton = document.querySelector('[data-refresh-admin-shop-orders]');
+const shopOrderNavBadge = document.querySelector('[data-shop-order-nav-badge]');
+const shopOrderActionDialog = document.querySelector('[data-shop-order-action-dialog]');
+const shopOrderActionForm = document.querySelector('[data-shop-order-action-form]');
+const shopOrderActionNote = document.querySelector('[data-shop-order-action-note]');
+const shopOrderActionMessage = document.querySelector('[data-shop-order-action-message]');
+const shopOrderActionCancelButtons = [...document.querySelectorAll('[data-shop-order-action-cancel]')];
+const confirmShopOrderActionButton = document.querySelector('[data-confirm-shop-order-action]');
+const ownerShopEnabled = document.querySelector('[data-owner-shop-enabled]');
+const ownerShopTitle = document.querySelector('[data-owner-shop-title]');
+const ownerShopDescription = document.querySelector('[data-owner-shop-description]');
+const ownerShopInstructions = document.querySelector('[data-owner-shop-instructions]');
+const ownerShopMessage = document.querySelector('[data-owner-shop-message]');
+const ownerShopItemList = document.querySelector('[data-owner-shop-item-list]');
+const ownerShopEmpty = document.querySelector('[data-owner-shop-empty]');
+const ownerShopError = document.querySelector('[data-owner-shop-error]');
+const refreshShopConfigButton = document.querySelector('[data-refresh-shop-config]');
+const saveShopSettingsButton = document.querySelector('[data-save-shop-settings]');
+const newShopItemButton = document.querySelector('[data-new-shop-item]');
+const shopItemDialog = document.querySelector('[data-shop-item-dialog]');
+const shopItemForm = document.querySelector('[data-shop-item-form]');
+const shopItemCancelButtons = [...document.querySelectorAll('[data-shop-item-cancel]')];
+const shopItemMessage = document.querySelector('[data-shop-item-message]');
+
+let shopItems = [];
+let memberShopOrders = [];
+let selectedShopItem = null;
+let selectedShopOrder = null;
+let selectedShopOrderAction = '';
+let ownerShopItems = [];
+let editingShopItemId = null;
+let shopPurchasesEnabled = false;
+let shopRequestInProgress = false;
+let shopPurchaseInProgress = false;
+let adminShopRequestInProgress = false;
+let shopOrderActionInProgress = false;
+let ownerShopRequestInProgress = false;
+
+const shopStatusLabel = (status) => titleCaseState(status || 'unknown');
+const shopStockText = (item) => item.stock_quantity == null ? 'Unlimited stock' : `${Number(item.stock_quantity)} in stock`;
+const shopMemberLimitText = (item) => {
+  if (item.max_per_player == null) return 'No lifetime limit';
+  if (item.remaining_member_limit == null) return `Limit ${Number(item.max_per_player)} per player`;
+  return `${Math.max(0, Number(item.remaining_member_limit))} remaining for you`;
+};
+
+const resetShopPanels = () => {
+  shopOrderGuest?.removeAttribute('hidden');
+  shopOrderUnlinked?.setAttribute('hidden', '');
+  shopOrderContent?.setAttribute('hidden', '');
+  memberShopOrders = [];
+  if (shopOrderList) shopOrderList.replaceChildren();
+  setText('[data-shop-wallet]', 'Sign in required');
+  setText('[data-shop-open-orders]', '—');
+};
+
+const populateShopCategories = () => {
+  if (!shopCategory) return;
+  const selected = shopCategory.value || 'all';
+  shopCategory.replaceChildren();
+  const all = document.createElement('option');
+  all.value = 'all';
+  all.textContent = 'All categories';
+  shopCategory.append(all);
+  [...new Set(shopItems.map((item) => String(item.category)))].sort((a, b) => a.localeCompare(b)).forEach((category) => {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = category;
+    shopCategory.append(option);
+  });
+  shopCategory.value = [...shopCategory.options].some((option) => option.value === selected) ? selected : 'all';
+};
+
+const openShopPurchase = (item) => {
+  if (!authenticatedUser) {
+    handleAuthAction();
+    return;
+  }
+  if (!shopPurchasesEnabled || !item?.available || shopPurchaseInProgress) return;
+  selectedShopItem = item;
+  shopPurchaseForm?.reset();
+  if (shopPurchaseQuantity) {
+    shopPurchaseQuantity.value = '1';
+    shopPurchaseQuantity.max = String(Math.max(1, Math.min(
+      Number(item.max_per_order || 1),
+      item.stock_quantity == null ? 100 : Number(item.stock_quantity),
+      item.remaining_member_limit == null ? 100 : Number(item.remaining_member_limit)
+    )));
+  }
+  setText('[data-shop-purchase-title]', `Buy ${item.name}?`);
+  setText('[data-shop-purchase-item]', `${item.name} · ${item.sku}`);
+  setText('[data-shop-purchase-price]', `${formatMoney(item.price)} each · ${shopStockText(item)}`);
+  showInlineMessage(shopPurchaseMessage, '');
+  updateShopPurchaseTotal();
+  if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal();
+  else shopPurchaseDialog?.setAttribute('open', '');
+};
+
+const updateShopPurchaseTotal = () => {
+  const quantity = Math.max(1, Number(shopPurchaseQuantity?.value || 1));
+  const total = quantity * Number(selectedShopItem?.price || 0);
+  setText('[data-shop-purchase-total]', `Your wallet will be debited ${formatMoney(total)} immediately.`);
+};
+shopPurchaseQuantity?.addEventListener('input', updateShopPurchaseTotal);
+
+const renderShopCatalogue = () => {
+  if (!shopCatalogue) return;
+  const query = String(shopSearch?.value || '').trim().toLowerCase();
+  const category = shopCategory?.value || 'all';
+  const visible = shopItems.filter((item) => {
+    const matchesCategory = category === 'all' || String(item.category) === category;
+    const haystack = `${item.name} ${item.sku} ${item.category} ${item.description}`.toLowerCase();
+    return matchesCategory && (!query || haystack.includes(query));
+  });
+  shopCatalogue.replaceChildren();
+  visible.forEach((item) => {
+    const card = document.createElement('article');
+    card.className = `shop-item-card${item.available ? '' : ' unavailable'}`;
+    const heading = document.createElement('div');
+    heading.className = 'shop-item-heading';
+    const copy = document.createElement('div');
+    const categoryText = document.createElement('p');
+    categoryText.className = 'panel-kicker';
+    categoryText.textContent = `${item.category} · ${item.sku}`;
+    const title = document.createElement('h2');
+    title.textContent = item.name;
+    copy.append(categoryText, title);
+    const price = document.createElement('strong');
+    price.className = 'shop-item-price';
+    price.textContent = formatMoney(item.price);
+    heading.append(copy, price);
+    const description = document.createElement('p');
+    description.textContent = item.description;
+    const meta = document.createElement('div');
+    meta.className = 'shop-item-meta';
+    [shopStockText(item), `Max ${item.max_per_order}/order`, shopMemberLimitText(item)].forEach((value) => {
+      const span = document.createElement('span');
+      span.textContent = value;
+      meta.append(span);
+    });
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'primary-action wide';
+    const linked = !document.querySelector('[data-shop-order-content]')?.hidden;
+    const canBuy = shopPurchasesEnabled && linked && item.available;
+    button.textContent = !shopPurchasesEnabled ? 'Purchases paused' : !authenticatedUser ? 'Sign in to buy' : !linked ? 'Link PSN to buy' : item.available ? 'Buy item' : 'Unavailable';
+    button.disabled = !shopPurchasesEnabled || Boolean(authenticatedUser && !canBuy);
+    button.addEventListener('click', () => openShopPurchase(item));
+    card.append(heading, description, meta, button);
+    shopCatalogue.append(card);
+  });
+  if (shopEmpty) shopEmpty.hidden = visible.length !== 0;
+};
+
+const renderMemberShopOrders = (orders) => {
+  if (!shopOrderList) return;
+  shopOrderList.replaceChildren();
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  safeOrders.forEach((order) => {
+    const card = document.createElement('article');
+    card.className = 'shop-order-card';
+    const heading = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = `Order #${order.order_id} · ${order.quantity} × ${order.item.name}`;
+    const status = document.createElement('span');
+    status.className = `shop-order-status ${String(order.status)}`;
+    status.textContent = shopStatusLabel(order.status);
+    heading.append(title, status);
+    const meta = document.createElement('p');
+    meta.textContent = `${formatMoney(order.total_price)} · Ordered ${formatAccountDate(order.created_at)}${order.handled_by_name ? ` · ${order.handled_by_name}` : ''}`;
+    card.append(heading, meta);
+    if (order.buyer_note) {
+      const note = document.createElement('small');
+      note.textContent = `Your note: ${order.buyer_note}`;
+      card.append(note);
+    }
+    if (order.fulfilment_note) {
+      const note = document.createElement('small');
+      note.textContent = `Staff update: ${order.fulfilment_note}`;
+      card.append(note);
+    }
+    shopOrderList.append(card);
+  });
+  if (shopOrderEmpty) shopOrderEmpty.hidden = safeOrders.length !== 0;
+};
+
+const applyShopPayload = (payload, { member = false } = {}) => {
+  const settings = payload?.settings || {};
+  shopPurchasesEnabled = Boolean(settings.enabled);
+  shopItems = Array.isArray(payload?.items) ? payload.items : [];
+  setText('[data-shop-title]', settings.title || 'Survivor shop.');
+  setText('[data-shop-description]', settings.description || 'Spend your verified community balance on approved goods and services.');
+  setText('[data-shop-instructions]', settings.purchase_instructions || 'Staff will arrange fulfilment after purchase.');
+  setText('[data-shop-item-count]', String(shopItems.length));
+  setText('[data-shop-status-label]', settings.enabled ? 'Shop open' : 'Purchases paused');
+  setStatusClass(document.querySelector('[data-shop-status-badge]'), settings.enabled ? 'online' : 'unavailable');
+  populateShopCategories();
+  if (member) {
+    shopOrderGuest?.setAttribute('hidden', '');
+    if (!payload.linked) {
+      shopOrderUnlinked?.removeAttribute('hidden');
+      shopOrderContent?.setAttribute('hidden', '');
+      setText('[data-shop-wallet]', 'PSN link required');
+      setText('[data-shop-open-orders]', '—');
+    } else {
+      shopOrderUnlinked?.setAttribute('hidden', '');
+      shopOrderContent?.removeAttribute('hidden');
+      memberShopOrders = Array.isArray(payload.orders) ? payload.orders : [];
+      setText('[data-shop-wallet]', formatMoney(payload.balance));
+      setText('[data-shop-open-orders]', String(memberShopOrders.filter((order) => ['pending', 'processing'].includes(order.status)).length));
+      renderMemberShopOrders(memberShopOrders);
+    }
+  }
+  renderShopCatalogue();
+};
+
+const loadPublicShop = async () => {
+  if (shopRequestInProgress) return;
+  shopRequestInProgress = true;
+  refreshShopButton?.setAttribute('disabled', '');
+  try {
+    const response = await authFetch(SHOP_CATALOGUE_URL, { headers: { Accept: 'application/json' } });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Shop unavailable');
+    applyShopPayload(payload);
+    if (shopError) shopError.hidden = true;
+  } catch (error) {
+    if (shopError) shopError.hidden = false;
+  } finally {
+    shopRequestInProgress = false;
+    refreshShopButton?.removeAttribute('disabled');
+  }
+};
+
+const loadMemberShop = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!sessionToken) return false;
+  if (shopRequestInProgress) {
+    window.setTimeout(() => loadMemberShop(sessionToken), 250);
+    return false;
+  }
+  shopRequestInProgress = true;
+  refreshShopButton?.setAttribute('disabled', '');
+  refreshShopOrdersButton?.setAttribute('disabled', '');
+  try {
+    const response = await authFetch(ACCOUNT_SHOP_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      storageRemove(AUTH_SESSION_KEY);
+      applySignedOutState();
+      return false;
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Shop unavailable');
+    applyShopPayload(payload, { member: true });
+    if (shopError) shopError.hidden = true;
+    return true;
+  } catch (error) {
+    if (shopError) shopError.hidden = false;
+    return false;
+  } finally {
+    shopRequestInProgress = false;
+    refreshShopButton?.removeAttribute('disabled');
+    refreshShopOrdersButton?.removeAttribute('disabled');
+  }
+};
+
+shopSearch?.addEventListener('input', renderShopCatalogue);
+shopCategory?.addEventListener('change', renderShopCatalogue);
+refreshShopButton?.addEventListener('click', () => storageGet(AUTH_SESSION_KEY) ? loadMemberShop() : loadPublicShop());
+refreshShopOrdersButton?.addEventListener('click', () => loadMemberShop());
+shopPurchaseCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!shopPurchaseInProgress) shopPurchaseDialog?.close?.(); }));
+shopPurchaseForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || !selectedShopItem || shopPurchaseInProgress) return;
+  shopPurchaseInProgress = true;
+  confirmShopPurchaseButton?.setAttribute('disabled', '');
+  showInlineMessage(shopPurchaseMessage, 'Railway is validating stock, purchase limits and your wallet.', 'info');
+  try {
+    const response = await protectedActionFetch(ACCOUNT_SHOP_PURCHASE_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({
+        item_id: Number(selectedShopItem.item_id),
+        quantity: Number(shopPurchaseQuantity?.value || 1),
+        buyer_note: shopPurchaseNote?.value.trim() || '',
+        purchase_key: `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      storageRemove(AUTH_SESSION_KEY);
+      applySignedOutState();
+      shopPurchaseDialog?.close?.();
+      return;
+    }
+    if (!response.ok) throw new Error(payload.message || 'The purchase could not be completed.');
+    showInlineMessage(shopPurchaseMessage, payload.message || 'Order placed.', 'success');
+    await loadMemberShop(sessionToken);
+    window.setTimeout(() => shopPurchaseDialog?.close?.(), 900);
+  } catch (error) {
+    showInlineMessage(shopPurchaseMessage, error.message || 'The purchase could not be completed.');
+  } finally {
+    shopPurchaseInProgress = false;
+    confirmShopPurchaseButton?.removeAttribute('disabled');
+  }
+});
+
+const adminShopActionButton = (label, action, order, danger = false) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = `${danger ? 'primary-action danger-action' : 'secondary-action'} compact-action`;
+  button.textContent = label;
+  button.addEventListener('click', () => {
+    selectedShopOrder = order;
+    selectedShopOrderAction = action;
+    shopOrderActionForm?.reset();
+    setText('[data-shop-order-action-title]', `${label} order #${order.order_id}?`);
+    setText('[data-shop-order-action-target]', `${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`);
+    setText('[data-shop-order-action-detail]', `${formatMoney(order.total_price)} · ${shopStatusLabel(order.status)}`);
+    setText('[data-shop-order-action-warning]', ['cancel', 'refund'].includes(action) ? 'Full economy refund and stock restoration' : 'Permanent order audit entry');
+    showInlineMessage(shopOrderActionMessage, '');
+    if (typeof shopOrderActionDialog?.showModal === 'function') shopOrderActionDialog.showModal();
+    else shopOrderActionDialog?.setAttribute('open', '');
+  });
+  return button;
+};
+
+const renderAdminShopOrders = (payload) => {
+  if (!adminShopOrderList) return;
+  adminShopOrderList.replaceChildren();
+  const summary = payload?.summary || {};
+  ['open', 'pending', 'processing', 'fulfilled', 'refunded', 'cancelled'].forEach((key) => setText(`[data-admin-shop-${key}]`, String(Number(summary[key] || 0))));
+  const openCount = Number(summary.open || 0);
+  if (shopOrderNavBadge) {
+    shopOrderNavBadge.textContent = String(openCount);
+    shopOrderNavBadge.hidden = openCount === 0;
+  }
+  const orders = Array.isArray(payload?.orders) ? payload.orders : [];
+  orders.forEach((order) => {
+    const card = document.createElement('article');
+    card.className = 'shop-order-card admin-order';
+    const heading = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = `#${order.order_id} · ${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`;
+    const status = document.createElement('span');
+    status.className = `shop-order-status ${order.status}`;
+    status.textContent = shopStatusLabel(order.status);
+    heading.append(title, status);
+    const detail = document.createElement('p');
+    detail.textContent = `${formatMoney(order.total_price)} · ${order.buyer.discord_name} · ${formatAccountDate(order.created_at)}`;
+    const actions = document.createElement('div');
+    actions.className = 'heading-actions';
+    if (order.status === 'pending') {
+      actions.append(adminShopActionButton('Start processing', 'start_processing', order));
+      actions.append(adminShopActionButton('Cancel & refund', 'cancel', order, true));
+    } else if (order.status === 'processing') {
+      actions.append(adminShopActionButton('Mark fulfilled', 'fulfill', order));
+      actions.append(adminShopActionButton('Cancel & refund', 'cancel', order, true));
+    } else if (order.status === 'fulfilled') {
+      actions.append(adminShopActionButton('Refund order', 'refund', order, true));
+    }
+    card.append(heading, detail);
+    if (order.item.fulfilment_instructions) {
+      const instructions = document.createElement('small');
+      instructions.textContent = `Fulfilment instructions: ${order.item.fulfilment_instructions}`;
+      card.append(instructions);
+    }
+    if (order.buyer_note) {
+      const note = document.createElement('small');
+      note.textContent = `Buyer note: ${order.buyer_note}`;
+      card.append(note);
+    }
+    if (actions.childElementCount) card.append(actions);
+    adminShopOrderList.append(card);
+  });
+  if (adminShopOrderEmpty) adminShopOrderEmpty.hidden = orders.length !== 0;
+  if (adminShopOrderError) adminShopOrderError.hidden = true;
+};
+
+const loadAdminShopOrders = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!sessionToken || !hasServerActionAccess() || adminShopRequestInProgress) return false;
+  adminShopRequestInProgress = true;
+  refreshAdminShopOrdersButton?.setAttribute('disabled', '');
+  try {
+    const scope = encodeURIComponent(adminShopOrderScope?.value || 'open');
+    const response = await authFetch(`${ADMIN_SHOP_ORDERS_URL}?status=${scope}&limit=75`, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Orders unavailable');
+    renderAdminShopOrders(payload);
+    return true;
+  } catch (error) {
+    if (adminShopOrderError) adminShopOrderError.hidden = false;
+    return false;
+  } finally {
+    adminShopRequestInProgress = false;
+    refreshAdminShopOrdersButton?.removeAttribute('disabled');
+  }
+};
+adminShopOrderScope?.addEventListener('change', () => loadAdminShopOrders());
+refreshAdminShopOrdersButton?.addEventListener('click', () => loadAdminShopOrders());
+shopOrderActionCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!shopOrderActionInProgress) shopOrderActionDialog?.close?.(); }));
+shopOrderActionForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || !selectedShopOrder || !selectedShopOrderAction || shopOrderActionInProgress) return;
+  shopOrderActionInProgress = true;
+  confirmShopOrderActionButton?.setAttribute('disabled', '');
+  showInlineMessage(shopOrderActionMessage, 'Railway is updating the order and economy audit.', 'info');
+  try {
+    const response = await protectedActionFetch(ADMIN_SHOP_ORDER_ACTION_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({ order_id: selectedShopOrder.order_id, action: selectedShopOrderAction, note: shopOrderActionNote?.value.trim() || '' })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
+    if (!response.ok) throw new Error(payload.message || 'The order could not be updated.');
+    showInlineMessage(shopOrderActionMessage, payload.message || 'Order updated.', 'success');
+    await Promise.all([loadAdminShopOrders(sessionToken), loadMemberShop(sessionToken)]);
+    window.setTimeout(() => shopOrderActionDialog?.close?.(), 800);
+  } catch (error) {
+    showInlineMessage(shopOrderActionMessage, error.message || 'The order could not be updated.');
+  } finally {
+    shopOrderActionInProgress = false;
+    confirmShopOrderActionButton?.removeAttribute('disabled');
+  }
+});
+
+const ownerShopEditButton = (item) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'table-button';
+  button.textContent = 'Edit';
+  button.addEventListener('click', () => openShopItemEditor(item));
+  return button;
+};
+
+const renderOwnerShopItems = () => {
+  if (!ownerShopItemList) return;
+  ownerShopItemList.replaceChildren();
+  ownerShopItems.forEach((item) => {
+    const row = document.createElement('tr');
+    const itemCell = document.createElement('td');
+    const strong = document.createElement('strong');
+    strong.textContent = item.name;
+    const small = document.createElement('small');
+    small.textContent = item.sku;
+    itemCell.append(strong, document.createElement('br'), small);
+    const category = document.createElement('td'); category.textContent = item.category;
+    const price = document.createElement('td'); price.textContent = formatMoney(item.price);
+    const stock = document.createElement('td'); stock.textContent = item.stock_quantity == null ? 'Unlimited' : String(item.stock_quantity);
+    const limits = document.createElement('td'); limits.textContent = `${item.max_per_order}/order · ${item.max_per_player == null ? 'No player limit' : `${item.max_per_player}/player`}`;
+    const state = document.createElement('td');
+    const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill);
+    const action = document.createElement('td'); action.append(ownerShopEditButton(item));
+    row.append(itemCell, category, price, stock, limits, state, action);
+    ownerShopItemList.append(row);
+  });
+  if (ownerShopEmpty) ownerShopEmpty.hidden = ownerShopItems.length !== 0;
+};
+
+const openShopItemEditor = (item = null) => {
+  editingShopItemId = item?.item_id == null ? null : Number(item.item_id);
+  shopItemForm?.reset();
+  setText('[data-shop-item-dialog-title]', item ? `Edit ${item.name}` : 'Create shop item');
+  const values = {
+    '[data-shop-item-sku]': item?.sku || '', '[data-shop-item-name]': item?.name || '',
+    '[data-shop-item-category]': item?.category || '', '[data-shop-item-price]': item?.price || '',
+    '[data-shop-item-stock]': item?.stock_quantity ?? '', '[data-shop-item-max-order]': item?.max_per_order || 1,
+    '[data-shop-item-max-player]': item?.max_per_player ?? '', '[data-shop-item-sort]': item?.sort_order || 0,
+    '[data-shop-item-description]': item?.description || '', '[data-shop-item-fulfilment]': item?.fulfilment_instructions || ''
+  };
+  Object.entries(values).forEach(([selector, value]) => { const element = document.querySelector(selector); if (element) element.value = String(value); });
+  const active = document.querySelector('[data-shop-item-active]'); if (active) active.checked = item ? Boolean(item.active) : true;
+  showInlineMessage(shopItemMessage, '');
+  if (typeof shopItemDialog?.showModal === 'function') shopItemDialog.showModal();
+  else shopItemDialog?.setAttribute('open', '');
+};
+newShopItemButton?.addEventListener('click', () => openShopItemEditor());
+shopItemCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!ownerShopRequestInProgress) shopItemDialog?.close?.(); }));
+
+const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopRequestInProgress) return false;
+  ownerShopRequestInProgress = true;
+  refreshShopConfigButton?.setAttribute('disabled', '');
+  try {
+    const response = await authFetch(OWNER_SHOP_CONFIG_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Configuration unavailable');
+    const settings = payload.settings || {};
+    if (ownerShopEnabled) ownerShopEnabled.checked = Boolean(settings.enabled);
+    if (ownerShopTitle) ownerShopTitle.value = String(settings.title || '');
+    if (ownerShopDescription) ownerShopDescription.value = String(settings.description || '');
+    if (ownerShopInstructions) ownerShopInstructions.value = String(settings.purchase_instructions || '');
+    ownerShopItems = Array.isArray(payload.items) ? payload.items : [];
+    renderOwnerShopItems();
+    if (ownerShopError) ownerShopError.hidden = true;
+    return true;
+  } catch (error) {
+    if (ownerShopError) ownerShopError.hidden = false;
+    return false;
+  } finally {
+    ownerShopRequestInProgress = false;
+    refreshShopConfigButton?.removeAttribute('disabled');
+  }
+};
+refreshShopConfigButton?.addEventListener('click', () => loadOwnerShopConfig());
+saveShopSettingsButton?.addEventListener('click', async () => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopRequestInProgress) return;
+  ownerShopRequestInProgress = true;
+  saveShopSettingsButton.setAttribute('disabled', '');
+  showInlineMessage(ownerShopMessage, 'Saving shop settings…', 'info');
+  try {
+    const response = await protectedActionFetch(OWNER_SHOP_SETTINGS_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({
+        enabled: Boolean(ownerShopEnabled?.checked), title: ownerShopTitle?.value.trim() || '',
+        description: ownerShopDescription?.value.trim() || '', purchase_instructions: ownerShopInstructions?.value.trim() || ''
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
+    if (!response.ok) throw new Error(payload.message || 'Settings could not be saved.');
+    showInlineMessage(ownerShopMessage, payload.message || 'Shop settings saved.', 'success');
+    ownerShopRequestInProgress = false;
+    await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
+  } catch (error) {
+    showInlineMessage(ownerShopMessage, error.message || 'Settings could not be saved.');
+  } finally {
+    ownerShopRequestInProgress = false;
+    saveShopSettingsButton.removeAttribute('disabled');
+  }
+});
+shopItemForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopRequestInProgress) return;
+  ownerShopRequestInProgress = true;
+  document.querySelector('[data-save-shop-item]')?.setAttribute('disabled', '');
+  showInlineMessage(shopItemMessage, 'Saving catalogue item…', 'info');
+  const value = (selector) => document.querySelector(selector)?.value ?? '';
+  try {
+    const response = await protectedActionFetch(OWNER_SHOP_ITEM_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({
+        item_id: editingShopItemId, sku: value('[data-shop-item-sku]'), name: value('[data-shop-item-name]'),
+        category: value('[data-shop-item-category]'), price: value('[data-shop-item-price]'),
+        stock_quantity: value('[data-shop-item-stock]'), max_per_order: value('[data-shop-item-max-order]'),
+        max_per_player: value('[data-shop-item-max-player]'), sort_order: value('[data-shop-item-sort]'),
+        description: value('[data-shop-item-description]'), fulfilment_instructions: value('[data-shop-item-fulfilment]'),
+        active: Boolean(document.querySelector('[data-shop-item-active]')?.checked)
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
+    if (!response.ok) throw new Error(payload.message || 'The item could not be saved.');
+    showInlineMessage(shopItemMessage, payload.message || 'Item saved.', 'success');
+    ownerShopRequestInProgress = false;
+    await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
+    window.setTimeout(() => shopItemDialog?.close?.(), 800);
+  } catch (error) {
+    showInlineMessage(shopItemMessage, error.message || 'The item could not be saved.');
+  } finally {
+    ownerShopRequestInProgress = false;
+    document.querySelector('[data-save-shop-item]')?.removeAttribute('disabled');
+  }
+});
+
+window.addEventListener('wwz:viewchange', (event) => {
+  const { view, section } = event.detail || {};
+  const token = storageGet(AUTH_SESSION_KEY);
+  if (view === 'shop') token ? loadMemberShop(token) : loadPublicShop();
+  if (view === 'staff' && section === 'shop-orders') loadAdminShopOrders(token);
+  if (view === 'configuration' && section === 'shop-config') loadOwnerShopConfig(token);
+});
+loadPublicShop();
+
 const commands = [
   {"name": "account", "category": "Accounts", "description": "Advanced account linking and administration group.", "access": "Member"},
   {"name": "adm", "category": "ADM intelligence", "description": "Advanced ADM intelligence group.", "access": "Admin"},
@@ -3574,7 +4193,11 @@ const commands = [
   {"name": "warnings", "category": "Moderation", "description": "View a member’s active warnings.", "access": "Admin"},
   {"name": "watch", "category": "Player admin", "description": "Add a PlayStation account to the watchlist.", "access": "Admin"},
   {"name": "watchlist", "category": "Player admin", "description": "View watched PlayStation accounts.", "access": "Admin"},
-  {"name": "work", "category": "Economy", "description": "Complete a survivor job.", "access": "Member"}
+  {"name": "work", "category": "Economy", "description": "Complete a survivor job.", "access": "Member"},
+  {"name": "shop", "category": "Shop", "description": "Browse the active survivor shop catalogue.", "access": "Member"},
+  {"name": "buy", "category": "Shop", "description": "Purchase an active shop item with community currency.", "access": "Member"},
+  {"name": "orders", "category": "Shop", "description": "View your recent shop orders and fulfilment status.", "access": "Member"},
+  {"name": "order", "category": "Shop", "description": "View one shop order and its audit history.", "access": "Member"}
 ];
 
 const commandResults = document.querySelector('[data-command-results]');

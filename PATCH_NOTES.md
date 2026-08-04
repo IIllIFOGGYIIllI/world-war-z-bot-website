@@ -1,5 +1,50 @@
 # Website Patch Notes
 
+## Version 1.19.0 — Economy-Linked Survivor Shop
+
+**Release date:** 5 August 2026
+
+### Git commit message
+
+```text
+Add economy-linked survivor shop
+```
+
+### Member shop
+
+- Added direct sidebar access to the Survivor Shop and My Shop Orders.
+- Added a searchable and category-filtered public catalogue.
+- Signed-in linked members see their current wallet, per-player limits and recent order history.
+- Purchases use a confirmation dialog, quantity controls, delivery notes and unique idempotency keys.
+- Added clear guest, unlinked, loading, closed, unavailable and empty states.
+- Order tracking shows pending, processing, fulfilled, cancelled and refunded states plus staff updates.
+
+### Admin fulfilment
+
+- Added a direct Shop Fulfilment sidebar destination for current Admins and the Owner.
+- Added open/all/status filters, queue summaries and required-note action dialogs.
+- Admins can begin processing, fulfil, cancel or refund supported orders.
+- Successful actions refresh the queue, member shop state and managed notification routes.
+
+### Owner catalogue controls
+
+- Added an Owner-only Shop Catalogue destination.
+- Owners can enable or pause purchases and edit the public title, description and purchase instructions.
+- Added item creation and editing for SKU, category, price, finite/unlimited stock, per-order and per-player limits, sort order and active state.
+- Internal fulfilment instructions are not returned through public or member catalogue responses.
+
+### Policy and command updates
+
+- Updated Terms, Privacy and Community Guidelines for virtual shop orders, manual in-game fulfilment, order records, refunds and abuse prevention.
+- Expanded the searchable command library from 83 to 87 commands with `/shop`, `/buy`, `/orders` and `/order`.
+
+### Deployment
+
+- Deploy bot version 1.17.0 before this website version.
+- Upload the version 1.19.0 website patch.
+- Wait for GitHub Pages to publish, then use Ctrl+F5.
+- No website files need to be deleted.
+
 ## Version 1.18.0 — Member Appeals and Complete Command Access
 
 **Release date:** 5 August 2026

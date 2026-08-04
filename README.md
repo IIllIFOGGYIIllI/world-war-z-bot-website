@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add moderation queue and webhooks`
+4. Enter the commit message: `Add economy-linked survivor shop`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -33,7 +33,7 @@ GitHub may take a few minutes to publish the first version.
 - `script.js` — navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
-- `dashboard.js` — Railway health, Discord session, role visibility, member data, secure player lookup, controlled moderation actions and protected audit history
+- `dashboard.js` — Railway health, Discord session, role visibility, member data, survivor-shop purchases, fulfilment controls, secure player lookup, moderation actions and protected audit history
 - `chernarus-map.js` — public POI search, filters, markers, pan and vector zoom
 - `legal.html` — legal and policy document hub
 - `terms.html` — community Terms of Service
@@ -55,6 +55,20 @@ GitHub may take a few minutes to publish the first version.
 - `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
+
+## Version 1.19.0 economy-linked survivor shop
+
+The dashboard now includes a public catalogue, protected linked-member wallet
+and order tracking, an Admin fulfilment queue and an Owner catalogue editor.
+Purchases debit the existing verified economy through Railway, require a final
+confirmation and use idempotency protection against duplicate browser submits.
+Finite stock, per-order and per-player limits are validated again by the API.
+
+Admins can move orders into processing, record fulfilment, cancel or refund with
+a required note. Refunds restore the full virtual balance and finite stock while
+retaining the original ledger and order history. The searchable command library
+now reflects the complete 87-command bot layout, including `/shop`, `/buy`,
+`/orders` and `/order`.
 
 ## Version 1.18.0 member appeals and complete command access
 
