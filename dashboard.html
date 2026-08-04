@@ -14,7 +14,7 @@
   <link rel="manifest" href="site.webmanifest">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/world-war-z-icon.png">
-  <link rel="stylesheet" href="dashboard.css?v=1.16.0">
+  <link rel="stylesheet" href="dashboard.css?v=1.17.0">
 </head>
 <body>
   <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -58,15 +58,18 @@
         <button class="side-link" type="button" data-view="tickets" data-section="support" data-nav-label="Support tickets"><span class="side-link-icon" aria-hidden="true">◇</span><span class="side-link-copy"><strong>Support tickets</strong><small>Community support centre</small></span></button>
 
         <p class="nav-label" data-staff-only hidden>Administration</p>
+        <button class="side-link" type="button" data-view="staff" data-section="queue" data-nav-label="Moderation queue" data-staff-only hidden><span class="side-link-icon" aria-hidden="true">☷</span><span class="side-link-copy"><strong>Moderation queue</strong><small>Assignments and deadlines</small></span><span class="side-link-badge" data-queue-nav-badge hidden>0</span></button>
         <button class="side-link" type="button" data-view="staff" data-section="cases" data-nav-label="Moderation cases" data-staff-only hidden><span class="side-link-icon" aria-hidden="true">⚑</span><span class="side-link-copy"><strong>Moderation cases</strong><small>Evidence, reviews, appeals</small></span></button>
         <button class="side-link" type="button" data-view="staff" data-section="banlists" data-nav-label="Current ban lists" data-staff-only hidden><span class="side-link-icon" aria-hidden="true">⊘</span><span class="side-link-copy"><strong>Current ban lists</strong><small>Discord and DayZ</small></span></button>
         <button class="side-link" type="button" data-view="staff" data-section="players" data-nav-label="Player administration" data-staff-only hidden><span class="side-link-icon" aria-hidden="true">⌕</span><span class="side-link-copy"><strong>Player administration</strong><small>Search, warn and manage</small></span></button>
         <button class="side-link" type="button" data-view="staff" data-section="server-controls" data-nav-label="Server controls" data-staff-only hidden><span class="side-link-icon" aria-hidden="true">⚙</span><span class="side-link-copy"><strong>Server controls</strong><small>Start, stop and restart</small></span></button>
         <button class="side-link" type="button" data-view="staff" data-section="server-audit" data-nav-label="Server action history" data-staff-only hidden><span class="side-link-icon" aria-hidden="true">▤</span><span class="side-link-copy"><strong>Server action history</strong><small>Protected operation audit</small></span></button>
+        <button class="side-link" type="button" data-view="staff" data-section="failures" data-nav-label="Operational failures" data-staff-only hidden><span class="side-link-icon" aria-hidden="true">!</span><span class="side-link-copy"><strong>Operational failures</strong><small>Retries and service issues</small></span><span class="side-link-badge danger" data-failure-nav-badge hidden>0</span></button>
 
         <p class="nav-label" data-owner-only hidden>Owner</p>
         <button class="side-link" type="button" data-view="configuration" data-section="workflow" data-nav-label="Configuration workflow" data-owner-only hidden><span class="side-link-icon" aria-hidden="true">⚙</span><span class="side-link-copy"><strong>Configuration workflow</strong><small>Backup, validate, compare</small></span></button>
         <button class="side-link" type="button" data-view="configuration" data-section="backups" data-nav-label="Backup history" data-owner-only hidden><span class="side-link-icon" aria-hidden="true">▣</span><span class="side-link-copy"><strong>Backup history</strong><small>Restore-ready snapshots</small></span></button>
+        <button class="side-link" type="button" data-view="configuration" data-section="notifications" data-nav-label="Notifications &amp; webhooks" data-owner-only hidden><span class="side-link-icon" aria-hidden="true">⌁</span><span class="side-link-copy"><strong>Notifications &amp; webhooks</strong><small>Discord event routing</small></span></button>
 
         <p class="nav-label">Account &amp; help</p>
         <button class="side-link" type="button" data-view="settings" data-section="connection" data-nav-label="Discord connection"><span class="side-link-icon" aria-hidden="true">◎</span><span class="side-link-copy"><strong>Discord connection</strong><small>Session and sign-in</small></span></button>
@@ -251,6 +254,21 @@
       <section class="dashboard-view" data-view-panel="staff" aria-labelledby="staff-title" hidden>
         <div class="view-heading"><div><p class="breadcrumb">Dashboard / Admin tools</p><h1 id="staff-title">Administration centre.</h1><p>Protected player moderation, economy administration and server operations for verified Admins.</p></div><span class="restricted-badge">Admin verified</span></div>
         <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Fresh authorization on every request</strong><p>Railway rechecks your current Discord membership and Admin or Owner access before every player search, moderation action and server operation. All player changes require a recorded reason and an explicit confirmation for the selected player.</p></div></div>
+        <article class="panel operations-queue-panel" id="dashboard-admin-queue" data-dashboard-section="queue" data-staff-only>
+          <div class="panel-heading"><div><p class="panel-kicker">Daily moderation operations</p><h2>Moderation queue</h2></div><button class="secondary-action compact-action" type="button" data-refresh-moderation-queue>Refresh queue</button></div>
+          <p class="panel-intro">Prioritise active cases, assign a reviewer and set an internal deadline. Assignment changes create linked audit cases and never rewrite the original moderation record.</p>
+          <div class="operations-summary-grid">
+            <div><span>Awaiting review</span><strong data-queue-awaiting>—</strong></div>
+            <div><span>Active appeals</span><strong data-queue-appeals>—</strong></div>
+            <div><span>Expiring within 24h</span><strong data-queue-expiring>—</strong></div>
+            <div><span>Operational failures</span><strong data-queue-failures>—</strong></div>
+            <div><span>Overdue</span><strong data-queue-overdue>—</strong></div>
+            <div><span>Assigned to me</span><strong data-queue-mine>—</strong></div>
+          </div>
+          <div class="operations-queue-list" data-moderation-queue-list aria-live="polite"></div>
+          <p class="table-note" data-moderation-queue-empty hidden>No active cases currently require operational attention.</p>
+          <p class="table-note history-error" data-moderation-queue-error hidden>The moderation queue is temporarily unavailable. Use Refresh queue to try again.</p>
+        </article>
         <article class="panel moderation-case-panel" id="dashboard-admin-cases" data-dashboard-section="cases" data-staff-only data-moderation-case-panel>
           <div class="panel-heading moderation-case-heading"><div><p class="panel-kicker">Moderation case management</p><h2 data-moderation-case-heading>Active moderation cases</h2></div><div class="moderation-case-toolbar"><label><span class="sr-only">Moderation case view</span><select data-moderation-case-scope aria-label="Moderation case view"><option value="active">Active cases</option><option value="recent">Recent cases</option></select></label><button class="secondary-action compact-action" type="button" data-refresh-moderation-cases>Refresh cases</button></div></div>
           <p class="panel-intro">Warnings, bans, evidence, reviews and appeals remain attached to numbered cases. Switch to Recent cases to review resolved or expired records. Railway processes due temporary unbans automatically and preserves every review outcome.</p>
@@ -299,6 +317,13 @@
 
         <article class="panel" id="dashboard-admin-server-controls" data-dashboard-section="server-controls" data-staff-only data-admin-server-controls hidden><div class="panel-heading"><div><p class="panel-kicker">Admin operations</p><h2>Protected server controls</h2></div><span class="lock-label" data-server-control-status>Admin verified · controls connected</span></div><div class="operation-grid"><button type="button" data-server-action="restart"><strong>Restart server</strong><small data-server-action-note>Checking live server state</small></button><button type="button" data-server-action="stop"><strong>Stop server</strong><small data-server-action-note>Checking live server state</small></button><button type="button" data-server-action="start"><strong>Start server</strong><small data-server-action-note>Checking live server state</small></button></div></article>
         <article class="panel" id="dashboard-admin-server-audit" data-dashboard-section="server-audit" data-staff-only data-server-action-history-panel hidden><div class="panel-heading"><div><p class="panel-kicker">Protected audit</p><h2>Recent server operations</h2></div><button class="secondary-action compact-action" type="button" data-refresh-server-actions>Refresh history</button></div><ol class="activity-list server-action-history" data-server-action-history aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading protected history</strong><small>Railway is verifying Admin access</small></div></li></ol><p class="table-note" data-server-action-history-empty hidden>No Start, Stop or Restart actions have been recorded yet.</p><p class="table-note history-error" data-server-action-history-error hidden>History is temporarily unavailable. Use Refresh history to try again.</p></article>
+        <article class="panel operations-failure-panel" id="dashboard-admin-failures" data-dashboard-section="failures" data-staff-only>
+          <div class="panel-heading"><div><p class="panel-kicker">External service recovery</p><h2>Operational failures</h2></div><div class="panel-heading-actions"><span class="status-badge unavailable"><i></i><span data-operation-failure-count>—</span></span><button class="secondary-action compact-action" type="button" data-refresh-operation-failures>Refresh failures</button></div></div>
+          <p class="panel-intro">Failed automatic unbans and Discord notification deliveries remain visible until resolved. Retrying does not duplicate the original punishment or close the failure before the external service confirms success.</p>
+          <div class="operation-failure-list" data-operation-failure-list aria-live="polite"></div>
+          <p class="table-note" data-operation-failure-empty hidden>No unresolved moderation operations are recorded.</p>
+          <p class="table-note history-error" data-operation-failure-error hidden>Operational failures are temporarily unavailable.</p>
+        </article>
       </section>
 
       <section class="dashboard-view" data-view-panel="configuration" aria-labelledby="configuration-title" hidden>
@@ -306,6 +331,36 @@
         <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Safe by design</strong><p>Destructive actions will require a confirmation, permission check, fresh backup and permanent audit record.</p></div></div>
         <div class="config-flow" id="dashboard-configuration-workflow" data-dashboard-section="workflow"><article class="flow-card complete"><span>01</span><strong>Back up</strong><small>Capture current files</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>02</span><strong>Validate</strong><small>Check syntax and structure</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>03</span><strong>Compare</strong><small>Review every change</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>04</span><strong>Restore</strong><small>Owner confirmation</small></article></div>
         <article class="panel" id="dashboard-configuration-backups" data-dashboard-section="backups"><div class="panel-heading"><div><p class="panel-kicker">Example history</p><h2>Recent backups</h2></div><button class="secondary-action" type="button" disabled>Create backup</button></div><div class="responsive-table"><table><thead><tr><th>Backup</th><th>Created</th><th>Files</th><th>Validation</th><th>Action</th></tr></thead><tbody><tr><td>Pre-update example</td><td>Today, 8:42 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled>Compare</button></td></tr><tr><td>Scheduled example</td><td>Yesterday, 9:00 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled>Compare</button></td></tr></tbody></table></div><p class="table-note">Example history only. No Nitrado files are present on this website.</p></article>
+        <article class="panel webhook-control-panel" id="dashboard-configuration-notifications" data-dashboard-section="notifications" data-owner-only>
+          <div class="panel-heading"><div><p class="panel-kicker">Owner-managed Discord routing</p><h2>Notifications &amp; webhooks</h2></div><button class="secondary-action compact-action" type="button" data-refresh-webhooks>Refresh configuration</button></div>
+          <div class="security-notice compact-notice"><span aria-hidden="true">✓</span><div><strong>Webhook secrets stay off the website</strong><p>Select a Discord text channel and Railway asks the bot to create the incoming webhook. The website never receives a webhook URL or token, and the database stores only the Discord webhook ID and routing metadata.</p></div></div>
+          <div class="webhook-layout">
+            <section class="inset-panel webhook-create-card">
+              <div class="panel-heading"><div><p class="panel-kicker">New destination</p><h3>Create managed webhook</h3></div><span class="lock-label">Owner only</span></div>
+              <label class="dialog-field"><span>Destination label</span><input type="text" maxlength="80" placeholder="Moderation alerts" data-webhook-label></label>
+              <label class="dialog-field"><span>Discord text channel</span><select data-webhook-channel><option value="">Loading available channels…</option></select></label>
+              <label class="dialog-field"><span>Webhook name</span><input type="text" maxlength="80" value="World War Z Operations" data-webhook-name></label>
+              <button class="primary-action wide" type="button" data-create-webhook>Create webhook destination</button>
+              <p class="table-note">The bot requires Manage Webhooks and Send Messages access in the selected channel.</p>
+            </section>
+            <section class="inset-panel">
+              <div class="panel-heading"><div><p class="panel-kicker">Managed destinations</p><h3>Discord webhooks</h3></div><span class="muted-label" data-webhook-count>—</span></div>
+              <div class="webhook-destination-list" data-webhook-list></div>
+              <p class="table-note" data-webhook-empty hidden>No managed webhook destinations exist yet.</p>
+            </section>
+          </div>
+          <section class="inset-panel webhook-route-panel">
+            <div class="panel-heading"><div><p class="panel-kicker">Per-event routing</p><h3>Notification routes</h3></div><span class="muted-label">Test destinations before enabling</span></div>
+            <div class="webhook-route-list" data-webhook-route-list></div>
+          </section>
+          <section class="inset-panel webhook-audit-panel">
+            <div class="panel-heading"><div><p class="panel-kicker">Protected audit</p><h3>Recent webhook changes</h3></div><span class="muted-label">Last 25 actions</span></div>
+            <ol class="activity-list webhook-audit-list" data-webhook-audit-list></ol>
+            <p class="table-note" data-webhook-audit-empty hidden>No webhook configuration actions have been recorded.</p>
+          </section>
+          <div class="restart-dialog-message" role="status" data-webhook-message hidden></div>
+          <p class="table-note history-error" data-webhook-error hidden>Webhook configuration is temporarily unavailable.</p>
+        </article>
       </section>
 
       <section class="dashboard-view" data-view-panel="settings" aria-labelledby="settings-title" hidden>
@@ -417,7 +472,7 @@
     </div>
   </dialog>
 
-  <script src="dashboard.js?v=1.16.0"></script>
+  <script src="dashboard.js?v=1.17.0"></script>
   <script src="chernarus-map.js?v=1.7.0"></script>
 </body>
 </html>

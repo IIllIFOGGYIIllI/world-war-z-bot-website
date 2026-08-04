@@ -13,9 +13,8 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. If `DELETE_THESE_FILES.txt` still exists in the repository, delete it; it is an obsolete instruction file and is intentionally absent from this release.
-5. Enter the commit message: `Add direct-access dashboard navigation`
-6. Select **Commit changes**.
+4. Enter the commit message: `Add moderation queue and webhooks`
+5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
 
@@ -53,9 +52,17 @@ GitHub may take a few minutes to publish the first version.
 - `assets/chernarus-vector.svg` — custom vector Chernarus road overview
 - `assets/chernarus-pois.json` — validated public map locations
 - `PATCH_NOTES.md` — version history and update notes
-- `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates
+- `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
+
+## Version 1.17.0 moderation operations and webhooks
+
+The Admin dashboard now includes a moderation operations queue, assignments,
+priorities, deadlines and an external-failure recovery panel. Owners can create
+bot-managed Discord webhook destinations directly from the dashboard and route
+each supported event category independently. Webhook URLs and tokens never
+enter the GitHub Pages website.
 
 ## Version 1.16.0 direct-access dashboard navigation
 

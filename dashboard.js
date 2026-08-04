@@ -134,6 +134,13 @@ const ADMIN_PLAYER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/players/action`
 const ADMIN_MODERATION_CASES_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/cases`;
 const ADMIN_MODERATION_CASE_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/cases/action`;
 const ADMIN_BANLISTS_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/banlists`;
+const ADMIN_MODERATION_QUEUE_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/queue`;
+const ADMIN_MODERATION_STAFF_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/staff`;
+const ADMIN_MODERATION_ASSIGNMENT_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/assignment`;
+const ADMIN_OPERATION_FAILURES_URL = `${DASHBOARD_API_BASE}/api/admin/operations/failures`;
+const ADMIN_OPERATION_RETRY_URL = `${DASHBOARD_API_BASE}/api/admin/operations/retry`;
+const OWNER_NOTIFICATION_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/notifications/config`;
+const OWNER_NOTIFICATION_ACTION_URL = `${DASHBOARD_API_BASE}/api/owner/notifications/action`;
 const PLAYER_ACTIONS = {
   add_note: { mark: '≡', title: 'Add private staff note?', description: 'The note will be visible only inside protected Admin player administration.', warning: 'Private notes remain in the Railway database and are included in the player audit view.', reasonLabel: 'Private staff note', reasonHelp: '1–1,500 characters', submitLabel: 'Add private note' },
   update_note: { mark: '✎', title: 'Update this private staff note?', description: 'The selected note will be replaced with the revised staff-only text.', warning: 'The previous note text is retained inside the private Railway audit record.', reasonLabel: 'Updated private note', reasonHelp: '1–1,500 characters', submitLabel: 'Update private note' },
@@ -218,6 +225,29 @@ const moderationCaseEmpty = document.querySelector('[data-moderation-case-empty]
 const moderationCaseError = document.querySelector('[data-moderation-case-error]');
 const refreshModerationCasesButton = document.querySelector('[data-refresh-moderation-cases]');
 const moderationCaseScope = document.querySelector('[data-moderation-case-scope]');
+const moderationQueueList = document.querySelector('[data-moderation-queue-list]');
+const moderationQueueEmpty = document.querySelector('[data-moderation-queue-empty]');
+const moderationQueueError = document.querySelector('[data-moderation-queue-error]');
+const refreshModerationQueueButton = document.querySelector('[data-refresh-moderation-queue]');
+const queueNavBadge = document.querySelector('[data-queue-nav-badge]');
+const operationFailureList = document.querySelector('[data-operation-failure-list]');
+const operationFailureEmpty = document.querySelector('[data-operation-failure-empty]');
+const operationFailureError = document.querySelector('[data-operation-failure-error]');
+const operationFailureCount = document.querySelector('[data-operation-failure-count]');
+const refreshOperationFailuresButton = document.querySelector('[data-refresh-operation-failures]');
+const failureNavBadge = document.querySelector('[data-failure-nav-badge]');
+const refreshWebhooksButton = document.querySelector('[data-refresh-webhooks]');
+const webhookLabelInput = document.querySelector('[data-webhook-label]');
+const webhookChannelSelect = document.querySelector('[data-webhook-channel]');
+const webhookNameInput = document.querySelector('[data-webhook-name]');
+const createWebhookButton = document.querySelector('[data-create-webhook]');
+const webhookDestinationList = document.querySelector('[data-webhook-list]');
+const webhookEmpty = document.querySelector('[data-webhook-empty]');
+const webhookRouteList = document.querySelector('[data-webhook-route-list]');
+const webhookAuditList = document.querySelector('[data-webhook-audit-list]');
+const webhookAuditEmpty = document.querySelector('[data-webhook-audit-empty]');
+const webhookMessage = document.querySelector('[data-webhook-message]');
+const webhookError = document.querySelector('[data-webhook-error]');
 const moderationCaseDialog = document.querySelector('[data-moderation-case-dialog]');
 const moderationCaseCloseButtons = [...document.querySelectorAll('[data-moderation-case-close]')];
 const caseDialogMessage = document.querySelector('[data-case-dialog-message]');
@@ -309,6 +339,11 @@ let selectedModerationCase = null;
 let selectedCaseEvidenceId = null;
 let caseEvidenceMode = 'add';
 let banlistRequestInProgress = false;
+let moderationQueueRequestInProgress = false;
+let moderationQueueStaff = [];
+let operationFailureRequestInProgress = false;
+let webhookRequestInProgress = false;
+let webhookConfiguration = { channels: [], webhooks: [], routes: [], audit: [] };
 let adminPlayerSearchRequestInProgress = false;
 let adminPlayerDetailRequestInProgress = false;
 let selectedAdminPlayer = null;
@@ -1162,6 +1197,483 @@ const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
 refreshModerationCasesButton?.addEventListener('click', () => loadModerationCases());
 moderationCaseScope?.addEventListener('change', () => loadModerationCases());
 
+const setSidebarBadge = (element, value) => {
+  if (!element) return;
+  const count = Math.max(0, Number(value) || 0);
+  element.textContent = count > 99 ? '99+' : String(count);
+  element.hidden = count === 0;
+};
+
+const toLocalDateTimeInput = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+};
+
+const createSelectOption = (value, label, { disabled = false } = {}) => {
+  const option = document.createElement('option');
+  option.value = String(value);
+  option.textContent = String(label);
+  option.disabled = disabled;
+  return option;
+};
+
+const queueFlag = (label, tone = '') => {
+  const flag = document.createElement('span');
+  flag.className = `queue-flag ${tone}`.trim();
+  flag.textContent = label;
+  return flag;
+};
+
+const saveModerationAssignment = async ({ caseId, assignee, priority, dueAt, button }) => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || !hasServerActionAccess()) return;
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Saving…';
+  try {
+    const dueDate = dueAt ? new Date(dueAt) : null;
+    const response = await authFetch(ADMIN_MODERATION_ASSIGNMENT_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionToken}`
+      },
+      body: JSON.stringify({
+        case_id: caseId,
+        assignee_key: assignee,
+        priority,
+        due_at: dueDate && !Number.isNaN(dueDate.getTime()) ? dueDate.toISOString() : null
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Case assignment could not be saved.');
+    button.textContent = 'Saved';
+    await Promise.all([loadModerationQueue(), loadModerationCases()]);
+  } catch (error) {
+    button.textContent = error instanceof Error ? error.message : 'Save failed';
+    window.setTimeout(() => { button.textContent = originalLabel; }, 2500);
+  } finally {
+    button.disabled = false;
+    if (button.textContent === 'Saving…') button.textContent = originalLabel;
+  }
+};
+
+const renderModerationQueue = (payload) => {
+  const items = Array.isArray(payload?.items) ? payload.items : [];
+  const summary = payload?.summary || {};
+  setText('[data-queue-awaiting]', String(summary.awaiting_review ?? 0));
+  setText('[data-queue-appeals]', String(summary.active_appeals ?? 0));
+  setText('[data-queue-expiring]', String(summary.expiring_within_24_hours ?? 0));
+  setText('[data-queue-failures]', String(summary.failed_operations ?? 0));
+  setText('[data-queue-overdue]', String(summary.overdue ?? 0));
+  setText('[data-queue-mine]', String(summary.assigned_to_me ?? 0));
+  setSidebarBadge(queueNavBadge, Number(summary.awaiting_review || 0) + Number(summary.overdue || 0));
+
+  moderationQueueList?.replaceChildren();
+  if (moderationQueueEmpty) moderationQueueEmpty.hidden = items.length !== 0;
+  if (moderationQueueError) moderationQueueError.hidden = true;
+
+  items.forEach((item) => {
+    const caseId = Number(item?.case_id);
+    const card = document.createElement('article');
+    card.className = `operations-queue-card priority-${String(item?.priority || 'normal')}`;
+
+    const heading = document.createElement('div');
+    heading.className = 'operations-queue-heading';
+    const copy = document.createElement('div');
+    const kicker = document.createElement('p');
+    kicker.className = 'panel-kicker';
+    kicker.textContent = `Case #${Number.isInteger(caseId) ? caseId : '—'} · ${titleCaseState(item?.action || 'record')}`;
+    const title = document.createElement('h3');
+    title.textContent = String(item?.target_name || 'Player');
+    const reason = document.createElement('p');
+    reason.className = 'operations-queue-reason';
+    reason.textContent = String(item?.reason || 'No reason recorded');
+    copy.append(kicker, title, reason);
+
+    const flags = document.createElement('div');
+    flags.className = 'queue-flags';
+    flags.append(queueFlag(titleCaseState(item?.priority || 'normal'), `priority-${String(item?.priority || 'normal')}`));
+    if (item?.review_type) flags.append(queueFlag(titleCaseState(item.review_type), 'review'));
+    if (item?.overdue) flags.append(queueFlag('Overdue', 'danger'));
+    if (item?.expiring_soon) flags.append(queueFlag('Expires soon', 'warning'));
+    if (item?.operation_failed) flags.append(queueFlag('Operation failed', 'danger'));
+    if (!item?.evidence_count) flags.append(queueFlag('No evidence', 'muted'));
+    heading.append(copy, flags);
+
+    const metadata = document.createElement('p');
+    metadata.className = 'operations-queue-meta';
+    const assignmentText = item?.assignee_name ? `Assigned to ${item.assignee_name}` : 'Unassigned';
+    const dueText = item?.due_at ? ` · Due ${formatAccountDate(item.due_at)}` : '';
+    metadata.textContent = `${assignmentText}${dueText} · ${Number(item?.evidence_count || 0)} active evidence · Opened ${formatAccountDate(item?.created_at)}`;
+
+    const controls = document.createElement('div');
+    controls.className = 'queue-assignment-controls';
+    const assignee = document.createElement('select');
+    assignee.setAttribute('aria-label', `Assignee for case ${caseId}`);
+    assignee.append(createSelectOption('unassigned', 'Unassigned'), createSelectOption('self', 'Assign to me'));
+    moderationQueueStaff.forEach((staff) => {
+      assignee.append(createSelectOption(staff.staff_key, `${staff.name} · ${accessLabel(staff.access_level)}`));
+    });
+    const matchingStaff = moderationQueueStaff.find((staff) => staff.name === item?.assignee_name);
+    assignee.value = matchingStaff?.staff_key || (item?.assigned_to_me ? 'self' : 'unassigned');
+
+    const priority = document.createElement('select');
+    priority.setAttribute('aria-label', `Priority for case ${caseId}`);
+    ['low', 'normal', 'high', 'urgent'].forEach((value) => priority.append(createSelectOption(value, titleCaseState(value))));
+    priority.value = String(item?.priority || 'normal');
+
+    const due = document.createElement('input');
+    due.type = 'datetime-local';
+    due.step = '60';
+    due.value = toLocalDateTimeInput(item?.due_at);
+    due.setAttribute('aria-label', `Review deadline for case ${caseId}`);
+
+    const save = document.createElement('button');
+    save.type = 'button';
+    save.className = 'secondary-action compact-action';
+    save.textContent = 'Save assignment';
+    save.addEventListener('click', () => saveModerationAssignment({
+      caseId,
+      assignee: assignee.value,
+      priority: priority.value,
+      dueAt: due.value,
+      button: save
+    }));
+
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.className = 'activity-row-action';
+    open.textContent = 'Open case';
+    open.addEventListener('click', () => openModerationCase(caseId));
+    controls.append(assignee, priority, due, save, open);
+    card.append(heading, metadata, controls);
+    moderationQueueList?.append(card);
+  });
+};
+
+const loadModerationQueue = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!hasServerActionAccess() || !sessionToken || moderationQueueRequestInProgress) return;
+  moderationQueueRequestInProgress = true;
+  refreshModerationQueueButton?.setAttribute('disabled', '');
+  refreshModerationQueueButton?.setAttribute('aria-busy', 'true');
+  try {
+    const [queueResponse, staffResponse] = await Promise.all([
+      authFetch(ADMIN_MODERATION_QUEUE_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } }),
+      authFetch(ADMIN_MODERATION_STAFF_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } })
+    ]);
+    const [queuePayload, staffPayload] = await Promise.all([
+      queueResponse.json().catch(() => ({})),
+      staffResponse.json().catch(() => ({}))
+    ]);
+    if (handleAdminPlayerAuthorizationResponse(queueResponse, queuePayload, { actionRequest: false })) return;
+    if (handleAdminPlayerAuthorizationResponse(staffResponse, staffPayload, { actionRequest: false })) return;
+    if (!queueResponse.ok || queuePayload.status !== 'ok' || !staffResponse.ok || staffPayload.status !== 'ok') {
+      throw new Error('Moderation queue unavailable');
+    }
+    moderationQueueStaff = Array.isArray(staffPayload.staff) ? staffPayload.staff : [];
+    renderModerationQueue(queuePayload);
+  } catch (error) {
+    moderationQueueList?.replaceChildren();
+    if (moderationQueueEmpty) moderationQueueEmpty.hidden = true;
+    if (moderationQueueError) moderationQueueError.hidden = false;
+    ['awaiting', 'appeals', 'expiring', 'failures', 'overdue', 'mine'].forEach((key) => setText(`[data-queue-${key}]`, '—'));
+  } finally {
+    moderationQueueRequestInProgress = false;
+    refreshModerationQueueButton?.removeAttribute('disabled');
+    refreshModerationQueueButton?.removeAttribute('aria-busy');
+  }
+};
+
+refreshModerationQueueButton?.addEventListener('click', () => loadModerationQueue());
+
+const renderOperationFailures = (payload) => {
+  const failures = Array.isArray(payload?.failures) ? payload.failures : [];
+  operationFailureList?.replaceChildren();
+  if (operationFailureEmpty) operationFailureEmpty.hidden = failures.length !== 0;
+  if (operationFailureError) operationFailureError.hidden = true;
+  if (operationFailureCount) operationFailureCount.textContent = `${failures.length} unresolved`;
+  setSidebarBadge(failureNavBadge, failures.length);
+
+  failures.forEach((failure) => {
+    const card = document.createElement('article');
+    card.className = 'operation-failure-card';
+    const copy = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = String(failure?.title || 'Moderation operation failed');
+    const message = document.createElement('p');
+    message.textContent = String(failure?.message || 'No failure detail was recorded.');
+    const detail = document.createElement('small');
+    detail.textContent = `${String(failure?.subject || 'Operation')} · ${Number(failure?.attempts || 1)} attempt(s)${failure?.retry_at ? ` · Next retry ${formatAccountDate(failure.retry_at)}` : ''}`;
+    copy.append(title, message, detail);
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.className = 'secondary-action compact-action';
+    retry.textContent = 'Retry now';
+    retry.disabled = !failure?.can_retry;
+    retry.addEventListener('click', async () => {
+      const sessionToken = storageGet(AUTH_SESSION_KEY);
+      if (!sessionToken) return;
+      retry.disabled = true;
+      retry.textContent = 'Retrying…';
+      try {
+        const response = await authFetch(ADMIN_OPERATION_RETRY_URL, {
+          method: 'POST',
+          headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+          body: JSON.stringify({ failure_id: failure.failure_id })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (handleAdminPlayerAuthorizationResponse(response, result, { actionRequest: true })) return;
+        if (!response.ok || result.status !== 'ok') throw new Error(result.message || 'Retry failed');
+        await Promise.all([loadOperationFailures(), loadModerationQueue()]);
+      } catch (error) {
+        retry.textContent = error instanceof Error ? error.message : 'Retry failed';
+        window.setTimeout(() => { retry.textContent = 'Retry now'; retry.disabled = false; }, 2500);
+      }
+    });
+    card.append(copy, retry);
+    operationFailureList?.append(card);
+  });
+};
+
+const loadOperationFailures = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!hasServerActionAccess() || !sessionToken || operationFailureRequestInProgress) return;
+  operationFailureRequestInProgress = true;
+  refreshOperationFailuresButton?.setAttribute('disabled', '');
+  try {
+    const response = await authFetch(ADMIN_OPERATION_FAILURES_URL, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return;
+    if (!response.ok || payload.status !== 'ok') throw new Error('Operational failures unavailable');
+    renderOperationFailures(payload);
+  } catch (error) {
+    operationFailureList?.replaceChildren();
+    if (operationFailureEmpty) operationFailureEmpty.hidden = true;
+    if (operationFailureError) operationFailureError.hidden = false;
+    if (operationFailureCount) operationFailureCount.textContent = 'Unavailable';
+  } finally {
+    operationFailureRequestInProgress = false;
+    refreshOperationFailuresButton?.removeAttribute('disabled');
+  }
+};
+
+refreshOperationFailuresButton?.addEventListener('click', () => loadOperationFailures());
+
+const showWebhookMessage = (message = '', tone = 'error') => {
+  if (!webhookMessage) return;
+  webhookMessage.hidden = !message;
+  webhookMessage.textContent = message;
+  webhookMessage.dataset.tone = tone;
+};
+
+const ownerNotificationAction = async (action, values = {}, button = null) => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || dashboardAccessLevel !== 'owner' || webhookRequestInProgress) return false;
+  webhookRequestInProgress = true;
+  const originalLabel = button?.textContent || '';
+  if (button) { button.disabled = true; button.textContent = 'Working…'; }
+  showWebhookMessage('');
+  try {
+    const response = await authFetch(OWNER_NOTIFICATION_ACTION_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({ action, ...values })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true });
+      return false;
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Webhook operation failed.');
+    showWebhookMessage(payload.message || 'Webhook configuration updated.', 'success');
+    webhookRequestInProgress = false;
+    await loadWebhookConfiguration();
+    return true;
+  } catch (error) {
+    showWebhookMessage(error instanceof Error ? error.message : 'Webhook operation failed.', 'error');
+    return false;
+  } finally {
+    webhookRequestInProgress = false;
+    if (button) { button.disabled = false; button.textContent = originalLabel; }
+  }
+};
+
+const renderWebhookConfiguration = (payload) => {
+  webhookConfiguration = {
+    channels: Array.isArray(payload?.channels) ? payload.channels : [],
+    webhooks: Array.isArray(payload?.webhooks) ? payload.webhooks : [],
+    routes: Array.isArray(payload?.routes) ? payload.routes : [],
+    audit: Array.isArray(payload?.audit) ? payload.audit : []
+  };
+  if (webhookError) webhookError.hidden = true;
+  if (webhookChannelSelect) {
+    webhookChannelSelect.replaceChildren(createSelectOption('', 'Select a Discord text channel'));
+    webhookConfiguration.channels.forEach((channel) => {
+      const prefix = channel.category ? `${channel.category} / ` : '';
+      webhookChannelSelect.append(createSelectOption(
+        channel.channel_key,
+        `${prefix}#${channel.name}${channel.can_manage_webhooks ? '' : ' · missing permissions'}`,
+        { disabled: !channel.can_manage_webhooks }
+      ));
+    });
+  }
+
+  webhookDestinationList?.replaceChildren();
+  if (webhookEmpty) webhookEmpty.hidden = webhookConfiguration.webhooks.length !== 0;
+  setText('[data-webhook-count]', `${webhookConfiguration.webhooks.length} configured`);
+  webhookConfiguration.webhooks.forEach((destination) => {
+    const card = document.createElement('article');
+    card.className = 'webhook-destination-card';
+    const copy = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = String(destination.label || 'Webhook destination');
+    const detail = document.createElement('p');
+    detail.textContent = `#${String(destination.channel_name || 'channel')} · ${String(destination.webhook_name || 'World War Z Operations')}`;
+    const status = document.createElement('small');
+    status.textContent = destination.last_test_at
+      ? `Last test ${titleCaseState(destination.last_test_status || 'unknown')} · ${formatAccountDate(destination.last_test_at)}`
+      : 'Not tested yet';
+    copy.append(title, detail, status);
+    const actions = document.createElement('div');
+    actions.className = 'webhook-card-actions';
+    const test = document.createElement('button');
+    test.type = 'button';
+    test.className = 'secondary-action compact-action';
+    test.textContent = 'Send test';
+    test.addEventListener('click', () => ownerNotificationAction('test_webhook', { config_id: destination.config_id }, test));
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'activity-row-action danger';
+    remove.textContent = 'Remove';
+    remove.addEventListener('click', () => {
+      const label = String(destination.label || 'this webhook destination');
+      if (!window.confirm(`Remove ${label}? Notification routes using it will be disabled.`)) return;
+      ownerNotificationAction('remove_webhook', { config_id: destination.config_id }, remove);
+    });
+    actions.append(test, remove);
+    card.append(copy, actions);
+    webhookDestinationList?.append(card);
+  });
+
+  webhookRouteList?.replaceChildren();
+  webhookConfiguration.routes.forEach((route) => {
+    const row = document.createElement('article');
+    row.className = 'webhook-route-row';
+    const copy = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = String(route.label || titleCaseState(route.event_key));
+    const description = document.createElement('small');
+    description.textContent = String(route.description || 'Discord moderation notification');
+    copy.append(title, description);
+
+    const enabledLabel = document.createElement('label');
+    enabledLabel.className = 'route-toggle';
+    const enabled = document.createElement('input');
+    enabled.type = 'checkbox';
+    enabled.checked = Boolean(route.enabled);
+    const enabledText = document.createElement('span');
+    enabledText.textContent = 'Enabled';
+    enabledLabel.append(enabled, enabledText);
+
+    const destination = document.createElement('select');
+    destination.setAttribute('aria-label', `${route.label} destination`);
+    destination.append(createSelectOption('', 'No destination'));
+    webhookConfiguration.webhooks.forEach((webhook) => destination.append(createSelectOption(webhook.config_id, webhook.label)));
+    destination.value = route.webhook_config_id == null ? '' : String(route.webhook_config_id);
+
+    const save = document.createElement('button');
+    save.type = 'button';
+    save.className = 'secondary-action compact-action';
+    save.textContent = 'Save route';
+    save.addEventListener('click', () => {
+      if (enabled.checked && !destination.value) {
+        showWebhookMessage('Select a destination before enabling that notification route.', 'error');
+        return;
+      }
+      ownerNotificationAction('set_route', {
+        event_key: route.event_key,
+        config_id: destination.value ? Number(destination.value) : null,
+        enabled: enabled.checked
+      }, save);
+    });
+    row.append(copy, enabledLabel, destination, save);
+    webhookRouteList?.append(row);
+  });
+
+  webhookAuditList?.replaceChildren();
+  if (webhookAuditEmpty) webhookAuditEmpty.hidden = webhookConfiguration.audit.length !== 0;
+  webhookConfiguration.audit.forEach((entry) => {
+    const item = document.createElement('li');
+    const symbol = document.createElement('span');
+    symbol.className = `activity-symbol ${entry.success ? '' : 'red'}`.trim();
+    symbol.textContent = entry.success ? '✓' : '!';
+    const copy = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = `${titleCaseState(entry.action || 'webhook change')} · ${entry.success ? 'Accepted' : 'Rejected'}`;
+    const detail = document.createElement('small');
+    const destinationText = entry.destination_label ? ` · ${entry.destination_label}` : '';
+    const routeText = entry.event_key ? ` · ${titleCaseState(entry.event_key)}` : '';
+    detail.textContent = `${String(entry.outcome || 'Configuration updated')}${destinationText}${routeText} · ${String(entry.actor_name || 'Owner')} · ${formatAccountDate(entry.created_at)}`;
+    copy.append(title, detail);
+    item.append(symbol, copy);
+    webhookAuditList?.append(item);
+  });
+};
+
+const loadWebhookConfiguration = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (dashboardAccessLevel !== 'owner' || !sessionToken || webhookRequestInProgress) return;
+  webhookRequestInProgress = true;
+  refreshWebhooksButton?.setAttribute('disabled', '');
+  if (webhookError) webhookError.hidden = true;
+  try {
+    const response = await authFetch(OWNER_NOTIFICATION_CONFIG_URL, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true });
+      return;
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Webhook configuration unavailable.');
+    renderWebhookConfiguration(payload);
+  } catch (error) {
+    if (webhookError) {
+      webhookError.hidden = false;
+      webhookError.textContent = error instanceof Error ? error.message : 'Webhook configuration is temporarily unavailable.';
+    }
+  } finally {
+    webhookRequestInProgress = false;
+    refreshWebhooksButton?.removeAttribute('disabled');
+  }
+};
+
+refreshWebhooksButton?.addEventListener('click', () => loadWebhookConfiguration());
+createWebhookButton?.addEventListener('click', async () => {
+  const created = await ownerNotificationAction('create_webhook', {
+    label: webhookLabelInput?.value || '',
+    channel_key: webhookChannelSelect?.value || '',
+    webhook_name: webhookNameInput?.value || 'World War Z Operations'
+  }, createWebhookButton);
+  if (created && webhookLabelInput) webhookLabelInput.value = '';
+});
+
+window.addEventListener('wwz:viewchange', (event) => {
+  const view = event.detail?.view;
+  const section = event.detail?.section;
+  if (view === 'staff' && section === 'queue') loadModerationQueue();
+  if (view === 'staff' && section === 'cases') loadModerationCases();
+  if (view === 'staff' && section === 'banlists') loadCurrentBanlists();
+  if (view === 'staff' && section === 'failures') loadOperationFailures();
+  if (view === 'configuration' && section === 'notifications') loadWebhookConfiguration();
+});
+
 const showCaseDialogMessage = (message = '', tone = 'error') => {
   if (!caseDialogMessage) return;
   caseDialogMessage.hidden = !message;
@@ -1602,12 +2114,6 @@ const loadCurrentBanlists = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
 };
 
 refreshBanlistsButton?.addEventListener('click', () => loadCurrentBanlists());
-window.addEventListener('wwz:viewchange', (event) => {
-  if (event.detail?.view === 'staff') {
-    loadModerationCases();
-    loadCurrentBanlists();
-  }
-});
 
 const renderAdminNotes = (notes) => {
   if (!adminPlayerNotes) return;

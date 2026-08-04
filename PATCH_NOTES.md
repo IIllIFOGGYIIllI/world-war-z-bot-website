@@ -1,5 +1,42 @@
 # Website Patch Notes
 
+## Version 1.17.0 — Moderation Operations and Webhooks
+
+**Release date:** 4 August 2026
+
+### Git commit message
+
+```text
+Add moderation queue and webhooks
+```
+
+### Added
+
+- Dedicated Moderation Queue navigation with assignments, priorities and review deadlines.
+- Queue counters for active appeals, reviews, expiring bans, overdue work and cases assigned to the signed-in Admin.
+- Operational Failures navigation with safe retry controls for automatic-unban and notification-delivery failures.
+- Owner-only Notifications & Webhooks navigation.
+- Managed Discord webhook creation from allowlisted current text channels.
+- Test and remove controls for each managed destination.
+- Per-event notification routing for ten moderation and operational event categories.
+- Permanent recent webhook-configuration audit showing accepted and rejected actions.
+- Sidebar badges for unresolved queue work and service failures.
+
+### Security and privacy
+
+- The website never asks for or displays a Discord webhook URL or token.
+- Discord member, channel and webhook IDs remain server-side and are represented with opaque browser keys where selection is required.
+- Every queue, retry and webhook request repeats live Discord role verification on Railway.
+- Webhook changes are Owner-only and remain behind the existing Railway write-action safety switch.
+- Dynamic moderation and webhook content continues to use text rendering rather than `innerHTML`.
+
+### Deployment
+
+- Deploy bot version 1.15.0 before this website version.
+- Upload the version 1.17.0 website patch.
+- Wait for GitHub Pages to publish, then use Ctrl+F5.
+- No website files need to be deleted.
+
 ## Version 1.16.0 — Direct-Access Dashboard Navigation
 
 ### Added

@@ -1983,3 +1983,177 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .side-link-copy strong { font-size: 11px; }
   .side-link-copy small { font-size: 7.5px; }
 }
+
+/* Version 1.17.0 — moderation operations and managed webhook routing */
+.side-link { grid-template-columns: 34px minmax(0, 1fr) auto; }
+.side-link > .side-link-badge {
+  min-width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 6px;
+  border: 1px solid rgba(238,122,39,0.28);
+  border-radius: 999px;
+  background: rgba(238,122,39,0.1);
+  color: #f0a765;
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1;
+}
+.side-link > .side-link-badge.danger {
+  border-color: rgba(243,58,40,0.35);
+  background: rgba(212,36,24,0.14);
+  color: #ff8f82;
+}
+.side-link.active > .side-link-badge { color: #fff; }
+
+.operations-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+.operations-summary-grid > div {
+  min-height: 76px;
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.018);
+}
+.operations-summary-grid span {
+  color: #77706b;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.operations-summary-grid strong {
+  color: var(--paper);
+  font-family: var(--display);
+  font-size: 25px;
+  letter-spacing: 0.025em;
+}
+.operations-queue-list,
+.operation-failure-list,
+.webhook-destination-list,
+.webhook-route-list { display: grid; gap: 12px; }
+
+.operations-queue-card {
+  position: relative;
+  display: grid;
+  gap: 13px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-left: 3px solid #5f5853;
+  background: linear-gradient(135deg, rgba(255,255,255,0.025), rgba(255,255,255,0.008));
+}
+.operations-queue-card.priority-low { border-left-color: #6f7970; }
+.operations-queue-card.priority-normal { border-left-color: #90867f; }
+.operations-queue-card.priority-high { border-left-color: #d4a12b; }
+.operations-queue-card.priority-urgent { border-left-color: var(--red-bright); }
+.operations-queue-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+.operations-queue-heading h3 { margin: 3px 0 0; font-size: 19px; }
+.operations-queue-reason { max-width: 900px; margin: 7px 0 0; color: #a19892; font-size: 11px; line-height: 1.55; }
+.operations-queue-meta { margin: 0; color: #716a65; font-size: 9px; line-height: 1.5; }
+.queue-flags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.queue-flag {
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  color: #8e8781;
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.queue-flag.priority-high, .queue-flag.warning { border-color: rgba(212,161,43,0.3); color: #e5bd60; background: rgba(212,161,43,0.07); }
+.queue-flag.priority-urgent, .queue-flag.danger { border-color: rgba(243,58,40,0.32); color: #ff8f82; background: rgba(212,36,24,0.08); }
+.queue-flag.review { border-color: rgba(106,126,255,0.28); color: #9da8ff; background: rgba(88,101,242,0.08); }
+.queue-flag.muted { opacity: 0.75; }
+.queue-assignment-controls {
+  display: grid;
+  grid-template-columns: minmax(170px, 1.2fr) minmax(110px, .55fr) minmax(190px, .9fr) auto auto;
+  gap: 9px;
+  align-items: center;
+}
+.queue-assignment-controls select,
+.queue-assignment-controls input,
+.webhook-route-row select {
+  min-height: 40px;
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #100d0d;
+  color: #d8d0c8;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 9px;
+}
+
+.panel-heading-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
+.operation-failure-card,
+.webhook-destination-card,
+.webhook-route-row {
+  display: grid;
+  align-items: center;
+  gap: 14px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.018);
+}
+.operation-failure-card { grid-template-columns: minmax(0, 1fr) auto; border-left: 3px solid var(--red-bright); }
+.operation-failure-card > div,
+.webhook-destination-card > div:first-child,
+.webhook-route-row > div:first-child { display: grid; gap: 4px; min-width: 0; }
+.operation-failure-card strong,
+.webhook-destination-card strong,
+.webhook-route-row strong { font-size: 11px; }
+.operation-failure-card p,
+.webhook-destination-card p { margin: 0; color: #9a918b; font-size: 10px; line-height: 1.5; }
+.operation-failure-card small,
+.webhook-destination-card small,
+.webhook-route-row small { color: #6f6863; font-size: 8px; line-height: 1.45; }
+
+.compact-notice { margin: 16px 0; }
+.webhook-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, .8fr) minmax(340px, 1.2fr);
+  gap: 14px;
+  margin: 18px 0 14px;
+}
+.webhook-create-card { display: grid; align-content: start; gap: 11px; }
+.webhook-destination-card { grid-template-columns: minmax(0, 1fr) auto; }
+.webhook-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.webhook-route-panel { margin-top: 14px; }
+.webhook-route-row { grid-template-columns: minmax(220px, 1fr) auto minmax(180px, .65fr) auto; }
+.route-toggle { display: inline-flex; align-items: center; gap: 7px; color: #a49b95; font-size: 9px; font-weight: 800; }
+.route-toggle input { accent-color: var(--red-bright); }
+
+@media (max-width: 1220px) {
+  .operations-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .queue-assignment-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .queue-assignment-controls .activity-row-action { justify-self: start; }
+  .webhook-route-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .webhook-route-row select { grid-column: 1; }
+}
+
+@media (max-width: 760px) {
+  .operations-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .operations-queue-heading { display: grid; }
+  .queue-flags { justify-content: flex-start; }
+  .queue-assignment-controls,
+  .webhook-layout,
+  .operation-failure-card,
+  .webhook-destination-card,
+  .webhook-route-row { grid-template-columns: 1fr; }
+  .queue-assignment-controls > *,
+  .webhook-card-actions,
+  .webhook-route-row select { width: 100%; grid-column: auto; }
+  .webhook-card-actions { justify-content: stretch; }
+  .webhook-card-actions > * { flex: 1; }
+}
