@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add trader delivery and server control`
+4. Enter the commit message: `Polish shop and Discord logs`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -43,6 +43,7 @@ GitHub may take a few minutes to publish the first version.
 - `pages.css` — shared privacy and changelog page design
 - `404.html` — custom missing-page screen
 - `site.webmanifest` — website metadata
+- `.nojekyll` — forces GitHub Pages to publish the static site without Jekyll processing
 - `assets/world-war-z-banner.png` — social sharing banner
 - `assets/world-war-z-logo.webp` — refined local header and interface logo
 - `assets/world-war-z-icon.png` and `assets/favicon.png` — local application icons
@@ -54,6 +55,11 @@ GitHub may take a few minutes to publish the first version.
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+
+
+## Version 1.22.1 shop workspace and Discord logs
+
+The Owner catalogue editors now use the supplied split Create Item / Rules layout while retaining the World War Z visual theme. Saved coordinate fields no longer overlap, and the dashboard includes a protected Discord Logs page for routing the bot's eight existing audit categories.
 
 ## Version 1.22.0 trader workspace and coordinate checkout
 

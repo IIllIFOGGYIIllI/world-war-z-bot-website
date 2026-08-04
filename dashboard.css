@@ -3237,3 +3237,317 @@ tbody tr:hover { background: rgba(22,136,248,.045); }
 .shop-order-status.cleanup_due { color:#dda0ff; border-color:rgba(221,160,255,.35); }
 @media(max-width:980px){.map-coming-soon,.event-purchase-layout{grid-template-columns:1fr}.map-coming-art{min-height:300px}.coordinate-picker-frame{min-height:430px}}
 @media(max-width:680px){.shop-mode-tabs,.shop-management-toolbar{grid-template-columns:1fr}.coordinate-picker-frame{min-height:340px}.map-coming-preview{grid-template-columns:1fr}.map-coming-symbol{min-height:150px}.event-delivery-fields{padding:11px}.shop-purchase-dialog form{padding-inline:12px}}
+
+
+/* v1.22.1 — shop builders, saved-location layout and Discord log routing */
+.dashboard-view *,
+.login-dialog * { box-sizing: border-box; }
+.dialog-field,
+.dialog-field input,
+.dialog-field select,
+.dialog-field textarea,
+.command-search,
+.command-search input { min-width: 0; max-width: 100%; }
+
+.location-banner { margin-bottom: 16px; }
+.location-workspace-card,
+.saved-location-book { min-width: 0; overflow: hidden; }
+.location-card-heading h2 {
+  margin: 2px 0 0;
+  font-size: clamp(30px, 4vw, 50px);
+  line-height: .95;
+}
+.accent-kicker { color: #56a9ff; }
+.location-form-card { padding-top: 4px; }
+.location-coordinate-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(92px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+.location-coordinate-grid .dialog-field,
+.location-coordinate-grid input { min-width: 0; width: 100%; }
+.location-default-toggle {
+  padding: 18px 20px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  background: rgba(5,8,12,.55);
+}
+.saved-location-book .saved-location-list { margin-top: 4px; }
+.saved-location-heading strong,
+.saved-location-heading small,
+.saved-location-card p { overflow-wrap: anywhere; }
+
+.owner-builder-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, .75fr);
+  gap: 16px;
+  margin: 18px 0 14px;
+  align-items: start;
+}
+.owner-builder-layout-event { margin-top: 14px; }
+.owner-builder-main,
+.owner-builder-side,
+.owner-builder-subpanel {
+  min-width: 0;
+  background: linear-gradient(155deg, rgba(32,34,39,.98), rgba(20,22,28,.95));
+}
+.owner-builder-main,
+.owner-builder-side { overflow: hidden; }
+.owner-builder-main .panel-heading,
+.owner-builder-side .panel-heading,
+.owner-builder-subpanel .panel-heading { margin-bottom: 12px; }
+.owner-builder-main h3,
+.owner-builder-side h3,
+.owner-builder-subpanel h4 {
+  margin: 0;
+  font-size: clamp(24px, 2.5vw, 36px);
+  line-height: 1;
+}
+.owner-builder-side h3 { font-size: 26px; }
+.builder-requirement,
+.optional-kicker {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  letter-spacing: .08em;
+}
+.builder-requirement { background: rgba(255,74,61,.14); color: #ff8e85; }
+.optional-kicker { background: rgba(255,255,255,.06); color: #bcc1c9; }
+.owner-builder-notice { margin-bottom: 14px; }
+.owner-inline-builder-form,
+.owner-builder-side-stack,
+.owner-builder-toggle-stack,
+.owner-builder-event-block { display: grid; gap: 13px; }
+.owner-builder-basic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+.owner-builder-three { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.owner-builder-two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.quick-value-row { display: grid; gap: 8px; }
+.quick-value-row > span {
+  color: #7f8792;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.quick-chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.quick-chip-group button {
+  min-width: 56px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  background: #25282d;
+  color: #edf0f5;
+  font: 800 12px/1 var(--body-font);
+  cursor: pointer;
+  transition: border-color .18s ease, transform .18s ease, background .18s ease;
+}
+.quick-chip-group button:hover,
+.quick-chip-group button:focus-visible {
+  border-color: rgba(69,162,255,.44);
+  background: #2d3138;
+  transform: translateY(-1px);
+}
+.owner-builder-toggle-stack .toggle-setting {
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+  background: rgba(7,10,13,.46);
+}
+.owner-builder-toggle-stack .toggle-setting strong,
+.owner-builder-toggle-stack .toggle-setting small { overflow-wrap: anywhere; }
+.owner-builder-side .dialog-field span small,
+.owner-builder-main .dialog-field span small { color: #8b919b; }
+.owner-builder-main textarea,
+.owner-builder-side textarea { min-height: 120px; }
+.owner-builder-event-block {
+  padding: 16px;
+  border: 1px solid rgba(255,73,61,.16);
+  border-radius: 14px;
+  background: rgba(58,16,18,.18);
+}
+.table-button-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.discord-log-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px,1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0 12px;
+}
+.discord-log-table td { vertical-align: middle; }
+.discord-log-table td:first-child { min-width: 230px; }
+.discord-log-table td:first-child strong { color: #f0f2f5; }
+.discord-log-table td:first-child small {
+  display: inline-block;
+  max-width: 430px;
+  margin-top: 5px;
+  color: #7f8790;
+  line-height: 1.45;
+}
+.discord-log-channel-select {
+  width: min(100%, 420px);
+  min-width: 210px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #100d0d;
+  color: #d8d0c8;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 10px;
+}
+.discord-log-updated {
+  display: block;
+  max-width: 220px;
+  margin-top: 7px;
+  color: #747a83;
+  line-height: 1.4;
+}
+.discord-log-actions { display: flex; flex-wrap: wrap; gap: 7px; min-width: 230px; }
+.discord-log-actions button:disabled { opacity: .45; cursor: not-allowed; }
+
+@media (max-width: 1280px) {
+  .owner-builder-layout { grid-template-columns: 1fr; }
+  .location-coordinate-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 1000px) {
+  .discord-log-toolbar { grid-template-columns: 1fr; }
+  .discord-log-actions { min-width: 0; }
+}
+@media (max-width: 900px) {
+  .owner-builder-three,
+  .owner-builder-two { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 680px) {
+  .owner-builder-basic-grid,
+  .owner-builder-three,
+  .owner-builder-two,
+  .location-coordinate-grid { grid-template-columns: 1fr; }
+  .location-card-heading h2,
+  .owner-builder-main h3,
+  .owner-builder-side h3,
+  .owner-builder-subpanel h4 { font-size: 30px; }
+  .discord-log-channel-select { width: 100%; min-width: 0; }
+  .discord-log-actions { display: grid; grid-template-columns: 1fr; }
+  .discord-log-actions > * { width: 100%; }
+}
+
+
+/* v1.22.1 final catalogue-builder and overlap corrections */
+.coordinate-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+  width: 100%;
+}
+.coordinate-grid > .dialog-field,
+.coordinate-grid > .dialog-field input {
+  min-width: 0;
+  width: 100%;
+}
+.delivery-location-layout > .panel { min-width: 0; overflow: hidden; }
+
+.catalogue-builder-dialog {
+  width: min(1480px, calc(100vw - 32px));
+  max-width: none;
+  max-height: min(94vh, 1080px);
+  overflow: hidden;
+}
+.catalogue-builder-dialog .catalogue-builder-form {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 0;
+  max-height: min(94vh, 1080px);
+  padding: 0;
+  overflow: hidden;
+}
+.catalogue-builder-header {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 28px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(28,29,34,.99), rgba(18,19,23,.97));
+}
+.catalogue-builder-heading { display: flex; align-items: center; gap: 15px; min-width: 0; }
+.catalogue-builder-heading .restart-mark { flex: 0 0 auto; margin: 0; }
+.catalogue-builder-heading h2 { margin: 2px 0 4px; font-size: clamp(28px, 3vw, 44px); line-height: .95; }
+.catalogue-builder-heading p:last-child { margin: 0; color: #8e949d; font-size: 11px; line-height: 1.45; }
+.catalogue-builder-header .dialog-close { position: static; flex: 0 0 auto; }
+.catalogue-builder-dialog .owner-builder-layout {
+  min-height: 0;
+  margin: 0;
+  padding: 18px;
+  overflow: auto;
+  background: rgba(7,8,10,.82);
+}
+.catalogue-builder-dialog .owner-builder-main,
+.catalogue-builder-dialog .owner-builder-side { padding: 20px; }
+.catalogue-builder-dialog .owner-builder-main { align-self: stretch; }
+.catalogue-builder-dialog .owner-builder-side { position: sticky; top: 0; }
+.catalogue-builder-dialog .dialog-field > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #e1e4e9;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .025em;
+}
+.catalogue-builder-dialog .dialog-field input,
+.catalogue-builder-dialog .dialog-field select,
+.catalogue-builder-dialog .dialog-field textarea {
+  width: 100%;
+  border-color: rgba(255,255,255,.12);
+  background: #0d0f12;
+}
+.catalogue-builder-dialog .owner-builder-side-stack > .toggle-setting { margin-top: 2px; }
+.catalogue-builder-dialog .owner-builder-event-rules { display: grid; gap: 13px; margin-top: 2px; }
+.catalogue-builder-dialog .owner-builder-event-rules[hidden] { display: none !important; }
+.catalogue-builder-dialog .owner-builder-event-block:not(.owner-builder-event-rules) { margin-top: 2px; }
+.catalogue-builder-dialog .restart-dialog-message { margin: 0 18px 14px; }
+.catalogue-builder-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  background: rgba(18,19,23,.98);
+}
+.catalogue-builder-actions button { min-width: 150px; }
+.catalogue-builder-dialog.event-builder-mode .catalogue-builder-header {
+  box-shadow: inset 4px 0 0 #da2f27;
+}
+@media (max-width: 1280px) {
+  .catalogue-builder-dialog .owner-builder-side { position: static; }
+}
+@media (max-width: 720px) {
+  .catalogue-builder-dialog { width: calc(100vw - 14px); max-height: 97vh; }
+  .catalogue-builder-dialog .catalogue-builder-form { max-height: 97vh; }
+  .catalogue-builder-header { align-items: flex-start; padding: 18px 16px; }
+  .catalogue-builder-heading .restart-mark { display: none; }
+  .catalogue-builder-heading p:last-child { display: none; }
+  .catalogue-builder-dialog .owner-builder-layout { padding: 9px; }
+  .catalogue-builder-dialog .owner-builder-main,
+  .catalogue-builder-dialog .owner-builder-side { padding: 14px; }
+  .catalogue-builder-actions { display: grid; grid-template-columns: 1fr; }
+  .catalogue-builder-actions button { width: 100%; }
+}
+.owner-builder-event-block[hidden] { display: none !important; }
+.owner-builder-three,
+.owner-builder-two { display: grid; gap: 12px; }
+.builder-requirement,
+.optional-kicker { font-size: 9px; line-height: 1; vertical-align: middle; }
+h3 > .builder-requirement,
+h3 > .optional-kicker { margin-left: 7px; }
+.discord-log-table .table-status.online { color: #82dda2; }
+.discord-log-table .table-status.neutral { color: #c3c7ce; }
+.discord-log-table .table-status.offline { color: #ff8c84; }

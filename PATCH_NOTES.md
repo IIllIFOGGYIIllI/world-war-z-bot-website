@@ -1,3 +1,14 @@
+# Version 1.22.1
+
+- Finished the World War Z themed Create Item and Create Event Item workspaces inspired by the supplied DayZ++ reference screens.
+- Added responsive main/rules panels, quick price and category chips, inline editing and event restart controls capped at 30,000.
+- Fixed saved-location X, Y, Z and rotation inputs overlapping at desktop and narrower widths.
+- Added Owner-only Discord log channel configuration with search, connect, update, test and disconnect actions.
+- Added compact and mobile layouts for the new shop, location and logging controls.
+- Restored the missing `.nojekyll` marker so GitHub Pages publishes the static dashboard exactly as packaged.
+- Requires bot version 1.18.2 before using the Discord log configuration page.
+- No website files need to be deleted.
+
 # Version 1.22.0
 
 - Split trader catalogue into Items and Event Items.

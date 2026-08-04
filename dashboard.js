@@ -276,6 +276,8 @@ const ADMIN_OPERATION_FAILURES_URL = `${DASHBOARD_API_BASE}/api/admin/operations
 const ADMIN_OPERATION_RETRY_URL = `${DASHBOARD_API_BASE}/api/admin/operations/retry`;
 const OWNER_NOTIFICATION_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/notifications/config`;
 const OWNER_NOTIFICATION_ACTION_URL = `${DASHBOARD_API_BASE}/api/owner/notifications/action`;
+const OWNER_DISCORD_LOG_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/discord-logs/config`;
+const OWNER_DISCORD_LOG_ACTION_URL = `${DASHBOARD_API_BASE}/api/owner/discord-logs/action`;
 const PLAYER_ACTIONS = {
   add_note: { mark: '≡', title: 'Add private staff note?', description: 'The note will be visible only inside protected Admin player administration.', warning: 'Private notes remain in the Railway database and are included in the player audit view.', reasonLabel: 'Private staff note', reasonHelp: '1–1,500 characters', submitLabel: 'Add private note' },
   update_note: { mark: '✎', title: 'Update this private staff note?', description: 'The selected note will be replaced with the revised staff-only text.', warning: 'The previous note text is retained inside the private Railway audit record.', reasonLabel: 'Updated private note', reasonHelp: '1–1,500 characters', submitLabel: 'Update private note' },
@@ -383,6 +385,13 @@ const webhookAuditList = document.querySelector('[data-webhook-audit-list]');
 const webhookAuditEmpty = document.querySelector('[data-webhook-audit-empty]');
 const webhookMessage = document.querySelector('[data-webhook-message]');
 const webhookError = document.querySelector('[data-webhook-error]');
+
+const refreshDiscordLogsButton = document.querySelector('[data-refresh-discord-logs]');
+const discordLogSearch = document.querySelector('[data-discord-log-search]');
+const discordLogList = document.querySelector('[data-discord-log-list]');
+const discordLogEmpty = document.querySelector('[data-discord-log-empty]');
+const discordLogMessage = document.querySelector('[data-discord-log-message]');
+const discordLogError = document.querySelector('[data-discord-log-error]');
 const moderationCaseDialog = document.querySelector('[data-moderation-case-dialog]');
 const moderationCaseCloseButtons = [...document.querySelectorAll('[data-moderation-case-close]')];
 const caseDialogMessage = document.querySelector('[data-case-dialog-message]');
@@ -479,6 +488,8 @@ let moderationQueueStaff = [];
 let operationFailureRequestInProgress = false;
 let webhookRequestInProgress = false;
 let webhookConfiguration = { channels: [], webhooks: [], routes: [], audit: [] };
+let discordLogRequestInProgress = false;
+let discordLogConfiguration = { channels: [], log_types: [] };
 let adminPlayerSearchRequestInProgress = false;
 let adminPlayerDetailRequestInProgress = false;
 let selectedAdminPlayer = null;
@@ -1817,6 +1828,153 @@ const loadWebhookConfiguration = async (sessionToken = storageGet(AUTH_SESSION_K
 };
 
 refreshWebhooksButton?.addEventListener('click', () => loadWebhookConfiguration());
+
+
+const showDiscordLogMessage = (message = '', tone = 'error') => {
+  if (!discordLogMessage) return;
+  discordLogMessage.hidden = !message;
+  discordLogMessage.textContent = message;
+  discordLogMessage.dataset.tone = tone;
+};
+
+const discordLogAction = async (action, logType, channelKey = '', button = null) => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || dashboardAccessLevel !== 'owner' || discordLogRequestInProgress) return false;
+  discordLogRequestInProgress = true;
+  const originalLabel = button?.textContent || '';
+  if (button) { button.disabled = true; button.textContent = 'Working…'; }
+  showDiscordLogMessage('');
+  try {
+    const response = await protectedActionFetch(OWNER_DISCORD_LOG_ACTION_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({ action, log_type: logType, channel_key: channelKey || null })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Discord logging operation failed.');
+    showDiscordLogMessage(payload.message || 'Discord logging configuration updated.', 'success');
+    discordLogRequestInProgress = false;
+    await loadDiscordLogConfiguration();
+    return true;
+  } catch (error) {
+    showDiscordLogMessage(error instanceof Error ? error.message : 'Discord logging operation failed.');
+    return false;
+  } finally {
+    discordLogRequestInProgress = false;
+    if (button) { button.disabled = false; button.textContent = originalLabel; }
+  }
+};
+
+const renderDiscordLogConfiguration = () => {
+  if (!discordLogList) return;
+  const query = String(discordLogSearch?.value || '').trim().toLowerCase();
+  const rows = discordLogConfiguration.log_types.filter((entry) => {
+    const haystack = `${entry.label || ''} ${entry.description || ''} ${entry.channel_name || ''}`.toLowerCase();
+    return !query || haystack.includes(query);
+  });
+  discordLogList.replaceChildren();
+  const connectedCount = discordLogConfiguration.log_types.filter((entry) => entry.connected).length;
+  setText('[data-discord-log-summary]', `${connectedCount} / ${discordLogConfiguration.log_types.length} connected`);
+  if (discordLogEmpty) discordLogEmpty.hidden = rows.length !== 0;
+
+  rows.forEach((entry) => {
+    const row = document.createElement('tr');
+    const nameCell = document.createElement('td');
+    const name = document.createElement('strong');
+    name.textContent = String(entry.label || titleCaseState(entry.log_type));
+    const description = document.createElement('small');
+    description.textContent = String(entry.description || 'Discord audit activity');
+    nameCell.append(name, document.createElement('br'), description);
+
+    const channelCell = document.createElement('td');
+    const select = document.createElement('select');
+    select.className = 'discord-log-channel-select';
+    select.setAttribute('aria-label', `${entry.label} channel`);
+    select.append(createSelectOption('', 'Select or search channel'));
+    discordLogConfiguration.channels.forEach((channel) => {
+      const prefix = channel.category ? `${channel.category} / ` : '';
+      select.append(createSelectOption(
+        channel.channel_key,
+        `${prefix}#${channel.name}${channel.can_log ? '' : ' · missing permissions'}`,
+        { disabled: !channel.can_log }
+      ));
+    });
+    select.value = entry.channel_key || '';
+    channelCell.append(select);
+
+    const statusCell = document.createElement('td');
+    const status = document.createElement('span');
+    status.className = `table-status ${entry.connected ? 'online' : entry.enabled_by_code ? 'neutral' : 'offline'}`;
+    status.textContent = entry.connected ? 'Connected' : entry.enabled_by_code ? 'Not connected' : 'Disabled in bot';
+    statusCell.append(status);
+    if (entry.updated_at) {
+      const updated = document.createElement('small');
+      updated.className = 'discord-log-updated';
+      updated.textContent = `Updated ${formatAccountDate(entry.updated_at)}${entry.updated_by_name ? ` by ${entry.updated_by_name}` : ''}`;
+      statusCell.append(updated);
+    }
+
+    const actionCell = document.createElement('td');
+    const actions = document.createElement('div');
+    actions.className = 'discord-log-actions';
+    const save = document.createElement('button');
+    save.type = 'button'; save.className = 'primary-action compact-action'; save.textContent = entry.connected ? 'Update' : 'Connect';
+    save.disabled = !entry.enabled_by_code;
+    save.addEventListener('click', () => {
+      if (!select.value) { showDiscordLogMessage('Select a Discord text channel first.'); return; }
+      discordLogAction('set_channel', entry.log_type, select.value, save);
+    });
+    const test = document.createElement('button');
+    test.type = 'button'; test.className = 'secondary-action compact-action'; test.textContent = 'Test'; test.disabled = !entry.connected;
+    test.addEventListener('click', () => discordLogAction('test_channel', entry.log_type, '', test));
+    const disconnect = document.createElement('button');
+    disconnect.type = 'button'; disconnect.className = 'activity-row-action danger'; disconnect.textContent = 'Disconnect'; disconnect.disabled = !entry.connected;
+    disconnect.addEventListener('click', () => {
+      if (!window.confirm(`Disconnect ${entry.label}? Discord events in this category will stop being delivered until it is reconnected.`)) return;
+      discordLogAction('disable_channel', entry.log_type, '', disconnect);
+    });
+    actions.append(save, test, disconnect);
+    actionCell.append(actions);
+    row.append(nameCell, channelCell, statusCell, actionCell);
+    discordLogList.append(row);
+  });
+};
+
+const loadDiscordLogConfiguration = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (dashboardAccessLevel !== 'owner' || !sessionToken || discordLogRequestInProgress) return false;
+  discordLogRequestInProgress = true;
+  refreshDiscordLogsButton?.setAttribute('disabled', '');
+  if (discordLogError) discordLogError.hidden = true;
+  try {
+    const response = await authFetch(OWNER_DISCORD_LOG_CONFIG_URL, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Discord logging configuration unavailable.');
+    discordLogConfiguration = {
+      channels: Array.isArray(payload.channels) ? payload.channels : [],
+      log_types: Array.isArray(payload.log_types) ? payload.log_types : []
+    };
+    renderDiscordLogConfiguration();
+    return true;
+  } catch (error) {
+    discordLogList?.replaceChildren();
+    if (discordLogError) {
+      discordLogError.hidden = false;
+      discordLogError.textContent = error instanceof Error ? error.message : 'Discord logging configuration is temporarily unavailable.';
+    }
+    setText('[data-discord-log-summary]', 'Unavailable');
+    return false;
+  } finally {
+    discordLogRequestInProgress = false;
+    refreshDiscordLogsButton?.removeAttribute('disabled');
+  }
+};
+
+refreshDiscordLogsButton?.addEventListener('click', () => loadDiscordLogConfiguration());
+discordLogSearch?.addEventListener('input', renderDiscordLogConfiguration);
 createWebhookButton?.addEventListener('click', async () => {
   const created = await ownerNotificationAction('create_webhook', {
     label: webhookLabelInput?.value || '',
@@ -1833,6 +1991,7 @@ window.addEventListener('wwz:viewchange', (event) => {
   if (view === 'staff' && section === 'cases') loadModerationCases();
   if (view === 'staff' && section === 'banlists') loadCurrentBanlists();
   if (view === 'staff' && section === 'failures') loadOperationFailures();
+  if (view === 'configuration' && section === 'discord-logs') loadDiscordLogConfiguration();
   if (view === 'configuration' && section === 'notifications') loadWebhookConfiguration();
 });
 
@@ -3724,7 +3883,9 @@ const shopItemForm = document.querySelector('[data-shop-item-form]');
 const shopItemCancelButtons = [...document.querySelectorAll('[data-shop-item-cancel]')];
 const shopItemMessage = document.querySelector('[data-shop-item-message]');
 const shopItemDeliveryType = document.querySelector('[data-shop-item-delivery-type]');
-const shopEventProfileEditor = document.querySelector('[data-shop-event-profile]');
+const shopEventProfileEditors = [...document.querySelectorAll('[data-shop-event-profile]')];
+const shopPriceQuickButtons = [...document.querySelectorAll('[data-shop-price-value]')];
+const shopCategoryQuickButtons = [...document.querySelectorAll('[data-shop-category-value]')];
 const ownerEventItemList = document.querySelector('[data-owner-event-item-list]');
 const ownerEventItemEmpty = document.querySelector('[data-owner-event-item-empty]');
 const newEventItemButton = document.querySelector('[data-new-event-item]');
@@ -4369,14 +4530,18 @@ const parseProfileList = (value) => String(value || '').split(/\r?\n/).map((line
 
 const syncShopItemDeliveryEditor = () => {
   const isEvent = shopItemDeliveryType?.value === 'event';
-  if (shopEventProfileEditor) shopEventProfileEditor.hidden = !isEvent;
+  shopEventProfileEditors.forEach((editor) => { editor.hidden = !isEvent; });
   document.querySelectorAll('[data-shop-event-profile] input, [data-shop-event-profile] select, [data-shop-event-profile] textarea').forEach((field) => {
     field.disabled = !isEvent;
   });
   const maxOrder = document.querySelector('[data-shop-item-max-order]');
   const priceLabel = document.querySelector('[data-shop-item-price]')?.closest('label')?.querySelector('span');
   if (maxOrder) { maxOrder.disabled = isEvent; if (isEvent) maxOrder.value = '1'; }
-  if (priceLabel) priceLabel.textContent = isEvent ? 'Price per restart' : 'Price';
+  if (priceLabel) priceLabel.childNodes[0].textContent = isEvent ? 'Price per restart ' : 'Price ';
+  shopItemDialog?.classList.toggle('event-builder-mode', isEvent);
+  setText('[data-shop-builder-subtitle]', isEvent
+    ? 'Configure a restart-bound event item, its XML spawn profile and purchase bounds.'
+    : 'Build the player-facing item first, then apply optional stock and purchase limits.');
 };
 
 const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
@@ -4416,6 +4581,14 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
 newShopItemButton?.addEventListener('click', () => openShopItemEditor());
 newEventItemButton?.addEventListener('click', () => openShopItemEditor(null, { forceEvent: true }));
 shopItemDeliveryType?.addEventListener('change', syncShopItemDeliveryEditor);
+shopPriceQuickButtons.forEach((button) => button.addEventListener('click', () => {
+  const input = document.querySelector('[data-shop-item-price]');
+  if (input) { input.value = String(button.dataset.shopPriceValue || ''); input.focus(); }
+}));
+shopCategoryQuickButtons.forEach((button) => button.addEventListener('click', () => {
+  const input = document.querySelector('[data-shop-item-category]');
+  if (input) { input.value = String(button.dataset.shopCategoryValue || ''); input.focus(); }
+}));
 shopItemCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!ownerShopRequestInProgress) shopItemDialog?.close?.(); }));
 
 const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {

@@ -10,7 +10,7 @@
 <link href="site.webmanifest" rel="manifest"/>
 <link href="assets/favicon.png" rel="icon" type="image/png"/>
 <link href="assets/world-war-z-icon.png" rel="apple-touch-icon"/>
-<link href="dashboard.css?v=1.22.0" rel="stylesheet"/>
+<link href="dashboard.css?v=1.22.1" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-bot-website/dashboard.html" rel="canonical"/><meta content="World War Z Community" property="og:site_name"/><meta content="World War Z — Live DayZ Command Centre" property="og:title"/><meta content="Secure World War Z dashboard with live server status, survivor profiles, trader orders, moderation, event delivery and Nitrado controls." property="og:description"/><meta content="website" property="og:type"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/dashboard.html" property="og:url"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" property="og:image"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" property="og:image:secure_url"/><meta content="image/png" property="og:image:type"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="World War Z DayZ PS4 and PS5 Command Centre" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="World War Z — Live DayZ Command Centre" name="twitter:title"/><meta content="Secure World War Z dashboard with live server status, survivor profiles, trader orders, moderation, event delivery and Nitrado controls." name="twitter:description"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" name="twitter:image"/></head>
 <body>
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -98,13 +98,14 @@
 </div>
 </details>
 <details class="nav-group" data-nav-group="" data-owner-only="" hidden="" open="">
-<summary><span>⚙</span><strong>Owner configuration</strong><small>7</small></summary>
+<summary><span>⚙</span><strong>Owner configuration</strong><small>8</small></summary>
 <div class="nav-group-links">
 <button class="side-link" data-nav-label="DayZ service overview" data-owner-only="" data-section="overview" data-view="serverconfig" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">SV</span><span class="side-link-copy"><strong>Service overview</strong><small>Files, events and readiness</small></span></button>
 <button class="side-link" data-nav-label="Mission file editor" data-owner-only="" data-section="files" data-view="serverconfig" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">XML</span><span class="side-link-copy"><strong>Mission files</strong><small>Validate, diff and deploy</small></span></button>
 <button class="side-link" data-nav-label="Events and zones" data-owner-only="" data-section="events" data-view="serverconfig" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">ZN</span><span class="side-link-copy"><strong>Events &amp; zones</strong><small>Live CE event positions</small></span></button>
 <button class="side-link" data-nav-label="Configuration workflow" data-owner-only="" data-section="workflow" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">CF</span><span class="side-link-copy"><strong>Configuration workflow</strong><small>Backup, validate, compare</small></span></button>
 <button class="side-link" data-nav-label="Backup history" data-owner-only="" data-section="backups" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">BK</span><span class="side-link-copy"><strong>Backup history</strong><small>Restore-ready snapshots</small></span></button>
+<button class="side-link" data-nav-label="Discord logs" data-owner-only="" data-section="discord-logs" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">LG</span><span class="side-link-copy"><strong>Discord logs</strong><small>Audit channel routing</small></span></button>
 <button class="side-link" data-nav-label="Notifications &amp; webhooks" data-owner-only="" data-section="notifications" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">WH</span><span class="side-link-copy"><strong>Notifications &amp; webhooks</strong><small>Discord event routing</small></span></button>
 <button class="side-link" data-nav-label="Appeal settings" data-owner-only="" data-section="appeals" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">AP</span><span class="side-link-copy"><strong>Appeal settings</strong><small>Deadlines, tickets and policy</small></span></button>
 </div>
@@ -122,7 +123,7 @@
 <span aria-hidden="true" class="access-icon" data-access-icon="">⌁</span>
 <div><strong data-access-card-title="">Guest access</strong><small data-access-card-copy="">Sign in will securely verify your community access.</small></div>
 </div>
-<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.22.0</strong></div>
+<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.22.1</strong></div>
 <div class="sidebar-footer"><a href="index.html">Website</a><a href="legal.html">Policies</a><a href="privacy.html">Privacy</a></div>
 </aside>
 <button aria-label="Close dashboard menu" class="sidebar-scrim" data-sidebar-scrim="" type="button"></button>
@@ -361,6 +362,15 @@
 <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Safe by design</strong><p>Destructive actions will require a confirmation, permission check, fresh backup and permanent audit record.</p></div></div>
 <div class="config-flow" data-dashboard-section="workflow" id="dashboard-configuration-workflow"><article class="flow-card complete"><span>01</span><strong>Back up</strong><small>Capture current files</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>02</span><strong>Validate</strong><small>Check syntax and structure</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>03</span><strong>Compare</strong><small>Review every change</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>04</span><strong>Restore</strong><small>Owner confirmation</small></article></div>
 <article class="panel" data-dashboard-section="backups" id="dashboard-configuration-backups"><div class="panel-heading"><div><p class="panel-kicker">Example history</p><h2>Recent backups</h2></div><button class="secondary-action" disabled="" type="button">Create backup</button></div><div class="responsive-table"><table><thead><tr><th>Backup</th><th>Created</th><th>Files</th><th>Validation</th><th>Action</th></tr></thead><tbody><tr><td>Pre-update example</td><td>Today, 8:42 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled="">Compare</button></td></tr><tr><td>Scheduled example</td><td>Yesterday, 9:00 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled="">Compare</button></td></tr></tbody></table></div><p class="table-note">Example history only. No Nitrado files are present on this website.</p></article>
+<article class="panel discord-logs-panel" data-dashboard-section="discord-logs" data-owner-only="" id="dashboard-configuration-discord-logs">
+<div class="panel-heading"><div><p class="panel-kicker">Owner-managed Discord audit routing</p><h2>Discord logs</h2></div><button class="secondary-action compact-action" data-refresh-discord-logs="" type="button">Refresh logs</button></div>
+<div class="security-notice compact-notice"><span aria-hidden="true">LG</span><div><strong>Connect each audit stream to the correct Discord channel</strong><p>Railway verifies Owner access and asks the bot to save, test or disconnect each route. Raw Discord channel IDs remain server-side.</p></div></div>
+<div class="discord-log-toolbar command-bar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search Discord logs</span><input autocomplete="off" data-discord-log-search="" placeholder="Search log name or channel…" type="search"/></label><div class="toolbar-view-note"><span>LIVE</span><strong data-discord-log-summary="">Loading</strong><small>Connected log streams</small></div></div>
+<div class="responsive-table discord-log-table"><table><thead><tr><th>Log name</th><th>Log channel</th><th>Connected</th><th>Action</th></tr></thead><tbody data-discord-log-list=""></tbody></table></div>
+<p class="table-note" data-discord-log-empty="" hidden="">No Discord log types match this search.</p>
+<div class="restart-dialog-message" data-discord-log-message="" hidden="" role="status"></div>
+<p class="table-note history-error" data-discord-log-error="" hidden="">Discord logging configuration is temporarily unavailable.</p>
+</article>
 <article class="panel webhook-control-panel" data-dashboard-section="notifications" data-owner-only="" id="dashboard-configuration-notifications">
 <div class="panel-heading"><div><p class="panel-kicker">Owner-managed Discord routing</p><h2>Notifications &amp; webhooks</h2></div><button class="secondary-action compact-action" data-refresh-webhooks="" type="button">Refresh configuration</button></div>
 <div class="security-notice compact-notice"><span aria-hidden="true">✓</span><div><strong>Webhook secrets stay off the website</strong><p>Select a Discord text channel and Railway asks the bot to create the incoming webhook. The website never receives a webhook URL or token, and the database stores only the Discord webhook ID and routing metadata.</p></div></div>
@@ -554,10 +564,85 @@
 <dialog aria-labelledby="shop-order-action-title" class="login-dialog restart-dialog" data-shop-order-action-dialog="">
 <form data-shop-order-action-form="" method="dialog"><button aria-label="Close order action" class="dialog-close" data-shop-order-action-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">📦</span><p class="panel-kicker">Protected shop operation</p><h2 data-shop-order-action-title="" id="shop-order-action-title">Update shop order?</h2><div class="player-action-target"><span>Selected order</span><strong data-shop-order-action-target="">—</strong><small data-shop-order-action-detail="">—</small></div><label class="dialog-field"><span>Action note <small>Required · 3–1,000 characters</small></span><textarea data-shop-order-action-note="" maxlength="1000" required="" rows="4"></textarea></label><div class="restart-warning"><strong data-shop-order-action-warning="">Audit required</strong><span>The result will be added to the member order history.</span></div><div class="restart-dialog-message" data-shop-order-action-message="" hidden="" role="status"></div><button class="primary-action wide" data-confirm-shop-order-action="" type="submit">Confirm action</button><button class="dialog-cancel" data-shop-order-action-cancel="" type="button">Cancel</button></form>
 </dialog>
-<dialog aria-labelledby="shop-item-dialog-title" class="login-dialog shop-item-dialog" data-shop-item-dialog="">
-<form data-shop-item-form="" method="dialog"><button aria-label="Close item editor" class="dialog-close" data-shop-item-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">🛠</span><p class="panel-kicker">Owner catalogue editor</p><h2 data-shop-item-dialog-title="" id="shop-item-dialog-title">Create shop item</h2><div class="dashboard-grid shop-item-form-grid"><label class="dialog-field"><span>SKU</span><input data-shop-item-sku="" maxlength="40" placeholder="CAR-ADA" required="" type="text"/></label><label class="dialog-field"><span>Item name</span><input data-shop-item-name="" maxlength="100" required="" type="text"/></label><label class="dialog-field"><span>Category</span><input data-shop-item-category="" maxlength="60" placeholder="Vehicles" required="" type="text"/></label><label class="dialog-field"><span>Price</span><input data-shop-item-price="" max="1000000000" min="1" required="" step="1" type="number"/></label><label class="dialog-field"><span>Delivery type</span><select data-shop-item-delivery-type=""><option value="manual">Manual trader order</option><option value="event">Restart-bound event spawn</option></select></label><label class="dialog-field"><span>Stock <small>Blank = unlimited</small></span><input data-shop-item-stock="" max="1000000" min="0" step="1" type="number"/></label><label class="dialog-field"><span>Maximum per order</span><input data-shop-item-max-order="" max="100" min="1" required="" step="1" type="number" value="1"/></label><label class="dialog-field"><span>Maximum per player <small>Blank = unlimited</small></span><input data-shop-item-max-player="" max="1000000" min="1" step="1" type="number"/></label><label class="dialog-field"><span>Sort order</span><input data-shop-item-sort="" max="10000" min="-10000" step="1" type="number" value="0"/></label></div><label class="dialog-field"><span>Description</span><textarea data-shop-item-description="" maxlength="1000" required="" rows="4"></textarea></label><label class="dialog-field"><span>Internal fulfilment instructions</span><textarea data-shop-item-fulfilment="" maxlength="1500" rows="3"></textarea></label><fieldset class="event-profile-editor" data-shop-event-profile="" hidden=""><legend>Event spawn profile</legend><div class="security-notice compact-notice"><span aria-hidden="true">!</span><div><strong>Classname-wide spawnable profile</strong><p>Attachments and cargo modify the selected classname's <code>cfgspawnabletypes.xml</code> entry and can affect other CE spawns of that classname.</p></div></div><div class="dashboard-grid shop-item-form-grid"><label class="dialog-field"><span>Profile name</span><input data-shop-profile-name="" maxlength="100" placeholder="Ada Complete" type="text"/></label><label class="dialog-field"><span>Child classname</span><input data-shop-profile-child="" maxlength="128" placeholder="OffroadHatchback" type="text"/></label><label class="dialog-field"><span>Secondary event <small>Optional</small></span><input data-shop-profile-secondary="" maxlength="128" type="text"/></label><label class="dialog-field"><span>Lifetime seconds</span><input data-shop-profile-lifetime="" max="2147483647" min="1" type="number" value="3888000"/></label><label class="dialog-field"><span>Restock</span><input data-shop-profile-restock="" max="2147483647" min="0" type="number" value="0"/></label><label class="dialog-field"><span>Minimum restarts</span><input data-shop-profile-min-restarts="" max="30000" min="1" type="number" value="1"/></label><label class="dialog-field"><span>Maximum restarts</span><input data-shop-profile-max-restarts="" max="30000" min="1" type="number" value="30000"/></label><label class="dialog-field"><span>Event limit</span><select data-shop-profile-limit=""><option value="custom">Custom</option><option value="child">Child</option><option value="parent">Parent</option></select></label><label class="dialog-field"><span>Safe radius</span><input data-shop-profile-saferadius="" max="2147483647" min="0" type="number" value="0"/></label><label class="dialog-field"><span>Distance radius</span><input data-shop-profile-distanceradius="" max="2147483647" min="0" type="number" value="0"/></label><label class="dialog-field"><span>Cleanup radius</span><input data-shop-profile-cleanupradius="" max="2147483647" min="0" type="number" value="0"/></label></div><div class="dashboard-grid"><label class="dialog-field"><span>Attachments <small>One classname per line; optional <code>,chance</code></small></span><textarea data-shop-profile-attachments="" placeholder="HatchbackWheel,1
-CarBattery,1" rows="6"></textarea></label><label class="dialog-field"><span>Cargo <small>One classname per line; optional <code>,chance</code></small></span><textarea data-shop-profile-cargo="" placeholder="CanisterGasoline,1" rows="6"></textarea></label></div><div class="appeal-settings-grid"><label class="toggle-setting"><input checked="" data-shop-profile-approval="" type="checkbox"/><span><strong>Require Admin approval</strong><small>Recommended for vehicles and expensive orders.</small></span></label><label class="toggle-setting"><input data-shop-profile-deletable="" type="checkbox"/><span><strong>Deletable event</strong><small>DayZ event flag.</small></span></label><label class="toggle-setting"><input data-shop-profile-random="" type="checkbox"/><span><strong>Random initialisation</strong><small>DayZ event flag.</small></span></label><label class="toggle-setting"><input data-shop-profile-remove-damaged="" type="checkbox"/><span><strong>Remove damaged</strong><small>DayZ event flag.</small></span></label></div></fieldset><label class="toggle-setting"><input checked="" data-shop-item-active="" type="checkbox"/><span><strong>Item active</strong><small>Inactive items remain in order history but cannot be purchased.</small></span></label><div class="restart-dialog-message" data-shop-item-message="" hidden="" role="status"></div><button class="primary-action wide" data-save-shop-item="" type="submit">Save item</button><button class="dialog-cancel" data-shop-item-cancel="" type="button">Cancel</button></form>
+<dialog aria-labelledby="shop-item-dialog-title" class="login-dialog shop-item-dialog catalogue-builder-dialog" data-shop-item-dialog="">
+<form class="catalogue-builder-form" data-shop-item-form="" method="dialog">
+<header class="catalogue-builder-header">
+<div class="catalogue-builder-heading"><span aria-hidden="true" class="restart-mark">🛠</span><div><p class="panel-kicker">Owner catalogue editor</p><h2 data-shop-item-dialog-title="" id="shop-item-dialog-title">Create shop item</h2><p data-shop-builder-subtitle="">Build the player-facing item first, then apply optional stock and purchase limits.</p></div></div>
+<button aria-label="Close item editor" class="dialog-close" data-shop-item-cancel="" type="button">×</button>
+</header>
+<div class="owner-builder-layout">
+<section class="panel owner-builder-main">
+<div class="panel-heading"><div><p class="panel-kicker accent-kicker">Catalogue item</p><h3>Item details <span class="builder-requirement">Required</span></h3></div></div>
+<div class="security-notice compact-notice owner-builder-notice"><span aria-hidden="true">i</span><div><strong>Start with what players will see.</strong><p>Name, price, category, description and delivery method are shown throughout the shop and order history.</p></div></div>
+<div class="owner-inline-builder-form">
+<div class="owner-builder-basic-grid">
+<label class="dialog-field"><span>Item name</span><input data-shop-item-name="" maxlength="100" placeholder="e.g. Starter Kit" required="" type="text"/></label>
+<label class="dialog-field"><span>Price</span><input data-shop-item-price="" max="1000000000" min="1" placeholder="1000" required="" step="1" type="number"/></label>
+</div>
+<div class="quick-value-row"><span>Quick price</span><div class="quick-chip-group" aria-label="Quick price values"><button data-shop-price-value="1" type="button">1</button><button data-shop-price-value="50" type="button">50</button><button data-shop-price-value="100" type="button">100</button><button data-shop-price-value="250" type="button">250</button><button data-shop-price-value="500" type="button">500</button><button data-shop-price-value="1000" type="button">1,000</button></div></div>
+<div class="owner-builder-basic-grid">
+<label class="dialog-field"><span>SKU <small>Unique internal code</small></span><input data-shop-item-sku="" maxlength="40" placeholder="KIT-STARTER" required="" type="text"/></label>
+<label class="dialog-field"><span>Delivery method</span><select data-shop-item-delivery-type=""><option value="manual">Manual trader order</option><option value="event">Restart-bound event spawn</option></select></label>
+</div>
+<label class="dialog-field"><span>Category</span><input data-shop-item-category="" maxlength="60" placeholder="Weapons, Vehicles, Building…" required="" type="text"/></label>
+<div class="quick-value-row"><span>Common categories</span><div class="quick-chip-group" aria-label="Common item categories"><button data-shop-category-value="Weapons" type="button">Weapons</button><button data-shop-category-value="Ammo" type="button">Ammo</button><button data-shop-category-value="Tools" type="button">Tools</button><button data-shop-category-value="Food" type="button">Food</button><button data-shop-category-value="Medical" type="button">Medical</button><button data-shop-category-value="Clothing" type="button">Clothing</button><button data-shop-category-value="Vehicles" type="button">Vehicles</button><button data-shop-category-value="Building" type="button">Building</button><button data-shop-category-value="Other" type="button">Other</button></div></div>
+<label class="dialog-field"><span>Description <small>Player-facing</small></span><textarea data-shop-item-description="" maxlength="1000" placeholder="Explain exactly what the buyer receives." required="" rows="4"></textarea></label>
+<label class="dialog-field"><span>Internal fulfilment instructions <small>Admins only</small></span><textarea data-shop-item-fulfilment="" maxlength="1500" placeholder="Trader location, package contents or staff handling instructions." rows="4"></textarea></label>
+
+<section class="owner-builder-event-block" data-shop-event-profile="" hidden="">
+<div class="panel-heading"><div><p class="panel-kicker">Restart delivery</p><h4>Event XML profile</h4></div><span class="optional-kicker">Event item</span></div>
+<div class="security-notice compact-notice"><span aria-hidden="true">!</span><div><strong>Classname-wide spawnable profile</strong><p>Attachments and cargo update the selected classname in <code>cfgspawnabletypes.xml</code> and may affect other Central Economy spawns using that classname.</p></div></div>
+<div class="owner-builder-three">
+<label class="dialog-field"><span>Profile name</span><input data-shop-profile-name="" maxlength="100" placeholder="Ada Complete" type="text"/></label>
+<label class="dialog-field"><span>Child classname</span><input data-shop-profile-child="" maxlength="128" placeholder="OffroadHatchback" type="text"/></label>
+<label class="dialog-field"><span>Secondary event <small>Optional</small></span><input data-shop-profile-secondary="" maxlength="128" type="text"/></label>
+</div>
+<div class="owner-builder-three">
+<label class="dialog-field"><span>Lifetime seconds</span><input data-shop-profile-lifetime="" max="2147483647" min="1" type="number" value="3888000"/></label>
+<label class="dialog-field"><span>Restock</span><input data-shop-profile-restock="" max="2147483647" min="0" type="number" value="0"/></label>
+<label class="dialog-field"><span>Event limit</span><select data-shop-profile-limit=""><option value="custom">Custom</option><option value="child">Child</option><option value="parent">Parent</option></select></label>
+</div>
+<div class="owner-builder-three">
+<label class="dialog-field"><span>Safe radius</span><input data-shop-profile-saferadius="" max="2147483647" min="0" type="number" value="0"/></label>
+<label class="dialog-field"><span>Distance radius</span><input data-shop-profile-distanceradius="" max="2147483647" min="0" type="number" value="0"/></label>
+<label class="dialog-field"><span>Cleanup radius</span><input data-shop-profile-cleanupradius="" max="2147483647" min="0" type="number" value="0"/></label>
+</div>
+<div class="owner-builder-two">
+<label class="dialog-field"><span>Attachments <small>One classname per line; optional <code>,chance</code></small></span><textarea data-shop-profile-attachments="" placeholder="HatchbackWheel,1&#10;CarBattery,1" rows="7"></textarea></label>
+<label class="dialog-field"><span>Cargo <small>One classname per line; optional <code>,chance</code></small></span><textarea data-shop-profile-cargo="" placeholder="CanisterGasoline,1" rows="7"></textarea></label>
+</div>
+<div class="owner-builder-toggle-stack owner-builder-two">
+<label class="toggle-setting"><input data-shop-profile-deletable="" type="checkbox"/><span><strong>Deletable event</strong><small>Apply the DayZ deletable event flag.</small></span></label>
+<label class="toggle-setting"><input data-shop-profile-random="" type="checkbox"/><span><strong>Random initialisation</strong><small>Apply the DayZ random initialisation flag.</small></span></label>
+<label class="toggle-setting"><input data-shop-profile-remove-damaged="" type="checkbox"/><span><strong>Remove damaged</strong><small>Remove damaged event objects during cleanup.</small></span></label>
+</div>
+</section>
+</div>
+</section>
+
+<aside class="panel owner-builder-side">
+<div class="panel-heading"><div><p class="panel-kicker">Purchase controls</p><h3>Rules <span class="optional-kicker">Optional</span></h3></div></div>
+<div class="security-notice compact-notice owner-builder-notice"><span aria-hidden="true">i</span><div><strong>Control availability and limits.</strong><p>Blank stock or player limits remain unlimited. Existing orders retain their original audit details.</p></div></div>
+<div class="owner-builder-side-stack">
+<label class="dialog-field"><span>Stock <small>Blank = unlimited</small></span><input data-shop-item-stock="" max="1000000" min="0" step="1" type="number"/></label>
+<label class="dialog-field"><span>Maximum per order</span><input data-shop-item-max-order="" max="100" min="1" required="" step="1" type="number" value="1"/></label>
+<label class="dialog-field"><span>Maximum per player <small>Blank = unlimited</small></span><input data-shop-item-max-player="" max="1000000" min="1" step="1" type="number"/></label>
+<label class="dialog-field"><span>Sort order <small>Lower values appear first</small></span><input data-shop-item-sort="" max="10000" min="-10000" step="1" type="number" value="0"/></label>
+<label class="toggle-setting"><input checked="" data-shop-item-active="" type="checkbox"/><span><strong>Item active</strong><small>Inactive items stay in order history but cannot be purchased.</small></span></label>
+
+<section class="owner-builder-event-block owner-builder-event-rules" data-shop-event-profile="" hidden="">
+<div class="panel-heading"><div><p class="panel-kicker">Event bounds</p><h4>Restart rules</h4></div></div>
+<label class="dialog-field"><span>Minimum restarts</span><input data-shop-profile-min-restarts="" max="30000" min="1" type="number" value="1"/></label>
+<label class="dialog-field"><span>Maximum restarts <small>Hard cap: 30,000</small></span><input data-shop-profile-max-restarts="" max="30000" min="1" type="number" value="30000"/></label>
+<label class="toggle-setting"><input checked="" data-shop-profile-approval="" type="checkbox"/><span><strong>Require Admin approval</strong><small>Recommended for vehicles and high-value restart orders.</small></span></label>
+</section>
+</div>
+</aside>
+</div>
+<div class="restart-dialog-message" data-shop-item-message="" hidden="" role="status"></div>
+<footer class="catalogue-builder-actions"><button class="secondary-action" data-shop-item-cancel="" type="button">Cancel</button><button class="primary-action" data-save-shop-item="" type="submit">Save item</button></footer>
+</form>
 </dialog>
-<script src="dashboard.js?v=1.22.0"></script>
+<script src="dashboard.js?v=1.22.1"></script>
 </body>
 </html>
