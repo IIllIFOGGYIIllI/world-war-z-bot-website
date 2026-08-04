@@ -57,6 +57,11 @@ GitHub may take a few minutes to publish the first version.
 
 
 
+## Version 1.22.2 compact catalogue windows
+
+The Owner Create Item and Create Event Item editors now use compact title-bar windows inspired by the supplied references while retaining the World War Z theme. The dialogs have internal scrolling, sticky actions and responsive sizing, with no API or database change.
+
+
 ## Version 1.22.1 shop workspace and Discord logs
 
 The Owner catalogue editors now use the supplied split Create Item / Rules layout while retaining the World War Z visual theme. Saved coordinate fields no longer overlap, and the dashboard includes a protected Discord Logs page for routing the bot's eight existing audit categories.

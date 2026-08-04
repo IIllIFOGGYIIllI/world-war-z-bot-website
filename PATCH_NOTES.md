@@ -1,3 +1,14 @@
+# Version 1.22.2
+
+- Reworked the Create Item and Create Event Item dialogs into compact application windows based on the supplied reference screens.
+- Added simple Item and Event Item title bars with operation-specific subtitles.
+- Reduced oversized headings and nested-card visual weight while preserving the dark red World War Z theme.
+- Added a stronger dimmed backdrop, internal scrolling and a sticky action footer.
+- Moved Cancel and Create/Save actions to a compact left-aligned footer and updated the submit label for create versus edit operations.
+- Improved desktop, tablet and mobile modal sizing without changing shop data, Railway APIs or permissions.
+- No website files need to be deleted.
+- No bot or Railway deployment change is required.
+
 # Version 1.22.1
 
 - Finished the World War Z themed Create Item and Create Event Item workspaces inspired by the supplied DayZ++ reference screens.

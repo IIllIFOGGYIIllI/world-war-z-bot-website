@@ -4539,15 +4539,20 @@ const syncShopItemDeliveryEditor = () => {
   if (maxOrder) { maxOrder.disabled = isEvent; if (isEvent) maxOrder.value = '1'; }
   if (priceLabel) priceLabel.childNodes[0].textContent = isEvent ? 'Price per restart ' : 'Price ';
   shopItemDialog?.classList.toggle('event-builder-mode', isEvent);
-  setText('[data-shop-builder-subtitle]', isEvent
-    ? 'Configure a restart-bound event item, its XML spawn profile and purchase bounds.'
-    : 'Build the player-facing item first, then apply optional stock and purchase limits.');
+  const editorName = String(document.querySelector('[data-shop-item-name]')?.value || '').trim();
+  const isEditing = editingShopItemId != null;
+  setText('[data-shop-item-dialog-title]', isEvent ? 'Event Item' : 'Item');
+  setText('[data-shop-builder-subtitle]', isEditing
+    ? `Editing ${editorName || (isEvent ? 'event item' : 'catalogue item')}`
+    : isEvent
+      ? 'Create a restart-bound event item.'
+      : 'Create a new catalogue item.');
+  setText('[data-save-shop-item]', isEditing ? 'Save changes' : 'Create');
 };
 
 const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
   editingShopItemId = item?.item_id == null ? null : Number(item.item_id);
   shopItemForm?.reset();
-  setText('[data-shop-item-dialog-title]', item ? `Edit ${item.name}` : forceEvent ? 'Create event item' : 'Create shop item');
   const profile = item?.delivery_profile || {};
   const values = {
     '[data-shop-item-sku]': item?.sku || '', '[data-shop-item-name]': item?.name || '',
