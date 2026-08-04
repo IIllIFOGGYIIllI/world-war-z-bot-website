@@ -1,48 +1,51 @@
-# Interactive Chernarus POI Map
-
-The dashboard now uses one custom vector road map instead of multiple raster
-layers.
+# Chernarus Satellite Map Implementation
 
 ## Current implementation
 
-- One locally hosted `assets/chernarus-vector.svg` base map.
-- Highlighted major and secondary roads, tracks, coastline, forests, grid,
-  settlement labels and CE settlement footprints.
-- Vector line work and text stay sharp at every zoom level.
-- No third-party map scripts, embeds, tiles, cookies or tracking.
-- Native mouse, touch and keyboard pan and zoom.
-- Validated public JSON POIs with search, filters and accessible details.
-- DayZ X/Z coordinate readout and marker positioning on a 15360 m map.
-- Responsive desktop, tablet and mobile layouts.
+Version 1.22.3 replaces the public Coming Soon map with a locally hosted satellite explorer generated from the uploaded Chernarus layer tiles.
 
-Public markers live in `assets/chernarus-pois.json`. Every entry must contain a
-unique ID, category, name, description, X/Z DayZ coordinates and
-`"visibility": "public"`. The browser rejects malformed, duplicate,
-out-of-bounds or non-public entries.
+The source tiles are ordered as follows:
 
-## Access model
+- first filename number: horizontal column, west to east;
+- second filename number: vertical row, north to south;
+- horizontal flip: none;
+- vertical flip: none;
+- source grid: 32 × 32;
+- native source square: 16,384 × 16,384 pixels;
+- DayZ coordinate square: X/Z 0 through 15,360.
 
-- Visitors and members can view public POIs.
-- Admins may later receive approved moderation overlays only from protected
-  Railway endpoints.
-- Owners may later create, edit or remove POIs through confirmed and
-  audit-logged endpoints.
-- Hidden controls are only presentation; Railway must authorize every future
-  map-management request again.
+The complete 16,384 px source square maps linearly to the 15,360 metre Chernarus coordinate system. X increases from west to east. Z increases from south to north.
 
-Never publish live player locations, private bases, Admin positions or
-unpublished event coordinates.
+## Browser tile pyramid
 
-## Future stages
+The generated pyramid uses 512 px WebP tiles:
 
-1. Replace the initial navigation landmarks with confirmed World War Z
-   community POIs such as traders, safe zones and event areas.
-2. Add Railway-backed POI storage and strict validation.
-3. Add an Owner editor with confirmation, audit history and rollback.
-4. Add protected Admin overlays only where operationally safe.
+- zoom 0: 1 tile;
+- zoom 1: 4 tiles;
+- zoom 2: 16 tiles;
+- zoom 3: 64 tiles;
+- zoom 4: 256 tiles;
+- zoom 5: 1,024 tiles;
+- total: 1,365 tiles.
 
-## Sources
+Only visible tiles and a one-tile buffer are inserted into the page. This prevents the browser from downloading the complete high-resolution map during ordinary use.
 
-- Official source repository: https://github.com/BohemiaInteractive/DayZ-Central-Economy
-- ADPL-SA licence: https://www.bohemia.net/en/licenses/arma-and-dayz-public-license-share-alike-adpl-sa
-- Full attribution and modification notice: `MAP_ATTRIBUTION.md`
+## Controls
+
+The public map supports:
+
+- mouse-wheel zoom;
+- pointer and touch dragging;
+- two-finger pinch zoom;
+- keyboard arrows, plus, minus and zero;
+- Reset and Fullscreen controls;
+- pointer coordinate display;
+- click/tap coordinate selection;
+- copied X/Z values with three decimal places;
+- public POI search, category filtering and centring.
+
+## Privacy and access
+
+The map is public and read only. It renders only POIs explicitly marked `visibility: public` in `assets/chernarus-pois.json`. Private bases, live player locations, Admin positions and protected Railway data are not loaded by the map.
+
+Admin-only and Owner-only dashboard functions continue to use the existing Railway-verified visibility controls.

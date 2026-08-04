@@ -1,351 +1,664 @@
 <!doctype html>
 <html lang="en-AU">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0909">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://world-war-z-discord-bot-production.up.railway.app; img-src 'self' data: https://cdn.discordapp.com https://media.discordapp.net; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self'">
-  <meta name="description" content="View live World War Z DayZ server information, your verified survivor profile and economy account, with protected Admin controls.">
-  <meta property="og:title" content="World War Z Bot Dashboard">
-  <meta property="og:description" content="Live DayZ server status with secure Discord profile and economy access.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/world-war-z-banner.png">
-  <title>Dashboard | World War Z Bot</title>
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="icon" type="image/png" href="assets/favicon.png">
-  <link rel="apple-touch-icon" href="assets/world-war-z-icon.png">
-  <link rel="stylesheet" href="dashboard.css?v=1.14.1">
-</head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#0b0909" name="theme-color"/>
+<meta content="default-src 'self'; connect-src 'self' https://world-war-z-discord-bot-production.up.railway.app; img-src 'self' data: https://cdn.discordapp.com https://media.discordapp.net; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self'" http-equiv="Content-Security-Policy"/>
+<meta content="Secure World War Z dashboard with live server status, survivor profiles, trader orders, moderation, event delivery and Nitrado controls." name="description"/>
+<title>Dashboard | World War Z Bot</title>
+<link href="site.webmanifest" rel="manifest"/>
+<link href="assets/favicon.png" rel="icon" type="image/png"/>
+<link href="assets/world-war-z-icon.png" rel="apple-touch-icon"/>
+<link href="dashboard.css?v=1.22.3" rel="stylesheet"/>
+<link href="https://iillifoggyiilli.github.io/world-war-z-bot-website/dashboard.html" rel="canonical"/><meta content="World War Z Community" property="og:site_name"/><meta content="World War Z — Live DayZ Command Centre" property="og:title"/><meta content="Secure World War Z dashboard with live server status, survivor profiles, trader orders, moderation, event delivery and Nitrado controls." property="og:description"/><meta content="website" property="og:type"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/dashboard.html" property="og:url"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" property="og:image"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" property="og:image:secure_url"/><meta content="image/png" property="og:image:type"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="World War Z DayZ PS4 and PS5 Command Centre" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="World War Z — Live DayZ Command Centre" name="twitter:title"/><meta content="Secure World War Z dashboard with live server status, survivor profiles, trader orders, moderation, event delivery and Nitrado controls." name="twitter:description"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" name="twitter:image"/></head>
 <body>
-  <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
+<a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
+<header class="dashboard-topbar">
+<button aria-controls="dashboard-sidebar" aria-expanded="false" class="icon-button mobile-menu" data-sidebar-toggle="" type="button">
+<span aria-hidden="true">☰</span><span class="sr-only">Open dashboard menu</span>
+</button>
+<a aria-label="World War Z Bot home" class="dashboard-brand" href="index.html">
+<span aria-hidden="true" class="dashboard-brand-mark"><img alt="" src="assets/world-war-z-logo.webp"/></span>
+<span><strong>WORLD WAR Z</strong><small>COMMAND CENTRE</small></span>
+</a>
+<div aria-live="polite" class="topbar-workspace">
+<small>Current workspace</small>
+<strong data-workspace-label="">Overview</strong>
+</div>
+<button aria-haspopup="dialog" class="dashboard-search-trigger" data-open-command-search="" type="button">
+<span aria-hidden="true">⌕</span><span>Search pages, tools and settings…</span><kbd>Ctrl K</kbd>
+</button>
+<div class="topbar-spacer"></div>
+<div class="connection-state" data-api-connection="" data-state="loading"><span></span><span data-api-connection-label="">Connecting to bot API…</span></div>
+<button class="discord-button account-menu-trigger" data-open-login="" type="button"><span aria-hidden="true" class="topbar-user-avatar" data-topbar-avatar="">◈</span><span data-auth-button-label="">Sign in with Discord</span></button>
+</header>
+<div class="dashboard-shell">
+<aside class="dashboard-sidebar" data-sidebar="" id="dashboard-sidebar">
+<div class="service-context-card">
+<span aria-hidden="true" class="service-context-icon">WZ</span>
+<div><small>Selected service</small><strong>World War Z</strong><span>PlayStation · Chernarus</span></div>
+<span class="service-context-state" data-dashboard-mode="" title="Connected through Railway">Live status</span>
+</div>
+<nav aria-label="Dashboard navigation" class="sidebar-navigation">
+<details class="nav-group" data-nav-group="" open="">
+<summary><span>⌂</span><strong>Dashboard</strong><small>4</small></summary>
+<div class="nav-group-links">
+<button class="side-link active" data-nav-label="Overview" data-section="summary" data-view="overview" type="button"><span aria-hidden="true" class="side-link-icon">01</span><span class="side-link-copy"><strong>Overview</strong><small>Live community summary</small></span></button>
+<button class="side-link" data-nav-label="Quick actions" data-section="actions" data-view="overview" type="button"><span aria-hidden="true" class="side-link-icon">02</span><span class="side-link-copy"><strong>Quick actions</strong><small>Common shortcuts</small></span></button>
+<button class="side-link" data-nav-label="Recent activity" data-section="activity" data-view="overview" type="button"><span aria-hidden="true" class="side-link-icon">03</span><span class="side-link-copy"><strong>Recent activity</strong><small>Community feed preview</small></span></button>
+<button class="side-link" data-nav-label="Connection roadmap" data-section="roadmap" data-view="overview" type="button"><span aria-hidden="true" class="side-link-icon">04</span><span class="side-link-copy"><strong>Connection roadmap</strong><small>Live system progress</small></span></button>
+</div>
+</details>
+<details class="nav-group" data-nav-group="" open="">
+<summary><span>◉</span><strong>Server &amp; world</strong><small>6</small></summary>
+<div class="nav-group-links">
+<button class="side-link" data-nav-label="Live server status" data-section="status" data-view="server" type="button"><span aria-hidden="true" class="side-link-icon">ST</span><span class="side-link-copy"><strong>Live status</strong><small>Population and session</small></span></button>
+<button class="side-link" data-nav-label="Operational health" data-section="health" data-view="server" type="button"><span aria-hidden="true" class="side-link-icon">HL</span><span class="side-link-copy"><strong>Operational health</strong><small>Railway, Discord, Nitrado</small></span></button>
+<button class="side-link" data-nav-label="Refresh server data" data-section="refresh" data-view="server" type="button"><span aria-hidden="true" class="side-link-icon">RF</span><span class="side-link-copy"><strong>Refresh data</strong><small>Public read-only request</small></span></button>
+<button class="side-link" data-nav-label="Chernarus map" data-section="explorer" data-view="map" type="button"><span aria-hidden="true" class="side-link-icon">MP</span><span class="side-link-copy"><strong>Satellite map</strong><small>Zoom, pan and coordinates</small></span></button>
+<button class="side-link" data-nav-label="Public locations" data-section="locations" data-view="map" type="button"><span aria-hidden="true" class="side-link-icon">PO</span><span class="side-link-copy"><strong>Public locations</strong><small>Search navigation POIs</small></span></button>
+<button class="side-link" data-nav-label="Command library" data-section="library" data-view="commands" type="button"><span aria-hidden="true" class="side-link-icon">/</span><span class="side-link-copy"><strong>Command library</strong><small>Search all bot commands</small></span></button>
+</div>
+</details>
+<details class="nav-group" data-nav-group="" open="">
+<summary><span>♙</span><strong>My account</strong><small>7</small></summary>
+<div class="nav-group-links">
+<button class="side-link" data-nav-label="Account centre" data-section="account" data-view="players" type="button"><span aria-hidden="true" class="side-link-icon">ME</span><span class="side-link-copy"><strong>Account centre</strong><small>Discord and survivor identity</small></span></button>
+<button class="side-link" data-nav-label="Wallet &amp; economy" data-section="wallet" data-view="economy" type="button"><span aria-hidden="true" class="side-link-icon">$</span><span class="side-link-copy"><strong>Wallet &amp; economy</strong><small>Balance and statistics</small></span></button>
+<button class="side-link" data-nav-label="Economy ledger" data-section="ledger" data-view="economy" type="button"><span aria-hidden="true" class="side-link-icon">TX</span><span class="side-link-copy"><strong>Economy ledger</strong><small>Totals and transactions</small></span></button>
+<button class="side-link" data-nav-label="Survivor profile" data-section="identity" data-view="players" type="button"><span aria-hidden="true" class="side-link-icon">ID</span><span class="side-link-copy"><strong>Survivor profile</strong><small>Verified PlayStation identity</small></span></button>
+<button class="side-link" data-nav-label="Activity &amp; combat" data-section="activity" data-view="players" type="button"><span aria-hidden="true" class="side-link-icon">PV</span><span class="side-link-copy"><strong>Activity &amp; combat</strong><small>Sessions and PvP record</small></span></button>
+<button class="side-link" data-nav-label="Support tickets" data-section="support" data-view="tickets" type="button"><span aria-hidden="true" class="side-link-icon">TK</span><span class="side-link-copy"><strong>Support tickets</strong><small>Community support centre</small></span></button>
+<button class="side-link" data-nav-label="My appeals" data-section="my-appeals" data-view="appeals" type="button"><span aria-hidden="true" class="side-link-icon">AP</span><span class="side-link-copy"><strong>My appeals</strong><small>Submit and follow reviews</small></span></button>
+</div>
+</details>
+<details class="nav-group shop-nav-group" data-nav-group="" open="">
+<summary><span>▣</span><strong>Shop &amp; trader</strong><small>7</small></summary>
+<div class="nav-group-links">
+<button class="side-link" data-nav-label="Shop catalogue" data-section="catalogue" data-view="shop" type="button"><span aria-hidden="true" class="side-link-icon">IT</span><span class="side-link-copy"><strong>Catalogue</strong><small>Manual and event items</small></span></button>
+<button class="side-link" data-nav-label="Event item profiles" data-owner-only="" data-section="event-items" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">EV</span><span class="side-link-copy"><strong>Event items</strong><small>Vehicles and restart spawns</small></span></button>
+<button class="side-link" data-nav-label="My shop orders" data-section="orders" data-view="shop" type="button"><span aria-hidden="true" class="side-link-icon">OR</span><span class="side-link-copy"><strong>My orders</strong><small>Delivery and refund status</small></span></button>
+<button class="side-link" data-nav-label="Saved delivery locations" data-section="saved" data-view="locations" type="button"><span aria-hidden="true" class="side-link-icon">XY</span><span class="side-link-copy"><strong>Saved locations</strong><small>Named in-game coordinates</small></span></button>
+<button class="side-link" data-nav-label="Event delivery queue" data-section="queue" data-staff-only="" data-view="delivery" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">DQ</span><span class="side-link-copy"><strong>Delivery queue</strong><small>Preview, stage and verify</small></span><span class="side-link-badge" data-delivery-nav-badge="" hidden="">0</span></button>
+<button class="side-link" data-nav-label="Shop fulfilment" data-section="shop-orders" data-staff-only="" data-view="staff" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">FQ</span><span class="side-link-copy"><strong>Manual fulfilment</strong><small>Process and refund orders</small></span><span class="side-link-badge" data-shop-order-nav-badge="" hidden="">0</span></button>
+<button class="side-link" data-nav-label="Shop catalogue settings" data-owner-only="" data-section="shop-config" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">CF</span><span class="side-link-copy"><strong>Shop configuration</strong><small>Items, pricing and stock</small></span></button>
+</div>
+</details>
+<details class="nav-group" data-nav-group="" data-staff-only="" hidden="" open="">
+<summary><span>⚑</span><strong>Administration</strong><small>7</small></summary>
+<div class="nav-group-links">
+<button class="side-link" data-nav-label="Moderation queue" data-section="queue" data-staff-only="" data-view="staff" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">MQ</span><span class="side-link-copy"><strong>Moderation queue</strong><small>Assignments and deadlines</small></span><span class="side-link-badge" data-queue-nav-badge="" hidden="">0</span></button>
+<button class="side-link" data-nav-label="Moderation cases" data-section="cases" data-staff-only="" data-view="staff" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">CS</span><span class="side-link-copy"><strong>Moderation cases</strong><small>Evidence, reviews, appeals</small></span></button>
+<button class="side-link" data-nav-label="Current ban lists" data-section="banlists" data-staff-only="" data-view="staff" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">BL</span><span class="side-link-copy"><strong>Current ban lists</strong><small>Discord and DayZ</small></span></button>
+<button class="side-link" data-nav-label="Player administration" data-section="players" data-staff-only="" data-view="staff" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">PL</span><span class="side-link-copy"><strong>Player administration</strong><small>Search, warn and manage</small></span></button>
+<button class="side-link" data-nav-label="Server controls" data-section="server-controls" data-staff-only="" data-view="staff" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">SC</span><span class="side-link-copy"><strong>Server controls</strong><small>Start, stop and restart</small></span></button>
+<button class="side-link" data-nav-label="Server action history" data-section="server-audit" data-staff-only="" data-view="staff" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">AU</span><span class="side-link-copy"><strong>Server audit</strong><small>Protected operation history</small></span></button>
+<button class="side-link" data-nav-label="Operational failures" data-section="failures" data-staff-only="" data-view="staff" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">!</span><span class="side-link-copy"><strong>Operational failures</strong><small>Retries and service issues</small></span><span class="side-link-badge danger" data-failure-nav-badge="" hidden="">0</span></button>
+</div>
+</details>
+<details class="nav-group" data-nav-group="" data-owner-only="" hidden="" open="">
+<summary><span>⚙</span><strong>Owner configuration</strong><small>8</small></summary>
+<div class="nav-group-links">
+<button class="side-link" data-nav-label="DayZ service overview" data-owner-only="" data-section="overview" data-view="serverconfig" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">SV</span><span class="side-link-copy"><strong>Service overview</strong><small>Files, events and readiness</small></span></button>
+<button class="side-link" data-nav-label="Mission file editor" data-owner-only="" data-section="files" data-view="serverconfig" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">XML</span><span class="side-link-copy"><strong>Mission files</strong><small>Validate, diff and deploy</small></span></button>
+<button class="side-link" data-nav-label="Events and zones" data-owner-only="" data-section="events" data-view="serverconfig" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">ZN</span><span class="side-link-copy"><strong>Events &amp; zones</strong><small>Live CE event positions</small></span></button>
+<button class="side-link" data-nav-label="Configuration workflow" data-owner-only="" data-section="workflow" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">CF</span><span class="side-link-copy"><strong>Configuration workflow</strong><small>Backup, validate, compare</small></span></button>
+<button class="side-link" data-nav-label="Backup history" data-owner-only="" data-section="backups" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">BK</span><span class="side-link-copy"><strong>Backup history</strong><small>Restore-ready snapshots</small></span></button>
+<button class="side-link" data-nav-label="Discord logs" data-owner-only="" data-section="discord-logs" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">LG</span><span class="side-link-copy"><strong>Discord logs</strong><small>Audit channel routing</small></span></button>
+<button class="side-link" data-nav-label="Notifications &amp; webhooks" data-owner-only="" data-section="notifications" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">WH</span><span class="side-link-copy"><strong>Notifications &amp; webhooks</strong><small>Discord event routing</small></span></button>
+<button class="side-link" data-nav-label="Appeal settings" data-owner-only="" data-section="appeals" data-view="configuration" hidden="" type="button"><span aria-hidden="true" class="side-link-icon">AP</span><span class="side-link-copy"><strong>Appeal settings</strong><small>Deadlines, tickets and policy</small></span></button>
+</div>
+</details>
+<details class="nav-group" data-nav-group="">
+<summary><span>?</span><strong>Account &amp; help</strong><small>3</small></summary>
+<div class="nav-group-links">
+<button class="side-link" data-nav-label="Discord connection" data-section="connection" data-view="settings" type="button"><span aria-hidden="true" class="side-link-icon">DC</span><span class="side-link-copy"><strong>Discord connection</strong><small>Session and sign-in</small></span></button>
+<button class="side-link" data-nav-label="Access levels" data-section="access" data-view="settings" type="button"><span aria-hidden="true" class="side-link-icon">AC</span><span class="side-link-copy"><strong>Access levels</strong><small>Visitor to Owner roles</small></span></button>
+<button class="side-link" data-nav-label="Dashboard help" data-section="help" data-view="settings" type="button"><span aria-hidden="true" class="side-link-icon">?</span><span class="side-link-copy"><strong>Dashboard help</strong><small>Answers and guidance</small></span></button>
+</div>
+</details>
+</nav>
+<div class="access-card" data-access-card="">
+<span aria-hidden="true" class="access-icon" data-access-icon="">⌁</span>
+<div><strong data-access-card-title="">Guest access</strong><small data-access-card-copy="">Sign in will securely verify your community access.</small></div>
+</div>
+<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.22.3</strong></div>
+<div class="sidebar-footer"><a href="index.html">Website</a><a href="legal.html">Policies</a><a href="privacy.html">Privacy</a></div>
+</aside>
+<button aria-label="Close dashboard menu" class="sidebar-scrim" data-sidebar-scrim="" type="button"></button>
+<main class="dashboard-main" id="dashboard-content">
+<div class="preview-banner" data-live-banner="" role="status">
+<span aria-hidden="true">◉</span>
+<p><strong data-live-banner-title="">Connecting to live server status.</strong> <span data-live-banner-message="">Public DayZ information is loading from the bot. Sign in to securely load your own survivor profile and economy account.</span></p>
+</div>
+<div class="auth-message" data-auth-message="" hidden="" role="status"></div>
+<section aria-labelledby="overview-title" class="dashboard-view active" data-view-panel="overview">
+<div class="view-heading" data-dashboard-section="summary" id="dashboard-overview-summary">
+<div class="overview-heading-copy"><p class="breadcrumb">Dashboard / Overview</p><h1 id="overview-title">Welcome, survivor.</h1><p data-welcome-copy="">Live server information and a secure path into your World War Z community account.</p></div>
+<div aria-hidden="true" class="overview-command-mark"><img alt="" src="assets/world-war-z-logo.webp"/><span>CONTROL CENTRE</span></div>
+<div class="heading-actions"><button class="secondary-action" data-jump="commands" type="button">View commands</button><button class="primary-action" data-auth-cta="" data-open-login="" type="button">Connect Discord</button></div>
+</div>
+<div class="metric-grid">
+<article class="metric-card"><div><span aria-hidden="true" class="metric-icon" data-live-status-class="">◉</span><small>DayZ server</small></div><strong data-server-status="">Loading</strong><p data-server-status-note="">Contacting the Railway API</p></article>
+<article class="metric-card"><div><span aria-hidden="true" class="metric-icon">♙</span><small>Players</small></div><strong data-player-count="">— <em>/ —</em></strong><p>Live server population</p></article>
+<article class="metric-card"><div><span aria-hidden="true" class="metric-icon">◷</span><small>Restart cycle</small></div><strong>Every 3h</strong><p>Configured schedule</p></article>
+<article class="metric-card"><div><span aria-hidden="true" class="metric-icon">$</span><small>Your balance</small></div><strong data-account-balance="">—</strong><p data-account-balance-note="">Discord connection required</p></article>
+</div>
+<div class="dashboard-grid main-grid">
+<article class="panel server-panel">
+<div class="panel-heading"><div><p class="panel-kicker">Main server</p><h2 data-server-name="">World War Z</h2></div><span class="status-badge" data-server-status-badge=""><i></i><span data-status-label="">Loading live status</span></span></div>
+<div class="server-hero">
+<div><span>Platform</span><strong data-server-platform="">PlayStation 4 &amp; 5</strong></div>
+<div><span>Map</span><strong data-server-map="">Chernarus</strong></div>
+<div><span>Capacity</span><strong data-server-capacity="">Loading…</strong></div>
+<div><span>Host</span><strong>Nitrado</strong></div>
+</div>
+<div class="restart-track"><div class="restart-progress" style="--progress:0%"></div></div>
+<div class="restart-labels"><span>Restart cycle <strong>Every 3 hours</strong></span><span>Last live update <strong data-live-updated-short="">Loading…</strong></span></div>
+<button class="text-action" data-jump="server" type="button">Open server details <span aria-hidden="true">→</span></button>
+</article>
+<article class="panel quick-panel" data-dashboard-section="actions" id="dashboard-overview-actions">
+<div class="panel-heading"><div><p class="panel-kicker">Shortcuts</p><h2>Quick actions</h2></div><span class="lock-label">Protected access</span></div>
+<div class="quick-grid">
+<button data-server-action="restart" data-staff-only="" hidden="" type="button"><span aria-hidden="true">↻</span><strong>Restart server</strong><small data-server-action-note="">Checking live server state</small></button>
+<button data-jump="players" data-profile-shortcut="" disabled="" type="button"><span aria-hidden="true">♙</span><strong>My profile</strong><small data-profile-shortcut-note="">Sign in required</small></button>
+<button disabled="" type="button"><span aria-hidden="true">◇</span><strong>Open ticket</strong><small>Sign in required</small></button>
+<button data-jump="staff" data-jump-section="players" data-player-lookup-shortcut="" data-staff-only="" hidden="" type="button"><span aria-hidden="true">⚑</span><strong>Player administration</strong><small>Protected search &amp; actions</small></button>
+</div>
+</article>
+</div>
+<div class="dashboard-grid lower-grid">
+<article class="panel activity-panel" data-dashboard-section="activity" id="dashboard-overview-activity">
+<div class="panel-heading"><div><p class="panel-kicker">Demonstration feed</p><h2>Recent activity</h2></div><span class="muted-label">Preview entries</span></div>
+<ol class="activity-list">
+<li><span class="activity-symbol green">✓</span><div><strong>Configuration validation passed</strong><small>Example event · 14 minutes ago</small></div></li>
+<li><span class="activity-symbol red">↻</span><div><strong>Scheduled restart completed</strong><small>Example event · 1 hour ago</small></div></li>
+<li><span class="activity-symbol">◇</span><div><strong>Support ticket resolved</strong><small>Example event · 3 hours ago</small></div></li>
+</ol>
+</article>
+<article class="panel roadmap-panel" data-dashboard-section="roadmap" id="dashboard-overview-roadmap">
+<div class="panel-heading"><div><p class="panel-kicker">Development</p><h2>Connection roadmap</h2></div></div>
+<ol class="mini-roadmap"><li class="done"><i></i><div><strong>Dashboard interface</strong><small>Complete</small></div></li><li class="done"><i></i><div><strong>Railway API</strong><small>Live public status</small></div></li><li class="done"><i></i><div><strong>Discord sign-in</strong><small>Secure member data</small></div></li><li class="done"><i></i><div><strong>Chernarus map</strong><small>Public POI viewer</small></div></li></ol>
+</article>
+</div>
+</section>
+<section aria-labelledby="server-title" class="dashboard-view" data-view-panel="server" hidden="">
+<div class="view-heading" data-dashboard-section="status" id="dashboard-server-status"><div><p class="breadcrumb">Dashboard / Server status</p><h1 id="server-title">Server status.</h1><p>Live public information supplied by the World War Z Bot on Railway.</p></div><span class="status-badge large" data-server-status-badge=""><i></i><span data-status-label="">Loading live status</span></span></div>
+<div class="dashboard-grid server-detail-grid">
+<article class="panel map-preview-card map-live-preview"><img alt="Chernarus satellite map preview" decoding="async" loading="lazy" src="assets/chernarus-map/overview.webp"/><div><p class="panel-kicker">World map workspace</p><h2 data-map-name="">CHERNARUS LIVE</h2><p>Explore the locally hosted satellite map, search public landmarks and copy accurate DayZ X/Z coordinates.</p><button class="secondary-action" data-jump="map" type="button">Open interactive map</button></div></article>
+<article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Server details</p><h2>Current session</h2></div></div><dl class="detail-list"><div><dt>Status</dt><dd data-detail-status="">Loading…</dd></div><div><dt>Players</dt><dd data-detail-players="">— / —</dd></div><div><dt>Platform</dt><dd data-detail-platform="">PlayStation 4 &amp; 5</dd></div><div><dt>Map</dt><dd data-detail-map="">Chernarus</dd></div><div><dt>Last API update</dt><dd data-live-updated="">Loading…</dd></div><div><dt>Information source</dt><dd data-information-source="">Railway dashboard API</dd></div></dl></article>
+<article class="panel full-width" data-dashboard-section="health" id="dashboard-server-health"><div class="panel-heading"><div><p class="panel-kicker">Live operations</p><h2>Operational health</h2></div><span class="lock-label">Sanitized public health</span></div><div class="operations-health-grid"><dl class="detail-list"><div><dt>Railway bot uptime</dt><dd data-operations-uptime="">Loading…</dd></div><div><dt>Discord gateway</dt><dd data-operations-discord="">Loading…</dd></div><div><dt>Nitrado state</dt><dd data-operations-nitrado="">Loading…</dd></div></dl><dl class="detail-list"><div><dt>Last successful update</dt><dd data-operations-updated="">Loading…</dd></div><div><dt>Next scheduled restart</dt><dd data-operations-next-restart="">Not exposed</dd></div><div><dt>Privacy</dt><dd>Names and credentials excluded</dd></div></dl></div></article>
+<article class="panel full-width" data-dashboard-section="refresh" id="dashboard-server-refresh"><div class="panel-heading"><div><p class="panel-kicker">Server connection</p><h2>Public status</h2></div><span class="lock-label">Safe read-only information</span></div><div class="operation-grid"><button data-refresh-status="" type="button"><strong>Refresh live status</strong><small>Safe public read-only request</small></button></div></article>
+</div>
+</section>
+<section aria-labelledby="map-title" class="dashboard-view" data-view-panel="map" hidden="">
+<div class="view-heading map-view-heading"><div><p class="breadcrumb">Dashboard / Interactive map</p><h1 id="map-title">Interactive map.</h1><p>Explore the locally processed Chernarus satellite imagery, public navigation landmarks and accurate DayZ X/Z coordinates.</p></div><span class="status-badge online map-public-badge"><i></i>Satellite map live</span></div>
+<div class="map-toolbar panel"><label class="command-search map-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search public map locations</span><input autocomplete="off" data-map-search="" placeholder="Search public locations, categories or coordinates…" type="search"/></label><div aria-label="Filter map locations" class="filter-list map-filter-list" data-map-filters=""></div><div class="map-result-count"><strong data-map-result-count="">0</strong> public locations</div></div>
+<div class="map-workspace" data-map-fullscreen-workspace="">
+<article class="panel interactive-map-panel" data-dashboard-section="explorer" data-map-fullscreen-target="" id="dashboard-map-explorer">
+<div aria-label="Interactive Chernarus satellite map. Drag to pan, scroll or pinch to zoom, and click to select coordinates." class="map-frame" data-map-frame="" tabindex="0">
+<div class="map-stage" data-map-stage=""><div aria-hidden="true" class="map-tile-layer" data-map-tiles=""></div><div class="map-markers" data-map-markers=""></div><span aria-hidden="true" class="map-selection-marker" data-map-selection-marker="" hidden="">⌖</span></div>
+<div aria-label="Map controls" class="map-controls"><button aria-label="Zoom in" data-map-zoom-in="" type="button">+</button><button aria-label="Zoom out" data-map-zoom-out="" type="button">−</button><button aria-label="Reset map" data-map-reset="" type="button">⌂</button><button aria-label="Open fullscreen map" data-map-fullscreen="" type="button">⛶</button></div>
+<div class="map-coordinate-readout"><div><span>Pointer</span><strong data-map-coordinates="">X — · Z —</strong></div><div><span>Selected</span><strong data-map-selected-coordinates="">Click or tap the map</strong></div><button data-map-copy-coordinates="" disabled="" type="button">Copy</button></div>
+<div class="map-loading" data-map-loading=""><span aria-hidden="true"></span><strong>Loading Chernarus satellite tiles…</strong></div>
+</div>
+<div class="map-source-note"><span>Chernarus and DayZ imagery © Bohemia Interactive</span><span>Locally processed from the uploaded satellite layers · no third-party map service</span></div>
+</article>
+<aside class="map-side-panel">
+<article class="panel map-details"><div class="map-details-empty" data-map-details-empty=""><span aria-hidden="true">⌖</span><p class="panel-kicker">Public landmark details</p><h2>Select a location.</h2><p>Choose a public marker or result to view its description and coordinates. Private bases, live players and operational locations are not published.</p></div><div data-map-details-content="" hidden=""><span class="map-category-badge" data-map-detail-category="">Category</span><h2 data-map-detail-name="">Location</h2><p data-map-detail-description="">Public navigation landmark.</p><dl class="map-coordinate-list"><div><dt>X</dt><dd data-map-detail-x="">—</dd></div><div><dt>Z</dt><dd data-map-detail-z="">—</dd></div><div><dt>Action</dt><dd><button class="text-action" data-map-focus-selected="" type="button">Centre map</button></dd></div></dl></div></article>
+<article class="panel map-location-panel" data-dashboard-section="locations" id="dashboard-map-locations"><div class="panel-heading"><div><p class="panel-kicker">Public navigation index</p><h2>Map locations</h2></div><span class="muted-label">Public only</span></div><div class="map-location-list" data-map-location-list=""></div><p class="empty-state map-empty" data-map-empty="" hidden="">No public locations match the current filters.</p></article>
+</aside>
+</div>
+<div class="security-notice map-safety-notice"><span aria-hidden="true">✓</span><div><strong>Coordinate selection is public and read only</strong><p>Clicking the map only calculates local X/Z coordinates in your browser. It does not expose private bases, player positions or Railway data.</p></div></div>
+</section>
+<section aria-labelledby="commands-dashboard-title" class="dashboard-view" data-view-panel="commands" hidden="">
+<div class="view-heading" data-dashboard-section="library" id="dashboard-command-library"><div><p class="breadcrumb">Dashboard / Commands</p><h1 id="commands-dashboard-title">Command library.</h1><p>Search the current top-level bot commands by name, description or category.</p></div><span class="catalogue-count"><strong data-command-count="">0</strong> bot commands</span></div>
+<div class="command-toolbar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search commands</span><input autocomplete="off" data-command-search="" placeholder="Search commands…" type="search"/></label><div aria-label="Filter command categories" class="filter-list" data-command-filters=""></div></div>
+<div aria-live="polite" class="command-results" data-command-results=""></div>
+<p class="empty-state" data-command-empty="" hidden="">No bot commands match your search.</p>
+</section>
+<section aria-labelledby="economy-title" class="dashboard-view" data-view-panel="economy" hidden="">
+<div class="view-heading" data-dashboard-section="wallet" id="dashboard-economy-wallet"><div><p class="breadcrumb">Dashboard / Economy</p><h1 id="economy-title">Your survivor economy.</h1><p>Live, read-only wallet and economy statistics belonging only to the signed-in member.</p></div><span class="status-badge" data-economy-badge=""><i></i><span data-economy-badge-label="">Sign in required</span></span></div>
+<div class="locked-hero panel" data-economy-guest=""><div class="locked-copy"><span aria-hidden="true" class="large-lock">$</span><p class="panel-kicker">Personal account required</p><h2>Connect your Discord profile.</h2><p>Sign in to securely load your own verified wallet. Other members' account data is never returned by this page.</p><button class="primary-action" data-open-login="" type="button">Sign in with Discord</button></div><div class="balance-preview"><small>Protected wallet</small><strong>PRIVATE</strong><span>Railway session required</span><div class="balance-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+<div data-economy-unlinked="" hidden=""><div class="security-notice"><span aria-hidden="true">⌁</span><div><strong>No verified survivor profile found</strong><p>Use <code>/account link</code> in Discord with your exact PlayStation ID, then join the DayZ server to complete verification.</p></div></div></div>
+<div data-economy-content="" hidden="">
+<div class="metric-grid"><article class="metric-card featured"><div><span aria-hidden="true" class="metric-icon">$</span><small>Wallet balance</small></div><strong data-economy-balance="">—</strong><p>Live verified balance</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">♢</span><small>Community jackpot</small></div><strong data-economy-jackpot="">—</strong><p>Current shared prize</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">🔥</span><small>Heat</small></div><strong data-economy-heat="">○○○○○</strong><p>Current underworld heat</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">✓</span><small>Daily streak</small></div><strong data-economy-daily="">0</strong><p>Consecutive claims</p></article></div>
+<div class="dashboard-grid account-data-grid" data-dashboard-section="ledger" id="dashboard-economy-ledger"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Lifetime ledger</p><h2>Economy totals</h2></div><span class="muted-label">Read only</span></div><dl class="detail-list"><div><dt>Total earned</dt><dd data-economy-earned="">—</dd></div><div><dt>Total spent</dt><dd data-economy-spent="">—</dd></div><div><dt>Work completed</dt><dd data-economy-work="">—</dd></div><div><dt>Gambling record</dt><dd data-economy-gambling="">—</dd></div><div><dt>Crime record</dt><dd data-economy-crime="">—</dd></div><div><dt>Robbery protection</dt><dd data-economy-protection="">Inactive</dd></div></dl></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Your ledger</p><h2>Recent transactions</h2></div><span class="muted-label">Latest six</span></div><ol class="activity-list" data-economy-transactions=""><li><span class="activity-symbol">…</span><div><strong>Loading your activity</strong><small>Secure Railway request</small></div></li></ol><p class="table-note" data-economy-empty="" hidden="">No economy transactions have been recorded yet.</p></article></div>
+</div>
+</section>
+<section aria-labelledby="shop-title" class="dashboard-view" data-view-panel="shop" hidden="">
+<div class="view-heading shop-view-heading" data-dashboard-section="catalogue" id="dashboard-shop-catalogue"><div><p class="breadcrumb">Dashboard / Shop catalogue</p><h1 data-shop-title="" id="shop-title">Survivor shop.</h1><p data-shop-description="">Spend your verified community balance on approved DayZ goods and services.</p></div><div class="heading-actions"><span class="status-badge" data-shop-status-badge=""><i></i><span data-shop-status-label="">Loading catalogue</span></span><button class="secondary-action" data-refresh-shop="" type="button">Refresh shop</button></div></div>
+<div aria-label="Shop workspace shortcuts" class="workspace-subnav">
+<button data-jump="shop" data-jump-section="catalogue" type="button"><span>IT</span><strong>Catalogue</strong><small>Browse and purchase</small></button>
+<button data-jump="shop" data-jump-section="orders" type="button"><span>OR</span><strong>My orders</strong><small>Track fulfilment</small></button>
+<button data-jump="locations" data-jump-section="saved" type="button"><span>XY</span><strong>Locations</strong><small>Save coordinates</small></button>
+<button data-jump="delivery" data-jump-section="queue" data-staff-only="" hidden="" type="button"><span>DQ</span><strong>Event delivery</strong><small>Stage restart spawns</small></button>
+<button data-jump="staff" data-jump-section="shop-orders" data-staff-only="" hidden="" type="button"><span>FQ</span><strong>Manual fulfilment</strong><small>Process orders</small></button>
+<button data-jump="configuration" data-jump-section="shop-config" data-owner-only="" hidden="" type="button"><span>CF</span><strong>Configuration</strong><small>Catalogue controls</small></button>
+</div>
+<div class="shop-account-strip panel"><div><span>Wallet balance</span><strong data-shop-wallet="">Sign in required</strong><small>Available community currency</small></div><div><span>Catalogue items</span><strong data-shop-item-count="">—</strong><small>Active products and services</small></div><div><span>Open orders</span><strong data-shop-open-orders="">—</strong><small>Pending or processing</small></div><div><span>Delivery model</span><strong>Audited queue</strong><small>Staff fulfilment today</small></div></div>
+<div class="security-notice compact-notice shop-process-notice"><span aria-hidden="true">✓</span><div><strong>One connected purchase and fulfilment workflow</strong><p data-shop-instructions="">Purchases create an economy transaction and a protected fulfilment order. The same order system is ready to support future event-file delivery without replacing the catalogue or transaction history.</p></div></div>
+<div aria-label="Shop catalogue type" class="shop-mode-tabs" role="tablist"><button aria-selected="true" class="active" data-shop-mode="manual" role="tab" type="button"><span aria-hidden="true">▣</span><strong>Items</strong><small>Manual trader orders</small><b data-shop-manual-count="">0</b></button><button aria-selected="false" data-shop-mode="event" role="tab" type="button"><span aria-hidden="true">↻</span><strong>Event items</strong><small>Vehicles and restart rentals</small><b data-shop-event-count="">0</b></button></div><div class="shop-toolbar command-bar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search shop</span><input autocomplete="off" data-shop-search="" placeholder="Search ID, name, category or SKU…" type="search"/></label><label class="dialog-field compact-select"><span>Category</span><select data-shop-category=""><option value="all">All categories</option></select></label><div class="toolbar-view-note"><span>LIVE</span><strong data-shop-mode-label="">Items</strong><small data-shop-mode-help="">Manual trader catalogue</small></div></div>
+<div aria-live="polite" class="shop-catalogue-grid" data-shop-catalogue=""></div>
+<p class="empty-state" data-shop-empty="" hidden="">No active shop items match your filters.</p>
+<p class="table-note history-error" data-shop-error="" hidden="">The survivor shop is temporarily unavailable.</p>
+<article class="panel shop-orders-panel" data-dashboard-section="orders" id="dashboard-shop-orders">
+<div class="panel-heading"><div><p class="panel-kicker">Private purchase history</p><h2>My shop orders</h2></div><button class="secondary-action compact-action" data-refresh-shop-orders="" type="button">Refresh orders</button></div>
+<div class="locked-copy shop-order-guest" data-shop-order-guest=""><span aria-hidden="true" class="large-lock">📦</span><h3>Sign in to track your orders.</h3><p>Railway returns only orders attached to your own verified Discord and PlayStation account.</p><button class="primary-action" data-open-login="" type="button">Sign in with Discord</button></div>
+<div data-shop-order-unlinked="" hidden=""><div class="security-notice"><span aria-hidden="true">⌁</span><div><strong>A verified PlayStation link is required</strong><p>Use <code>/link</code> in Discord, then refresh the shop.</p></div></div></div>
+<div data-shop-order-content="" hidden=""><div class="shop-order-list" data-shop-order-list=""></div><p class="table-note" data-shop-order-empty="" hidden="">You have not placed a shop order yet.</p></div>
+</article>
+</section>
+<section aria-labelledby="locations-title" class="dashboard-view" data-view-panel="locations" hidden="">
+<div class="view-heading" data-dashboard-section="saved" id="dashboard-delivery-locations"><div><p class="breadcrumb">Dashboard / Saved delivery locations</p><h1 id="locations-title">Your in-game coordinates.</h1><p>Save real Chernarus X, Y, Z and rotation values under names you can reuse for future trader and event-item orders.</p></div><button class="secondary-action" data-refresh-delivery-locations="" type="button">Refresh locations</button></div>
+<div class="security-notice"><span aria-hidden="true">⌖</span><div><strong>You choose the actual delivery point</strong><p>Locations are not restricted to preset zones. Select a clear, safe area and verify the coordinates before ordering. Staff may reject dangerous or malformed spawn points.</p></div></div>
+<div class="dashboard-grid delivery-location-layout"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Named coordinate</p><h2 data-location-form-title="">Save a location</h2></div><span class="muted-label">Maximum 50</span></div><form class="location-form" data-location-form=""><input data-location-id="" type="hidden"/><label class="dialog-field"><span>Location name</span><input data-location-name="" maxlength="80" placeholder="Main Base" required="" type="text"/></label><div class="coordinate-grid"><label class="dialog-field"><span>X</span><input data-location-x="" max="15360" min="0" required="" step="0.001" type="number"/></label><label class="dialog-field"><span>Y / height</span><input data-location-y="" max="2000" min="-100" required="" step="0.001" type="number"/></label><label class="dialog-field"><span>Z</span><input data-location-z="" max="15360" min="0" required="" step="0.001" type="number"/></label><label class="dialog-field"><span>Rotation</span><input data-location-rotation="" max="360" min="0" required="" step="0.1" type="number" value="0"/></label></div><label class="toggle-setting"><input data-location-default="" type="checkbox"/><span><strong>Default delivery location</strong><small>Preselect this location during event-item checkout.</small></span></label><div class="restart-dialog-message" data-location-message="" hidden="" role="status"></div><div class="heading-actions"><button class="primary-action" data-save-location="" type="submit">Save location</button><button class="secondary-action" data-cancel-location-edit="" hidden="" type="button">Cancel edit</button></div></form></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Private location book</p><h2>Saved locations</h2></div><span class="muted-label" data-location-count="">—</span></div><div class="saved-location-list" data-saved-location-list=""></div><p class="table-note" data-saved-location-empty="" hidden="">No saved delivery locations yet.</p><p class="table-note history-error" data-saved-location-error="" hidden="">Saved locations are temporarily unavailable.</p></article></div>
+</section>
+<section aria-labelledby="delivery-title" class="dashboard-view" data-staff-only="" data-view-panel="delivery" hidden="">
+<div class="view-heading" data-dashboard-section="queue" id="dashboard-delivery-queue"><div><p class="breadcrumb">Dashboard / Event delivery queue</p><h1 id="delivery-title">Restart-bound event deliveries.</h1><p>Approve coordinate-based trader orders, preview exact XML changes, stop the server, stage backed-up files, start the server and verify the in-game spawn.</p></div><div class="heading-actions"><label class="dialog-field compact-select"><span>Scope</span><select data-delivery-scope=""><option value="open">Open deliveries</option><option value="awaiting_approval">Awaiting approval</option><option value="ready">Ready</option><option value="previewed">Previewed</option><option value="restart_pending">Restart pending</option><option value="verification">Needs verification</option><option value="failed">Failed</option><option value="all">All deliveries</option></select></label><button class="secondary-action" data-refresh-delivery-queue="" type="button">Refresh queue</button></div></div>
+<div class="operations-summary-grid delivery-summary"><div><span>Open</span><strong data-delivery-open="">—</strong></div><div><span>Awaiting approval</span><strong data-delivery-awaiting="">—</strong></div><div><span>Restart pending</span><strong data-delivery-restart="">—</strong></div><div><span>Verification</span><strong data-delivery-verification="">—</strong></div><div><span>Failed</span><strong data-delivery-failed="">—</strong></div></div>
+<div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Locked three-file deployment</strong><p>Stop the DayZ server before staging. Each staging action then validates and backs up <code>events.xml</code>, <code>cfgeventspawns.xml</code> and <code>cfgspawnabletypes.xml</code>. Only one delivery operation can run at a time.</p></div></div>
+<div class="delivery-order-list" data-delivery-order-list=""></div><p class="empty-state" data-delivery-empty="" hidden="">No event deliveries match this scope.</p><p class="table-note history-error" data-delivery-error="" hidden="">The delivery queue is temporarily unavailable.</p>
+</section>
+<section aria-labelledby="serverconfig-title" class="dashboard-view" data-owner-only="" data-view-panel="serverconfig" hidden="">
+<div class="view-heading" data-dashboard-section="overview" id="dashboard-serverconfig-overview"><div><p class="breadcrumb">Dashboard / DayZ service overview</p><h1 id="serverconfig-title">DayZ configuration control centre.</h1><p>Read live mission files, validate proposed changes, inspect exact diffs and deploy through the existing backup-and-rollback engine.</p></div><button class="secondary-action" data-refresh-server-config="" type="button">Refresh service</button></div>
+<div class="service-overview-grid"><article class="panel service-readiness-card"><p class="panel-kicker">Mission service</p><h2 data-config-mission-root="">Loading…</h2><div class="operations-summary-grid"><div><span>Managed files</span><strong data-config-file-count="">—</strong></div><div><span>Backups</span><strong data-config-backup-count="">—</strong></div><div><span>Editor limit</span><strong data-config-editor-limit="">—</strong></div></div><p data-config-latest-action="">No recent action loaded.</p></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Deployment safety</p><h2>Protected writes</h2></div><span class="validation-pass">Owner only</span></div><ul class="control-checklist"><li>Fresh Discord Owner verification</li><li>Pre-change backup</li><li>Format validation</li><li>Exact diff preview</li><li>Post-upload checksum verification</li><li>Restore-ready history</li></ul></article></div>
+<article class="panel mission-file-panel" data-dashboard-section="files" id="dashboard-serverconfig-files"><div class="panel-heading"><div><p class="panel-kicker">Live Nitrado mission files</p><h2>Mission file editor</h2></div><div class="heading-actions"><select class="config-file-select" data-config-file-select=""><option value="">Select managed file…</option></select><button class="secondary-action compact-action" data-load-config-file="" type="button">Load file</button></div></div><div class="file-editor-meta"><span data-config-file-path="">No file loaded</span><span data-config-file-sha="">—</span><span data-config-file-size="">—</span></div><textarea class="mission-file-editor" data-config-file-content="" placeholder="Select a managed XML, JSON or text file." spellcheck="false"></textarea><label class="dialog-field"><span>Deployment reason <small>Required when applying</small></span><input data-config-file-reason="" maxlength="500" placeholder="Describe the intended server change" type="text"/></label><div class="heading-actions"><button class="secondary-action" data-validate-config-file="" type="button">Validate &amp; diff</button><button class="primary-action danger-action" data-apply-config-file="" type="button">Backup &amp; apply</button></div><div class="restart-dialog-message" data-config-file-message="" hidden="" role="status"></div><pre class="config-diff-output" data-config-file-diff="">No diff generated.</pre></article>
+<article class="panel events-zone-panel" data-dashboard-section="events" id="dashboard-serverconfig-events"><div class="panel-heading"><div><p class="panel-kicker">Central Economy</p><h2>Events &amp; zones</h2></div><button class="secondary-action compact-action" data-refresh-server-events="" type="button">Refresh events</button></div><div class="operations-summary-grid"><div><span>Events</span><strong data-server-event-count="">—</strong></div><div><span>Active</span><strong data-server-active-count="">—</strong></div><div><span>Positions</span><strong data-server-position-count="">—</strong></div><div><span>Zones</span><strong data-server-zone-count="">—</strong></div></div><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search events</span><input data-server-event-search="" placeholder="Search event, classname or group…" type="search"/></label><div class="responsive-table"><table><thead><tr><th>Event</th><th>Children</th><th>Population</th><th>Positions</th><th>State</th></tr></thead><tbody data-server-event-list=""></tbody></table></div><p class="table-note" data-server-event-empty="" hidden="">No events match this search.</p><p class="table-note history-error" data-server-event-error="" hidden="">Event configuration is temporarily unavailable.</p></article>
+</section>
+<section aria-labelledby="players-title" class="dashboard-view" data-view-panel="players" hidden="">
+<div class="view-heading" data-dashboard-section="identity" id="dashboard-profile-identity"><div><p class="breadcrumb">Dashboard / My profile</p><h1 id="players-title">Your survivor profile.</h1><p>Live DayZ identity, activity and PvP statistics for the signed-in Discord member only.</p></div><span class="status-badge" data-profile-badge=""><i></i><span data-profile-badge-label="">Sign in required</span></span></div>
+<div class="locked-hero panel" data-profile-guest=""><div class="locked-copy"><span aria-hidden="true" class="large-lock">♙</span><p class="panel-kicker">Private member profile</p><h2>Sign in to view your survivor.</h2><p>Railway matches your verified Discord identity to your own PlayStation survivor record. The browser cannot choose another member ID.</p><button class="primary-action" data-open-login="" type="button">Sign in with Discord</button></div></div>
+<div data-profile-unlinked="" hidden=""><div class="security-notice"><span aria-hidden="true">⌁</span><div><strong>No verified survivor profile found</strong><p>Use <code>/account link</code> in Discord with your exact PlayStation ID, then join the DayZ server to finish the live verification.</p></div></div></div>
+<div data-profile-content="" hidden="">
+<article class="panel discord-profile-card" data-dashboard-section="account" id="dashboard-profile-account"><span aria-hidden="true" class="profile-discord-avatar" data-profile-discord-avatar="">WZ</span><div><p class="panel-kicker">Connected Discord account</p><h2 data-profile-discord-name="">Discord survivor</h2><p><span data-profile-discord-username="">@account</span> · <span data-profile-access-level="">Member</span> · Joined Discord <span data-profile-discord-joined="">—</span></p></div><div class="profile-quick-links"><button class="secondary-action compact-action" data-jump="economy" data-jump-section="wallet" type="button">Wallet</button><button class="secondary-action compact-action" data-jump="shop" data-jump-section="orders" type="button">Orders</button><button class="secondary-action compact-action" data-jump="locations" data-jump-section="saved" type="button">Locations</button><button class="secondary-action compact-action" data-jump="appeals" data-jump-section="my-appeals" type="button">Appeals</button></div></article>
+<article class="panel survivor-identity"><div aria-hidden="true" class="survivor-mark">WZ</div><div><p class="panel-kicker">Verified survivor</p><h2 data-profile-psn="">PlayStation ID</h2><p><span class="table-status" data-profile-online-state=""><i></i><span data-profile-status="">Offline</span></span> · Linked <span data-profile-linked="">—</span></p></div><span class="validation-pass">Verified</span></article>
+<div class="metric-grid" data-dashboard-section="activity" id="dashboard-profile-activity"><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">◷</span><small>Total playtime</small></div><strong data-profile-playtime="">—</strong><p>Tracked from ADM sessions</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">↻</span><small>Sessions</small></div><strong data-profile-sessions="">—</strong><p>Recorded server joins</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">☠</span><small>K/D ratio</small></div><strong data-profile-kd="">—</strong><p><span data-profile-kills="">0</span> kills · <span data-profile-deaths="">0</span> deaths</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">🏆</span><small>Event wins</small></div><strong data-profile-event-wins="">—</strong><p><span data-profile-flags="">0</span> flags captured</p></article></div>
+<div class="dashboard-grid account-data-grid"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Survivor activity</p><h2>Server history</h2></div><span class="muted-label">Live</span></div><dl class="detail-list"><div><dt>First joined</dt><dd data-profile-first-joined="">—</dd></div><div><dt>Last seen</dt><dd data-profile-last-seen="">—</dd></div><div><dt>Faction</dt><dd data-profile-faction="">None</dd></div><div><dt>Reputation</dt><dd data-profile-reputation="">0</dd></div></dl></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">PvP intelligence</p><h2>Combat record</h2></div><span class="muted-label">Your data</span></div><dl class="detail-list"><div><dt>Current streak</dt><dd data-profile-streak="">0</dd></div><div><dt>Longest kill</dt><dd data-profile-longest="">Not recorded</dd></div><div><dt>Favourite weapon</dt><dd data-profile-weapon="">Not recorded</dd></div></dl></article></div>
+</div>
+</section>
+<section aria-labelledby="tickets-title" class="dashboard-view" data-view-panel="tickets" hidden="">
+<div class="view-heading" data-dashboard-section="support" id="dashboard-ticket-support"><div><p class="breadcrumb">Dashboard / Support tickets</p><h1 id="tickets-title">Support centre.</h1><p>Open a private Discord support ticket without searching through grouped commands.</p></div><button class="primary-action" data-copy-command="/support" type="button">Copy /support</button></div>
+<div class="dashboard-grid ticket-grid"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Direct Discord command</p><h2>Open the support menu</h2></div><span class="muted-label">Member</span></div><p>Use <code>/support</code> in the World War Z Discord server. The bot opens the existing category selector privately so you can choose account help, player reports, technical support, a general question or another supported request.</p><button class="primary-action wide" data-copy-command="/support" type="button">Copy /support command</button><p class="table-note" data-command-copy-message="" hidden=""></p></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Moderation appeals</p><h2>Appeals have their own workflow</h2></div><span class="muted-label">Case linked</span></div><ol class="support-steps"><li><span>01</span><div><strong>Open My appeals</strong><small>Select one of your eligible numbered cases.</small></div></li><li><span>02</span><div><strong>Submit context and evidence</strong><small>Railway creates the protected review record.</small></div></li><li><span>03</span><div><strong>Follow the outcome</strong><small>An optional private Discord ticket stays linked to the case.</small></div></li></ol><button class="secondary-action wide" data-jump="appeals" data-jump-section="my-appeals" type="button">Open My appeals</button></article></div>
+</section>
+<section aria-labelledby="appeals-title" class="dashboard-view" data-view-panel="appeals" hidden="">
+<div class="view-heading" data-dashboard-section="my-appeals" id="dashboard-member-appeals"><div><p class="breadcrumb">Dashboard / My appeals</p><h1 id="appeals-title">Your moderation appeals.</h1><p>View only your own eligible cases, submit an appeal and follow the protected review outcome.</p></div><div class="heading-actions"><button class="secondary-action" data-refresh-member-appeals="" type="button">Refresh appeals</button><button class="primary-action" data-auth-cta="" data-open-login="" type="button">Connect Discord</button></div></div>
+<div class="locked-hero panel" data-appeal-guest=""><div class="locked-copy"><span aria-hidden="true" class="large-lock">⚖</span><p class="panel-kicker">Private member records</p><h2>Sign in to view your cases.</h2><p>Railway verifies your Discord identity and returns only moderation cases attached to your own linked account.</p><button class="primary-action" data-open-login="" type="button">Sign in with Discord</button></div></div>
+<div data-appeal-unlinked="" hidden=""><div class="security-notice"><span aria-hidden="true">⌁</span><div><strong>A verified PlayStation link is required</strong><p>Use <code>/link</code> in Discord with your exact PlayStation ID, then return here and refresh.</p></div></div></div>
+<div data-appeal-content="" hidden="">
+<div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Submitting an appeal does not automatically reverse a punishment</strong><p data-appeal-instructions="">Explain the case honestly and include relevant evidence.</p></div></div>
+<div class="appeal-policy-grid"><div><span>Appeal deadline</span><strong data-appeal-deadline="">—</strong></div><div><span>Discord ticket</span><strong data-appeal-ticket-policy="">—</strong></div><div><span>Punishment during review</span><strong data-appeal-punishment-policy="">—</strong></div><div><span>Editing</span><strong data-appeal-edit-policy="">—</strong></div></div>
+<article class="panel appeal-eligible-panel"><div class="panel-heading"><div><p class="panel-kicker">Available actions</p><h2>Cases eligible for appeal</h2></div><span class="muted-label" data-appeal-eligible-count="">—</span></div><div aria-live="polite" class="appeal-card-list" data-appeal-eligible-list=""></div><p class="table-note" data-appeal-eligible-empty="" hidden="">No moderation cases are currently eligible for a new appeal.</p></article>
+<article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Your history</p><h2>Submitted appeals</h2></div><span class="muted-label" data-member-appeal-count="">—</span></div><div aria-live="polite" class="appeal-card-list" data-member-appeal-list=""></div><p class="table-note" data-member-appeal-empty="" hidden="">You have not submitted an appeal.</p><p class="table-note history-error" data-member-appeal-error="" hidden="">Your appeals are temporarily unavailable.</p></article>
+</div>
+</section>
+<section aria-labelledby="staff-title" class="dashboard-view" data-view-panel="staff" hidden="">
+<div class="view-heading"><div><p class="breadcrumb">Dashboard / Admin tools</p><h1 id="staff-title">Administration centre.</h1><p>Protected player moderation, economy administration and server operations for verified Admins.</p></div><span class="restricted-badge">Admin verified</span></div>
+<div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Fresh authorization on every request</strong><p>Railway rechecks your current Discord membership and Admin or Owner access before every player search, moderation action and server operation. All player changes require a recorded reason and an explicit confirmation for the selected player.</p></div></div>
+<article class="panel operations-queue-panel" data-dashboard-section="queue" data-staff-only="" id="dashboard-admin-queue">
+<div class="panel-heading"><div><p class="panel-kicker">Daily moderation operations</p><h2>Moderation queue</h2></div><button class="secondary-action compact-action" data-refresh-moderation-queue="" type="button">Refresh queue</button></div>
+<p class="panel-intro">Prioritise active cases, assign a reviewer and set an internal deadline. Assignment changes create linked audit cases and never rewrite the original moderation record.</p>
+<div class="operations-summary-grid">
+<div><span>Awaiting review</span><strong data-queue-awaiting="">—</strong></div>
+<div><span>Active appeals</span><strong data-queue-appeals="">—</strong></div>
+<div><span>Expiring within 24h</span><strong data-queue-expiring="">—</strong></div>
+<div><span>Operational failures</span><strong data-queue-failures="">—</strong></div>
+<div><span>Overdue</span><strong data-queue-overdue="">—</strong></div>
+<div><span>Assigned to me</span><strong data-queue-mine="">—</strong></div>
+</div>
+<div aria-live="polite" class="operations-queue-list" data-moderation-queue-list=""></div>
+<p class="table-note" data-moderation-queue-empty="" hidden="">No active cases currently require operational attention.</p>
+<p class="table-note history-error" data-moderation-queue-error="" hidden="">The moderation queue is temporarily unavailable. Use Refresh queue to try again.</p>
+</article>
+<article class="panel moderation-case-panel" data-dashboard-section="cases" data-moderation-case-panel="" data-staff-only="" id="dashboard-admin-cases">
+<div class="panel-heading moderation-case-heading"><div><p class="panel-kicker">Moderation case management</p><h2 data-moderation-case-heading="">Active moderation cases</h2></div><div class="moderation-case-toolbar"><label><span class="sr-only">Moderation case view</span><select aria-label="Moderation case view" data-moderation-case-scope=""><option value="active">Active cases</option><option value="recent">Recent cases</option></select></label><button class="secondary-action compact-action" data-refresh-moderation-cases="" type="button">Refresh cases</button></div></div>
+<p class="panel-intro">Warnings, bans, evidence, reviews and appeals remain attached to numbered cases. Switch to Recent cases to review resolved or expired records. Railway processes due temporary unbans automatically and preserves every review outcome.</p>
+<div class="case-summary-grid"><div><span>Active cases</span><strong data-moderation-case-active="">—</strong></div><div><span>Temporary bans</span><strong data-moderation-case-temporary="">—</strong></div><div><span>Expiring within 24h</span><strong data-moderation-case-expiring="">—</strong></div><div><span>Under review</span><strong data-moderation-case-reviewing="">—</strong></div><div><span>Appealed</span><strong data-moderation-case-appealed="">—</strong></div></div>
+<ol aria-live="polite" class="activity-list moderation-case-list" data-moderation-case-list=""><li><span class="activity-symbol">…</span><div><strong>Loading protected cases</strong><small>Railway is verifying current Admin access</small></div></li></ol>
+<p class="table-note" data-moderation-case-empty="" hidden="">No active moderation cases are recorded.</p>
+<p class="table-note history-error" data-moderation-case-error="" hidden="">Moderation cases are temporarily unavailable. Use Refresh cases to try again.</p>
+</article>
+<article class="panel current-banlists-panel" data-current-banlists-panel="" data-dashboard-section="banlists" data-staff-only="" id="dashboard-admin-banlists">
+<div class="panel-heading"><div><p class="panel-kicker">Live enforcement state</p><h2>Current ban lists</h2></div><button class="secondary-action compact-action" data-refresh-banlists="" type="button">Refresh ban lists</button></div>
+<p class="panel-intro">Read the current Discord and Nitrado DayZ ban lists directly from their live services. Entries created outside the dashboard remain visible but may not have a numbered case or linked expiry.</p>
+<div class="dashboard-grid admin-private-grid current-banlist-grid">
+<article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Discord enforcement</p><h3>Discord ban list</h3></div><span class="muted-label" data-discord-banlist-count="">—</span></div><ol aria-live="polite" class="activity-list current-banlist-list" data-discord-banlist-list=""><li><span class="activity-symbol">…</span><div><strong>Loading Discord bans</strong><small>Railway is verifying current Admin access</small></div></li></ol><p class="table-note" data-discord-banlist-empty="" hidden="">No accounts are currently banned from Discord.</p><p class="table-note history-error" data-discord-banlist-error="" hidden="">The Discord ban list is temporarily unavailable.</p></article>
+<article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Nitrado enforcement</p><h3>DayZ ban list</h3></div><span class="muted-label" data-dayz-banlist-count="">—</span></div><ol aria-live="polite" class="activity-list current-banlist-list" data-dayz-banlist-list=""><li><span class="activity-symbol">…</span><div><strong>Loading DayZ bans</strong><small>Railway is contacting the Nitrado ban list</small></div></li></ol><p class="table-note" data-dayz-banlist-empty="" hidden="">No PlayStation IDs are currently banned from DayZ.</p><p class="table-note history-error" data-dayz-banlist-error="" hidden="">The Nitrado DayZ ban list is temporarily unavailable.</p></article>
+</div>
+<p class="table-note banlist-checked" data-banlist-checked="">Ban lists have not been refreshed during this session.</p>
+</article>
+<div class="metric-grid three"><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">⌕</span><small>Player search</small></div><strong>Live</strong><p>PSN or Discord display name</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">15</span><small>Result limit</small></div><strong>15</strong><p>No database-wide listings</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">✓</span><small>Write controls</small></div><strong>Protected</strong><p>Confirmation and audit required</p></article></div>
+<article class="panel admin-player-search-panel" data-admin-player-search-panel="" data-dashboard-section="players" id="dashboard-admin-players">
+<div class="panel-heading"><div><p class="panel-kicker">Secure player lookup</p><h2>Player administration</h2></div><span class="lock-label">Admin only · audited actions</span></div>
+<form class="admin-player-search" data-admin-player-search-form="">
+<label for="admin-player-search"><span>PlayStation ID or Discord display name</span><input autocomplete="off" data-admin-player-search-input="" id="admin-player-search" maxlength="64" minlength="3" placeholder="Enter at least 3 characters" spellcheck="false" type="search"/></label>
+<button class="primary-action" data-admin-player-search-button="" type="submit">Search players</button>
+</form>
+<p class="table-note">Searches are limited to 15 matches. Search results never return raw Discord IDs, player database IDs, DayZ UIDs, positions or credentials. Protected details expose only the active warning and private-note references required for edit/remove controls, plus staff-only content and audit records.</p>
+<div class="admin-player-state" data-admin-player-search-state="" role="status">Enter at least three characters to search.</div>
+<div aria-live="polite" class="admin-player-results" data-admin-player-results=""></div>
+<p class="table-note" data-admin-player-empty="" hidden="">No matching player records were found.</p>
+<p class="table-note history-error" data-admin-player-error="" hidden="">Player search is temporarily unavailable.</p>
+</article>
+<article class="panel admin-player-detail" data-admin-player-detail="" hidden="">
+<div class="panel-heading"><div><p class="panel-kicker">Protected player record</p><h2 data-admin-player-psn="">Selected player</h2></div><span class="status-badge" data-admin-player-badge=""><i></i><span data-admin-player-badge-label="">Loading</span></span></div>
+<div class="security-notice admin-unlinked-notice" data-admin-player-unlinked="" hidden=""><span aria-hidden="true">⌁</span><div><strong>Unlinked DayZ player</strong><p>This PlayStation ID exists in the DayZ activity registry but is not linked to a verified Discord account. Linked profile, playtime and moderation data are unavailable.</p></div></div>
+<article class="survivor-identity admin-player-identity"><div aria-hidden="true" class="survivor-mark">WZ</div><div><p class="panel-kicker">Player identity</p><h3 data-admin-player-discord="">Discord profile unavailable</h3><p><span class="table-status" data-admin-player-online-state=""><i></i><span data-admin-player-status="">Offline</span></span> · <span data-admin-player-link-state="">Unlinked</span></p></div><span class="muted-label" data-admin-player-verified="">Not verified</span></article>
+<div class="metric-grid"><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">◷</span><small>Playtime</small></div><strong data-admin-player-playtime="">—</strong><p>Tracked ADM sessions</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">↻</span><small>Sessions</small></div><strong data-admin-player-sessions="">—</strong><p>Recorded joins</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">☠</span><small>K/D ratio</small></div><strong data-admin-player-kd="">—</strong><p><span data-admin-player-kills="">0</span> kills · <span data-admin-player-deaths="">0</span> deaths</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">!</span><small>Active warnings</small></div><strong data-admin-player-warnings="">0</strong><p>Current moderation count</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">$</span><small>Economy balance</small></div><strong data-admin-player-balance="">—</strong><p>Verified linked wallet</p></article></div>
+<article class="panel inset-panel player-action-panel" data-admin-player-actions=""><div class="panel-heading"><div><p class="panel-kicker">Protected player controls</p><h3>Player actions</h3></div><span class="lock-label">Numbered cases · protected confirmation</span></div><div class="player-action-grid"><button data-player-action="add_note" type="button"><strong>Add private note</strong><small>Staff-only case context</small></button><button data-linked-action="" data-player-action="add_warning" type="button"><strong>Add warning</strong><small>Creates an active moderation case</small></button><button data-economy-action="" data-player-action="economy_adjust" type="button"><strong>Adjust balance</strong><small>Add, remove or set money</small></button><button data-linked-action="" data-player-action="discord_kick" type="button"><strong>Kick from Discord</strong><small>Current server members only</small></button><button class="danger-outline" data-linked-action="" data-player-action="discord_ban" type="button"><strong>Ban from Discord</strong><small>Permanent or scheduled temporary ban</small></button><button data-linked-action="" data-player-action="discord_unban" type="button"><strong>Unban from Discord</strong><small>Close active Discord ban cases</small></button><button class="danger-outline" data-player-action="dayz_ban" type="button"><strong>Ban from DayZ</strong><small>Permanent or scheduled Nitrado ban</small></button><button data-player-action="dayz_unban" type="button"><strong>Unban from DayZ</strong><small>Close active DayZ ban cases</small></button><button class="danger-outline" data-linked-action="" data-owner-only="" data-player-action="unlink" type="button"><strong>Unlink account</strong><small>Owner only · recovery snapshot first</small></button></div></article>
+<div class="dashboard-grid account-data-grid"><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Activity</p><h3>Server history</h3></div><span class="muted-label">Read only</span></div><dl class="detail-list"><div><dt>First seen</dt><dd data-admin-player-first-seen="">—</dd></div><div><dt>Last seen</dt><dd data-admin-player-last-seen="">—</dd></div><div><dt>Linked</dt><dd data-admin-player-linked-at="">Not linked</dd></div><div><dt>Current session</dt><dd data-admin-player-session-start="">Offline</dd></div></dl></article><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">PvP intelligence</p><h3>Combat record</h3></div><span class="muted-label">Sanitized</span></div><dl class="detail-list"><div><dt>Current streak</dt><dd data-admin-player-streak="">0</dd></div><div><dt>Longest kill</dt><dd data-admin-player-longest="">Not recorded</dd></div><div><dt>Favourite weapon</dt><dd data-admin-player-weapon="">Not recorded</dd></div></dl></article></div>
+<div class="dashboard-grid admin-private-grid"><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Private staff record</p><h3>Notes</h3></div><span class="muted-label">Latest 10</span></div><ol aria-live="polite" class="activity-list" data-admin-player-notes=""></ol><p class="table-note" data-admin-player-notes-empty="" hidden="">No private staff notes have been added.</p></article><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Active moderation</p><h3>Warnings</h3></div><span class="muted-label">Editable · removable</span></div><ol aria-live="polite" class="activity-list" data-admin-player-active-warnings=""></ol><p class="table-note" data-admin-player-warnings-empty="" hidden="">No active warnings are recorded.</p></article></div>
+<div class="panel-heading moderation-heading"><div><p class="panel-kicker">Moderation history</p><h3>Recent Discord records</h3></div><span class="muted-label">Latest 10</span></div>
+<ol aria-live="polite" class="activity-list admin-moderation-history" data-admin-player-moderation-history=""></ol>
+<p class="table-note" data-admin-player-moderation-empty="" hidden="">No moderation records have been recorded for this linked account.</p>
+<div class="dashboard-grid admin-private-grid"><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Nitrado enforcement</p><h3>DayZ ban history</h3></div><span class="muted-label" data-admin-player-dayz-ban-state="">Not banned</span></div><ol aria-live="polite" class="activity-list" data-admin-player-dayz-bans=""></ol><p class="table-note" data-admin-player-dayz-bans-empty="" hidden="">No DayZ ban actions have been recorded.</p></article><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Permanent audit</p><h3>Dashboard actions</h3></div><span class="muted-label">Latest 20</span></div><ol aria-live="polite" class="activity-list" data-admin-player-action-history=""></ol><p class="table-note" data-admin-player-action-history-empty="" hidden="">No dashboard player actions have been recorded.</p></article></div>
+</article>
+<article class="panel" data-admin-server-controls="" data-dashboard-section="server-controls" data-staff-only="" hidden="" id="dashboard-admin-server-controls"><div class="panel-heading"><div><p class="panel-kicker">Admin operations</p><h2>Protected server controls</h2></div><span class="lock-label" data-server-control-status="">Admin verified · controls connected</span></div><div class="operation-grid"><button data-server-action="restart" type="button"><strong>Restart server</strong><small data-server-action-note="">Checking live server state</small></button><button data-server-action="stop" type="button"><strong>Stop server</strong><small data-server-action-note="">Checking live server state</small></button><button data-server-action="start" type="button"><strong>Start server</strong><small data-server-action-note="">Checking live server state</small></button></div></article>
+<article class="panel" data-dashboard-section="server-audit" data-server-action-history-panel="" data-staff-only="" hidden="" id="dashboard-admin-server-audit"><div class="panel-heading"><div><p class="panel-kicker">Protected audit</p><h2>Recent server operations</h2></div><button class="secondary-action compact-action" data-refresh-server-actions="" type="button">Refresh history</button></div><ol aria-live="polite" class="activity-list server-action-history" data-server-action-history=""><li><span class="activity-symbol">…</span><div><strong>Loading protected history</strong><small>Railway is verifying Admin access</small></div></li></ol><p class="table-note" data-server-action-history-empty="" hidden="">No Start, Stop or Restart actions have been recorded yet.</p><p class="table-note history-error" data-server-action-history-error="" hidden="">History is temporarily unavailable. Use Refresh history to try again.</p></article>
+<article class="panel shop-fulfilment-panel" data-dashboard-section="shop-orders" data-staff-only="" id="dashboard-admin-shop-orders">
+<div class="panel-heading"><div><p class="panel-kicker">Economy fulfilment queue</p><h2>Shop orders</h2></div><div class="panel-heading-actions"><label><span class="sr-only">Shop order scope</span><select data-admin-shop-order-scope=""><option value="open">Open orders</option><option value="pending">Pending</option><option value="processing">Processing</option><option value="fulfilled">Fulfilled</option><option value="cancelled">Cancelled</option><option value="refunded">Refunded</option><option value="all">All recent orders</option></select></label><button class="secondary-action compact-action" data-refresh-admin-shop-orders="" type="button">Refresh orders</button></div></div>
+<p class="panel-intro">Move paid orders into processing, record delivery, or return the full purchase amount. Refund and cancellation actions restore finite stock and create a linked economy transaction.</p>
+<div class="operations-summary-grid"><div><span>Open</span><strong data-admin-shop-open="">—</strong></div><div><span>Pending</span><strong data-admin-shop-pending="">—</strong></div><div><span>Processing</span><strong data-admin-shop-processing="">—</strong></div><div><span>Fulfilled</span><strong data-admin-shop-fulfilled="">—</strong></div><div><span>Refunded</span><strong data-admin-shop-refunded="">—</strong></div><div><span>Cancelled</span><strong data-admin-shop-cancelled="">—</strong></div></div>
+<div class="shop-order-list admin-shop-order-list" data-admin-shop-order-list=""></div>
+<p class="table-note" data-admin-shop-order-empty="" hidden="">No shop orders match this view.</p>
+<p class="table-note history-error" data-admin-shop-order-error="" hidden="">Shop orders are temporarily unavailable.</p>
+</article>
+<article class="panel operations-failure-panel" data-dashboard-section="failures" data-staff-only="" id="dashboard-admin-failures">
+<div class="panel-heading"><div><p class="panel-kicker">External service recovery</p><h2>Operational failures</h2></div><div class="panel-heading-actions"><span class="status-badge unavailable"><i></i><span data-operation-failure-count="">—</span></span><button class="secondary-action compact-action" data-refresh-operation-failures="" type="button">Refresh failures</button></div></div>
+<p class="panel-intro">Failed automatic unbans and Discord notification deliveries remain visible until resolved. Retrying does not duplicate the original punishment or close the failure before the external service confirms success.</p>
+<div aria-live="polite" class="operation-failure-list" data-operation-failure-list=""></div>
+<p class="table-note" data-operation-failure-empty="" hidden="">No unresolved moderation operations are recorded.</p>
+<p class="table-note history-error" data-operation-failure-error="" hidden="">Operational failures are temporarily unavailable.</p>
+</article>
+</section>
+<section aria-labelledby="configuration-title" class="dashboard-view" data-view-panel="configuration" hidden="">
+<div class="view-heading"><div><p class="breadcrumb">Dashboard / Configuration</p><h1 id="configuration-title">Configuration control.</h1><p>Back up, validate, compare and restore DayZ configuration files safely.</p></div><span class="restricted-badge">Owner access</span></div>
+<div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Safe by design</strong><p>Destructive actions will require a confirmation, permission check, fresh backup and permanent audit record.</p></div></div>
+<div class="config-flow" data-dashboard-section="workflow" id="dashboard-configuration-workflow"><article class="flow-card complete"><span>01</span><strong>Back up</strong><small>Capture current files</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>02</span><strong>Validate</strong><small>Check syntax and structure</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>03</span><strong>Compare</strong><small>Review every change</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>04</span><strong>Restore</strong><small>Owner confirmation</small></article></div>
+<article class="panel" data-dashboard-section="backups" id="dashboard-configuration-backups"><div class="panel-heading"><div><p class="panel-kicker">Example history</p><h2>Recent backups</h2></div><button class="secondary-action" disabled="" type="button">Create backup</button></div><div class="responsive-table"><table><thead><tr><th>Backup</th><th>Created</th><th>Files</th><th>Validation</th><th>Action</th></tr></thead><tbody><tr><td>Pre-update example</td><td>Today, 8:42 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled="">Compare</button></td></tr><tr><td>Scheduled example</td><td>Yesterday, 9:00 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled="">Compare</button></td></tr></tbody></table></div><p class="table-note">Example history only. No Nitrado files are present on this website.</p></article>
+<article class="panel discord-logs-panel" data-dashboard-section="discord-logs" data-owner-only="" id="dashboard-configuration-discord-logs">
+<div class="panel-heading"><div><p class="panel-kicker">Owner-managed Discord audit routing</p><h2>Discord logs</h2></div><button class="secondary-action compact-action" data-refresh-discord-logs="" type="button">Refresh logs</button></div>
+<div class="security-notice compact-notice"><span aria-hidden="true">LG</span><div><strong>Connect each audit stream to the correct Discord channel</strong><p>Railway verifies Owner access and asks the bot to save, test or disconnect each route. Raw Discord channel IDs remain server-side.</p></div></div>
+<div class="discord-log-toolbar command-bar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search Discord logs</span><input autocomplete="off" data-discord-log-search="" placeholder="Search log name or channel…" type="search"/></label><div class="toolbar-view-note"><span>LIVE</span><strong data-discord-log-summary="">Loading</strong><small>Connected log streams</small></div></div>
+<div class="responsive-table discord-log-table"><table><thead><tr><th>Log name</th><th>Log channel</th><th>Connected</th><th>Action</th></tr></thead><tbody data-discord-log-list=""></tbody></table></div>
+<p class="table-note" data-discord-log-empty="" hidden="">No Discord log types match this search.</p>
+<div class="restart-dialog-message" data-discord-log-message="" hidden="" role="status"></div>
+<p class="table-note history-error" data-discord-log-error="" hidden="">Discord logging configuration is temporarily unavailable.</p>
+</article>
+<article class="panel webhook-control-panel" data-dashboard-section="notifications" data-owner-only="" id="dashboard-configuration-notifications">
+<div class="panel-heading"><div><p class="panel-kicker">Owner-managed Discord routing</p><h2>Notifications &amp; webhooks</h2></div><button class="secondary-action compact-action" data-refresh-webhooks="" type="button">Refresh configuration</button></div>
+<div class="security-notice compact-notice"><span aria-hidden="true">✓</span><div><strong>Webhook secrets stay off the website</strong><p>Select a Discord text channel and Railway asks the bot to create the incoming webhook. The website never receives a webhook URL or token, and the database stores only the Discord webhook ID and routing metadata.</p></div></div>
+<div class="webhook-layout">
+<section class="inset-panel webhook-create-card">
+<div class="panel-heading"><div><p class="panel-kicker">New destination</p><h3>Create managed webhook</h3></div><span class="lock-label">Owner only</span></div>
+<label class="dialog-field"><span>Destination label</span><input data-webhook-label="" maxlength="80" placeholder="Moderation alerts" type="text"/></label>
+<label class="dialog-field"><span>Discord text channel</span><select data-webhook-channel=""><option value="">Loading available channels…</option></select></label>
+<label class="dialog-field"><span>Webhook name</span><input data-webhook-name="" maxlength="80" type="text" value="World War Z Operations"/></label>
+<button class="primary-action wide" data-create-webhook="" type="button">Create webhook destination</button>
+<p class="table-note">The bot requires Manage Webhooks and Send Messages access in the selected channel.</p>
+</section>
+<section class="inset-panel">
+<div class="panel-heading"><div><p class="panel-kicker">Managed destinations</p><h3>Discord webhooks</h3></div><span class="muted-label" data-webhook-count="">—</span></div>
+<div class="webhook-destination-list" data-webhook-list=""></div>
+<p class="table-note" data-webhook-empty="" hidden="">No managed webhook destinations exist yet.</p>
+</section>
+</div>
+<section class="inset-panel webhook-route-panel">
+<div class="panel-heading"><div><p class="panel-kicker">Per-event routing</p><h3>Notification routes</h3></div><span class="muted-label">Test destinations before enabling</span></div>
+<div class="webhook-route-list" data-webhook-route-list=""></div>
+</section>
+<section class="inset-panel webhook-audit-panel">
+<div class="panel-heading"><div><p class="panel-kicker">Protected audit</p><h3>Recent webhook changes</h3></div><span class="muted-label">Last 25 actions</span></div>
+<ol class="activity-list webhook-audit-list" data-webhook-audit-list=""></ol>
+<p class="table-note" data-webhook-audit-empty="" hidden="">No webhook configuration actions have been recorded.</p>
+</section>
+<div class="restart-dialog-message" data-webhook-message="" hidden="" role="status"></div>
+<p class="table-note history-error" data-webhook-error="" hidden="">Webhook configuration is temporarily unavailable.</p>
+</article>
+<article class="panel event-items-panel" data-dashboard-section="event-items" data-owner-only="" id="dashboard-configuration-event-items"><div class="panel-heading"><div><p class="panel-kicker">Restart-bound catalogue</p><h2>Event item profiles</h2></div><button class="secondary-action compact-action" data-new-event-item="" type="button">Create event item</button></div><div class="security-notice compact-notice"><span aria-hidden="true">EV</span><div><strong>Vehicles, containers and event-triggered orders</strong><p>Event profiles generate one unique <code>WWZ_Order_XXXXXX</code> entry using the buyer's exact coordinates. Attachment and cargo profiles in <code>cfgspawnabletypes.xml</code> are classname-wide and may affect other Central Economy spawns of the same class.</p></div></div><div class="shop-management-toolbar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search event items</span><input data-owner-event-search="" placeholder="ID, name, category, classname…" type="search"/></label><label class="dialog-field compact-select"><span>Category</span><select data-owner-event-category=""><option value="all">All categories</option></select></label></div><div class="responsive-table"><table><thead><tr><th>ID / item</th><th>Category</th><th>Classname</th><th>Price / restart</th><th>Restarts</th><th>Approval</th><th>Status</th><th>Action</th></tr></thead><tbody data-owner-event-item-list=""></tbody></table></div><p class="table-note" data-owner-event-item-empty="" hidden="">No event-delivery items are configured.</p></article>
+<article class="panel shop-config-panel" data-dashboard-section="shop-config" data-owner-only="" id="dashboard-configuration-shop">
+<div class="panel-heading"><div><p class="panel-kicker">Owner-managed commerce workspace</p><h2>Catalogue configuration</h2></div><button class="secondary-action compact-action" data-refresh-shop-config="" type="button">Refresh configuration</button></div>
+<div class="security-notice compact-notice"><span aria-hidden="true">$</span><div><strong>Every catalogue change is auditable</strong><p>Manage pricing, stock, limits and internal fulfilment instructions in one workspace. Items are disabled rather than destructively removed from historical orders.</p></div></div>
+<div class="appeal-settings-grid"><label class="toggle-setting"><input data-owner-shop-enabled="" type="checkbox"/><span><strong>Enable purchases</strong><small>The public catalogue remains visible while purchasing is paused.</small></span></label></div>
+<div class="dashboard-grid appeal-setting-fields"><label class="dialog-field"><span>Shop title</span><input data-owner-shop-title="" maxlength="100" type="text"/></label><label class="dialog-field"><span>Shop description</span><textarea data-owner-shop-description="" maxlength="1000" rows="3"></textarea></label></div>
+<label class="dialog-field"><span>Purchase and fulfilment instructions</span><textarea data-owner-shop-instructions="" maxlength="1500" rows="4"></textarea></label>
+<div class="heading-actions"><button class="primary-action" data-save-shop-settings="" type="button">Save shop settings</button><button class="secondary-action" data-new-shop-item="" type="button">Create item</button></div>
+<div class="restart-dialog-message" data-owner-shop-message="" hidden="" role="status"></div>
+<div class="shop-management-toolbar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search regular shop items</span><input data-owner-shop-search="" placeholder="ID, name, category or SKU…" type="search"/></label><label class="dialog-field compact-select"><span>Category</span><select data-owner-shop-category=""><option value="all">All categories</option></select></label></div><div class="responsive-table shop-config-table"><table><thead><tr><th>ID / item</th><th>Category</th><th>Price</th><th>Stock</th><th>Limits</th><th>Status</th><th>Action</th></tr></thead><tbody data-owner-shop-item-list=""></tbody></table></div>
+<p class="table-note" data-owner-shop-empty="" hidden="">No shop items exist yet. Create the first catalogue item.</p>
+<p class="table-note history-error" data-owner-shop-error="" hidden="">Shop configuration is temporarily unavailable.</p>
+</article>
+<article class="panel appeal-settings-panel" data-dashboard-section="appeals" data-owner-only="" id="dashboard-configuration-appeals">
+<div class="panel-heading"><div><p class="panel-kicker">Owner configuration</p><h2>Member appeals &amp; ticket integration</h2></div><button class="secondary-action compact-action" data-refresh-appeal-settings="" type="button">Refresh settings</button></div>
+<p class="panel-intro">Control who can appeal, the submission deadline and which Discord category and role receive linked appeal tickets. Raw Discord IDs remain on Railway.</p>
+<div class="appeal-settings-grid">
+<label class="toggle-setting"><input data-owner-appeal-enabled="" type="checkbox"/><span><strong>Enable member appeals</strong><small>Allow linked members to submit from the dashboard or <code>/appeal</code>.</small></span></label>
+<label class="toggle-setting"><input data-owner-appeal-create-ticket="" type="checkbox"/><span><strong>Create a Discord ticket</strong><small>Open a private case-linked ticket after a successful appeal.</small></span></label>
+<label class="toggle-setting"><input data-owner-appeal-edit="" type="checkbox"/><span><strong>Allow pre-assignment edits</strong><small>Members may revise their statement until a reviewer is assigned.</small></span></label>
+<label class="toggle-setting"><input data-owner-appeal-continues="" type="checkbox"/><span><strong>Punishment continues during review</strong><small>Clarifies that submitting an appeal does not pause enforcement.</small></span></label>
+</div>
+<div class="dashboard-grid appeal-setting-fields"><label class="dialog-field"><span>Appeal deadline <small>1–90 days after case creation</small></span><input data-owner-appeal-deadline="" max="90" min="1" step="1" type="number"/></label><label class="dialog-field"><span>Discord ticket category</span><select data-owner-appeal-category=""><option value="ticket_default">Use ticket-system open category</option></select></label><label class="dialog-field"><span>Appeal ticket support role</span><select data-owner-appeal-role=""><option value="ticket_default">Use ticket-system support role</option></select></label></div>
+<label class="dialog-field"><span>Member instructions <small>20–2,000 characters</small></span><textarea data-owner-appeal-instructions="" maxlength="2000" rows="5"></textarea></label>
+<div class="restart-dialog-message" data-owner-appeal-message="" hidden="" role="status"></div>
+<button class="primary-action" data-save-appeal-settings="" type="button">Save appeal settings</button>
+</article>
+</section>
+<section aria-labelledby="settings-title" class="dashboard-view" data-view-panel="settings" hidden="">
+<div class="view-heading"><div><p class="breadcrumb">Dashboard / Settings &amp; help</p><h1 id="settings-title">Settings &amp; help.</h1><p>Connection status, privacy information and answers about the dashboard.</p></div></div>
+<div class="dashboard-grid settings-grid"><article class="panel connection-panel" data-dashboard-section="connection" id="dashboard-settings-connection"><div class="panel-heading"><div><p class="panel-kicker">Account</p><h2>Discord connection</h2></div><span class="status-badge" data-auth-badge=""><i></i><span data-auth-badge-label="">Checking connection</span></span></div><div class="account-summary" data-account-summary="" hidden=""><span aria-label="Discord avatar" class="account-avatar" data-account-avatar="">WZ</span><div><strong data-account-display-name="">Survivor</strong><small><span data-account-username="">Discord account</span> · <span data-account-level="">Member</span></small></div></div><p data-auth-description="">Discord sign-in securely verifies your World War Z membership and current access level.</p><div class="auth-actions"><button class="primary-action" data-auth-guest-action="" data-open-login="" type="button">Sign in with Discord</button><button class="secondary-action" data-sign-out="" hidden="" type="button">Sign out</button></div><a class="inline-link" href="legal.html">Read the legal and privacy information <span aria-hidden="true">→</span></a></article><article class="panel" data-dashboard-section="access" id="dashboard-settings-access"><div class="panel-heading"><div><p class="panel-kicker">Access levels</p><h2>Role-based permissions</h2></div></div><ul class="role-list"><li><span>Visitor</span><small>Public server information</small></li><li><span>Member</span><small>Verified profile and personal economy data</small></li><li><span>Admin</span><small>Moderation and protected server controls</small></li><li><span>Owner</span><small>Verified access to owner-only configuration</small></li></ul></article></div>
+<article class="panel help-panel" data-dashboard-section="help" id="dashboard-settings-help"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open=""><summary>Why are some buttons still locked?</summary><p>Start, Stop and Restart are enabled only for a safe live server state. Player actions also depend on whether the selected record is linked, verified or currently banned. Unlinking is Owner-only. Ticket and configuration write actions remain locked until their own protected endpoints are completed.</p></details><details><summary>Which displayed information is live?</summary><p>Server status, population, map and platform are public and live. After sign-in, your Discord access, linked PlayStation profile, activity, PvP statistics, wallet and personal ledger are also live. Verified Admin player records, notes, warnings, balances and audit history are read directly from Railway's protected API.</p></details><details><summary>Who can use protected actions?</summary><p>Only a signed-in Admin or Owner can see them. Railway rechecks current Discord membership, permissions and the selected target after the confirmation prompt. Owner and self-target protections remain server-side, and every accepted or rejected request is audited.</p></details><details><summary>What happened to the interactive map?</summary><p>The previous schematic public map has been replaced with a Coming Soon workspace while a clearer high-detail version is prepared. The trader checkout map remains active for selecting X and Z coordinates.</p></details></article>
+</section>
+<footer class="dashboard-footer"><p class="bohemia-disclaimer">This independent community website is not affiliated with or endorsed by Bohemia Interactive, Discord, Sony Interactive Entertainment, Nitrado, GitHub or Railway. Relevant names, games, services and trademarks belong to their respective owners.</p><p>Live server status, secure member self-service, controlled player administration and audited Admin server controls.</p><div><a href="index.html">Website</a><a href="changelog.html">Changelog</a><a href="legal.html">Legal</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="https://discord.gg/worldwarzps" rel="noreferrer" target="_blank">Discord</a></div><p>© <span data-year=""></span> World War Z Community</p></footer>
+</main>
+</div>
+<dialog aria-labelledby="command-palette-title" class="command-palette" data-command-palette="">
+<div class="command-palette-shell">
+<div class="command-palette-heading">
+<span aria-hidden="true">⌕</span>
+<div><small>Command Centre search</small><h2 id="command-palette-title">Jump to any dashboard tool</h2></div>
+<button aria-label="Close search" data-close-command-search="" type="button">×</button>
+</div>
+<label class="command-palette-input"><span class="sr-only">Search dashboard pages</span><input autocomplete="off" data-dashboard-search="" placeholder="Search shop, moderation, server controls, settings…" type="search"/></label>
+<div aria-live="polite" class="command-palette-results" data-dashboard-search-results=""></div>
+<p class="command-palette-hint"><kbd>↑</kbd><kbd>↓</kbd> move <kbd>Enter</kbd> open <kbd>Esc</kbd> close</p>
+</div>
+</dialog>
+<dialog aria-labelledby="login-title" class="login-dialog" data-login-dialog="">
+<form method="dialog">
+<button aria-label="Close sign-in" class="dialog-close" value="close">×</button>
+<span aria-hidden="true" class="discord-mark">◈</span>
+<p class="panel-kicker">Secure Discord OAuth</p>
+<h2 id="login-title">Sign in with Discord</h2>
+<p>Discord will identify your account. Railway will then confirm your current World War Z membership and assign member, admin or owner access.</p>
+<ul><li><span aria-hidden="true">✓</span>Requests only Discord's basic identify permission</li><li><span aria-hidden="true">✓</span>Rechecks community membership and roles on Railway</li><li><span aria-hidden="true">✓</span>Keeps Discord and Nitrado secrets off this website</li></ul>
+<div class="dialog-notice" data-auth-dialog-notice=""><strong>Secure connection</strong><span>Your dashboard session lasts for this browser tab and expires automatically.</span></div>
+<button class="discord-button wide" data-start-discord-login="" disabled="" type="button">Checking Discord sign-in…</button>
+<button class="dialog-cancel" value="close">Return to dashboard</button>
+</form>
+</dialog>
+<dialog aria-labelledby="server-action-dialog-title" class="login-dialog restart-dialog" data-server-action-dialog="">
+<form data-server-action-form="" method="dialog">
+<button aria-label="Close server action confirmation" class="dialog-close" data-server-action-cancel="" type="button">×</button>
+<span aria-hidden="true" class="restart-mark" data-server-action-mark="">↻</span>
+<p class="panel-kicker">Protected Admin operation</p>
+<h2 data-server-action-title="" id="server-action-dialog-title">Confirm server action?</h2>
+<p data-server-action-description="">Review the warning and confirm only when the server is ready.</p>
+<div class="restart-warning"><strong>Are you sure?</strong><span data-server-action-warning="">Selecting Yes will immediately submit this protected request.</span></div>
+<ul class="restart-confirmation-list"><li><span aria-hidden="true">!</span><span data-server-action-impact="">Current players may be affected</span></li><li><span aria-hidden="true">✓</span><span>Railway will recheck your Admin access and server state</span></li><li><span aria-hidden="true">✓</span><span>The request and outcome will be audited</span></li></ul>
+<label class="dialog-field"><span>Reason <small>Optional · 200 characters maximum</small></span><textarea data-server-action-reason="" maxlength="200" placeholder="Example: Scheduled community maintenance" rows="3"></textarea></label>
+<div class="restart-dialog-message" data-server-action-dialog-message="" hidden="" role="status"></div>
+<button class="primary-action danger-action wide" data-confirm-server-action="" disabled="" type="submit">Yes, continue</button>
+<button class="dialog-cancel" data-server-action-cancel="" type="button">No, cancel and return</button>
+</form>
+</dialog>
+<dialog aria-labelledby="player-action-dialog-title" class="login-dialog restart-dialog player-action-dialog" data-player-action-dialog="">
+<form data-player-action-form="" method="dialog">
+<button aria-label="Close player action confirmation" class="dialog-close" data-player-action-cancel="" type="button">×</button>
+<span aria-hidden="true" class="restart-mark" data-player-action-mark="">!</span>
+<p class="panel-kicker">Protected player operation</p>
+<h2 data-player-action-title="" id="player-action-dialog-title">Confirm player action?</h2>
+<p data-player-action-description="">Review the action carefully before submitting it.</p>
+<div class="restart-warning"><strong data-player-action-warning-title="">Confirmation required</strong><span data-player-action-warning="">This change will be permanently audited.</span></div>
+<label class="dialog-field"><span data-player-action-reason-label="">Reason <small data-player-action-reason-help="">Required</small></span><textarea data-player-action-reason="" maxlength="1500" placeholder="Enter the staff reason or note" required="" rows="4"></textarea></label>
+<div class="player-action-economy-fields" data-player-action-economy-fields="" hidden=""><label class="dialog-field"><span>Balance operation</span><select data-player-action-economy-operation=""><option value="add">Add money</option><option value="remove">Remove money</option><option value="set">Set exact balance</option></select></label><label class="dialog-field"><span>Amount <small>Whole dollars</small></span><input data-player-action-amount="" inputmode="numeric" max="2000000000" min="0" step="1" type="number"/></label></div>
+<div class="player-action-ban-fields" data-player-action-ban-fields="" hidden=""><label class="dialog-field"><span>Ban duration <small>Permanent or scheduled</small></span><select data-player-action-ban-duration=""><option value="permanent">Permanent</option><option value="3600">1 hour</option><option value="21600">6 hours</option><option value="43200">12 hours</option><option value="86400">1 day</option><option value="259200">3 days</option><option value="604800">7 days</option><option value="custom">Custom expiry</option></select></label><label class="dialog-field" data-player-action-custom-expiry="" hidden=""><span>Custom expiry <small>Your local date and time · maximum 365 days</small></span><input data-player-action-expiry="" step="60" type="datetime-local"/></label><p class="ban-expiry-note">Railway checks due temporary cases continuously and normally removes the ban within one minute of its expiry.</p></div>
+<div aria-live="polite" class="player-action-target"><span>Selected PlayStation ID</span><strong data-player-action-target="">—</strong><small>Confirm only if this is the player you intended to manage.</small></div>
+<div class="restart-dialog-message" data-player-action-dialog-message="" hidden="" role="status"></div>
+<button class="primary-action danger-action wide" data-confirm-player-action="" type="submit">Confirm protected action</button>
+<button class="dialog-cancel" data-player-action-cancel="" type="button">Cancel and return</button>
+</form>
+</dialog>
+<dialog aria-labelledby="moderation-case-dialog-title" class="login-dialog moderation-case-dialog" data-moderation-case-dialog="">
+<div class="moderation-case-dialog-shell">
+<button aria-label="Close moderation case" class="dialog-close" data-moderation-case-close="" type="button">×</button>
+<div class="case-dialog-heading">
+<div><p class="panel-kicker">Protected moderation record</p><h2 data-case-dialog-title="" id="moderation-case-dialog-title">Moderation case</h2><p data-case-dialog-subtitle="">Loading protected case information…</p></div>
+<span class="restricted-badge" data-case-dialog-state="">Verifying</span>
+</div>
+<div class="case-detail-grid"><div><span>Player</span><strong data-case-dialog-player="">—</strong></div><div><span>Issued by</span><strong data-case-dialog-moderator="">—</strong></div><div><span>Opened</span><strong data-case-dialog-created="">—</strong></div><div><span>Expiry</span><strong data-case-dialog-expiry="">—</strong></div></div>
+<article class="case-reason-card"><span>Original reason</span><p data-case-dialog-reason="">—</p></article>
+<div class="case-management-grid">
+<section class="case-management-section">
+<div class="panel-heading"><div><p class="panel-kicker">Evidence register</p><h3>Case evidence</h3></div><span class="muted-label" data-case-evidence-count="">0 active</span></div>
+<ol class="activity-list case-evidence-list" data-case-evidence-list=""></ol>
+<p class="table-note" data-case-evidence-empty="">No evidence has been attached to this case.</p>
+<div class="case-editor" data-case-evidence-editor="">
+<div class="panel-heading"><div><p class="panel-kicker">Evidence action</p><h3 data-case-evidence-editor-title="">Add evidence</h3></div><button class="text-action" data-case-evidence-cancel="" hidden="" type="button">Cancel edit</button></div>
+<div data-case-evidence-fields="">
+<label class="dialog-field"><span>Evidence type</span><select data-case-evidence-type=""><option value="discord_message">Discord message</option><option value="screenshot">Screenshot</option><option value="video">Video</option><option value="adm_log">ADM log</option><option value="nitrado_record">Nitrado record</option><option value="player_report">Player report</option><option value="staff_observation">Staff observation</option><option value="other">Other reference</option></select></label>
+<label class="dialog-field"><span>Link or reference <small>HTTP(S), message link or log reference</small></span><input data-case-evidence-reference="" maxlength="500" placeholder="https://… or ADM log 2026-08-04 20:15" type="text"/></label>
+<label class="dialog-field"><span>Evidence summary <small>3–1,000 characters</small></span><textarea data-case-evidence-summary="" maxlength="1000" placeholder="Explain what this evidence shows and why it matters" rows="3"></textarea></label>
+</div>
+<label class="dialog-field" data-case-evidence-remove-field="" hidden=""><span>Removal reason <small>The prior entry remains in the audit trail</small></span><textarea data-case-evidence-remove-reason="" maxlength="1000" rows="3"></textarea></label>
+<button class="secondary-action wide" data-case-evidence-submit="" type="button">Attach evidence</button>
+</div>
+</section>
+<section class="case-management-section">
+<div class="panel-heading"><div><p class="panel-kicker">Independent review</p><h3>Reviews &amp; appeals</h3></div><span class="muted-label" data-case-review-state="">No review</span></div>
+<ol class="activity-list case-review-list" data-case-review-list=""></ol>
+<p class="table-note" data-case-review-empty="">No review or appeal has been opened.</p>
+<div class="case-editor" data-case-review-start="">
+<p class="case-editor-copy">Open a staff quality review or record an appeal received through an official community contact route.</p>
+<label class="dialog-field"><span>Review type</span><select data-case-review-type=""><option value="staff_review">Staff review</option><option value="appeal">Player appeal</option></select></label>
+<label class="dialog-field" data-case-review-source-field="" hidden=""><span>Appeal source</span><select data-case-review-source=""><option value="discord_ticket">Discord ticket</option><option value="discord_message">Discord message</option><option value="email">Email</option><option value="external">External contact</option><option value="other">Other official route</option></select></label>
+<label class="dialog-field"><span>Review request <small>Explain the dispute, new evidence or quality concern</small></span><textarea data-case-review-reason="" maxlength="1000" rows="3"></textarea></label>
+<button class="secondary-action wide" data-case-review-start-button="" type="button">Open review</button>
+</div>
+<div class="case-editor case-decision-editor" data-case-review-decision="" hidden="">
+<div class="restart-warning"><strong>Independent decision</strong><span>A regular Admin cannot decide a case they originally issued. Owner overrides are recorded.</span></div>
+<label class="dialog-field"><span>Outcome</span><select data-case-review-outcome=""><option value="upheld">Upheld</option><option value="reduced">Reduced</option><option value="overturned">Overturned</option></select></label>
+<label class="dialog-field" data-case-review-reduction-field="" hidden=""><span>Reduced expiry <small>Your local date and time</small></span><input data-case-review-expiry="" step="60" type="datetime-local"/></label>
+<label class="dialog-field"><span>Decision reason <small>Required · preserved in case history</small></span><textarea data-case-review-decision-reason="" maxlength="1000" rows="3"></textarea></label>
+<button class="primary-action danger-action wide" data-case-review-decide="" type="button">Record review outcome</button>
+</div>
+</section>
+</div>
+<div class="restart-dialog-message" data-case-dialog-message="" hidden="" role="status"></div>
+<button class="dialog-cancel" data-moderation-case-close="" type="button">Close moderation case</button>
+</div>
+</dialog>
+<dialog aria-labelledby="member-appeal-dialog-title" class="login-dialog appeal-dialog" data-member-appeal-dialog="">
+<form data-member-appeal-form="" method="dialog">
+<button aria-label="Close appeal form" class="dialog-close" data-member-appeal-cancel="" type="button">×</button>
+<span aria-hidden="true" class="restart-mark">⚖</span><p class="panel-kicker">Private case submission</p><h2 data-member-appeal-title="" id="member-appeal-dialog-title">Submit appeal</h2><p data-member-appeal-copy="">Your statement is visible to authorised reviewers.</p>
+<div class="player-action-target"><span>Moderation case</span><strong data-member-appeal-case="">—</strong><small data-member-appeal-case-detail="">Review the selected action before submitting.</small></div>
+<label class="dialog-field"><span>Appeal statement <small>20–2,000 characters</small></span><textarea data-member-appeal-statement="" maxlength="2000" minlength="20" placeholder="Explain why this action should be reviewed and what outcome you are requesting." required="" rows="6"></textarea></label>
+<fieldset class="appeal-evidence-fields"><legend>Evidence references <small>Optional · maximum 5</small></legend>
+<div class="appeal-evidence-row"><input data-member-appeal-evidence-reference="" maxlength="500" placeholder="HTTPS link or reference" type="text"/><input data-member-appeal-evidence-summary="" maxlength="300" placeholder="What this evidence shows" type="text"/></div>
+<div class="appeal-evidence-row"><input data-member-appeal-evidence-reference="" maxlength="500" placeholder="HTTPS link or reference" type="text"/><input data-member-appeal-evidence-summary="" maxlength="300" placeholder="What this evidence shows" type="text"/></div>
+<div class="appeal-evidence-row"><input data-member-appeal-evidence-reference="" maxlength="500" placeholder="HTTPS link or reference" type="text"/><input data-member-appeal-evidence-summary="" maxlength="300" placeholder="What this evidence shows" type="text"/></div>
+<div class="appeal-evidence-row"><input data-member-appeal-evidence-reference="" maxlength="500" placeholder="HTTPS link or reference" type="text"/><input data-member-appeal-evidence-summary="" maxlength="300" placeholder="What this evidence shows" type="text"/></div>
+<div class="appeal-evidence-row"><input data-member-appeal-evidence-reference="" maxlength="500" placeholder="HTTPS link or reference" type="text"/><input data-member-appeal-evidence-summary="" maxlength="300" placeholder="What this evidence shows" type="text"/></div>
+</fieldset>
+<div class="restart-dialog-message" data-member-appeal-message="" hidden="" role="status"></div><button class="primary-action wide" data-submit-member-appeal="" type="submit">Submit appeal</button><button class="dialog-cancel" data-member-appeal-cancel="" type="button">Cancel</button>
+</form>
+</dialog>
+<dialog aria-labelledby="withdraw-appeal-title" class="login-dialog restart-dialog" data-withdraw-appeal-dialog=""><form data-withdraw-appeal-form="" method="dialog"><button aria-label="Close withdrawal form" class="dialog-close" data-withdraw-appeal-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">−</span><p class="panel-kicker">Appeal withdrawal</p><h2 id="withdraw-appeal-title">Withdraw this appeal?</h2><p>The moderation action and case history will remain unchanged.</p><label class="dialog-field"><span>Withdrawal reason <small>3–500 characters</small></span><textarea data-withdraw-appeal-reason="" maxlength="500" required="" rows="4"></textarea></label><div class="restart-dialog-message" data-withdraw-appeal-message="" hidden="" role="status"></div><button class="primary-action danger-action wide" data-confirm-withdraw-appeal="" type="submit">Withdraw appeal</button><button class="dialog-cancel" data-withdraw-appeal-cancel="" type="button">Cancel</button></form></dialog>
+<dialog aria-labelledby="shop-purchase-title" class="login-dialog shop-purchase-dialog" data-shop-purchase-dialog=""><form data-shop-purchase-form="" method="dialog"><button aria-label="Close purchase" class="dialog-close" data-shop-purchase-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">🛒</span><p class="panel-kicker">Economy purchase</p><h2 data-shop-purchase-title="" id="shop-purchase-title">Buy shop item?</h2><div class="player-action-target"><span>Selected item</span><strong data-shop-purchase-item="">—</strong><small data-shop-purchase-price="">—</small></div><label class="dialog-field shop-quantity-field"><span data-shop-quantity-label="">Quantity</span><input data-shop-purchase-quantity="" max="100" min="1" step="1" type="number" value="1"/><small data-shop-quantity-help="">Number of items to purchase.</small></label><fieldset class="event-delivery-fields" data-shop-event-delivery="" hidden=""><legend>In-game event delivery</legend><label class="dialog-field"><span>Saved location <small>Optional</small></span><select data-shop-delivery-location=""><option value="">Choose coordinates on the map</option></select></label><div class="event-purchase-layout"><div class="event-coordinate-form"><div class="coordinate-grid" data-shop-coordinate-inputs=""><label class="dialog-field"><span>X</span><input data-shop-delivery-x="" max="15360" min="0" step="0.001" type="number"/></label><label class="dialog-field"><span>Y / height</span><input data-shop-delivery-y="" max="2000" min="-100" step="0.001" type="number" value="0"/></label><label class="dialog-field"><span>Z</span><input data-shop-delivery-z="" max="15360" min="0" step="0.001" type="number"/></label><label class="dialog-field"><span>Rotation</span><input data-shop-delivery-rotation="" max="360" min="0" step="0.1" type="number" value="0"/></label></div><label class="toggle-setting"><input data-shop-save-location="" type="checkbox"/><span><strong>Save these coordinates</strong><small>Reuse this exact location on future orders.</small></span></label><label class="dialog-field" data-shop-save-name-field="" hidden=""><span>Saved location name</span><input data-shop-save-location-name="" maxlength="80" placeholder="Main Base" type="text"/></label><label class="toggle-setting coordinate-confirmation"><input data-shop-coordinate-confirm="" type="checkbox"/><span><strong>I checked this spawn point</strong><small>I understand staff may reject unsafe or obstructed coordinates.</small></span></label></div><div class="shop-coordinate-picker"><div class="coordinate-picker-heading"><div><span>Click or tap the map</span><strong data-shop-map-selected="">No coordinates selected</strong></div><small>Y remains manual</small></div><div aria-label="Chernarus coordinate selector. Click or tap to fill X and Z." class="coordinate-picker-frame" data-shop-coordinate-map="" tabindex="0"><div class="coordinate-picker-stage" data-shop-coordinate-stage=""><img alt="Chernarus satellite coordinate selection map" data-shop-coordinate-image="" decoding="async" draggable="false" loading="lazy" src="assets/chernarus-map/overview.webp"/><span aria-hidden="true" class="coordinate-picker-marker" data-shop-coordinate-marker="" hidden="">⌖</span></div><div class="coordinate-picker-controls"><button aria-label="Zoom in" data-shop-map-zoom-in="" type="button">+</button><button aria-label="Zoom out" data-shop-map-zoom-out="" type="button">−</button><button aria-label="Reset map" data-shop-map-reset="" type="button">⌂</button></div><div class="coordinate-picker-hint">Click anywhere to set X and Z</div></div></div></div></fieldset><label class="dialog-field"><span>Delivery note <small>Optional · 500 characters</small></span><textarea data-shop-purchase-note="" maxlength="500" placeholder="Other useful delivery details" rows="3"></textarea></label><div class="restart-warning"><strong>Confirm purchase</strong><span data-shop-purchase-total="">Your wallet will be debited immediately.</span></div><div class="restart-dialog-message" data-shop-purchase-message="" hidden="" role="status"></div><button class="primary-action wide" data-confirm-shop-purchase="" type="submit">Place order</button><button class="dialog-cancel" data-shop-purchase-cancel="" type="button">Cancel</button></form></dialog>
+<dialog aria-labelledby="shop-order-action-title" class="login-dialog restart-dialog" data-shop-order-action-dialog="">
+<form data-shop-order-action-form="" method="dialog"><button aria-label="Close order action" class="dialog-close" data-shop-order-action-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">📦</span><p class="panel-kicker">Protected shop operation</p><h2 data-shop-order-action-title="" id="shop-order-action-title">Update shop order?</h2><div class="player-action-target"><span>Selected order</span><strong data-shop-order-action-target="">—</strong><small data-shop-order-action-detail="">—</small></div><label class="dialog-field"><span>Action note <small>Required · 3–1,000 characters</small></span><textarea data-shop-order-action-note="" maxlength="1000" required="" rows="4"></textarea></label><div class="restart-warning"><strong data-shop-order-action-warning="">Audit required</strong><span>The result will be added to the member order history.</span></div><div class="restart-dialog-message" data-shop-order-action-message="" hidden="" role="status"></div><button class="primary-action wide" data-confirm-shop-order-action="" type="submit">Confirm action</button><button class="dialog-cancel" data-shop-order-action-cancel="" type="button">Cancel</button></form>
+</dialog>
+<dialog aria-labelledby="shop-item-dialog-title" class="login-dialog shop-item-dialog catalogue-builder-dialog" data-shop-item-dialog="">
+<form class="catalogue-builder-form" data-shop-item-form="" method="dialog">
+<header class="catalogue-builder-header">
+<div class="catalogue-builder-heading"><div><h2 data-shop-item-dialog-title="" id="shop-item-dialog-title">Item</h2><p data-shop-builder-subtitle="">Create a new catalogue item.</p></div></div>
+<button aria-label="Close item editor" class="dialog-close" data-shop-item-cancel="" type="button">×</button>
+</header>
+<div class="owner-builder-layout">
+<section class="panel owner-builder-main">
+<div class="panel-heading"><div><p class="panel-kicker accent-kicker">Catalogue item</p><h3>Item details <span class="builder-requirement">Required</span></h3></div></div>
+<div class="security-notice compact-notice owner-builder-notice"><span aria-hidden="true">i</span><div><strong>Start with what players will see.</strong><p>Name, price, category, description and delivery method are shown throughout the shop and order history.</p></div></div>
+<div class="owner-inline-builder-form">
+<div class="owner-builder-basic-grid">
+<label class="dialog-field"><span>Item name</span><input data-shop-item-name="" maxlength="100" placeholder="e.g. Starter Kit" required="" type="text"/></label>
+<label class="dialog-field"><span>Price</span><input data-shop-item-price="" max="1000000000" min="1" placeholder="1000" required="" step="1" type="number"/></label>
+</div>
+<div class="quick-value-row"><span>Quick price</span><div class="quick-chip-group" aria-label="Quick price values"><button data-shop-price-value="1" type="button">1</button><button data-shop-price-value="50" type="button">50</button><button data-shop-price-value="100" type="button">100</button><button data-shop-price-value="250" type="button">250</button><button data-shop-price-value="500" type="button">500</button><button data-shop-price-value="1000" type="button">1,000</button></div></div>
+<div class="owner-builder-basic-grid">
+<label class="dialog-field"><span>SKU <small>Unique internal code</small></span><input data-shop-item-sku="" maxlength="40" placeholder="KIT-STARTER" required="" type="text"/></label>
+<label class="dialog-field"><span>Delivery method</span><select data-shop-item-delivery-type=""><option value="manual">Manual trader order</option><option value="event">Restart-bound event spawn</option></select></label>
+</div>
+<label class="dialog-field"><span>Category</span><input data-shop-item-category="" maxlength="60" placeholder="Weapons, Vehicles, Building…" required="" type="text"/></label>
+<div class="quick-value-row"><span>Common categories</span><div class="quick-chip-group" aria-label="Common item categories"><button data-shop-category-value="Weapons" type="button">Weapons</button><button data-shop-category-value="Ammo" type="button">Ammo</button><button data-shop-category-value="Tools" type="button">Tools</button><button data-shop-category-value="Food" type="button">Food</button><button data-shop-category-value="Medical" type="button">Medical</button><button data-shop-category-value="Clothing" type="button">Clothing</button><button data-shop-category-value="Vehicles" type="button">Vehicles</button><button data-shop-category-value="Building" type="button">Building</button><button data-shop-category-value="Other" type="button">Other</button></div></div>
+<label class="dialog-field"><span>Description <small>Player-facing</small></span><textarea data-shop-item-description="" maxlength="1000" placeholder="Explain exactly what the buyer receives." required="" rows="4"></textarea></label>
+<label class="dialog-field"><span>Internal fulfilment instructions <small>Admins only</small></span><textarea data-shop-item-fulfilment="" maxlength="1500" placeholder="Trader location, package contents or staff handling instructions." rows="4"></textarea></label>
 
-  <header class="dashboard-topbar">
-    <button class="icon-button mobile-menu" type="button" aria-expanded="false" aria-controls="dashboard-sidebar" data-sidebar-toggle>
-      <span aria-hidden="true">☰</span><span class="sr-only">Open dashboard menu</span>
-    </button>
-    <a class="dashboard-brand" href="index.html" aria-label="World War Z Bot home">
-      <span class="dashboard-brand-mark" aria-hidden="true"><img src="assets/world-war-z-logo.webp" alt=""></span>
-      <span><strong>WORLD WAR Z</strong><small>BOT CONTROL CENTRE</small></span>
-    </a>
-    <span class="preview-pill" data-dashboard-mode>Live status</span>
-    <div class="topbar-spacer"></div>
-    <div class="connection-state" data-api-connection data-state="loading"><span></span><span data-api-connection-label>Connecting to bot API…</span></div>
-    <button class="discord-button" type="button" data-open-login><span aria-hidden="true">◈</span> <span data-auth-button-label>Sign in with Discord</span></button>
-  </header>
+<section class="owner-builder-event-block" data-shop-event-profile="" hidden="">
+<div class="panel-heading"><div><p class="panel-kicker">Restart delivery</p><h4>Event XML profile</h4></div><span class="optional-kicker">Event item</span></div>
+<div class="security-notice compact-notice"><span aria-hidden="true">!</span><div><strong>Classname-wide spawnable profile</strong><p>Attachments and cargo update the selected classname in <code>cfgspawnabletypes.xml</code> and may affect other Central Economy spawns using that classname.</p></div></div>
+<div class="owner-builder-three">
+<label class="dialog-field"><span>Profile name</span><input data-shop-profile-name="" maxlength="100" placeholder="Ada Complete" type="text"/></label>
+<label class="dialog-field"><span>Child classname</span><input data-shop-profile-child="" maxlength="128" placeholder="OffroadHatchback" type="text"/></label>
+<label class="dialog-field"><span>Secondary event <small>Optional</small></span><input data-shop-profile-secondary="" maxlength="128" type="text"/></label>
+</div>
+<div class="owner-builder-three">
+<label class="dialog-field"><span>Lifetime seconds</span><input data-shop-profile-lifetime="" max="2147483647" min="1" type="number" value="3888000"/></label>
+<label class="dialog-field"><span>Restock</span><input data-shop-profile-restock="" max="2147483647" min="0" type="number" value="0"/></label>
+<label class="dialog-field"><span>Event limit</span><select data-shop-profile-limit=""><option value="custom">Custom</option><option value="child">Child</option><option value="parent">Parent</option></select></label>
+</div>
+<div class="owner-builder-three">
+<label class="dialog-field"><span>Safe radius</span><input data-shop-profile-saferadius="" max="2147483647" min="0" type="number" value="0"/></label>
+<label class="dialog-field"><span>Distance radius</span><input data-shop-profile-distanceradius="" max="2147483647" min="0" type="number" value="0"/></label>
+<label class="dialog-field"><span>Cleanup radius</span><input data-shop-profile-cleanupradius="" max="2147483647" min="0" type="number" value="0"/></label>
+</div>
+<div class="owner-builder-two">
+<label class="dialog-field"><span>Attachments <small>One classname per line; optional <code>,chance</code></small></span><textarea data-shop-profile-attachments="" placeholder="HatchbackWheel,1&#10;CarBattery,1" rows="7"></textarea></label>
+<label class="dialog-field"><span>Cargo <small>One classname per line; optional <code>,chance</code></small></span><textarea data-shop-profile-cargo="" placeholder="CanisterGasoline,1" rows="7"></textarea></label>
+</div>
+<div class="owner-builder-toggle-stack owner-builder-two">
+<label class="toggle-setting"><input data-shop-profile-deletable="" type="checkbox"/><span><strong>Deletable event</strong><small>Apply the DayZ deletable event flag.</small></span></label>
+<label class="toggle-setting"><input data-shop-profile-random="" type="checkbox"/><span><strong>Random initialisation</strong><small>Apply the DayZ random initialisation flag.</small></span></label>
+<label class="toggle-setting"><input data-shop-profile-remove-damaged="" type="checkbox"/><span><strong>Remove damaged</strong><small>Remove damaged event objects during cleanup.</small></span></label>
+</div>
+</section>
+</div>
+</section>
 
-  <div class="dashboard-shell">
-    <aside id="dashboard-sidebar" class="dashboard-sidebar" data-sidebar>
-      <nav aria-label="Dashboard navigation">
-        <p class="nav-label">Community</p>
-        <button class="side-link active" type="button" data-view="overview"><span aria-hidden="true">⌂</span>Overview</button>
-        <button class="side-link" type="button" data-view="server"><span aria-hidden="true">◉</span>Server status</button>
-        <button class="side-link" type="button" data-view="map"><span aria-hidden="true">⌖</span>Chernarus map</button>
-        <button class="side-link" type="button" data-view="commands"><span aria-hidden="true">⌘</span>Commands</button>
-        <button class="side-link" type="button" data-view="economy"><span aria-hidden="true">$</span>Economy</button>
-        <button class="side-link" type="button" data-view="players"><span aria-hidden="true">♙</span>My profile</button>
-        <button class="side-link" type="button" data-view="tickets"><span aria-hidden="true">◇</span>Tickets</button>
+<aside class="panel owner-builder-side">
+<div class="panel-heading"><div><p class="panel-kicker">Purchase controls</p><h3>Rules <span class="optional-kicker">Optional</span></h3></div></div>
+<div class="security-notice compact-notice owner-builder-notice"><span aria-hidden="true">i</span><div><strong>Control availability and limits.</strong><p>Blank stock or player limits remain unlimited. Existing orders retain their original audit details.</p></div></div>
+<div class="owner-builder-side-stack">
+<label class="dialog-field"><span>Stock <small>Blank = unlimited</small></span><input data-shop-item-stock="" max="1000000" min="0" step="1" type="number"/></label>
+<label class="dialog-field"><span>Maximum per order</span><input data-shop-item-max-order="" max="100" min="1" required="" step="1" type="number" value="1"/></label>
+<label class="dialog-field"><span>Maximum per player <small>Blank = unlimited</small></span><input data-shop-item-max-player="" max="1000000" min="1" step="1" type="number"/></label>
+<label class="dialog-field"><span>Sort order <small>Lower values appear first</small></span><input data-shop-item-sort="" max="10000" min="-10000" step="1" type="number" value="0"/></label>
+<label class="toggle-setting"><input checked="" data-shop-item-active="" type="checkbox"/><span><strong>Item active</strong><small>Inactive items stay in order history but cannot be purchased.</small></span></label>
 
-        <p class="nav-label" data-staff-only hidden>Admin</p>
-        <button class="side-link" type="button" data-view="staff" data-staff-only hidden><span aria-hidden="true">⚑</span>Admin tools <small data-staff-access-label>Verified</small></button>
-        <p class="nav-label" data-owner-only hidden>Owner</p>
-        <button class="side-link" type="button" data-view="configuration" data-owner-only hidden><span aria-hidden="true">⚙</span>Configuration <small data-owner-access-label>Verified</small></button>
-
-        <p class="nav-label">Account</p>
-        <button class="side-link" type="button" data-view="settings"><span aria-hidden="true">◎</span>Settings &amp; help</button>
-      </nav>
-
-      <div class="access-card" data-access-card>
-        <span class="access-icon" aria-hidden="true" data-access-icon>⌁</span>
-        <div><strong data-access-card-title>Guest access</strong><small data-access-card-copy>Sign in will securely verify your community access.</small></div>
-      </div>
-
-      <div class="sidebar-footer">
-        <a href="index.html">Return to website</a>
-        <a href="privacy.html">Privacy</a>
-      </div>
-    </aside>
-    <button class="sidebar-scrim" type="button" aria-label="Close dashboard menu" data-sidebar-scrim></button>
-
-    <main id="dashboard-content" class="dashboard-main">
-      <div class="preview-banner" role="status" data-live-banner>
-        <span aria-hidden="true">◉</span>
-        <p><strong data-live-banner-title>Connecting to live server status.</strong> <span data-live-banner-message>Public DayZ information is loading from the bot. Sign in to securely load your own survivor profile and economy account.</span></p>
-      </div>
-      <div class="auth-message" role="status" data-auth-message hidden></div>
-
-      <section class="dashboard-view active" data-view-panel="overview" aria-labelledby="overview-title">
-        <div class="view-heading">
-          <div class="overview-heading-copy"><p class="breadcrumb">Dashboard / Overview</p><h1 id="overview-title">Welcome, survivor.</h1><p data-welcome-copy>Live server information and a secure path into your World War Z community account.</p></div>
-          <div class="overview-command-mark" aria-hidden="true"><img src="assets/world-war-z-logo.webp" alt=""><span>CONTROL CENTRE</span></div>
-          <div class="heading-actions"><button class="secondary-action" type="button" data-jump="commands">View commands</button><button class="primary-action" type="button" data-open-login data-auth-cta>Connect Discord</button></div>
-        </div>
-
-        <div class="metric-grid">
-          <article class="metric-card"><div><span class="metric-icon" data-live-status-class aria-hidden="true">◉</span><small>DayZ server</small></div><strong data-server-status>Loading</strong><p data-server-status-note>Contacting the Railway API</p></article>
-          <article class="metric-card"><div><span class="metric-icon" aria-hidden="true">♙</span><small>Players</small></div><strong data-player-count>— <em>/ —</em></strong><p>Live server population</p></article>
-          <article class="metric-card"><div><span class="metric-icon" aria-hidden="true">◷</span><small>Restart cycle</small></div><strong>Every 3h</strong><p>Configured schedule</p></article>
-          <article class="metric-card"><div><span class="metric-icon" aria-hidden="true">$</span><small>Your balance</small></div><strong data-account-balance>—</strong><p data-account-balance-note>Discord connection required</p></article>
-        </div>
-
-        <div class="dashboard-grid main-grid">
-          <article class="panel server-panel">
-            <div class="panel-heading"><div><p class="panel-kicker">Main server</p><h2 data-server-name>World War Z</h2></div><span class="status-badge" data-server-status-badge><i></i><span data-status-label>Loading live status</span></span></div>
-            <div class="server-hero">
-              <div><span>Platform</span><strong data-server-platform>PlayStation 4 &amp; 5</strong></div>
-              <div><span>Map</span><strong data-server-map>Chernarus</strong></div>
-              <div><span>Capacity</span><strong data-server-capacity>Loading…</strong></div>
-              <div><span>Host</span><strong>Nitrado</strong></div>
-            </div>
-            <div class="restart-track"><div class="restart-progress" style="--progress:0%"></div></div>
-            <div class="restart-labels"><span>Restart cycle <strong>Every 3 hours</strong></span><span>Last live update <strong data-live-updated-short>Loading…</strong></span></div>
-            <button class="text-action" type="button" data-jump="server">Open server details <span aria-hidden="true">→</span></button>
-          </article>
-
-          <article class="panel quick-panel">
-            <div class="panel-heading"><div><p class="panel-kicker">Shortcuts</p><h2>Quick actions</h2></div><span class="lock-label">Protected access</span></div>
-            <div class="quick-grid">
-              <button type="button" data-server-action="restart" data-staff-only hidden><span aria-hidden="true">↻</span><strong>Restart server</strong><small data-server-action-note>Checking live server state</small></button>
-              <button type="button" data-jump="players" data-profile-shortcut disabled><span aria-hidden="true">♙</span><strong>My profile</strong><small data-profile-shortcut-note>Sign in required</small></button>
-              <button type="button" disabled><span aria-hidden="true">◇</span><strong>Open ticket</strong><small>Sign in required</small></button>
-              <button type="button" data-jump="staff" data-player-lookup-shortcut data-staff-only hidden><span aria-hidden="true">⚑</span><strong>Player administration</strong><small>Protected search &amp; actions</small></button>
-            </div>
-          </article>
-        </div>
-
-        <div class="dashboard-grid lower-grid">
-          <article class="panel activity-panel">
-            <div class="panel-heading"><div><p class="panel-kicker">Demonstration feed</p><h2>Recent activity</h2></div><span class="muted-label">Preview entries</span></div>
-            <ol class="activity-list">
-              <li><span class="activity-symbol green">✓</span><div><strong>Configuration validation passed</strong><small>Example event · 14 minutes ago</small></div></li>
-              <li><span class="activity-symbol red">↻</span><div><strong>Scheduled restart completed</strong><small>Example event · 1 hour ago</small></div></li>
-              <li><span class="activity-symbol">◇</span><div><strong>Support ticket resolved</strong><small>Example event · 3 hours ago</small></div></li>
-            </ol>
-          </article>
-          <article class="panel roadmap-panel">
-            <div class="panel-heading"><div><p class="panel-kicker">Development</p><h2>Connection roadmap</h2></div></div>
-            <ol class="mini-roadmap"><li class="done"><i></i><div><strong>Dashboard interface</strong><small>Complete</small></div></li><li class="done"><i></i><div><strong>Railway API</strong><small>Live public status</small></div></li><li class="done"><i></i><div><strong>Discord sign-in</strong><small>Secure member data</small></div></li><li class="done"><i></i><div><strong>Chernarus map</strong><small>Public POI viewer</small></div></li></ol>
-          </article>
-        </div>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="server" aria-labelledby="server-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Server status</p><h1 id="server-title">Server status.</h1><p>Live public information supplied by the World War Z Bot on Railway.</p></div><span class="status-badge large" data-server-status-badge><i></i><span data-status-label>Loading live status</span></span></div>
-        <div class="dashboard-grid server-detail-grid">
-          <article class="panel map-preview-card"><img src="assets/chernarus-vector.svg" alt="WWZ vector road overview of Chernarus" loading="lazy"><div><p class="panel-kicker">ChernarusPlus</p><h2 data-map-name>CHERNARUS</h2><p><span data-map-server-name>World War Z</span> · <span data-map-platform>PlayStation</span></p><button class="primary-action" type="button" data-jump="map">Open interactive map</button></div></article>
-          <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Server details</p><h2>Current session</h2></div></div><dl class="detail-list"><div><dt>Status</dt><dd data-detail-status>Loading…</dd></div><div><dt>Players</dt><dd data-detail-players>— / —</dd></div><div><dt>Platform</dt><dd data-detail-platform>PlayStation 4 &amp; 5</dd></div><div><dt>Map</dt><dd data-detail-map>Chernarus</dd></div><div><dt>Last API update</dt><dd data-live-updated>Loading…</dd></div><div><dt>Information source</dt><dd data-information-source>Railway dashboard API</dd></div></dl></article>
-          <article class="panel full-width"><div class="panel-heading"><div><p class="panel-kicker">Live operations</p><h2>Operational health</h2></div><span class="lock-label">Sanitized public health</span></div><div class="operations-health-grid"><dl class="detail-list"><div><dt>Railway bot uptime</dt><dd data-operations-uptime>Loading…</dd></div><div><dt>Discord gateway</dt><dd data-operations-discord>Loading…</dd></div><div><dt>Nitrado state</dt><dd data-operations-nitrado>Loading…</dd></div></dl><dl class="detail-list"><div><dt>Last successful update</dt><dd data-operations-updated>Loading…</dd></div><div><dt>Next scheduled restart</dt><dd data-operations-next-restart>Not exposed</dd></div><div><dt>Privacy</dt><dd>Names and credentials excluded</dd></div></dl></div></article>
-          <article class="panel full-width"><div class="panel-heading"><div><p class="panel-kicker">Server connection</p><h2>Public status</h2></div><span class="lock-label">Safe read-only information</span></div><div class="operation-grid"><button type="button" data-refresh-status><strong>Refresh live status</strong><small>Safe public read-only request</small></button></div></article>
-        </div>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="map" aria-labelledby="map-title" hidden>
-        <div class="view-heading map-view-heading">
-          <div><p class="breadcrumb">Dashboard / Chernarus map</p><h1 id="map-title">Chernarus road map.</h1><p>Explore public landmarks and approved community points of interest on a custom vector map. Roads, labels and settlement footprints stay sharp while you drag, zoom and select markers for details.</p></div>
-          <span class="status-badge online map-public-badge"><i></i>Public read only</span>
-        </div>
-
-        <div class="map-toolbar panel">
-          <label class="command-search map-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search map points</span><input type="search" placeholder="Search locations or categories…" autocomplete="off" data-map-search></label>
-          <div class="filter-list map-filter-list" aria-label="Filter map point categories" data-map-filters></div>
-          <span class="map-result-count"><strong data-map-result-count>0</strong> visible</span>
-        </div>
-
-        <div class="map-workspace">
-          <article class="panel interactive-map-panel">
-            <div class="map-frame" data-map-frame tabindex="0" aria-label="Interactive Chernarus map. Use arrow keys to pan, plus and minus to zoom, and zero to reset.">
-              <div class="map-stage" data-map-stage>
-                <img class="map-layer active" src="assets/chernarus-vector.svg" alt="Custom WWZ vector road map of ChernarusPlus" draggable="false" data-map-image data-map-layer-image="vector">
-                <div class="map-markers" data-map-markers></div>
-              </div>
-              <div class="map-loading" data-map-loading role="status"><span></span><strong>Loading Chernarus map…</strong></div>
-              <div class="map-controls" aria-label="Map controls">
-                <button type="button" data-map-zoom-in aria-label="Zoom in">+</button>
-                <button type="button" data-map-zoom-out aria-label="Zoom out">−</button>
-                <button type="button" data-map-reset aria-label="Reset map view">⌂</button>
-              </div>
-              <div class="map-coordinate-readout"><span>Cursor</span><strong data-map-coordinates>X — · Z —</strong></div>
-            </div>
-            <footer class="map-source-note">
-              <span data-map-layer-note>WWZ Vector Road Map · custom schematic adaptation using official CE data © Bohemia Interactive, used under ADPL-SA.</span>
-              <a href="https://github.com/BohemiaInteractive/DayZ-Central-Economy/tree/master/CETool/ChernarusPlus" target="_blank" rel="noreferrer">Official source</a>
-            </footer>
-          </article>
-
-          <aside class="map-side-panel">
-            <article class="panel map-details" data-map-details aria-live="polite">
-              <div class="map-details-empty" data-map-details-empty><span aria-hidden="true">⌖</span><p class="panel-kicker">Location details</p><h2>Select a marker.</h2><p>Choose a marker on the map or from the location list below.</p></div>
-              <div data-map-details-content hidden>
-                <span class="map-category-badge" data-map-detail-category>Landmark</span>
-                <h2 data-map-detail-name>Location</h2>
-                <p data-map-detail-description></p>
-                <dl class="map-coordinate-list"><div><dt>DayZ X</dt><dd data-map-detail-x>—</dd></div><div><dt>DayZ Z</dt><dd data-map-detail-z>—</dd></div><div><dt>Visibility</dt><dd>Public</dd></div></dl>
-                <button class="secondary-action" type="button" data-map-focus-selected>Centre on marker</button>
-              </div>
-            </article>
-
-            <article class="panel map-location-panel">
-              <div class="panel-heading"><div><p class="panel-kicker">Public points</p><h2>Locations</h2></div></div>
-              <div class="map-location-list" data-map-location-list></div>
-              <p class="empty-state map-empty" data-map-empty hidden>No public locations match this search.</p>
-            </article>
-          </aside>
-        </div>
-
-        <div class="security-notice map-safety-notice"><span aria-hidden="true">✓</span><div><strong>Safe public map</strong><p>Live players, private bases, Admin positions and unpublished events are never included. Owner POI editing will be added later through protected Railway endpoints with validation and audit history.</p></div></div>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="commands" aria-labelledby="commands-dashboard-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Commands</p><h1 id="commands-dashboard-title">Command library.</h1><p>Search the current top-level bot commands by name, description or category.</p></div><span class="catalogue-count"><strong data-command-count>0</strong> bot commands</span></div>
-        <div class="command-toolbar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search commands</span><input type="search" placeholder="Search commands…" autocomplete="off" data-command-search></label><div class="filter-list" aria-label="Filter command categories" data-command-filters></div></div>
-        <div class="command-results" data-command-results aria-live="polite"></div>
-        <p class="empty-state" data-command-empty hidden>No bot commands match your search.</p>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="economy" aria-labelledby="economy-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Economy</p><h1 id="economy-title">Your survivor economy.</h1><p>Live, read-only wallet and economy statistics belonging only to the signed-in member.</p></div><span class="status-badge" data-economy-badge><i></i><span data-economy-badge-label>Sign in required</span></span></div>
-        <div class="locked-hero panel" data-economy-guest><div class="locked-copy"><span class="large-lock" aria-hidden="true">$</span><p class="panel-kicker">Personal account required</p><h2>Connect your Discord profile.</h2><p>Sign in to securely load your own verified wallet. Other members' account data is never returned by this page.</p><button class="primary-action" type="button" data-open-login>Sign in with Discord</button></div><div class="balance-preview"><small>Protected wallet</small><strong>PRIVATE</strong><span>Railway session required</span><div class="balance-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
-        <div data-economy-unlinked hidden><div class="security-notice"><span aria-hidden="true">⌁</span><div><strong>No verified survivor profile found</strong><p>Use <code>/account link</code> in Discord with your exact PlayStation ID, then join the DayZ server to complete verification.</p></div></div></div>
-        <div data-economy-content hidden>
-          <div class="metric-grid"><article class="metric-card featured"><div><span class="metric-icon" aria-hidden="true">$</span><small>Wallet balance</small></div><strong data-economy-balance>—</strong><p>Live verified balance</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">♢</span><small>Community jackpot</small></div><strong data-economy-jackpot>—</strong><p>Current shared prize</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">🔥</span><small>Heat</small></div><strong data-economy-heat>○○○○○</strong><p>Current underworld heat</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">✓</span><small>Daily streak</small></div><strong data-economy-daily>0</strong><p>Consecutive claims</p></article></div>
-          <div class="dashboard-grid account-data-grid"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Lifetime ledger</p><h2>Economy totals</h2></div><span class="muted-label">Read only</span></div><dl class="detail-list"><div><dt>Total earned</dt><dd data-economy-earned>—</dd></div><div><dt>Total spent</dt><dd data-economy-spent>—</dd></div><div><dt>Work completed</dt><dd data-economy-work>—</dd></div><div><dt>Gambling record</dt><dd data-economy-gambling>—</dd></div><div><dt>Crime record</dt><dd data-economy-crime>—</dd></div><div><dt>Robbery protection</dt><dd data-economy-protection>Inactive</dd></div></dl></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Your ledger</p><h2>Recent transactions</h2></div><span class="muted-label">Latest six</span></div><ol class="activity-list" data-economy-transactions><li><span class="activity-symbol">…</span><div><strong>Loading your activity</strong><small>Secure Railway request</small></div></li></ol><p class="table-note" data-economy-empty hidden>No economy transactions have been recorded yet.</p></article></div>
-        </div>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="players" aria-labelledby="players-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / My profile</p><h1 id="players-title">Your survivor profile.</h1><p>Live DayZ identity, activity and PvP statistics for the signed-in Discord member only.</p></div><span class="status-badge" data-profile-badge><i></i><span data-profile-badge-label>Sign in required</span></span></div>
-        <div class="locked-hero panel" data-profile-guest><div class="locked-copy"><span class="large-lock" aria-hidden="true">♙</span><p class="panel-kicker">Private member profile</p><h2>Sign in to view your survivor.</h2><p>Railway matches your verified Discord identity to your own PlayStation survivor record. The browser cannot choose another member ID.</p><button class="primary-action" type="button" data-open-login>Sign in with Discord</button></div></div>
-        <div data-profile-unlinked hidden><div class="security-notice"><span aria-hidden="true">⌁</span><div><strong>No verified survivor profile found</strong><p>Use <code>/account link</code> in Discord with your exact PlayStation ID, then join the DayZ server to finish the live verification.</p></div></div></div>
-        <div data-profile-content hidden>
-          <article class="panel survivor-identity"><div class="survivor-mark" aria-hidden="true">WZ</div><div><p class="panel-kicker">Verified survivor</p><h2 data-profile-psn>PlayStation ID</h2><p><span class="table-status" data-profile-online-state><i></i><span data-profile-status>Offline</span></span> · Linked <span data-profile-linked>—</span></p></div><span class="validation-pass">Verified</span></article>
-          <div class="metric-grid"><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">◷</span><small>Total playtime</small></div><strong data-profile-playtime>—</strong><p>Tracked from ADM sessions</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">↻</span><small>Sessions</small></div><strong data-profile-sessions>—</strong><p>Recorded server joins</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">☠</span><small>K/D ratio</small></div><strong data-profile-kd>—</strong><p><span data-profile-kills>0</span> kills · <span data-profile-deaths>0</span> deaths</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">🏆</span><small>Event wins</small></div><strong data-profile-event-wins>—</strong><p><span data-profile-flags>0</span> flags captured</p></article></div>
-          <div class="dashboard-grid account-data-grid"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Survivor activity</p><h2>Server history</h2></div><span class="muted-label">Live</span></div><dl class="detail-list"><div><dt>First joined</dt><dd data-profile-first-joined>—</dd></div><div><dt>Last seen</dt><dd data-profile-last-seen>—</dd></div><div><dt>Faction</dt><dd data-profile-faction>None</dd></div><div><dt>Reputation</dt><dd data-profile-reputation>0</dd></div></dl></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">PvP intelligence</p><h2>Combat record</h2></div><span class="muted-label">Your data</span></div><dl class="detail-list"><div><dt>Current streak</dt><dd data-profile-streak>0</dd></div><div><dt>Longest kill</dt><dd data-profile-longest>Not recorded</dd></div><div><dt>Favourite weapon</dt><dd data-profile-weapon>Not recorded</dd></div></dl></article></div>
-        </div>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="tickets" aria-labelledby="tickets-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Tickets</p><h1 id="tickets-title">Support centre.</h1><p>Create, follow and respond to community support requests in one place.</p></div><button class="primary-action" type="button" data-open-login data-auth-cta>Connect Discord</button></div>
-        <div class="dashboard-grid ticket-grid"><article class="panel empty-panel"><span aria-hidden="true">◇</span><h2>Ticket connection coming later</h2><p>Discord identity can be verified now. Open and resolved tickets will connect in a later stage.</p><button class="secondary-action" type="button" data-open-login>Sign in with Discord</button></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">How it will work</p><h2>Structured support</h2></div></div><ol class="support-steps"><li><span>01</span><div><strong>Choose a category</strong><small>Direct the request to the correct team.</small></div></li><li><span>02</span><div><strong>Provide the details</strong><small>Keep evidence and context together.</small></div></li><li><span>03</span><div><strong>Follow the outcome</strong><small>Receive updates without Admin DMs.</small></div></li></ol></article></div>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="staff" aria-labelledby="staff-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Admin tools</p><h1 id="staff-title">Administration centre.</h1><p>Protected player moderation, economy administration and server operations for verified Admins.</p></div><span class="restricted-badge">Admin verified</span></div>
-        <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Fresh authorization on every request</strong><p>Railway rechecks your current Discord membership and Admin or Owner access before every player search, moderation action and server operation. All player changes require a recorded reason and an explicit confirmation for the selected player.</p></div></div>
-        <article class="panel moderation-case-panel" data-staff-only data-moderation-case-panel>
-          <div class="panel-heading"><div><p class="panel-kicker">Stage 7B3A case management</p><h2>Active moderation cases</h2></div><button class="secondary-action compact-action" type="button" data-refresh-moderation-cases>Refresh cases</button></div>
-          <p class="panel-intro">Warnings, permanent bans and scheduled temporary bans remain attached to numbered cases. Railway processes due temporary unbans automatically.</p>
-          <div class="case-summary-grid"><div><span>Active cases</span><strong data-moderation-case-active>—</strong></div><div><span>Temporary bans</span><strong data-moderation-case-temporary>—</strong></div><div><span>Expiring within 24h</span><strong data-moderation-case-expiring>—</strong></div></div>
-          <ol class="activity-list moderation-case-list" data-moderation-case-list aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading protected cases</strong><small>Railway is verifying current Admin access</small></div></li></ol>
-          <p class="table-note" data-moderation-case-empty hidden>No active moderation cases are recorded.</p>
-          <p class="table-note history-error" data-moderation-case-error hidden>Moderation cases are temporarily unavailable. Use Refresh cases to try again.</p>
-        </article>
-        <article class="panel current-banlists-panel" data-staff-only data-current-banlists-panel>
-          <div class="panel-heading"><div><p class="panel-kicker">Live enforcement state</p><h2>Current ban lists</h2></div><button class="secondary-action compact-action" type="button" data-refresh-banlists>Refresh ban lists</button></div>
-          <p class="panel-intro">Read the current Discord and Nitrado DayZ ban lists directly from their live services. Entries created outside the dashboard remain visible but may not have a numbered case or linked expiry.</p>
-          <div class="dashboard-grid admin-private-grid current-banlist-grid">
-            <article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Discord enforcement</p><h3>Discord ban list</h3></div><span class="muted-label" data-discord-banlist-count>—</span></div><ol class="activity-list current-banlist-list" data-discord-banlist-list aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading Discord bans</strong><small>Railway is verifying current Admin access</small></div></li></ol><p class="table-note" data-discord-banlist-empty hidden>No accounts are currently banned from Discord.</p><p class="table-note history-error" data-discord-banlist-error hidden>The Discord ban list is temporarily unavailable.</p></article>
-            <article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Nitrado enforcement</p><h3>DayZ ban list</h3></div><span class="muted-label" data-dayz-banlist-count>—</span></div><ol class="activity-list current-banlist-list" data-dayz-banlist-list aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading DayZ bans</strong><small>Railway is contacting the Nitrado ban list</small></div></li></ol><p class="table-note" data-dayz-banlist-empty hidden>No PlayStation IDs are currently banned from DayZ.</p><p class="table-note history-error" data-dayz-banlist-error hidden>The Nitrado DayZ ban list is temporarily unavailable.</p></article>
-          </div>
-          <p class="table-note banlist-checked" data-banlist-checked>Ban lists have not been refreshed during this session.</p>
-        </article>
-        <div class="metric-grid three"><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">⌕</span><small>Player search</small></div><strong>Live</strong><p>PSN or Discord display name</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">15</span><small>Result limit</small></div><strong>15</strong><p>No database-wide listings</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">✓</span><small>Write controls</small></div><strong>Protected</strong><p>Confirmation and audit required</p></article></div>
-
-        <article class="panel admin-player-search-panel" data-admin-player-search-panel>
-          <div class="panel-heading"><div><p class="panel-kicker">Secure player lookup</p><h2>Player administration</h2></div><span class="lock-label">Admin only · audited actions</span></div>
-          <form class="admin-player-search" data-admin-player-search-form>
-            <label for="admin-player-search"><span>PlayStation ID or Discord display name</span><input id="admin-player-search" type="search" minlength="3" maxlength="64" autocomplete="off" spellcheck="false" placeholder="Enter at least 3 characters" data-admin-player-search-input></label>
-            <button class="primary-action" type="submit" data-admin-player-search-button>Search players</button>
-          </form>
-          <p class="table-note">Searches are limited to 15 matches. Search results never return raw Discord IDs, player database IDs, DayZ UIDs, positions or credentials. Protected details expose only the active warning and private-note references required for edit/remove controls, plus staff-only content and audit records.</p>
-          <div class="admin-player-state" data-admin-player-search-state role="status">Enter at least three characters to search.</div>
-          <div class="admin-player-results" data-admin-player-results aria-live="polite"></div>
-          <p class="table-note" data-admin-player-empty hidden>No matching player records were found.</p>
-          <p class="table-note history-error" data-admin-player-error hidden>Player search is temporarily unavailable.</p>
-        </article>
-
-        <article class="panel admin-player-detail" data-admin-player-detail hidden>
-          <div class="panel-heading"><div><p class="panel-kicker">Protected player record</p><h2 data-admin-player-psn>Selected player</h2></div><span class="status-badge" data-admin-player-badge><i></i><span data-admin-player-badge-label>Loading</span></span></div>
-          <div class="security-notice admin-unlinked-notice" data-admin-player-unlinked hidden><span aria-hidden="true">⌁</span><div><strong>Unlinked DayZ player</strong><p>This PlayStation ID exists in the DayZ activity registry but is not linked to a verified Discord account. Linked profile, playtime and moderation data are unavailable.</p></div></div>
-          <article class="survivor-identity admin-player-identity"><div class="survivor-mark" aria-hidden="true">WZ</div><div><p class="panel-kicker">Player identity</p><h3 data-admin-player-discord>Discord profile unavailable</h3><p><span class="table-status" data-admin-player-online-state><i></i><span data-admin-player-status>Offline</span></span> · <span data-admin-player-link-state>Unlinked</span></p></div><span class="muted-label" data-admin-player-verified>Not verified</span></article>
-          <div class="metric-grid"><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">◷</span><small>Playtime</small></div><strong data-admin-player-playtime>—</strong><p>Tracked ADM sessions</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">↻</span><small>Sessions</small></div><strong data-admin-player-sessions>—</strong><p>Recorded joins</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">☠</span><small>K/D ratio</small></div><strong data-admin-player-kd>—</strong><p><span data-admin-player-kills>0</span> kills · <span data-admin-player-deaths>0</span> deaths</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">!</span><small>Active warnings</small></div><strong data-admin-player-warnings>0</strong><p>Current moderation count</p></article><article class="metric-card"><div><span class="metric-icon" aria-hidden="true">$</span><small>Economy balance</small></div><strong data-admin-player-balance>—</strong><p>Verified linked wallet</p></article></div>
-          <article class="panel inset-panel player-action-panel" data-admin-player-actions><div class="panel-heading"><div><p class="panel-kicker">Stage 7B3A controls</p><h3>Player actions</h3></div><span class="lock-label">Numbered cases · protected confirmation</span></div><div class="player-action-grid"><button type="button" data-player-action="add_note"><strong>Add private note</strong><small>Staff-only case context</small></button><button type="button" data-player-action="add_warning" data-linked-action><strong>Add warning</strong><small>Creates an active moderation case</small></button><button type="button" data-player-action="economy_adjust" data-economy-action><strong>Adjust balance</strong><small>Add, remove or set money</small></button><button type="button" data-player-action="discord_kick" data-linked-action><strong>Kick from Discord</strong><small>Current server members only</small></button><button type="button" data-player-action="discord_ban" data-linked-action class="danger-outline"><strong>Ban from Discord</strong><small>Permanent or scheduled temporary ban</small></button><button type="button" data-player-action="discord_unban" data-linked-action><strong>Unban from Discord</strong><small>Close active Discord ban cases</small></button><button type="button" data-player-action="dayz_ban" class="danger-outline"><strong>Ban from DayZ</strong><small>Permanent or scheduled Nitrado ban</small></button><button type="button" data-player-action="dayz_unban"><strong>Unban from DayZ</strong><small>Close active DayZ ban cases</small></button><button type="button" data-player-action="unlink" data-linked-action data-owner-only class="danger-outline"><strong>Unlink account</strong><small>Owner only · recovery snapshot first</small></button></div></article>
-          <div class="dashboard-grid account-data-grid"><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Activity</p><h3>Server history</h3></div><span class="muted-label">Read only</span></div><dl class="detail-list"><div><dt>First seen</dt><dd data-admin-player-first-seen>—</dd></div><div><dt>Last seen</dt><dd data-admin-player-last-seen>—</dd></div><div><dt>Linked</dt><dd data-admin-player-linked-at>Not linked</dd></div><div><dt>Current session</dt><dd data-admin-player-session-start>Offline</dd></div></dl></article><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">PvP intelligence</p><h3>Combat record</h3></div><span class="muted-label">Sanitized</span></div><dl class="detail-list"><div><dt>Current streak</dt><dd data-admin-player-streak>0</dd></div><div><dt>Longest kill</dt><dd data-admin-player-longest>Not recorded</dd></div><div><dt>Favourite weapon</dt><dd data-admin-player-weapon>Not recorded</dd></div></dl></article></div>
-          <div class="dashboard-grid admin-private-grid"><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Private staff record</p><h3>Notes</h3></div><span class="muted-label">Latest 10</span></div><ol class="activity-list" data-admin-player-notes aria-live="polite"></ol><p class="table-note" data-admin-player-notes-empty hidden>No private staff notes have been added.</p></article><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Active moderation</p><h3>Warnings</h3></div><span class="muted-label">Editable · removable</span></div><ol class="activity-list" data-admin-player-active-warnings aria-live="polite"></ol><p class="table-note" data-admin-player-warnings-empty hidden>No active warnings are recorded.</p></article></div>
-          <div class="panel-heading moderation-heading"><div><p class="panel-kicker">Moderation history</p><h3>Recent Discord records</h3></div><span class="muted-label">Latest 10</span></div>
-          <ol class="activity-list admin-moderation-history" data-admin-player-moderation-history aria-live="polite"></ol>
-          <p class="table-note" data-admin-player-moderation-empty hidden>No moderation records have been recorded for this linked account.</p>
-          <div class="dashboard-grid admin-private-grid"><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Nitrado enforcement</p><h3>DayZ ban history</h3></div><span class="muted-label" data-admin-player-dayz-ban-state>Not banned</span></div><ol class="activity-list" data-admin-player-dayz-bans aria-live="polite"></ol><p class="table-note" data-admin-player-dayz-bans-empty hidden>No DayZ ban actions have been recorded.</p></article><article class="panel inset-panel"><div class="panel-heading"><div><p class="panel-kicker">Permanent audit</p><h3>Dashboard actions</h3></div><span class="muted-label">Latest 20</span></div><ol class="activity-list" data-admin-player-action-history aria-live="polite"></ol><p class="table-note" data-admin-player-action-history-empty hidden>No dashboard player actions have been recorded.</p></article></div>
-        </article>
-
-        <article class="panel" data-staff-only data-admin-server-controls hidden><div class="panel-heading"><div><p class="panel-kicker">Admin operations</p><h2>Protected server controls</h2></div><span class="lock-label" data-server-control-status>Admin verified · controls connected</span></div><div class="operation-grid"><button type="button" data-server-action="restart"><strong>Restart server</strong><small data-server-action-note>Checking live server state</small></button><button type="button" data-server-action="stop"><strong>Stop server</strong><small data-server-action-note>Checking live server state</small></button><button type="button" data-server-action="start"><strong>Start server</strong><small data-server-action-note>Checking live server state</small></button></div></article>
-        <article class="panel" data-staff-only data-server-action-history-panel hidden><div class="panel-heading"><div><p class="panel-kicker">Protected audit</p><h2>Recent server operations</h2></div><button class="secondary-action compact-action" type="button" data-refresh-server-actions>Refresh history</button></div><ol class="activity-list server-action-history" data-server-action-history aria-live="polite"><li><span class="activity-symbol">…</span><div><strong>Loading protected history</strong><small>Railway is verifying Admin access</small></div></li></ol><p class="table-note" data-server-action-history-empty hidden>No Start, Stop or Restart actions have been recorded yet.</p><p class="table-note history-error" data-server-action-history-error hidden>History is temporarily unavailable. Use Refresh history to try again.</p></article>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="configuration" aria-labelledby="configuration-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Configuration</p><h1 id="configuration-title">Configuration control.</h1><p>Back up, validate, compare and restore DayZ configuration files safely.</p></div><span class="restricted-badge">Owner access</span></div>
-        <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Safe by design</strong><p>Destructive actions will require a confirmation, permission check, fresh backup and permanent audit record.</p></div></div>
-        <div class="config-flow"><article class="flow-card complete"><span>01</span><strong>Back up</strong><small>Capture current files</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>02</span><strong>Validate</strong><small>Check syntax and structure</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>03</span><strong>Compare</strong><small>Review every change</small></article><i aria-hidden="true">→</i><article class="flow-card"><span>04</span><strong>Restore</strong><small>Owner confirmation</small></article></div>
-        <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Example history</p><h2>Recent backups</h2></div><button class="secondary-action" type="button" disabled>Create backup</button></div><div class="responsive-table"><table><thead><tr><th>Backup</th><th>Created</th><th>Files</th><th>Validation</th><th>Action</th></tr></thead><tbody><tr><td>Pre-update example</td><td>Today, 8:42 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled>Compare</button></td></tr><tr><td>Scheduled example</td><td>Yesterday, 9:00 PM</td><td>12</td><td><span class="validation-pass">Passed</span></td><td><button class="table-button" disabled>Compare</button></td></tr></tbody></table></div><p class="table-note">Example history only. No Nitrado files are present on this website.</p></article>
-      </section>
-
-      <section class="dashboard-view" data-view-panel="settings" aria-labelledby="settings-title" hidden>
-        <div class="view-heading"><div><p class="breadcrumb">Dashboard / Settings &amp; help</p><h1 id="settings-title">Settings &amp; help.</h1><p>Connection status, privacy information and answers about the dashboard.</p></div></div>
-        <div class="dashboard-grid settings-grid"><article class="panel connection-panel"><div class="panel-heading"><div><p class="panel-kicker">Account</p><h2>Discord connection</h2></div><span class="status-badge" data-auth-badge><i></i><span data-auth-badge-label>Checking connection</span></span></div><div class="account-summary" data-account-summary hidden><span class="account-avatar" data-account-avatar aria-hidden="true">WZ</span><div><strong data-account-display-name>Survivor</strong><small><span data-account-username>Discord account</span> · <span data-account-level>Member</span></small></div></div><p data-auth-description>Discord sign-in securely verifies your World War Z membership and current access level.</p><div class="auth-actions"><button class="primary-action" type="button" data-open-login data-auth-guest-action>Sign in with Discord</button><button class="secondary-action" type="button" data-sign-out hidden>Sign out</button></div><a class="inline-link" href="privacy.html">Read the privacy information <span aria-hidden="true">→</span></a></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Access levels</p><h2>Role-based permissions</h2></div></div><ul class="role-list"><li><span>Visitor</span><small>Public server information</small></li><li><span>Member</span><small>Verified profile and personal economy data</small></li><li><span>Admin</span><small>Moderation and protected server controls</small></li><li><span>Owner</span><small>Verified access to owner-only configuration</small></li></ul></article></div>
-        <article class="panel help-panel"><div class="panel-heading"><div><p class="panel-kicker">Questions</p><h2>Dashboard help</h2></div></div><details open><summary>Why are some buttons still locked?</summary><p>Start, Stop and Restart are enabled only for a safe live server state. Player actions also depend on whether the selected record is linked, verified or currently banned. Unlinking is Owner-only. Ticket and configuration write actions remain locked until their own protected endpoints are completed.</p></details><details><summary>Which displayed information is live?</summary><p>Server status, population, map and platform are public and live. After sign-in, your Discord access, linked PlayStation profile, activity, PvP statistics, wallet and personal ledger are also live. Verified Admin player records, notes, warnings, balances and audit history are read directly from Railway's protected API.</p></details><details><summary>Who can use protected actions?</summary><p>Only a signed-in Admin or Owner can see them. Railway rechecks current Discord membership, permissions and the selected target after the confirmation prompt. Owner and self-target protections remain server-side, and every accepted or rejected request is audited.</p></details><details><summary>How does the Chernarus map work?</summary><p>The dedicated public map uses one locally hosted vector road map with pan, zoom, search, filters and read-only public markers. It stays sharp at every zoom and does not contact a third-party map service. Private or live operational locations are not published.</p></details></article>
-      </section>
-
-      <footer class="dashboard-footer"><p class="bohemia-disclaimer">This website is not affiliated or authorized by Bohemia Interactive a.s. Bohemia Interactive, ARMA, DAYZ and all associated logos and designs are trademarks or registered trademarks of Bohemia Interactive a.s.</p><p>Live server status, secure member self-service, controlled player administration and audited Admin server controls.</p><div><a href="index.html">Website</a><a href="changelog.html">Changelog</a><a href="privacy.html">Privacy</a><a href="https://discord.gg/worldwarzps" target="_blank" rel="noreferrer">Discord</a></div><p>&copy; <span data-year></span> World War Z Community</p></footer>
-    </main>
-  </div>
-
-  <dialog class="login-dialog" data-login-dialog aria-labelledby="login-title">
-    <form method="dialog">
-      <button class="dialog-close" value="close" aria-label="Close sign-in">×</button>
-      <span class="discord-mark" aria-hidden="true">◈</span>
-      <p class="panel-kicker">Secure Discord OAuth</p>
-      <h2 id="login-title">Sign in with Discord</h2>
-      <p>Discord will identify your account. Railway will then confirm your current World War Z membership and assign member, admin or owner access.</p>
-      <ul><li><span aria-hidden="true">✓</span>Requests only Discord's basic identify permission</li><li><span aria-hidden="true">✓</span>Rechecks community membership and roles on Railway</li><li><span aria-hidden="true">✓</span>Keeps Discord and Nitrado secrets off this website</li></ul>
-      <div class="dialog-notice" data-auth-dialog-notice><strong>Secure connection</strong><span>Your dashboard session lasts for this browser tab and expires automatically.</span></div>
-      <button class="discord-button wide" type="button" data-start-discord-login disabled>Checking Discord sign-in…</button>
-      <button class="dialog-cancel" value="close">Return to dashboard</button>
-    </form>
-  </dialog>
-
-  <dialog class="login-dialog restart-dialog" data-server-action-dialog aria-labelledby="server-action-dialog-title">
-    <form method="dialog" data-server-action-form>
-      <button class="dialog-close" type="button" aria-label="Close server action confirmation" data-server-action-cancel>×</button>
-      <span class="restart-mark" aria-hidden="true" data-server-action-mark>↻</span>
-      <p class="panel-kicker">Protected Admin operation</p>
-      <h2 id="server-action-dialog-title" data-server-action-title>Confirm server action?</h2>
-      <p data-server-action-description>Review the warning and confirm only when the server is ready.</p>
-      <div class="restart-warning"><strong>Are you sure?</strong><span data-server-action-warning>Selecting Yes will immediately submit this protected request.</span></div>
-      <ul class="restart-confirmation-list"><li><span aria-hidden="true">!</span><span data-server-action-impact>Current players may be affected</span></li><li><span aria-hidden="true">✓</span><span>Railway will recheck your Admin access and server state</span></li><li><span aria-hidden="true">✓</span><span>The request and outcome will be audited</span></li></ul>
-      <label class="dialog-field"><span>Reason <small>Optional · 200 characters maximum</small></span><textarea rows="3" maxlength="200" placeholder="Example: Scheduled community maintenance" data-server-action-reason></textarea></label>
-      <div class="restart-dialog-message" role="status" data-server-action-dialog-message hidden></div>
-      <button class="primary-action danger-action wide" type="submit" data-confirm-server-action disabled>Yes, continue</button>
-      <button class="dialog-cancel" type="button" data-server-action-cancel>No, cancel and return</button>
-    </form>
-  </dialog>
-
-  <dialog class="login-dialog restart-dialog player-action-dialog" data-player-action-dialog aria-labelledby="player-action-dialog-title">
-    <form method="dialog" data-player-action-form>
-      <button class="dialog-close" type="button" aria-label="Close player action confirmation" data-player-action-cancel>×</button>
-      <span class="restart-mark" aria-hidden="true" data-player-action-mark>!</span>
-      <p class="panel-kicker">Protected player operation</p>
-      <h2 id="player-action-dialog-title" data-player-action-title>Confirm player action?</h2>
-      <p data-player-action-description>Review the action carefully before submitting it.</p>
-      <div class="restart-warning"><strong data-player-action-warning-title>Confirmation required</strong><span data-player-action-warning>This change will be permanently audited.</span></div>
-      <label class="dialog-field"><span data-player-action-reason-label>Reason <small data-player-action-reason-help>Required</small></span><textarea rows="4" maxlength="1500" placeholder="Enter the staff reason or note" data-player-action-reason required></textarea></label>
-      <div class="player-action-economy-fields" data-player-action-economy-fields hidden><label class="dialog-field"><span>Balance operation</span><select data-player-action-economy-operation><option value="add">Add money</option><option value="remove">Remove money</option><option value="set">Set exact balance</option></select></label><label class="dialog-field"><span>Amount <small>Whole dollars</small></span><input type="number" min="0" max="2000000000" step="1" inputmode="numeric" data-player-action-amount></label></div>
-      <div class="player-action-ban-fields" data-player-action-ban-fields hidden><label class="dialog-field"><span>Ban duration <small>Permanent or scheduled</small></span><select data-player-action-ban-duration><option value="permanent">Permanent</option><option value="3600">1 hour</option><option value="21600">6 hours</option><option value="43200">12 hours</option><option value="86400">1 day</option><option value="259200">3 days</option><option value="604800">7 days</option><option value="custom">Custom expiry</option></select></label><label class="dialog-field" data-player-action-custom-expiry hidden><span>Custom expiry <small>Your local date and time · maximum 365 days</small></span><input type="datetime-local" step="60" data-player-action-expiry></label><p class="ban-expiry-note">Railway checks due temporary cases continuously and normally removes the ban within one minute of its expiry.</p></div>
-      <div class="player-action-target" aria-live="polite"><span>Selected PlayStation ID</span><strong data-player-action-target>—</strong><small>Confirm only if this is the player you intended to manage.</small></div>
-      <div class="restart-dialog-message" role="status" data-player-action-dialog-message hidden></div>
-      <button class="primary-action danger-action wide" type="submit" data-confirm-player-action>Confirm protected action</button>
-      <button class="dialog-cancel" type="button" data-player-action-cancel>Cancel and return</button>
-    </form>
-  </dialog>
-
-  <script src="dashboard.js?v=1.14.1"></script>
-  <script src="chernarus-map.js?v=1.7.0"></script>
+<section class="owner-builder-event-block owner-builder-event-rules" data-shop-event-profile="" hidden="">
+<div class="panel-heading"><div><p class="panel-kicker">Event bounds</p><h4>Restart rules</h4></div></div>
+<label class="dialog-field"><span>Minimum restarts</span><input data-shop-profile-min-restarts="" max="30000" min="1" type="number" value="1"/></label>
+<label class="dialog-field"><span>Maximum restarts <small>Hard cap: 30,000</small></span><input data-shop-profile-max-restarts="" max="30000" min="1" type="number" value="30000"/></label>
+<label class="toggle-setting"><input checked="" data-shop-profile-approval="" type="checkbox"/><span><strong>Require Admin approval</strong><small>Recommended for vehicles and high-value restart orders.</small></span></label>
+</section>
+</div>
+</aside>
+</div>
+<div class="restart-dialog-message" data-shop-item-message="" hidden="" role="status"></div>
+<footer class="catalogue-builder-actions"><button class="dialog-cancel danger-action" data-shop-item-cancel="" type="button">Cancel</button><button class="primary-action" data-save-shop-item="" type="submit">Create</button></footer>
+</form>
+</dialog>
+<script src="dashboard.js?v=1.22.3"></script>
+<script src="chernarus-map.js?v=1.22.3"></script>
 </body>
 </html>

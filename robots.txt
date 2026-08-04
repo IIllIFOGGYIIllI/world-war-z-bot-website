@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://iillifoggyiilli.github.io/world-war-z-bot-website/
+Sitemap: https://iillifoggyiilli.github.io/world-war-z-bot-website/sitemap.xml

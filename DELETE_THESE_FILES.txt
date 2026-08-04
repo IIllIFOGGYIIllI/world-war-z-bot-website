@@ -1,9 +1,12 @@
-DELETE THESE THREE OLD FILES FROM THE GITHUB REPOSITORY
+NO FILES NEED TO BE DELETED FOR VERSION 1.22.3
+
+The legacy `assets/chernarus-vector.svg` file is retained as a small fallback/reference asset and does not interfere with the new satellite map.
+
+Historical cleanup only:
+If any of these retired map files still exist in the GitHub repository, delete them:
 
 assets/chernarus-map.webp
 assets/chernarus-roads.webp
 assets/chernarus-tactical.webp
 
-GitHub uploads do not delete existing files automatically. Delete each file
-from the repository after uploading this patch. The complete v1.7.0 package
-already excludes them.
+GitHub uploads do not automatically delete files that already exist in the repository.

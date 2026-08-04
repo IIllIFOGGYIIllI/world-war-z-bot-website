@@ -13,9 +13,8 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. If `DELETE_THESE_FILES.txt` still exists in the repository, delete it; it is an obsolete instruction file and is intentionally absent from this release.
-5. Enter the commit message: `Add temporary ban case management`
-6. Select **Commit changes**.
+4. Enter the commit message: `Add Chernarus satellite map`
+5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
 
@@ -34,24 +33,132 @@ GitHub may take a few minutes to publish the first version.
 - `script.js` — navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
-- `dashboard.js` — Railway health, Discord session, role visibility, member data, secure player lookup, controlled moderation actions and protected audit history
-- `chernarus-map.js` — public POI search, filters, markers, pan and vector zoom
-- `privacy.html` — current dashboard authentication and privacy information
+- `dashboard.js` — Railway health, Discord session, role visibility, member data, survivor-shop purchases, fulfilment controls, secure player lookup, moderation actions and protected audit history
+- `legal.html` — legal and policy document hub
+- `terms.html` — community Terms of Service
+- `privacy.html` — privacy, storage, service-provider and data-request information
+- `community-guidelines.html` — acceptable conduct and safety rules
+- `moderation-policy.html` — cases, evidence, bans, expiry and appeal practices
 - `changelog.html` — browser-readable website release history
 - `pages.css` — shared privacy and changelog page design
 - `404.html` — custom missing-page screen
 - `site.webmanifest` — website metadata
+- `.nojekyll` — forces GitHub Pages to publish the static site without Jekyll processing
 - `assets/world-war-z-banner.png` — social sharing banner
 - `assets/world-war-z-logo.webp` — refined local header and interface logo
 - `assets/world-war-z-icon.png` and `assets/favicon.png` — local application icons
 - `assets/world-war-z-dashboard-bg.webp` — desktop command-centre atmosphere
 - `assets/world-war-z-dashboard-bg-mobile.webp` — mobile command-centre atmosphere
-- `assets/chernarus-vector.svg` — custom vector Chernarus road overview
-- `assets/chernarus-pois.json` — validated public map locations
+- `assets/chernarus-map/tiles/` — locally generated multilevel WebP Chernarus satellite tiles
+- `assets/chernarus-map/overview.webp` — 4,096 px satellite overview used by compact coordinate selectors
+- `assets/chernarus-map/tile-report.json` — source-tile validation and generated-pyramid report
+- `assets/chernarus-vector.svg` — retained legacy vector fallback; no deletion is required
 - `PATCH_NOTES.md` — version history and update notes
-- `WEBHOOK_SETUP.md` — Discord notifications for GitHub website updates
-- `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected stages
+- `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
+- `CHERNARUS_MAP_PLAN.md` — implemented satellite map architecture and operating notes
+- `CHERNARUS_MAP_VALIDATION.md` — tile completeness, orientation and output validation
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
+
+
+
+## Version 1.22.3 Chernarus satellite map
+
+The public dashboard now uses the complete user-supplied 32 × 32 Chernarus satellite grid. A 1,365-file WebP tile pyramid supplies sharp local zoom levels without contacting DayZ++, iZurvive or another map service. The map supports mouse, touch, pinch, keyboard, fullscreen and accurate X/Z selection, while ordinary member and Admin visibility rules remain unchanged.
+
+
+## Version 1.22.2 compact catalogue windows
+
+The Owner Create Item and Create Event Item editors now use compact title-bar windows inspired by the supplied references while retaining the World War Z theme. The dialogs have internal scrolling, sticky actions and responsive sizing, with no API or database change.
+
+
+## Version 1.22.1 shop workspace and Discord logs
+
+The Owner catalogue editors now use the supplied split Create Item / Rules layout while retaining the World War Z visual theme. Saved coordinate fields no longer overlap, and the dashboard includes a protected Discord Logs page for routing the bot's eight existing audit categories.
+
+## Version 1.22.0 trader workspace and coordinate checkout
+
+- Separate regular Items and Event Items catalogue workspaces.
+- Event-item prices are charged per purchased server restart, capped at 30,000.
+- Click/tap Chernarus coordinate selection automatically fills X and Z.
+- The main public map is a Coming Soon workspace pending its high-detail rebuild.
+- Rich Open Graph and Twitter metadata supplies a branded Discord link preview.
+- `.nojekyll` explicitly publishes the project as a static GitHub Pages site.
+
+## Version 1.21.0 trader delivery and DayZ control centre
+
+The dashboard now supports real player-entered Chernarus coordinates, private
+named saved delivery locations, restart-bound vehicle and container orders, an
+Admin deployment queue and an Owner mission-file workspace. Event checkout can
+select a saved location or enter X, Y, Z and rotation directly.
+
+The Owner catalogue editor can mark an item as a manual trader order or an event
+spawn and define its Central Economy profile. Staff can approve the paid order,
+preview exact changes to `events.xml`, `cfgeventspawns.xml` and
+`cfgspawnabletypes.xml`, stage backed-up files, start the stopped Nitrado server, verify
+the result in game and retire the temporary event. The account centre now uses
+the member's Discord avatar where available.
+
+## Version 1.20.0 command centre layout overhaul
+
+Version 1.20.0 reorganises the full dashboard around collapsible workspaces, direct navigation and global search while preserving the economy-linked shop and all protected tools.
+
+## Version 1.19.0 economy-linked survivor shop
+
+The dashboard now includes a public catalogue, protected linked-member wallet
+and order tracking, an Admin fulfilment queue and an Owner catalogue editor.
+Purchases debit the existing verified economy through Railway, require a final
+confirmation and use idempotency protection against duplicate browser submits.
+Finite stock, per-order and per-player limits are validated again by the API.
+
+Admins can move orders into processing, record fulfilment, cancel or refund with
+a required note. Refunds restore the full virtual balance and finite stock while
+retaining the original ledger and order history. The searchable command library
+now reflects the complete 90-command bot layout, including `/shop`, `/buy`,
+`/orders` and `/order`.
+
+## Version 1.18.0 member appeals and complete command access
+
+Linked members can view only their own appealable cases, submit or withdraw an
+appeal, add bounded evidence references and follow the protected decision.
+Optional Discord tickets remain linked to the Railway case. Owners can configure
+appeal deadlines, ticket routing, ticket support role and editing policy from the
+dashboard. The command library now documents the complete 83-command bot layout,
+including direct `/appeal`, `/support`, member and Admin shortcuts.
+
+## Version 1.17.0 moderation operations and webhooks
+
+The Admin dashboard now includes a moderation operations queue, assignments,
+priorities, deadlines and an external-failure recovery panel. Owners can create
+bot-managed Discord webhook destinations directly from the dashboard and route
+each supported event category independently. Webhook URLs and tokens never
+enter the GitHub Pages website.
+
+## Version 1.16.0 direct-access dashboard navigation
+
+The dashboard sidebar now exposes individual destinations for every major public, member,
+Admin, Owner and help function. Section-aware links preserve browser history and allow
+Admins to jump directly to moderation cases, ban lists, player administration, server
+controls or protected audit history without scrolling through one large Admin page.
+
+## Version 1.15.1 moderation case dialog hotfix
+
+The protected moderation case dialog now uses the existing Admin authorization handler for
+case-detail reads and case actions. This fixes the undefined-function error without changing
+the Railway API, moderation permissions or database schema.
+
+## Version 1.15.0 moderation evidence, reviews and appeals
+
+Verified Admins can open any numbered moderation case, attach safe evidence references,
+record a staff review or player appeal, and issue an upheld, reduced or overturned
+decision. Supported overturned warnings and bans perform the real reversal while
+retaining the original case and evidence history.
+
+## Version 1.14.2 policy suite and release naming
+
+The public website now includes a Legal & Policies hub, Terms of Service, expanded
+Privacy Policy, Community Guidelines and Moderation & Appeals Policy. Public and
+dashboard footers link to the policy suite. Visible release and roadmap language
+uses version numbers instead of development phase labels.
 
 ## Version 1.14.1 current ban lists
 
@@ -68,8 +175,8 @@ The redesigned command centre now includes an Admin-only active moderation-case 
 
 Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth, member-data queries, protected player administration, Start, Stop and Restart requests, and protected audit-history queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab. Every protected player request requires fresh Admin/Owner authorization and returns only allowlisted fields. Player write actions require a reason, a clear confirmation dialog for the selected PlayStation ID, target protection and permanent audit logging. Railway still validates the selected PSN internally; Admins no longer need to retype it for every action. Ban actions may be permanent or scheduled; Railway validates the expiry and a persistent worker performs and audits automatic Discord or Nitrado unbans. Every server action requires an explicit confirmation prompt, fresh Admin/Owner authorization, a safe live state, duplicate protection and backend audit logging.
 
-The public map intentionally excludes live players, private bases, Admin positions and unpublished event coordinates. Only entries marked `public` in `assets/chernarus-pois.json` are displayed.
+The main public map is currently a Coming Soon workspace. The local Chernarus vector remains active in trader checkout for click-to-coordinate selection and does not publish private bases, live players, Admin positions or unpublished event coordinates.
 
 ## Disclaimer
 
-This website is not affiliated or authorized by Bohemia Interactive a.s. Bohemia Interactive, ARMA, DAYZ and all associated logos and designs are trademarks or registered trademarks of Bohemia Interactive a.s.
+This independent community website is not affiliated with or endorsed by Bohemia Interactive, Discord, Sony Interactive Entertainment, Nitrado, GitHub or Railway. Relevant names, games, services and trademarks belong to their respective owners.

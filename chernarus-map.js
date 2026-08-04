@@ -3,37 +3,47 @@
 
   const frame = document.querySelector('[data-map-frame]');
   const stage = document.querySelector('[data-map-stage]');
-  const image = document.querySelector('[data-map-image]');
-  const layerImages = Array.from(document.querySelectorAll('[data-map-layer-image]'));
-  const layerButtons = Array.from(document.querySelectorAll('[data-map-layer-button]'));
-  const layerNote = document.querySelector('[data-map-layer-note]');
+  const tileLayer = document.querySelector('[data-map-tiles]');
   const markersLayer = document.querySelector('[data-map-markers]');
+  const selectionMarker = document.querySelector('[data-map-selection-marker]');
   const loading = document.querySelector('[data-map-loading]');
   const search = document.querySelector('[data-map-search]');
   const filters = document.querySelector('[data-map-filters]');
   const locationList = document.querySelector('[data-map-location-list]');
   const emptyState = document.querySelector('[data-map-empty]');
   const resultCount = document.querySelector('[data-map-result-count]');
-  const coordinateReadout = document.querySelector('[data-map-coordinates]');
+  const pointerReadout = document.querySelector('[data-map-coordinates]');
+  const selectedReadout = document.querySelector('[data-map-selected-coordinates]');
+  const copyCoordinatesButton = document.querySelector('[data-map-copy-coordinates]');
+  const fullscreenButton = document.querySelector('[data-map-fullscreen]');
+  const fullscreenTarget = document.querySelector('[data-map-fullscreen-target]') || frame;
 
-  if (!frame || !stage || !image || !markersLayer) return;
+  if (!frame || !stage || !tileLayer || !markersLayer) return;
 
-  const RENDER_SIZE = 2048;
   const DATA_URL = 'assets/chernarus-pois.json';
   const markerElements = new Map();
   const locationElements = new Map();
-  const view = { x: 0, y: 0, zoom: 1, minZoom: 0.2, maxZoom: 2.6 };
+  const renderedTiles = new Map();
+  const activePointers = new Map();
+  const view = { x: 0, y: 0, zoom: 1, minZoom: 0.02, maxZoom: 1.35 };
 
   let mapSize = 15360;
+  let worldPixels = 16384;
+  let tileSize = 512;
+  let minTileZoom = 0;
+  let maxTileZoom = 5;
+  let tileBasePath = 'assets/chernarus-map/tiles';
+  let tileFormat = 'webp';
   let publicPois = [];
   let selectedCategory = 'All';
   let selectedPoiId = null;
+  let selectedCoordinates = null;
   let dataReady = false;
-  let imageReady = false;
   let hasFitted = false;
-  let dragState = null;
-  let activeLayerId = 'vector';
-  let mapLayers = new Map();
+  let firstTileLoaded = false;
+  let gesture = null;
+  let suppressCoordinateClick = false;
+  let tileRenderFrame = 0;
 
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
@@ -43,49 +53,14 @@
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '') || 'landmark';
 
-  const formatCoordinate = (value) => new Intl.NumberFormat('en-AU', {
-    maximumFractionDigits: 0
-  }).format(Math.round(Number(value) || 0));
+  const formatCoordinate = (value, decimals = 0) => new Intl.NumberFormat('en-AU', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }).format(Number(value) || 0);
 
   const validText = (value, maximumLength) => {
     const text = String(value || '').trim();
     return text && text.length <= maximumLength ? text : null;
-  };
-
-  const validateLayer = (rawLayer) => {
-    const id = validText(rawLayer?.id, 40);
-    const name = validText(rawLayer?.name, 60);
-    const imagePath = validText(rawLayer?.image, 160);
-    const note = validText(rawLayer?.note, 240);
-    const maxZoom = Number(rawLayer?.max_zoom);
-    if (!id || !name || !imagePath?.startsWith('assets/') || !note) return null;
-    if (!Number.isFinite(maxZoom) || maxZoom < 1 || maxZoom > 4) return null;
-    return { id, name, image: imagePath, note, maxZoom };
-  };
-
-  const setMapLayer = (layerId, { remember = true } = {}) => {
-    const layer = mapLayers.get(layerId);
-    const nextImage = layerImages.find((element) => element.dataset.mapLayerImage === layerId);
-    if (!layer || !nextImage) return;
-
-    activeLayerId = layerId;
-    view.maxZoom = layer.maxZoom;
-    layerImages.forEach((element) => {
-      const active = element === nextImage;
-      element.classList.toggle('active', active);
-      element.setAttribute('aria-hidden', String(!active));
-    });
-    layerButtons.forEach((button) => {
-      const active = button.dataset.mapLayerButton === layerId;
-      button.classList.toggle('active', active);
-      button.setAttribute('aria-pressed', String(active));
-    });
-    if (layerNote) layerNote.textContent = layer.note;
-
-    if (view.zoom > view.maxZoom) zoomAt(view.maxZoom);
-    if (remember) {
-      try { window.sessionStorage.setItem('wwz-map-layer', layerId); } catch (error) { /* Storage is optional. */ }
-    }
   };
 
   const validatePoi = (rawPoi) => {
@@ -104,12 +79,176 @@
     return { id, name, category, description, x, z, visibility: 'public' };
   };
 
+  const setLoadingError = (message) => {
+    if (!loading) return;
+    loading.hidden = false;
+    loading.classList.add('error');
+    const label = loading.querySelector('strong');
+    if (label) label.textContent = message;
+  };
+
+  const finishInitialLoading = () => {
+    if (!dataReady || !firstTileLoaded || !loading) return;
+    loading.hidden = true;
+  };
+
+  const mapPointFromClient = (clientX, clientY) => {
+    const rect = frame.getBoundingClientRect();
+    const pixelX = (clientX - rect.left - view.x) / view.zoom;
+    const pixelY = (clientY - rect.top - view.y) / view.zoom;
+    if (pixelX < 0 || pixelX > worldPixels || pixelY < 0 || pixelY > worldPixels) return null;
+    return { pixelX, pixelY };
+  };
+
+  const coordinatesFromMapPoint = (point) => {
+    if (!point) return null;
+    return {
+      x: clamp((point.pixelX / worldPixels) * mapSize, 0, mapSize),
+      z: clamp((1 - point.pixelY / worldPixels) * mapSize, 0, mapSize)
+    };
+  };
+
+  const updatePointerCoordinates = (clientX, clientY) => {
+    if (!pointerReadout) return;
+    const coordinates = coordinatesFromMapPoint(mapPointFromClient(clientX, clientY));
+    pointerReadout.textContent = coordinates
+      ? `X ${formatCoordinate(coordinates.x)} · Z ${formatCoordinate(coordinates.z)}`
+      : 'X — · Z —';
+  };
+
+  const updateSelectedCoordinateDisplay = () => {
+    if (selectedReadout) {
+      selectedReadout.textContent = selectedCoordinates
+        ? `X ${formatCoordinate(selectedCoordinates.x, 3)} · Z ${formatCoordinate(selectedCoordinates.z, 3)}`
+        : 'Click or tap the map';
+    }
+    if (copyCoordinatesButton) copyCoordinatesButton.disabled = !selectedCoordinates;
+    if (!selectionMarker) return;
+    if (!selectedCoordinates) {
+      selectionMarker.hidden = true;
+      return;
+    }
+    selectionMarker.hidden = false;
+    selectionMarker.style.left = `${(selectedCoordinates.x / mapSize) * 100}%`;
+    selectionMarker.style.top = `${(1 - selectedCoordinates.z / mapSize) * 100}%`;
+  };
+
+  const selectCoordinatesAt = (clientX, clientY) => {
+    const coordinates = coordinatesFromMapPoint(mapPointFromClient(clientX, clientY));
+    if (!coordinates) return;
+    selectedCoordinates = coordinates;
+    updateSelectedCoordinateDisplay();
+  };
+
+  const fallbackCopy = (text) => {
+    const field = document.createElement('textarea');
+    field.value = text;
+    field.setAttribute('readonly', '');
+    field.style.position = 'fixed';
+    field.style.opacity = '0';
+    document.body.append(field);
+    field.select();
+    let copied = false;
+    try { copied = document.execCommand('copy'); } catch (error) { copied = false; }
+    field.remove();
+    return copied;
+  };
+
+  const copySelectedCoordinates = async () => {
+    if (!selectedCoordinates || !copyCoordinatesButton) return;
+    const text = `X ${selectedCoordinates.x.toFixed(3)}, Z ${selectedCoordinates.z.toFixed(3)}`;
+    let copied = false;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      }
+    } catch (error) {
+      copied = false;
+    }
+    if (!copied) copied = fallbackCopy(text);
+    const original = copyCoordinatesButton.textContent;
+    copyCoordinatesButton.textContent = copied ? 'Copied' : 'Copy failed';
+    window.setTimeout(() => { copyCoordinatesButton.textContent = original; }, 1400);
+  };
+
+  const currentTileZoom = () => {
+    if (!Number.isFinite(view.zoom) || view.zoom <= 0) return minTileZoom;
+    const ideal = maxTileZoom + Math.log2(view.zoom);
+    return clamp(Math.ceil(ideal), minTileZoom, maxTileZoom);
+  };
+
+  const tilePath = (zoom, x, y) => `${tileBasePath}/${zoom}/${x}/${y}.${tileFormat}`;
+
+  const renderVisibleTiles = () => {
+    tileRenderFrame = 0;
+    if (!dataReady || !frame.clientWidth || !frame.clientHeight) return;
+
+    const zoom = currentTileZoom();
+    const dimension = 2 ** zoom;
+    const span = worldPixels / dimension;
+    const left = clamp(-view.x / view.zoom, 0, worldPixels);
+    const top = clamp(-view.y / view.zoom, 0, worldPixels);
+    const right = clamp((frame.clientWidth - view.x) / view.zoom, 0, worldPixels);
+    const bottom = clamp((frame.clientHeight - view.y) / view.zoom, 0, worldPixels);
+    const buffer = 1;
+    const minX = clamp(Math.floor(left / span) - buffer, 0, dimension - 1);
+    const maxX = clamp(Math.floor(Math.max(0, right - 0.001) / span) + buffer, 0, dimension - 1);
+    const minY = clamp(Math.floor(top / span) - buffer, 0, dimension - 1);
+    const maxY = clamp(Math.floor(Math.max(0, bottom - 0.001) / span) + buffer, 0, dimension - 1);
+    const required = new Set();
+
+    for (let y = minY; y <= maxY; y += 1) {
+      for (let x = minX; x <= maxX; x += 1) {
+        const key = `${zoom}/${x}/${y}`;
+        required.add(key);
+        if (renderedTiles.has(key)) continue;
+
+        const tile = document.createElement('img');
+        tile.className = 'map-tile';
+        tile.alt = '';
+        tile.draggable = false;
+        tile.decoding = 'async';
+        tile.loading = 'eager';
+        tile.style.left = `${x * span}px`;
+        tile.style.top = `${y * span}px`;
+        tile.style.width = `${span + 1}px`;
+        tile.style.height = `${span + 1}px`;
+        tile.src = tilePath(zoom, x, y);
+        tile.addEventListener('load', () => {
+          tile.classList.add('loaded');
+          if (!firstTileLoaded) {
+            firstTileLoaded = true;
+            finishInitialLoading();
+          }
+        }, { once: true });
+        tile.addEventListener('error', () => {
+          tile.classList.add('failed');
+          setLoadingError('A Chernarus map tile could not be loaded.');
+        }, { once: true });
+        tileLayer.append(tile);
+        renderedTiles.set(key, tile);
+      }
+    }
+
+    renderedTiles.forEach((tile, key) => {
+      if (required.has(key)) return;
+      tile.remove();
+      renderedTiles.delete(key);
+    });
+  };
+
+  const scheduleTileRender = () => {
+    if (tileRenderFrame) return;
+    tileRenderFrame = window.requestAnimationFrame(renderVisibleTiles);
+  };
+
   const updateTransform = () => {
     stage.style.transform = `translate3d(${view.x}px, ${view.y}px, 0) scale(${view.zoom})`;
     const inverseScale = String(1 / view.zoom);
-    markerElements.forEach((marker) => {
-      marker.style.setProperty('--marker-inverse-scale', inverseScale);
-    });
+    markerElements.forEach((marker) => marker.style.setProperty('--marker-inverse-scale', inverseScale));
+    selectionMarker?.style.setProperty('--marker-inverse-scale', inverseScale);
+    scheduleTileRender();
   };
 
   const clampPosition = () => {
@@ -117,7 +256,7 @@
     const height = frame.clientHeight;
     if (!width || !height) return;
 
-    const scaledSize = RENDER_SIZE * view.zoom;
+    const scaledSize = worldPixels * view.zoom;
     view.x = scaledSize <= width
       ? (width - scaledSize) / 2
       : clamp(view.x, width - scaledSize, 0);
@@ -131,10 +270,10 @@
     const height = frame.clientHeight;
     if (!width || !height) return;
 
-    view.minZoom = Math.min(width / RENDER_SIZE, height / RENDER_SIZE);
+    view.minZoom = Math.min(width / worldPixels, height / worldPixels);
     view.zoom = view.minZoom;
-    view.x = (width - RENDER_SIZE * view.zoom) / 2;
-    view.y = (height - RENDER_SIZE * view.zoom) / 2;
+    view.x = (width - worldPixels * view.zoom) / 2;
+    view.y = (height - worldPixels * view.zoom) / 2;
     hasFitted = true;
     updateTransform();
   };
@@ -145,8 +284,7 @@
     const pointY = Number.isFinite(clientY) ? clientY - rect.top : rect.height / 2;
     const mapX = (pointX - view.x) / view.zoom;
     const mapY = (pointY - view.y) / view.zoom;
-    const maximumZoom = Math.max(view.minZoom, view.maxZoom);
-    const zoom = clamp(nextZoom, view.minZoom, maximumZoom);
+    const zoom = clamp(nextZoom, view.minZoom, Math.max(view.minZoom, view.maxZoom));
 
     view.x = pointX - mapX * zoom;
     view.y = pointY - mapY * zoom;
@@ -155,32 +293,16 @@
     updateTransform();
   };
 
-  const centreOnPoi = (poi) => {
-    if (!poi || !frame.clientWidth || !frame.clientHeight) return;
-    const targetZoom = clamp(Math.max(view.zoom, view.minZoom * 2.35), view.minZoom, view.maxZoom);
-    const pixelX = (poi.x / mapSize) * RENDER_SIZE;
-    const pixelY = (1 - poi.z / mapSize) * RENDER_SIZE;
+  const centreOnMapCoordinates = (x, z, preferredZoom = 0.32) => {
+    if (!frame.clientWidth || !frame.clientHeight) return;
+    const targetZoom = clamp(Math.max(view.zoom, preferredZoom), view.minZoom, view.maxZoom);
+    const pixelX = (x / mapSize) * worldPixels;
+    const pixelY = (1 - z / mapSize) * worldPixels;
     view.zoom = targetZoom;
     view.x = frame.clientWidth / 2 - pixelX * targetZoom;
     view.y = frame.clientHeight / 2 - pixelY * targetZoom;
     clampPosition();
     updateTransform();
-  };
-
-  const updateCoordinates = (clientX, clientY) => {
-    if (!coordinateReadout) return;
-    const rect = frame.getBoundingClientRect();
-    const mapPixelX = (clientX - rect.left - view.x) / view.zoom;
-    const mapPixelY = (clientY - rect.top - view.y) / view.zoom;
-
-    if (mapPixelX < 0 || mapPixelX > RENDER_SIZE || mapPixelY < 0 || mapPixelY > RENDER_SIZE) {
-      coordinateReadout.textContent = 'X — · Z —';
-      return;
-    }
-
-    const x = (mapPixelX / RENDER_SIZE) * mapSize;
-    const z = (1 - mapPixelY / RENDER_SIZE) * mapSize;
-    coordinateReadout.textContent = `X ${formatCoordinate(x)} · Z ${formatCoordinate(z)}`;
   };
 
   const findPoi = (poiId) => publicPois.find((poi) => poi.id === poiId) || null;
@@ -195,19 +317,22 @@
       element.classList.toggle('selected', selected);
       element.setAttribute('aria-pressed', String(selected));
     });
-    locationElements.forEach((element, id) => {
-      element.classList.toggle('selected', id === poi.id);
-    });
+    locationElements.forEach((element, id) => element.classList.toggle('selected', id === poi.id));
 
     document.querySelector('[data-map-details-empty]')?.setAttribute('hidden', '');
     document.querySelector('[data-map-details-content]')?.removeAttribute('hidden');
-    document.querySelector('[data-map-detail-category]').textContent = poi.category;
-    document.querySelector('[data-map-detail-name]').textContent = poi.name;
-    document.querySelector('[data-map-detail-description]').textContent = poi.description;
-    document.querySelector('[data-map-detail-x]').textContent = formatCoordinate(poi.x);
-    document.querySelector('[data-map-detail-z]').textContent = formatCoordinate(poi.z);
+    const category = document.querySelector('[data-map-detail-category]');
+    const name = document.querySelector('[data-map-detail-name]');
+    const description = document.querySelector('[data-map-detail-description]');
+    const x = document.querySelector('[data-map-detail-x]');
+    const z = document.querySelector('[data-map-detail-z]');
+    if (category) category.textContent = poi.category;
+    if (name) name.textContent = poi.name;
+    if (description) description.textContent = poi.description;
+    if (x) x.textContent = formatCoordinate(poi.x);
+    if (z) z.textContent = formatCoordinate(poi.z);
 
-    if (centre) centreOnPoi(poi);
+    if (centre) centreOnMapCoordinates(poi.x, poi.z);
   };
 
   const renderLocationList = (visiblePois) => {
@@ -252,9 +377,7 @@
     });
     const visibleIds = new Set(visiblePois.map((poi) => poi.id));
 
-    markerElements.forEach((element, poiId) => {
-      element.hidden = !visibleIds.has(poiId);
-    });
+    markerElements.forEach((element, poiId) => { element.hidden = !visibleIds.has(poiId); });
     if (resultCount) resultCount.textContent = String(visiblePois.length);
     if (emptyState) emptyState.hidden = visiblePois.length !== 0;
     renderLocationList(visiblePois);
@@ -303,24 +426,29 @@
       markersLayer.append(marker);
       markerElements.set(poi.id, marker);
     });
-
-    updateTransform();
   };
 
-  const showLoadError = (message) => {
-    if (!loading) return;
-    loading.hidden = false;
-    loading.classList.add('error');
-    const label = loading.querySelector('strong');
-    if (label) label.textContent = message;
-  };
-
-  const finishLoadingIfReady = () => {
-    if (!dataReady || !imageReady) return;
-    if (loading) loading.hidden = true;
-    window.requestAnimationFrame(() => {
-      if (!hasFitted) fitMap();
-    });
+  const validateTilePyramid = (raw) => {
+    const basePath = validText(raw?.base_path, 180);
+    const format = validText(raw?.format, 12);
+    const configuredTileSize = Number(raw?.tile_size);
+    const configuredWorldPixels = Number(raw?.native_pixels);
+    const configuredMinZoom = Number(raw?.min_zoom);
+    const configuredMaxZoom = Number(raw?.max_zoom);
+    if (!basePath?.startsWith('assets/') || !/^[a-z0-9-]+$/i.test(format || '')) return null;
+    if (!Number.isInteger(configuredTileSize) || configuredTileSize < 128 || configuredTileSize > 1024) return null;
+    if (!Number.isInteger(configuredWorldPixels) || configuredWorldPixels < configuredTileSize) return null;
+    if (!Number.isInteger(configuredMinZoom) || !Number.isInteger(configuredMaxZoom)) return null;
+    if (configuredMinZoom < 0 || configuredMaxZoom < configuredMinZoom || configuredMaxZoom > 8) return null;
+    if (configuredTileSize * (2 ** configuredMaxZoom) !== configuredWorldPixels) return null;
+    return {
+      basePath,
+      format,
+      tileSize: configuredTileSize,
+      worldPixels: configuredWorldPixels,
+      minZoom: configuredMinZoom,
+      maxZoom: configuredMaxZoom
+    };
   };
 
   const loadMapData = async () => {
@@ -333,23 +461,18 @@
       if (!response.ok) throw new Error(`Map data request failed: ${response.status}`);
       const payload = await response.json();
       const configuredSize = Number(payload?.map?.size_meters);
-      if (!Number.isFinite(configuredSize) || configuredSize <= 0) throw new Error('Invalid map size');
+      const pyramid = validateTilePyramid(payload?.map?.tile_pyramid);
+      if (!Number.isFinite(configuredSize) || configuredSize <= 0 || !pyramid) throw new Error('Invalid map configuration');
+
       mapSize = configuredSize;
-
-      const validLayers = (Array.isArray(payload?.map?.layers) ? payload.map.layers : [])
-        .map(validateLayer)
-        .filter(Boolean);
-      if (!validLayers.length) throw new Error('No valid map layers');
-      mapLayers = new Map(validLayers.map((layer) => [layer.id, layer]));
-      validLayers.forEach((layer) => {
-        const layerImage = layerImages.find((element) => element.dataset.mapLayerImage === layer.id);
-        if (layerImage && layerImage.getAttribute('src') !== layer.image) layerImage.src = layer.image;
-      });
-
-      let preferredLayer = String(payload?.map?.default_layer || 'vector');
-      try { preferredLayer = window.sessionStorage.getItem('wwz-map-layer') || preferredLayer; } catch (error) { /* Storage is optional. */ }
-      if (!mapLayers.has(preferredLayer)) preferredLayer = validLayers[0].id;
-      setMapLayer(preferredLayer, { remember: false });
+      tileBasePath = pyramid.basePath;
+      tileFormat = pyramid.format;
+      tileSize = pyramid.tileSize;
+      worldPixels = pyramid.worldPixels;
+      minTileZoom = pyramid.minZoom;
+      maxTileZoom = pyramid.maxZoom;
+      stage.style.width = `${worldPixels}px`;
+      stage.style.height = `${worldPixels}px`;
 
       const seenIds = new Set();
       publicPois = (Array.isArray(payload?.pois) ? payload.pois : [])
@@ -364,72 +487,161 @@
       renderFilters();
       applyFilters();
       dataReady = true;
-      finishLoadingIfReady();
+      window.requestAnimationFrame(() => {
+        fitMap();
+        renderVisibleTiles();
+      });
     } catch (error) {
-      showLoadError('Public map data is temporarily unavailable.');
+      setLoadingError('Chernarus map data is temporarily unavailable.');
     }
   };
 
-  image.addEventListener('load', () => {
-    imageReady = true;
-    finishLoadingIfReady();
-  });
-  image.addEventListener('error', () => showLoadError('Chernarus map image could not be loaded.'));
-  if (image.complete && image.naturalWidth > 0) imageReady = true;
-
   search?.addEventListener('input', applyFilters);
-  layerButtons.forEach((button) => {
-    button.addEventListener('click', () => setMapLayer(button.dataset.mapLayerButton));
-  });
-  document.querySelector('[data-map-zoom-in]')?.addEventListener('click', () => zoomAt(view.zoom * 1.35));
-  document.querySelector('[data-map-zoom-out]')?.addEventListener('click', () => zoomAt(view.zoom / 1.35));
+  copyCoordinatesButton?.addEventListener('click', copySelectedCoordinates);
+  document.querySelector('[data-map-zoom-in]')?.addEventListener('click', () => zoomAt(view.zoom * 1.45));
+  document.querySelector('[data-map-zoom-out]')?.addEventListener('click', () => zoomAt(view.zoom / 1.45));
   document.querySelector('[data-map-reset]')?.addEventListener('click', fitMap);
-  document.querySelector('[data-map-focus-selected]')?.addEventListener('click', () => centreOnPoi(findPoi(selectedPoiId)));
+  document.querySelector('[data-map-focus-selected]')?.addEventListener('click', () => {
+    const poi = findPoi(selectedPoiId);
+    if (poi) centreOnMapCoordinates(poi.x, poi.z);
+  });
+
+  if (!document.fullscreenEnabled || !fullscreenTarget.requestFullscreen) {
+    fullscreenButton?.setAttribute('hidden', '');
+  } else {
+    fullscreenButton?.addEventListener('click', async () => {
+      try {
+        if (document.fullscreenElement === fullscreenTarget) await document.exitFullscreen();
+        else await fullscreenTarget.requestFullscreen();
+      } catch (error) {
+        /* Fullscreen can be denied by browser policy; the map remains usable. */
+      }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      if (fullscreenButton) {
+        const active = document.fullscreenElement === fullscreenTarget;
+        fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen map' : 'Open fullscreen map');
+        fullscreenButton.textContent = active ? '×' : '⛶';
+      }
+      window.requestAnimationFrame(() => {
+        clampPosition();
+        updateTransform();
+      });
+    });
+  }
 
   frame.addEventListener('wheel', (event) => {
     event.preventDefault();
-    const multiplier = Math.exp(-event.deltaY * 0.0015);
+    const multiplier = Math.exp(-event.deltaY * 0.00145);
     zoomAt(view.zoom * multiplier, event.clientX, event.clientY);
   }, { passive: false });
 
+  frame.addEventListener('dblclick', (event) => {
+    if (event.target.closest('button, a, input')) return;
+    event.preventDefault();
+    zoomAt(view.zoom * 1.8, event.clientX, event.clientY);
+  });
+
+  const beginGesture = () => {
+    const pointers = [...activePointers.values()];
+    if (pointers.length === 1) {
+      const pointer = pointers[0];
+      gesture = {
+        type: 'pan',
+        pointerId: pointer.id,
+        startX: pointer.x,
+        startY: pointer.y,
+        viewX: view.x,
+        viewY: view.y,
+        moved: false
+      };
+      return;
+    }
+    if (pointers.length >= 2) {
+      const [a, b] = pointers;
+      const rect = frame.getBoundingClientRect();
+      const midpointX = (a.x + b.x) / 2 - rect.left;
+      const midpointY = (a.y + b.y) / 2 - rect.top;
+      suppressCoordinateClick = true;
+      gesture = {
+        type: 'pinch',
+        startDistance: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)),
+        startZoom: view.zoom,
+        mapX: (midpointX - view.x) / view.zoom,
+        mapY: (midpointY - view.y) / view.zoom,
+        moved: true
+      };
+    }
+  };
+
   frame.addEventListener('pointerdown', (event) => {
     if (event.button !== 0 || event.target.closest('button, a, input')) return;
-    dragState = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    activePointers.set(event.pointerId, { id: event.pointerId, x: event.clientX, y: event.clientY });
     frame.setPointerCapture?.(event.pointerId);
+    beginGesture();
   });
 
   frame.addEventListener('pointermove', (event) => {
-    updateCoordinates(event.clientX, event.clientY);
-    if (!dragState || dragState.pointerId !== event.pointerId) return;
-    view.x += event.clientX - dragState.x;
-    view.y += event.clientY - dragState.y;
-    dragState.x = event.clientX;
-    dragState.y = event.clientY;
-    clampPosition();
-    updateTransform();
+    updatePointerCoordinates(event.clientX, event.clientY);
+    if (!activePointers.has(event.pointerId)) return;
+    activePointers.set(event.pointerId, { id: event.pointerId, x: event.clientX, y: event.clientY });
+
+    if (activePointers.size >= 2) {
+      if (gesture?.type !== 'pinch') beginGesture();
+      const [a, b] = [...activePointers.values()];
+      const rect = frame.getBoundingClientRect();
+      const midpointX = (a.x + b.x) / 2 - rect.left;
+      const midpointY = (a.y + b.y) / 2 - rect.top;
+      const distance = Math.max(1, Math.hypot(b.x - a.x, b.y - a.y));
+      const zoom = clamp(gesture.startZoom * (distance / gesture.startDistance), view.minZoom, view.maxZoom);
+      view.zoom = zoom;
+      view.x = midpointX - gesture.mapX * zoom;
+      view.y = midpointY - gesture.mapY * zoom;
+      clampPosition();
+      updateTransform();
+      return;
+    }
+
+    if (gesture?.type === 'pan' && gesture.pointerId === event.pointerId) {
+      const dx = event.clientX - gesture.startX;
+      const dy = event.clientY - gesture.startY;
+      if (Math.hypot(dx, dy) > 6) gesture.moved = true;
+      view.x = gesture.viewX + dx;
+      view.y = gesture.viewY + dy;
+      clampPosition();
+      updateTransform();
+    }
   });
 
-  const endDrag = (event) => {
-    if (!dragState || dragState.pointerId !== event.pointerId) return;
+  const endPointer = (event) => {
+    if (!activePointers.has(event.pointerId)) return;
+    const wasClick = activePointers.size === 1 && gesture?.type === 'pan' && !gesture.moved && !suppressCoordinateClick;
+    activePointers.delete(event.pointerId);
     frame.releasePointerCapture?.(event.pointerId);
-    dragState = null;
+    if (wasClick) selectCoordinatesAt(event.clientX, event.clientY);
+    if (activePointers.size) beginGesture();
+    else {
+      gesture = null;
+      suppressCoordinateClick = false;
+    }
   };
 
-  frame.addEventListener('pointerup', endDrag);
-  frame.addEventListener('pointercancel', endDrag);
+  frame.addEventListener('pointerup', endPointer);
+  frame.addEventListener('pointercancel', endPointer);
   frame.addEventListener('pointerleave', () => {
-    if (!dragState && coordinateReadout) coordinateReadout.textContent = 'X — · Z —';
+    if (!activePointers.size && pointerReadout) pointerReadout.textContent = 'X — · Z —';
   });
 
   frame.addEventListener('keydown', (event) => {
-    const panDistance = 72;
+    const panDistance = Math.max(52, Math.min(frame.clientWidth, frame.clientHeight) * 0.12);
     if (event.key === 'ArrowLeft') view.x += panDistance;
     else if (event.key === 'ArrowRight') view.x -= panDistance;
     else if (event.key === 'ArrowUp') view.y += panDistance;
     else if (event.key === 'ArrowDown') view.y -= panDistance;
-    else if (event.key === '+' || event.key === '=') zoomAt(view.zoom * 1.35);
-    else if (event.key === '-' || event.key === '_') zoomAt(view.zoom / 1.35);
+    else if (event.key === '+' || event.key === '=') zoomAt(view.zoom * 1.45);
+    else if (event.key === '-' || event.key === '_') zoomAt(view.zoom / 1.45);
     else if (event.key === '0') fitMap();
+    else if (event.key.toLowerCase() === 'c' && selectedCoordinates) copySelectedCoordinates();
     else return;
 
     event.preventDefault();
@@ -452,7 +664,7 @@
 
   if (typeof ResizeObserver === 'function') {
     new ResizeObserver(() => {
-      if (!frame.clientWidth || !frame.clientHeight) return;
+      if (!frame.clientWidth || !frame.clientHeight || !dataReady) return;
       if (!hasFitted) fitMap();
       else {
         clampPosition();
@@ -466,6 +678,6 @@
     });
   }
 
+  updateSelectedCoordinateDisplay();
   loadMapData();
-  finishLoadingIfReady();
 })();

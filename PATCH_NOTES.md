@@ -1,4 +1,316 @@
-# World War Z Bot Website — Patch Notes
+# Version 1.22.3
+
+- Validated all 1,024 uploaded Chernarus satellite PNG tiles as a complete 32 × 32 grid of 512 × 512 RGBA images.
+- Confirmed there are no missing coordinates, extra coordinates or duplicate file hashes.
+- Confirmed the correct north-up layout: the first filename number is the column, the second is the row, and no horizontal or vertical flip is required.
+- Generated a locally hosted 512 px WebP tile pyramid from zoom 0 through zoom 5, containing 1,365 browser tiles plus a 4,096 px overview image.
+- Added a high-detail responsive satellite map with smooth wheel, pointer, touch, pinch and keyboard navigation.
+- Added Zoom In, Zoom Out, Reset and Fullscreen map controls.
+- Added accurate DayZ X/Z selection, a visible pointer and selected-coordinate readout, and a Copy button.
+- Restored searchable and filterable public POI markers without exposing private bases, live players or operational locations.
+- Updated the event-item checkout coordinate selector to use the uploaded satellite imagery rather than the legacy vector preview.
+- Added Bohemia Interactive attribution and documented the tile validation, orientation and output structure.
+- No bot, Railway API, permission or database change is required.
+- No website files need to be deleted.
+
+# Version 1.22.2
+
+- Reworked the Create Item and Create Event Item dialogs into compact application windows based on the supplied reference screens.
+- Added simple Item and Event Item title bars with operation-specific subtitles.
+- Reduced oversized headings and nested-card visual weight while preserving the dark red World War Z theme.
+- Added a stronger dimmed backdrop, internal scrolling and a sticky action footer.
+- Moved Cancel and Create/Save actions to a compact left-aligned footer and updated the submit label for create versus edit operations.
+- Improved desktop, tablet and mobile modal sizing without changing shop data, Railway APIs or permissions.
+- No website files need to be deleted.
+- No bot or Railway deployment change is required.
+
+# Version 1.22.1
+
+- Finished the World War Z themed Create Item and Create Event Item workspaces inspired by the supplied DayZ++ reference screens.
+- Added responsive main/rules panels, quick price and category chips, inline editing and event restart controls capped at 30,000.
+- Fixed saved-location X, Y, Z and rotation inputs overlapping at desktop and narrower widths.
+- Added Owner-only Discord log channel configuration with search, connect, update, test and disconnect actions.
+- Added compact and mobile layouts for the new shop, location and logging controls.
+- Restored the missing `.nojekyll` marker so GitHub Pages publishes the static dashboard exactly as packaged.
+- Requires bot version 1.18.2 before using the Discord log configuration page.
+- No website files need to be deleted.
+
+# Version 1.22.0
+
+- Split trader catalogue into Items and Event Items.
+- Added click-to-coordinate checkout using the local Chernarus vector map.
+- Replaced the public interactive map with a Coming Soon workspace.
+- Added rich Discord/social link preview metadata and a 1200×630 preview asset.
+- Added owner search/filter tables and 30,000 restart limits.
+
+# World War Z Bot Website Patch Notes
+
+## Version 1.21.0 — Trader Delivery and DayZ Control Centre
+
+**Release date:** 5 August 2026
+
+### Git commit message
+
+```text
+Add trader delivery and server control
+```
+
+### Member account and delivery locations
+
+- Added real Discord profile avatars with safe initials fallback.
+- Added an Account Centre card with direct wallet, order, location and appeal links.
+- Added private named Chernarus X, Y, Z and rotation locations for future orders.
+- Event-item checkout accepts a saved location or new exact coordinates and can save the new point.
+
+### Event items and delivery operations
+
+- Added separate Event Items catalogue management for vehicles, containers and restart-bound orders.
+- Added Owner profile fields for child classname, lifetime, event flags, attachments and cargo.
+- Added an Admin event-delivery queue with approval, XML preview, stopped-server staging, Nitrado start, verification and rollback actions.
+- Preserved the existing manual fulfilment queue for normal trader orders.
+
+### DayZ server configuration
+
+- Added an Owner service overview, live mission-file editor, validation and exact diff output.
+- Added live Central Economy event, child, population, position and zone summaries.
+- Added an empty `.nojekyll` marker so GitHub Pages deploys the custom static application directly.
+
+### Deployment
+
+- Deploy bot version 1.18.0 before this website version.
+- Upload the version 1.21.0 website patch and use Ctrl+F5 after GitHub Pages publishes.
+- No existing website file needs to be deleted.
+
+
+## Version 1.20.0 — Command Centre Layout Overhaul
+
+- Rebuilt the dashboard sidebar into collapsible, task-focused workspaces.
+- Added direct Shop catalogue, order, fulfilment and configuration navigation.
+- Added a persistent service context card and active workspace label.
+- Added Ctrl+K and `/` global dashboard search with permission-aware results.
+- Improved table density, settings cards, filters, buttons and responsive behaviour.
+- Preserved all existing authentication, moderation, appeals, webhook and shop functions.
+- No API, database or Railway configuration change is required.
+
+## Version 1.19.0 — Economy-Linked Survivor Shop
+
+**Release date:** 5 August 2026
+
+### Git commit message
+
+```text
+Add economy-linked survivor shop
+```
+
+### Member shop
+
+- Added direct sidebar access to the Survivor Shop and My Shop Orders.
+- Added a searchable and category-filtered public catalogue.
+- Signed-in linked members see their current wallet, per-player limits and recent order history.
+- Purchases use a confirmation dialog, quantity controls, delivery notes and unique idempotency keys.
+- Added clear guest, unlinked, loading, closed, unavailable and empty states.
+- Order tracking shows pending, processing, fulfilled, cancelled and refunded states plus staff updates.
+
+### Admin fulfilment
+
+- Added a direct Shop Fulfilment sidebar destination for current Admins and the Owner.
+- Added open/all/status filters, queue summaries and required-note action dialogs.
+- Admins can begin processing, fulfil, cancel or refund supported orders.
+- Successful actions refresh the queue, member shop state and managed notification routes.
+
+### Owner catalogue controls
+
+- Added an Owner-only Shop Catalogue destination.
+- Owners can enable or pause purchases and edit the public title, description and purchase instructions.
+- Added item creation and editing for SKU, category, price, finite/unlimited stock, per-order and per-player limits, sort order and active state.
+- Internal fulfilment instructions are not returned through public or member catalogue responses.
+
+### Policy and command updates
+
+- Updated Terms, Privacy and Community Guidelines for virtual shop orders, manual in-game fulfilment, order records, refunds and abuse prevention.
+- Expanded the searchable command library from 83 to 87 commands with `/shop`, `/buy`, `/orders` and `/order`.
+
+### Deployment
+
+- Deploy bot version 1.17.0 before this website version.
+- Upload the version 1.19.0 website patch.
+- Wait for GitHub Pages to publish, then use Ctrl+F5.
+- No website files need to be deleted.
+
+## Version 1.18.0 — Member Appeals and Complete Command Access
+
+**Release date:** 5 August 2026
+
+### Git commit message
+
+```text
+Add member appeals and command library
+```
+
+### Member appeals
+
+- Added a protected My Appeals area for linked members.
+- Members can view only their own eligible moderation cases and appeal history.
+- Added bounded appeal statements, up to five evidence references, deadlines, cooldowns and duplicate protection.
+- Added optional editing before assignment and safe withdrawal before a decision.
+- Added optional case-linked Discord appeal tickets while Railway remains the authoritative case record.
+- Added clear upheld, reduced and overturned outcome states without exposing staff-only notes or evidence.
+
+### Owner configuration
+
+- Added Owner controls for appeal availability, deadline, ticket creation, ticket category, ticket support role, editing policy and member instructions.
+- Discord category and role selections use opaque keys; raw Discord IDs are not placed in the browser.
+- Appeal writes remain behind the existing Railway protected-action switch and live Discord verification.
+
+### Command access
+
+- Expanded the searchable command library from 30 to 83 top-level commands.
+- Added the new direct `/appeal` and `/support` commands plus direct member and Admin shortcuts.
+- Retained advanced groups where a grouped workflow remains clearer.
+- All direct shortcuts remain server-only and the complete command total stays below Discord's 100-command limit.
+
+### Deployment
+
+- Deploy bot version 1.16.0 before this website version.
+- Upload the version 1.18.0 website patch.
+- Wait for GitHub Pages to publish, then use Ctrl+F5.
+- No website files need to be deleted.
+
+## Version 1.17.0 — Moderation Operations and Webhooks
+
+**Release date:** 4 August 2026
+
+### Git commit message
+
+```text
+Add moderation queue and webhooks
+```
+
+### Added
+
+- Dedicated Moderation Queue navigation with assignments, priorities and review deadlines.
+- Queue counters for active appeals, reviews, expiring bans, overdue work and cases assigned to the signed-in Admin.
+- Operational Failures navigation with safe retry controls for automatic-unban and notification-delivery failures.
+- Owner-only Notifications & Webhooks navigation.
+- Managed Discord webhook creation from allowlisted current text channels.
+- Test and remove controls for each managed destination.
+- Per-event notification routing for ten moderation and operational event categories.
+- Permanent recent webhook-configuration audit showing accepted and rejected actions.
+- Sidebar badges for unresolved queue work and service failures.
+
+### Security and privacy
+
+- The website never asks for or displays a Discord webhook URL or token.
+- Discord member, channel and webhook IDs remain server-side and are represented with opaque browser keys where selection is required.
+- Every queue, retry and webhook request repeats live Discord role verification on Railway.
+- Webhook changes are Owner-only and remain behind the existing Railway write-action safety switch.
+- Dynamic moderation and webhook content continues to use text rendering rather than `innerHTML`.
+
+### Deployment
+
+- Deploy bot version 1.15.0 before this website version.
+- Upload the version 1.17.0 website patch.
+- Wait for GitHub Pages to publish, then use Ctrl+F5.
+- No website files need to be deleted.
+
+## Version 1.16.0 — Direct-Access Dashboard Navigation
+
+### Added
+
+- Rebuilt the dashboard sidebar around direct links to individual tools and data areas.
+- Added dedicated navigation entries for overview actions, activity, server health, map locations, wallet, ledger, profile activity, moderation cases, current ban lists, player administration, server controls, server audit, configuration workflow, backup history, Discord connection, access levels and help.
+- Added section-aware URLs such as `#staff/cases` and `#economy/ledger` so browser Back/Forward and copied links return to the correct dashboard area.
+- Added section-specific active states and breadcrumbs.
+
+### Improved
+
+- Admin tools no longer require scrolling through the entire Administration Centre to reach a specific function.
+- The sidebar is wider, clearer and independently scrollable on desktop and mobile.
+- Discord sign-in now remembers the exact dashboard section rather than only the broad page.
+- Existing quick-action buttons can route directly to the relevant subsection.
+
+### Safety
+
+- Website-only navigation update.
+- No API route, bot permission, moderation action or Railway database behaviour changed.
+- Existing Admin and Owner navigation remains hidden until Railway verifies the required access level.
+
+### Deployment
+
+- Upload the version 1.16.0 website patch.
+- No bot update, database migration or Railway setting change is required.
+- Hard refresh after GitHub Pages publishes.
+
+
+## Version 1.15.1 — Moderation Case Dialog Hotfix
+
+### Fixed
+
+- Fixed the moderation case dialog failing with `handleProtectedAuthFailure is not defined`.
+- Restored the existing protected-session and Admin authorization handler for case-detail reads and case actions.
+- Rejected case actions continue to show their real Railway response without incorrectly removing valid Admin access.
+
+### Deployment
+
+- Website-only update.
+- No bot update, database migration or Railway setting change is required.
+- Upload the version 1.15.1 patch and hard refresh after GitHub Pages publishes.
+
+
+## Version 1.15.0 — Moderation Evidence, Reviews and Appeals
+
+### Added
+
+- Added protected case-detail views for every numbered moderation case.
+- Added evidence links or references, summaries, editing and audited removal.
+- Added staff reviews and manually recorded player appeals.
+- Added upheld, reduced and overturned review decisions.
+- Added real warning removal, Discord unban and Nitrado DayZ unban for supported overturned active cases.
+- Added Under Review and Appealed case summary counts.
+
+### Safety
+
+- Regular Admins cannot decide reviews of actions they originally issued.
+- Owner overrides are explicitly recorded.
+- Evidence accepts safe HTTP(S) links or plain-text references only; large media is not uploaded.
+- Original cases and previous evidence versions remain preserved.
+- Railway remains the authorization boundary for every read and write.
+
+### Deployment
+
+- Deploy bot version 1.14.0 before this website update.
+- No database reset, replacement or manual migration is required.
+- Replace the website files with the version 1.15.0 patch and hard refresh after GitHub Pages publishes.
+
+
+## Version 1.14.2 — Policy Suite and Version-Only Releases
+
+### Added
+
+- Added `legal.html` as the central Legal & Policies hub.
+- Added community Terms of Service.
+- Added Community Guidelines covering safety, fair play, account misuse, scams,
+  evidence and ban evasion.
+- Added a Moderation & Appeals Policy covering numbered cases, evidence, temporary
+  and permanent bans, automatic expiry, review outcomes and technical errors.
+- Expanded the Privacy Policy with browser storage, service providers, cross-border
+  processing, retention, access/correction/deletion requests and younger-user guidance.
+- Added legal and policy links across the public website and dashboard.
+
+### Changed
+
+- Public release, roadmap and interface wording now uses version numbers instead of
+  development phase labels.
+- Strengthened independent-project, third-party platform and virtual-economy notices.
+- Preserved all version 1.14.1 current-ban-list functionality.
+
+### Deployment
+
+- Website-only update.
+- No Railway variable, bot update or database migration is required.
+- Replace the website files with the version 1.14.2 patch and hard refresh after
+  GitHub Pages publishes.
+
 
 ## Version 1.14.1 — Current Ban Lists
 
@@ -41,7 +353,7 @@
 - Replaced the temporary W/Z text mark with a dedicated locally hosted World War Z logo across the dashboard, public website and supporting pages.
 - Redesigned the dashboard top bar, navigation, view headers, cards, Admin controls, dialogs, mobile layouts and public landing page.
 - Added local favicon, application icon and responsive background assets.
-- Preserved every existing Stage 7B2 data attribute, API workflow and protected action.
+- Preserved every existing version 1.12 data attribute, API workflow and protected action.
 
 ### Repository cleanup
 
@@ -92,7 +404,7 @@
 - No fake DayZ kick control is shown because no supported console operation was
   available.
 - Temporary-ban expiry, evidence uploads, appeals, bulk actions and account
-  deletion remain future stages.
+  deletion remain future versions.
 
 ## Version 1.11.0 — Secure Read-Only Player Administration
 
@@ -116,7 +428,7 @@
   identities, evidence metadata and credentials are excluded.
 - Dynamic player and moderation values are rendered as text rather than
   injected HTML.
-- Stage 7B1 is read-only. Warning, note, ban, kick, balance, unlink and delete
+- version 1.11 is read-only. Warning, note, ban, kick, balance, unlink and delete
   controls remain unavailable.
 
 ## Version 1.10.0 — Live Server Operations
@@ -363,7 +675,7 @@
 - Railway rechecks current guild membership and roles before returning
   authenticated identity information.
 - Private profiles, economy records, moderation information and all
-  server-changing controls remain locked for later stages.
+  server-changing controls remain locked for later versions.
 
 ## Version 1.2.0 — Live Server Status
 
@@ -380,7 +692,7 @@
 
 - The public website cannot perform server-changing actions.
 - Online player names, Discord member records, bot credentials and Nitrado credentials are not requested or displayed.
-- Discord authentication and all protected account, Admin and owner features remain locked for future stages.
+- Discord authentication and all protected account, Admin and owner features remain locked for future versions.
 
 ## Version 1.1.0 — Dashboard Preview
 
