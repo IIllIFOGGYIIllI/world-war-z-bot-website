@@ -56,6 +56,15 @@ GitHub may take a few minutes to publish the first version.
 - `CHERNARUS_MAP_PLAN.md` — implemented map design and future protected versions
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+## Version 1.18.0 member appeals and complete command access
+
+Linked members can view only their own appealable cases, submit or withdraw an
+appeal, add bounded evidence references and follow the protected decision.
+Optional Discord tickets remain linked to the Railway case. Owners can configure
+appeal deadlines, ticket routing, ticket support role and editing policy from the
+dashboard. The command library now documents the complete 83-command bot layout,
+including direct `/appeal`, `/support`, member and Admin shortcuts.
+
 ## Version 1.17.0 moderation operations and webhooks
 
 The Admin dashboard now includes a moderation operations queue, assignments,

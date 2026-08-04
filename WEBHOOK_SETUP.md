@@ -1,6 +1,6 @@
 # GitHub Website Update Webhook (Optional)
 
-This separate optional webhook posts website repository updates into a Discord channel whenever files are committed to GitHub. It is not used by the dashboard-managed moderation notification system in version 1.17.0.
+This separate optional webhook posts website repository updates into a Discord channel whenever files are committed to GitHub. It is not used by the dashboard-managed moderation notification system in version 1.18.0.
 
 Dashboard moderation webhooks are created and routed by the bot from **Owner → Notifications & webhooks**. Do not paste those bot-managed webhook URLs into GitHub.
 

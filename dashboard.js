@@ -515,6 +515,7 @@ const applySignedOutState = ({ unavailable = false } = {}) => {
   authenticatedUser = null;
   applyAccessVisibility('guest');
   resetMemberPanels();
+  resetAppealPanels();
   setText('[data-auth-button-label]', 'Sign in with Discord');
   setText('[data-access-card-title]', 'Guest access');
   setText('[data-access-card-copy]', 'Sign in will securely verify your community access.');
@@ -2598,6 +2599,471 @@ const renderTransactions = (transactions) => {
   });
 };
 
+
+// Version 1.18.0 — member appeals, ticket integration and owner settings.
+const ACCOUNT_APPEALS_URL = `${DASHBOARD_API_BASE}/api/account/appeals`;
+const ACCOUNT_APPEAL_ACTION_URL = `${DASHBOARD_API_BASE}/api/account/appeals/action`;
+const OWNER_APPEAL_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/appeals/config`;
+
+const appealGuest = document.querySelector('[data-appeal-guest]');
+const appealUnlinked = document.querySelector('[data-appeal-unlinked]');
+const appealContent = document.querySelector('[data-appeal-content]');
+const appealEligibleList = document.querySelector('[data-appeal-eligible-list]');
+const appealEligibleEmpty = document.querySelector('[data-appeal-eligible-empty]');
+const memberAppealList = document.querySelector('[data-member-appeal-list]');
+const memberAppealEmpty = document.querySelector('[data-member-appeal-empty]');
+const memberAppealError = document.querySelector('[data-member-appeal-error]');
+const refreshMemberAppealsButton = document.querySelector('[data-refresh-member-appeals]');
+const memberAppealDialog = document.querySelector('[data-member-appeal-dialog]');
+const memberAppealForm = document.querySelector('[data-member-appeal-form]');
+const memberAppealTitle = document.querySelector('[data-member-appeal-title]');
+const memberAppealCopy = document.querySelector('[data-member-appeal-copy]');
+const memberAppealCase = document.querySelector('[data-member-appeal-case]');
+const memberAppealCaseDetail = document.querySelector('[data-member-appeal-case-detail]');
+const memberAppealStatement = document.querySelector('[data-member-appeal-statement]');
+const memberAppealEvidenceReferences = [...document.querySelectorAll('[data-member-appeal-evidence-reference]')];
+const memberAppealEvidenceSummaries = [...document.querySelectorAll('[data-member-appeal-evidence-summary]')];
+const memberAppealMessage = document.querySelector('[data-member-appeal-message]');
+const submitMemberAppealButton = document.querySelector('[data-submit-member-appeal]');
+const memberAppealCancelButtons = [...document.querySelectorAll('[data-member-appeal-cancel]')];
+const withdrawAppealDialog = document.querySelector('[data-withdraw-appeal-dialog]');
+const withdrawAppealForm = document.querySelector('[data-withdraw-appeal-form]');
+const withdrawAppealReason = document.querySelector('[data-withdraw-appeal-reason]');
+const withdrawAppealMessage = document.querySelector('[data-withdraw-appeal-message]');
+const withdrawAppealCancelButtons = [...document.querySelectorAll('[data-withdraw-appeal-cancel]')];
+const ownerAppealEnabled = document.querySelector('[data-owner-appeal-enabled]');
+const ownerAppealCreateTicket = document.querySelector('[data-owner-appeal-create-ticket]');
+const ownerAppealEdit = document.querySelector('[data-owner-appeal-edit]');
+const ownerAppealContinues = document.querySelector('[data-owner-appeal-continues]');
+const ownerAppealDeadline = document.querySelector('[data-owner-appeal-deadline]');
+const ownerAppealCategory = document.querySelector('[data-owner-appeal-category]');
+const ownerAppealRole = document.querySelector('[data-owner-appeal-role]');
+const ownerAppealInstructions = document.querySelector('[data-owner-appeal-instructions]');
+const ownerAppealMessage = document.querySelector('[data-owner-appeal-message]');
+const saveAppealSettingsButton = document.querySelector('[data-save-appeal-settings]');
+const refreshAppealSettingsButton = document.querySelector('[data-refresh-appeal-settings]');
+let memberAppealPayload = null;
+let memberAppealRequestInProgress = false;
+let memberAppealActionInProgress = false;
+let selectedMemberAppealMode = 'submit';
+let selectedMemberAppealId = null;
+let selectedMemberAppealCaseId = null;
+let ownerAppealRequestInProgress = false;
+let selectedWithdrawAppealId = null;
+
+const showInlineMessage = (element, message, state = 'error') => {
+  if (!element) return;
+  element.textContent = String(message || '');
+  element.dataset.state = state;
+  element.hidden = !message;
+};
+
+const openDashboardDialog = (dialog) => {
+  if (typeof dialog?.showModal === 'function') dialog.showModal();
+  else dialog?.setAttribute('open', '');
+};
+
+const closeDashboardDialog = (dialog) => {
+  if (typeof dialog?.close === 'function') dialog.close();
+  else dialog?.removeAttribute('open');
+};
+
+const resetAppealPanels = () => {
+  memberAppealPayload = null;
+  appealGuest?.removeAttribute('hidden');
+  appealUnlinked?.setAttribute('hidden', '');
+  appealContent?.setAttribute('hidden', '');
+  appealEligibleList?.replaceChildren();
+  memberAppealList?.replaceChildren();
+  if (appealEligibleEmpty) appealEligibleEmpty.hidden = true;
+  if (memberAppealEmpty) memberAppealEmpty.hidden = true;
+  if (memberAppealError) memberAppealError.hidden = true;
+  setText('[data-appeal-eligible-count]', '—');
+  setText('[data-member-appeal-count]', '—');
+};
+
+const appealActionLabel = (action) => ({
+  warn: 'Warning', kick: 'Discord kick', ban: 'Discord ban', dayz_ban: 'DayZ ban'
+}[String(action || '')] || titleCaseState(action || 'Moderation action'));
+
+const appealEvidenceFromForm = () => memberAppealEvidenceReferences.map((input, index) => ({
+  reference: input.value.trim(),
+  summary: memberAppealEvidenceSummaries[index]?.value.trim() || ''
+})).filter((item) => item.reference || item.summary);
+
+const clearMemberAppealForm = () => {
+  memberAppealForm?.reset();
+  memberAppealEvidenceReferences.forEach((input) => { input.value = ''; });
+  memberAppealEvidenceSummaries.forEach((input) => { input.value = ''; });
+  showInlineMessage(memberAppealMessage, '');
+};
+
+const fillAppealEvidence = (evidence = []) => {
+  memberAppealEvidenceReferences.forEach((input, index) => {
+    input.value = String(evidence[index]?.reference || '');
+  });
+  memberAppealEvidenceSummaries.forEach((input, index) => {
+    input.value = String(evidence[index]?.summary || '');
+  });
+};
+
+const openMemberAppealEditor = ({ mode, caseRecord = null, appeal = null }) => {
+  selectedMemberAppealMode = mode;
+  selectedMemberAppealId = appeal?.appeal_id == null ? null : Number(appeal.appeal_id);
+  selectedMemberAppealCaseId = Number(caseRecord?.case_id ?? appeal?.case_id);
+  clearMemberAppealForm();
+  if (mode === 'update') {
+    memberAppealTitle.textContent = `Update appeal #${selectedMemberAppealId}`;
+    memberAppealCopy.textContent = 'You may revise this submission until a reviewer is assigned.';
+    memberAppealStatement.value = String(appeal?.statement || '');
+    fillAppealEvidence(appeal?.evidence || []);
+    submitMemberAppealButton.textContent = 'Save appeal update';
+  } else {
+    memberAppealTitle.textContent = 'Submit moderation appeal';
+    memberAppealCopy.textContent = 'Your statement and evidence are visible only to authorised reviewers.';
+    submitMemberAppealButton.textContent = 'Submit appeal';
+  }
+  const record = caseRecord || appeal?.case || {};
+  memberAppealCase.textContent = `Case #${selectedMemberAppealCaseId || '—'} · ${appealActionLabel(record.action)}`;
+  memberAppealCaseDetail.textContent = `${String(record.reason || 'No reason recorded.')} · Opened ${formatAccountDate(record.created_at)}`;
+  openDashboardDialog(memberAppealDialog);
+  memberAppealStatement?.focus();
+};
+
+const createAppealCard = ({ title, reason, status, meta, actions = [] }) => {
+  const card = document.createElement('article');
+  card.className = 'appeal-card';
+  const copy = document.createElement('div');
+  copy.className = 'appeal-card-copy';
+  const heading = document.createElement('h3');
+  heading.textContent = title;
+  const statusPill = document.createElement('span');
+  statusPill.className = `appeal-status ${String(status || '').toLowerCase()}`.trim();
+  statusPill.textContent = titleCaseState(status || 'available');
+  const reasonText = document.createElement('p');
+  reasonText.textContent = reason;
+  const metadata = document.createElement('div');
+  metadata.className = 'appeal-card-meta';
+  for (const item of meta.filter(Boolean)) {
+    const span = document.createElement('span');
+    span.textContent = item;
+    metadata.append(span);
+  }
+  copy.append(statusPill, heading, reasonText, metadata);
+  const actionWrap = document.createElement('div');
+  actionWrap.className = 'appeal-card-actions';
+  actionWrap.append(...actions);
+  card.append(copy, actionWrap);
+  return card;
+};
+
+const actionButton = (label, callback, className = 'secondary-action compact-action') => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = className;
+  button.textContent = label;
+  button.addEventListener('click', callback);
+  return button;
+};
+
+const renderMemberAppeals = (payload) => {
+  memberAppealPayload = payload;
+  appealGuest?.setAttribute('hidden', '');
+  if (!payload?.linked) {
+    appealUnlinked?.removeAttribute('hidden');
+    appealContent?.setAttribute('hidden', '');
+    return;
+  }
+  appealUnlinked?.setAttribute('hidden', '');
+  appealContent?.removeAttribute('hidden');
+  const settings = payload.settings || {};
+  setText('[data-appeal-instructions]', String(settings.instructions || 'Explain why this action should be reviewed.'));
+  setText('[data-appeal-deadline]', settings.enabled ? `${Number(settings.deadline_days) || 14} days after the case` : 'Appeals disabled');
+  setText('[data-appeal-ticket-policy]', settings.create_ticket ? 'Private ticket created' : 'Dashboard only');
+  setText('[data-appeal-punishment-policy]', settings.punishment_continues_during_review ? 'Remains active' : 'See case instructions');
+  setText('[data-appeal-edit-policy]', settings.allow_edit_before_assignment ? 'Allowed before assignment' : 'Locked after submission');
+
+  const eligible = Array.isArray(payload.eligible_cases) ? payload.eligible_cases : [];
+  appealEligibleList?.replaceChildren();
+  eligible.forEach((record) => {
+    const submit = actionButton('Submit appeal', () => openMemberAppealEditor({ mode: 'submit', caseRecord: record }), 'primary-action compact-action');
+    appealEligibleList?.append(createAppealCard({
+      title: `Case #${record.case_id} · ${appealActionLabel(record.action)}`,
+      reason: String(record.reason || 'No reason recorded.'),
+      status: 'available',
+      meta: [
+        `Action date: ${formatAccountDate(record.created_at)}`,
+        record.expires_at ? `Expires: ${formatAccountDate(record.expires_at)}` : '',
+        `Appeal by: ${formatAccountDate(record.appeal_deadline_at)}`
+      ],
+      actions: [submit]
+    }));
+  });
+  setText('[data-appeal-eligible-count]', String(eligible.length));
+  if (appealEligibleEmpty) appealEligibleEmpty.hidden = eligible.length !== 0;
+
+  const appeals = Array.isArray(payload.appeals) ? payload.appeals : [];
+  memberAppealList?.replaceChildren();
+  appeals.forEach((appeal) => {
+    const actions = [];
+    if (appeal.status === 'submitted' && settings.allow_edit_before_assignment) {
+      actions.push(actionButton('Edit', () => openMemberAppealEditor({ mode: 'update', appeal })));
+    }
+    if (appeal.status === 'submitted') {
+      actions.push(actionButton('Withdraw', () => {
+        selectedWithdrawAppealId = Number(appeal.appeal_id);
+        withdrawAppealForm?.reset();
+        showInlineMessage(withdrawAppealMessage, '');
+        openDashboardDialog(withdrawAppealDialog);
+      }, 'secondary-action compact-action danger-outline'));
+    }
+    const ticket = appeal.ticket?.created
+      ? `Ticket #${appeal.ticket.ticket_number} · ${titleCaseState(appeal.ticket.status)}`
+      : `Ticket: ${titleCaseState(appeal.ticket?.status || 'not created')}`;
+    const outcome = appeal.outcome ? `Outcome: ${titleCaseState(appeal.outcome)}` : '';
+    memberAppealList?.append(createAppealCard({
+      title: `Appeal #${appeal.appeal_id} · Case #${appeal.case_id}`,
+      reason: String(appeal.statement || 'No statement available.'),
+      status: appeal.status,
+      meta: [
+        appealActionLabel(appeal.case?.action),
+        `Submitted: ${formatAccountDate(appeal.created_at)}`,
+        ticket,
+        outcome,
+        appeal.decision_reason ? `Decision: ${appeal.decision_reason}` : ''
+      ],
+      actions
+    }));
+  });
+  setText('[data-member-appeal-count]', String(appeals.length));
+  if (memberAppealEmpty) memberAppealEmpty.hidden = appeals.length !== 0;
+  if (memberAppealError) memberAppealError.hidden = true;
+};
+
+const loadMemberAppeals = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (!sessionToken || memberAppealRequestInProgress) return false;
+  memberAppealRequestInProgress = true;
+  refreshMemberAppealsButton?.setAttribute('aria-busy', 'true');
+  refreshMemberAppealsButton?.setAttribute('disabled', '');
+  try {
+    const response = await authFetch(ACCOUNT_APPEALS_URL, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) {
+      storageRemove(AUTH_SESSION_KEY);
+      applySignedOutState();
+      showAuthMessage(payload.message || 'Sign in again to view appeals.', 'error');
+      return false;
+    }
+    if (!response.ok) throw new Error(payload.message || 'Appeals are temporarily unavailable.');
+    renderMemberAppeals(payload);
+    return true;
+  } catch (error) {
+    if (memberAppealError) memberAppealError.hidden = false;
+    showAuthMessage(error.message || 'Appeals are temporarily unavailable.', 'error');
+    return false;
+  } finally {
+    memberAppealRequestInProgress = false;
+    refreshMemberAppealsButton?.removeAttribute('aria-busy');
+    refreshMemberAppealsButton?.removeAttribute('disabled');
+  }
+};
+
+const submitMemberAppealAction = async (payload, messageElement, button) => {
+  if (memberAppealActionInProgress) return null;
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken) {
+    showInlineMessage(messageElement, 'Sign in with Discord to continue.');
+    return null;
+  }
+  memberAppealActionInProgress = true;
+  button?.setAttribute('disabled', '');
+  button?.setAttribute('aria-busy', 'true');
+  try {
+    const response = await protectedActionFetch(ACCOUNT_APPEAL_ACTION_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) {
+      storageRemove(AUTH_SESSION_KEY);
+      applySignedOutState();
+      closeDashboardDialog(memberAppealDialog);
+      closeDashboardDialog(withdrawAppealDialog);
+      showAuthMessage(result.message || 'Your session expired. Sign in again.', 'error');
+      return null;
+    }
+    if (!response.ok) throw new Error(result.message || 'The appeal action could not be completed.');
+    await loadMemberAppeals(sessionToken);
+    await loadModerationQueue(sessionToken);
+    showAuthMessage(result.message || 'Appeal updated.', 'success');
+    return result;
+  } catch (error) {
+    showInlineMessage(messageElement, error.message || 'The appeal action could not be completed.');
+    return null;
+  } finally {
+    memberAppealActionInProgress = false;
+    button?.removeAttribute('disabled');
+    button?.removeAttribute('aria-busy');
+  }
+};
+
+memberAppealForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const statement = memberAppealStatement?.value.trim() || '';
+  const payload = {
+    action: selectedMemberAppealMode,
+    statement,
+    evidence: appealEvidenceFromForm()
+  };
+  if (selectedMemberAppealMode === 'update') payload.appeal_id = selectedMemberAppealId;
+  else payload.case_id = selectedMemberAppealCaseId;
+  const result = await submitMemberAppealAction(payload, memberAppealMessage, submitMemberAppealButton);
+  if (result) closeDashboardDialog(memberAppealDialog);
+});
+
+withdrawAppealForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = document.querySelector('[data-confirm-withdraw-appeal]');
+  const result = await submitMemberAppealAction({
+    action: 'withdraw',
+    appeal_id: selectedWithdrawAppealId,
+    reason: withdrawAppealReason?.value.trim() || ''
+  }, withdrawAppealMessage, button);
+  if (result) closeDashboardDialog(withdrawAppealDialog);
+});
+
+memberAppealCancelButtons.forEach((button) => button.addEventListener('click', () => closeDashboardDialog(memberAppealDialog)));
+withdrawAppealCancelButtons.forEach((button) => button.addEventListener('click', () => closeDashboardDialog(withdrawAppealDialog)));
+refreshMemberAppealsButton?.addEventListener('click', () => loadMemberAppeals());
+
+const populateOwnerSelect = (element, options, selectedKey) => {
+  if (!element) return;
+  element.replaceChildren();
+  (Array.isArray(options) ? options : []).forEach((option) => {
+    const item = document.createElement('option');
+    item.value = String(option.key || '');
+    item.textContent = String(option.name || 'Unknown');
+    item.selected = item.value === String(selectedKey || '');
+    element.append(item);
+  });
+};
+
+const applyOwnerAppealSettings = (payload) => {
+  const settings = payload?.settings || {};
+  if (ownerAppealEnabled) ownerAppealEnabled.checked = Boolean(settings.enabled);
+  if (ownerAppealCreateTicket) ownerAppealCreateTicket.checked = Boolean(settings.create_ticket);
+  if (ownerAppealEdit) ownerAppealEdit.checked = Boolean(settings.allow_edit_before_assignment);
+  if (ownerAppealContinues) ownerAppealContinues.checked = Boolean(settings.punishment_continues_during_review);
+  if (ownerAppealDeadline) ownerAppealDeadline.value = String(Number(settings.deadline_days) || 14);
+  if (ownerAppealInstructions) ownerAppealInstructions.value = String(settings.instructions || '');
+  populateOwnerSelect(ownerAppealCategory, payload?.categories, settings.ticket_category_key);
+  populateOwnerSelect(ownerAppealRole, payload?.roles, settings.staff_role_key);
+};
+
+const handleOwnerAppealAuthFailure = (response, payload = {}) => {
+  if (response.status === 401) {
+    storageRemove(AUTH_SESSION_KEY);
+    applySignedOutState();
+    showAuthMessage(payload.message || 'Your session expired. Sign in again.', 'error');
+    return true;
+  }
+  if (response.status === 403) {
+    if (authenticatedUser?.membership) authenticatedUser.membership.access_level = 'member';
+    applyAccessVisibility('member');
+    showView('overview', false);
+    showAuthMessage(payload.message || 'Owner access is required.', 'error');
+    return true;
+  }
+  return false;
+};
+
+const loadOwnerAppealSettings = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (dashboardAccessLevel !== 'owner' || !sessionToken || ownerAppealRequestInProgress) return false;
+  ownerAppealRequestInProgress = true;
+  refreshAppealSettingsButton?.setAttribute('disabled', '');
+  refreshAppealSettingsButton?.setAttribute('aria-busy', 'true');
+  try {
+    const response = await authFetch(OWNER_APPEAL_CONFIG_URL, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleOwnerAppealAuthFailure(response, payload)) return false;
+    if (!response.ok) throw new Error(payload.message || 'Appeal settings are temporarily unavailable.');
+    applyOwnerAppealSettings(payload);
+    showInlineMessage(ownerAppealMessage, '');
+    return true;
+  } catch (error) {
+    showInlineMessage(ownerAppealMessage, error.message || 'Appeal settings are temporarily unavailable.');
+    return false;
+  } finally {
+    ownerAppealRequestInProgress = false;
+    refreshAppealSettingsButton?.removeAttribute('disabled');
+    refreshAppealSettingsButton?.removeAttribute('aria-busy');
+  }
+};
+
+saveAppealSettingsButton?.addEventListener('click', async () => {
+  if (ownerAppealRequestInProgress) return;
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken) return;
+  ownerAppealRequestInProgress = true;
+  saveAppealSettingsButton.setAttribute('disabled', '');
+  saveAppealSettingsButton.setAttribute('aria-busy', 'true');
+  try {
+    const response = await protectedActionFetch(OWNER_APPEAL_CONFIG_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({
+        enabled: Boolean(ownerAppealEnabled?.checked),
+        deadline_days: Number(ownerAppealDeadline?.value || 14),
+        create_ticket: Boolean(ownerAppealCreateTicket?.checked),
+        allow_edit_before_assignment: Boolean(ownerAppealEdit?.checked),
+        punishment_continues_during_review: Boolean(ownerAppealContinues?.checked),
+        ticket_category_key: ownerAppealCategory?.value || 'ticket_default',
+        staff_role_key: ownerAppealRole?.value || 'ticket_default',
+        instructions: ownerAppealInstructions?.value.trim() || ''
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleOwnerAppealAuthFailure(response, payload)) return;
+    if (!response.ok) throw new Error(payload.message || 'Appeal settings could not be saved.');
+    applyOwnerAppealSettings(payload);
+    showInlineMessage(ownerAppealMessage, payload.message || 'Appeal settings saved.', 'success');
+    await loadMemberAppeals(sessionToken);
+  } catch (error) {
+    showInlineMessage(ownerAppealMessage, error.message || 'Appeal settings could not be saved.');
+  } finally {
+    ownerAppealRequestInProgress = false;
+    saveAppealSettingsButton.removeAttribute('disabled');
+    saveAppealSettingsButton.removeAttribute('aria-busy');
+  }
+});
+refreshAppealSettingsButton?.addEventListener('click', () => loadOwnerAppealSettings());
+
+document.querySelectorAll('[data-copy-command]').forEach((button) => {
+  const originalLabel = button.textContent;
+  button.addEventListener('click', async () => {
+    const command = String(button.dataset.copyCommand || '').trim();
+    try {
+      await navigator.clipboard.writeText(command);
+      button.textContent = `Copied ${command}`;
+    } catch (error) {
+      button.textContent = command;
+    }
+    window.setTimeout(() => { button.textContent = originalLabel; }, 1800);
+  });
+});
+
+window.addEventListener('wwz:viewchange', (event) => {
+  const { view, section } = event.detail || {};
+  if (view === 'appeals') loadMemberAppeals();
+  if (view === 'configuration' && section === 'appeals') loadOwnerAppealSettings();
+});
+
+
 const applyAccountSummary = (payload) => {
   const profile = payload?.profile;
   const economy = payload?.economy;
@@ -2720,6 +3186,8 @@ const loadCurrentAccount = async (sessionToken) => {
 
     applyAuthenticatedState(await response.json());
     await loadAccountSummary(sessionToken);
+    await loadMemberAppeals(sessionToken);
+    if (dashboardAccessLevel === 'owner') await loadOwnerAppealSettings(sessionToken);
     await loadServerActionHistory(sessionToken);
     await loadModerationCases(sessionToken);
     await loadCurrentBanlists(sessionToken);
@@ -2754,6 +3222,8 @@ const completeDiscordLogin = async (loginTicket) => {
 
     applyAuthenticatedState(payload);
     await loadAccountSummary(payload.session_token);
+    await loadMemberAppeals(payload.session_token);
+    if (dashboardAccessLevel === 'owner') await loadOwnerAppealSettings(payload.session_token);
     await loadServerActionHistory(payload.session_token);
     await loadModerationCases(payload.session_token);
     await loadCurrentBanlists(payload.session_token);
@@ -3022,36 +3492,89 @@ refreshLiveStatus();
 window.setInterval(refreshLiveStatus, LIVE_STATUS_REFRESH_MS);
 
 const commands = [
-  { name: 'bot', category: 'General', description: 'View bot information, status and help.', access: 'Everyone' },
-  { name: 'server', category: 'Server', description: 'View current DayZ server information.', access: 'Everyone' },
-  { name: 'account', category: 'Profiles', description: 'Manage your connected community account.', access: 'Member' },
-  { name: 'profile', category: 'Profiles', description: 'View your linked community profile.', access: 'Member' },
-  { name: 'pvp', category: 'Community', description: 'View PvP statistics and activity features.', access: 'Member' },
-  { name: 'event', category: 'Events', description: 'Access community event tools and information.', access: 'Admin' },
-  { name: 'economy', category: 'Economy', description: 'Access balances, rewards and economy features.', access: 'Member' },
-  { name: 'coinflip', category: 'Games', description: 'Make a simple heads-or-tails economy wager.', access: 'Member' },
-  { name: 'dice', category: 'Games', description: 'Place an economy wager on a dice roll.', access: 'Member' },
-  { name: 'slots', category: 'Games', description: 'Play the World War Z community slot machine.', access: 'Member' },
-  { name: 'roulette', category: 'Games', description: 'Play the community roulette game.', access: 'Member' },
-  { name: 'jackpot', category: 'Games', description: 'Enter and view the community jackpot.', access: 'Member' },
-  { name: 'blackjack', category: 'Games', description: 'Play a community economy blackjack game.', access: 'Member' },
-  { name: 'mod', category: 'Admin', description: 'Access moderation cases, warnings and controls.', access: 'Admin' },
-  { name: 'logs', category: 'Admin', description: 'Configure and inspect authorised bot logging.', access: 'Admin' },
-  { name: 'ticket', category: 'Support', description: 'Open and manage structured support requests.', access: 'Member' },
-  { name: 'nitrado', category: 'Server', description: 'Access approved Nitrado server information.', access: 'Owner' },
-  { name: 'damagesettings', category: 'Server', description: 'View or manage DayZ damage settings.', access: 'Owner' },
-  { name: 'restart', category: 'Server', description: 'Restart the DayZ server with owner controls.', access: 'Owner' },
-  { name: 'start', category: 'Server', description: 'Start the DayZ server with owner controls.', access: 'Owner' },
-  { name: 'stop', category: 'Server', description: 'Stop the DayZ server with owner controls.', access: 'Owner' },
-  { name: 'player', category: 'Admin', description: 'Look up and administer a community player.', access: 'Admin' },
-  { name: 'adm', category: 'Admin', description: 'Access ADM activity and intelligence tools.', access: 'Admin' },
-  { name: 'bounty', category: 'Economy', description: 'View and manage community bounties.', access: 'Member' },
-  { name: 'contract', category: 'Economy', description: 'View and manage community contracts.', access: 'Member' },
-  { name: 'config', category: 'Configuration', description: 'Manage DayZ configuration operations.', access: 'Owner' },
-  { name: 'loot', category: 'Configuration', description: 'Work with the server loot configuration.', access: 'Owner' },
-  { name: 'eventconfig', category: 'Configuration', description: 'Review and manage event configuration.', access: 'Owner' },
-  { name: 'eventpositions', category: 'Configuration', description: 'Manage configured event positions.', access: 'Owner' },
-  { name: 'validation', category: 'Configuration', description: 'Validate configuration files before use.', access: 'Owner' }
+  {"name": "account", "category": "Accounts", "description": "Advanced account linking and administration group.", "access": "Member"},
+  {"name": "adm", "category": "ADM intelligence", "description": "Advanced ADM intelligence group.", "access": "Admin"},
+  {"name": "adminlink", "category": "Accounts", "description": "Link a Discord member to a PlayStation identity.", "access": "Admin"},
+  {"name": "admstats", "category": "ADM intelligence", "description": "View ADM intelligence statistics.", "access": "Admin"},
+  {"name": "appeal", "category": "Support & appeals", "description": "Appeal one of your own eligible moderation cases.", "access": "Member"},
+  {"name": "balance", "category": "Economy", "description": "View a survivor wallet.", "access": "Member"},
+  {"name": "ban", "category": "Moderation", "description": "Ban a Discord member.", "access": "Admin"},
+  {"name": "blackjack", "category": "Games", "description": "Play community blackjack.", "access": "Member"},
+  {"name": "bot", "category": "General", "description": "Advanced bot information and messaging group.", "access": "Everyone"},
+  {"name": "botinfo", "category": "General", "description": "View bot version and service information.", "access": "Everyone"},
+  {"name": "bounties", "category": "Bounties & contracts", "description": "View active bounties.", "access": "Member"},
+  {"name": "bounty", "category": "Bounties & contracts", "description": "Advanced bounty group.", "access": "Member"},
+  {"name": "bountycreate", "category": "Bounties & contracts", "description": "Create a new player bounty.", "access": "Member"},
+  {"name": "case", "category": "Moderation", "description": "Open one numbered moderation case.", "access": "Admin"},
+  {"name": "cases", "category": "Moderation", "description": "List recent moderation cases.", "access": "Admin"},
+  {"name": "coinflip", "category": "Games", "description": "Place a heads-or-tails economy wager.", "access": "Member"},
+  {"name": "config", "category": "Configuration", "description": "Manage general DayZ configuration workflow.", "access": "Owner"},
+  {"name": "contract", "category": "Bounties & contracts", "description": "Advanced contract group.", "access": "Member"},
+  {"name": "contractaccept", "category": "Bounties & contracts", "description": "Accept a contract.", "access": "Member"},
+  {"name": "contractclaim", "category": "Bounties & contracts", "description": "Claim a completed contract reward.", "access": "Member"},
+  {"name": "contractprogress", "category": "Bounties & contracts", "description": "View contract progress.", "access": "Member"},
+  {"name": "contracts", "category": "Bounties & contracts", "description": "View available survivor contracts.", "access": "Member"},
+  {"name": "daily", "category": "Economy", "description": "Claim the daily survivor stipend.", "access": "Member"},
+  {"name": "damagefeed", "category": "ADM intelligence", "description": "View recent damage activity.", "access": "Admin"},
+  {"name": "damagesettings", "category": "Server", "description": "View or manage DayZ damage settings.", "access": "Owner"},
+  {"name": "dice", "category": "Games", "description": "Place an economy wager on a dice roll.", "access": "Member"},
+  {"name": "economy", "category": "Economy", "description": "Advanced economy administration group.", "access": "Member"},
+  {"name": "economyhistory", "category": "Economy", "description": "View recent economy transactions.", "access": "Member"},
+  {"name": "economystats", "category": "Economy", "description": "View detailed economy statistics.", "access": "Member"},
+  {"name": "event", "category": "Events", "description": "Manage community event records and rewards.", "access": "Admin"},
+  {"name": "eventconfig", "category": "Configuration", "description": "Manage event configuration.", "access": "Owner"},
+  {"name": "eventpositions", "category": "Configuration", "description": "Manage event position configuration.", "access": "Owner"},
+  {"name": "help", "category": "General", "description": "Search the direct command guide by command name or topic.", "access": "Everyone"},
+  {"name": "jackpot", "category": "Games", "description": "View or enter the community jackpot.", "access": "Member"},
+  {"name": "kick", "category": "Moderation", "description": "Kick a member from Discord.", "access": "Admin"},
+  {"name": "link", "category": "Accounts", "description": "Link and verify your PlayStation identity.", "access": "Member"},
+  {"name": "linkpanel", "category": "Accounts", "description": "Publish the persistent account-linking panel.", "access": "Admin"},
+  {"name": "lock", "category": "Moderation", "description": "Lock the current Discord channel.", "access": "Admin"},
+  {"name": "logs", "category": "Logging", "description": "Configure authorised Discord logging.", "access": "Admin"},
+  {"name": "loot", "category": "Configuration", "description": "Manage loot configuration.", "access": "Owner"},
+  {"name": "mod", "category": "Moderation", "description": "Advanced moderation and channel-control group.", "access": "Admin"},
+  {"name": "mybounties", "category": "Bounties & contracts", "description": "View bounties involving your account.", "access": "Member"},
+  {"name": "myprofile", "category": "Accounts", "description": "View your own or another survivor profile.", "access": "Member"},
+  {"name": "nitrado", "category": "Server", "description": "Access advanced Nitrado server controls.", "access": "Owner"},
+  {"name": "pay", "category": "Economy", "description": "Transfer money to another linked survivor.", "access": "Member"},
+  {"name": "ping", "category": "General", "description": "Check bot response latency.", "access": "Everyone"},
+  {"name": "player", "category": "Player admin", "description": "Advanced player administration group.", "access": "Admin"},
+  {"name": "playerlookup", "category": "Player admin", "description": "Open a complete PSN administration record.", "access": "Admin"},
+  {"name": "playernote", "category": "Player admin", "description": "Add a private note to a player record.", "access": "Admin"},
+  {"name": "playernotes", "category": "Player admin", "description": "View private player notes.", "access": "Admin"},
+  {"name": "presence", "category": "General", "description": "View the saved Discord presence.", "access": "Everyone"},
+  {"name": "profile", "category": "Accounts", "description": "Advanced survivor profile group.", "access": "Member"},
+  {"name": "purge", "category": "Moderation", "description": "Bulk-delete recent messages from a channel.", "access": "Admin"},
+  {"name": "pvp", "category": "PvP", "description": "Advanced PvP statistics and feed group.", "access": "Member"},
+  {"name": "pvpleaderboard", "category": "PvP", "description": "View the PvP leaderboard.", "access": "Member"},
+  {"name": "pvpstats", "category": "PvP", "description": "View detailed survivor PvP statistics.", "access": "Member"},
+  {"name": "recentdeaths", "category": "ADM intelligence", "description": "View recent DayZ deaths.", "access": "Admin"},
+  {"name": "recentkills", "category": "PvP", "description": "View recent confirmed PvP kills.", "access": "Member"},
+  {"name": "restart", "category": "Server", "description": "Restart the DayZ server with protected confirmation.", "access": "Owner"},
+  {"name": "richlist", "category": "Economy", "description": "View the wealthiest verified survivors.", "access": "Member"},
+  {"name": "roulette", "category": "Games", "description": "Play community roulette.", "access": "Member"},
+  {"name": "server", "category": "Server", "description": "Advanced live server and feed group.", "access": "Everyone"},
+  {"name": "serverstatus", "category": "Server", "description": "View live DayZ server population and status.", "access": "Everyone"},
+  {"name": "slots", "category": "Games", "description": "Play the community slot machine.", "access": "Member"},
+  {"name": "start", "category": "Server", "description": "Start the DayZ server.", "access": "Owner"},
+  {"name": "statuspanel", "category": "Server", "description": "Publish or update the persistent server-status panel.", "access": "Admin"},
+  {"name": "stop", "category": "Server", "description": "Stop the DayZ server.", "access": "Owner"},
+  {"name": "support", "category": "Support & appeals", "description": "Open the private support-ticket category menu.", "access": "Member"},
+  {"name": "suspicious", "category": "ADM intelligence", "description": "View suspicious activity intelligence.", "access": "Admin"},
+  {"name": "ticket", "category": "Support & appeals", "description": "Advanced ticket setup and management group.", "access": "Member"},
+  {"name": "timeout", "category": "Moderation", "description": "Temporarily timeout a member.", "access": "Admin"},
+  {"name": "unban", "category": "Moderation", "description": "Unban a Discord account.", "access": "Admin"},
+  {"name": "unlink", "category": "Accounts", "description": "Unlink your verified PlayStation identity.", "access": "Member"},
+  {"name": "unlock", "category": "Moderation", "description": "Unlock the current Discord channel.", "access": "Admin"},
+  {"name": "untimeout", "category": "Moderation", "description": "Remove a member timeout.", "access": "Admin"},
+  {"name": "unwarn", "category": "Moderation", "description": "Remove an active warning by case number.", "access": "Admin"},
+  {"name": "unwatch", "category": "Player admin", "description": "Remove a PlayStation account from the watchlist.", "access": "Admin"},
+  {"name": "validation", "category": "Configuration", "description": "Validate configuration files before deployment.", "access": "Owner"},
+  {"name": "warn", "category": "Moderation", "description": "Warn a member and create a numbered case.", "access": "Admin"},
+  {"name": "warnings", "category": "Moderation", "description": "View a member’s active warnings.", "access": "Admin"},
+  {"name": "watch", "category": "Player admin", "description": "Add a PlayStation account to the watchlist.", "access": "Admin"},
+  {"name": "watchlist", "category": "Player admin", "description": "View watched PlayStation accounts.", "access": "Admin"},
+  {"name": "work", "category": "Economy", "description": "Complete a survivor job.", "access": "Member"}
 ];
 
 const commandResults = document.querySelector('[data-command-results]');

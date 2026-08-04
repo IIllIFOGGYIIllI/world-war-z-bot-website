@@ -14,7 +14,7 @@
   <link rel="manifest" href="site.webmanifest">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/world-war-z-icon.png">
-  <link rel="stylesheet" href="dashboard.css?v=1.17.0">
+  <link rel="stylesheet" href="dashboard.css?v=1.18.0">
 </head>
 <body>
   <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -56,6 +56,7 @@
         <button class="side-link" type="button" data-view="players" data-section="identity" data-nav-label="Survivor profile"><span class="side-link-icon" aria-hidden="true">♙</span><span class="side-link-copy"><strong>Survivor profile</strong><small>Verified PlayStation identity</small></span></button>
         <button class="side-link" type="button" data-view="players" data-section="activity" data-nav-label="Activity &amp; combat"><span class="side-link-icon" aria-hidden="true">☠</span><span class="side-link-copy"><strong>Activity &amp; combat</strong><small>Sessions and PvP record</small></span></button>
         <button class="side-link" type="button" data-view="tickets" data-section="support" data-nav-label="Support tickets"><span class="side-link-icon" aria-hidden="true">◇</span><span class="side-link-copy"><strong>Support tickets</strong><small>Community support centre</small></span></button>
+        <button class="side-link" type="button" data-view="appeals" data-section="my-appeals" data-nav-label="My appeals"><span class="side-link-icon" aria-hidden="true">⚖</span><span class="side-link-copy"><strong>My appeals</strong><small>Submit and follow reviews</small></span></button>
 
         <p class="nav-label" data-staff-only hidden>Administration</p>
         <button class="side-link" type="button" data-view="staff" data-section="queue" data-nav-label="Moderation queue" data-staff-only hidden><span class="side-link-icon" aria-hidden="true">☷</span><span class="side-link-copy"><strong>Moderation queue</strong><small>Assignments and deadlines</small></span><span class="side-link-badge" data-queue-nav-badge hidden>0</span></button>
@@ -70,6 +71,7 @@
         <button class="side-link" type="button" data-view="configuration" data-section="workflow" data-nav-label="Configuration workflow" data-owner-only hidden><span class="side-link-icon" aria-hidden="true">⚙</span><span class="side-link-copy"><strong>Configuration workflow</strong><small>Backup, validate, compare</small></span></button>
         <button class="side-link" type="button" data-view="configuration" data-section="backups" data-nav-label="Backup history" data-owner-only hidden><span class="side-link-icon" aria-hidden="true">▣</span><span class="side-link-copy"><strong>Backup history</strong><small>Restore-ready snapshots</small></span></button>
         <button class="side-link" type="button" data-view="configuration" data-section="notifications" data-nav-label="Notifications &amp; webhooks" data-owner-only hidden><span class="side-link-icon" aria-hidden="true">⌁</span><span class="side-link-copy"><strong>Notifications &amp; webhooks</strong><small>Discord event routing</small></span></button>
+        <button class="side-link" type="button" data-view="configuration" data-section="appeals" data-nav-label="Appeal settings" data-owner-only hidden><span class="side-link-icon" aria-hidden="true">⚖</span><span class="side-link-copy"><strong>Appeal settings</strong><small>Deadlines, tickets and policy</small></span></button>
 
         <p class="nav-label">Account &amp; help</p>
         <button class="side-link" type="button" data-view="settings" data-section="connection" data-nav-label="Discord connection"><span class="side-link-icon" aria-hidden="true">◎</span><span class="side-link-copy"><strong>Discord connection</strong><small>Session and sign-in</small></span></button>
@@ -247,8 +249,20 @@
       </section>
 
       <section class="dashboard-view" data-view-panel="tickets" aria-labelledby="tickets-title" hidden>
-        <div class="view-heading" id="dashboard-ticket-support" data-dashboard-section="support"><div><p class="breadcrumb">Dashboard / Tickets</p><h1 id="tickets-title">Support centre.</h1><p>Create, follow and respond to community support requests in one place.</p></div><button class="primary-action" type="button" data-open-login data-auth-cta>Connect Discord</button></div>
-        <div class="dashboard-grid ticket-grid"><article class="panel empty-panel"><span aria-hidden="true">◇</span><h2>Ticket connection coming later</h2><p>Discord identity can be verified now. Open and resolved tickets will connect in a later version.</p><button class="secondary-action" type="button" data-open-login>Sign in with Discord</button></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">How it will work</p><h2>Structured support</h2></div></div><ol class="support-steps"><li><span>01</span><div><strong>Choose a category</strong><small>Direct the request to the correct team.</small></div></li><li><span>02</span><div><strong>Provide the details</strong><small>Keep evidence and context together.</small></div></li><li><span>03</span><div><strong>Follow the outcome</strong><small>Receive updates without Admin DMs.</small></div></li></ol></article></div>
+        <div class="view-heading" id="dashboard-ticket-support" data-dashboard-section="support"><div><p class="breadcrumb">Dashboard / Support tickets</p><h1 id="tickets-title">Support centre.</h1><p>Open a private Discord support ticket without searching through grouped commands.</p></div><button class="primary-action" type="button" data-copy-command="/support">Copy /support</button></div>
+        <div class="dashboard-grid ticket-grid"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Direct Discord command</p><h2>Open the support menu</h2></div><span class="muted-label">Member</span></div><p>Use <code>/support</code> in the World War Z Discord server. The bot opens the existing category selector privately so you can choose account help, player reports, technical support, a general question or another supported request.</p><button class="primary-action wide" type="button" data-copy-command="/support">Copy /support command</button><p class="table-note" data-command-copy-message hidden></p></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Moderation appeals</p><h2>Appeals have their own workflow</h2></div><span class="muted-label">Case linked</span></div><ol class="support-steps"><li><span>01</span><div><strong>Open My appeals</strong><small>Select one of your eligible numbered cases.</small></div></li><li><span>02</span><div><strong>Submit context and evidence</strong><small>Railway creates the protected review record.</small></div></li><li><span>03</span><div><strong>Follow the outcome</strong><small>An optional private Discord ticket stays linked to the case.</small></div></li></ol><button class="secondary-action wide" type="button" data-jump="appeals" data-jump-section="my-appeals">Open My appeals</button></article></div>
+      </section>
+
+      <section class="dashboard-view" data-view-panel="appeals" aria-labelledby="appeals-title" hidden>
+        <div class="view-heading" id="dashboard-member-appeals" data-dashboard-section="my-appeals"><div><p class="breadcrumb">Dashboard / My appeals</p><h1 id="appeals-title">Your moderation appeals.</h1><p>View only your own eligible cases, submit an appeal and follow the protected review outcome.</p></div><div class="heading-actions"><button class="secondary-action" type="button" data-refresh-member-appeals>Refresh appeals</button><button class="primary-action" type="button" data-open-login data-auth-cta>Connect Discord</button></div></div>
+        <div class="locked-hero panel" data-appeal-guest><div class="locked-copy"><span class="large-lock" aria-hidden="true">⚖</span><p class="panel-kicker">Private member records</p><h2>Sign in to view your cases.</h2><p>Railway verifies your Discord identity and returns only moderation cases attached to your own linked account.</p><button class="primary-action" type="button" data-open-login>Sign in with Discord</button></div></div>
+        <div data-appeal-unlinked hidden><div class="security-notice"><span aria-hidden="true">⌁</span><div><strong>A verified PlayStation link is required</strong><p>Use <code>/link</code> in Discord with your exact PlayStation ID, then return here and refresh.</p></div></div></div>
+        <div data-appeal-content hidden>
+          <div class="security-notice"><span aria-hidden="true">⚿</span><div><strong>Submitting an appeal does not automatically reverse a punishment</strong><p data-appeal-instructions>Explain the case honestly and include relevant evidence.</p></div></div>
+          <div class="appeal-policy-grid"><div><span>Appeal deadline</span><strong data-appeal-deadline>—</strong></div><div><span>Discord ticket</span><strong data-appeal-ticket-policy>—</strong></div><div><span>Punishment during review</span><strong data-appeal-punishment-policy>—</strong></div><div><span>Editing</span><strong data-appeal-edit-policy>—</strong></div></div>
+          <article class="panel appeal-eligible-panel"><div class="panel-heading"><div><p class="panel-kicker">Available actions</p><h2>Cases eligible for appeal</h2></div><span class="muted-label" data-appeal-eligible-count>—</span></div><div class="appeal-card-list" data-appeal-eligible-list aria-live="polite"></div><p class="table-note" data-appeal-eligible-empty hidden>No moderation cases are currently eligible for a new appeal.</p></article>
+          <article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Your history</p><h2>Submitted appeals</h2></div><span class="muted-label" data-member-appeal-count>—</span></div><div class="appeal-card-list" data-member-appeal-list aria-live="polite"></div><p class="table-note" data-member-appeal-empty hidden>You have not submitted an appeal.</p><p class="table-note history-error" data-member-appeal-error hidden>Your appeals are temporarily unavailable.</p></article>
+        </div>
       </section>
 
       <section class="dashboard-view" data-view-panel="staff" aria-labelledby="staff-title" hidden>
@@ -361,6 +375,20 @@
           <div class="restart-dialog-message" role="status" data-webhook-message hidden></div>
           <p class="table-note history-error" data-webhook-error hidden>Webhook configuration is temporarily unavailable.</p>
         </article>
+        <article class="panel appeal-settings-panel" id="dashboard-configuration-appeals" data-dashboard-section="appeals" data-owner-only>
+          <div class="panel-heading"><div><p class="panel-kicker">Owner configuration</p><h2>Member appeals &amp; ticket integration</h2></div><button class="secondary-action compact-action" type="button" data-refresh-appeal-settings>Refresh settings</button></div>
+          <p class="panel-intro">Control who can appeal, the submission deadline and which Discord category and role receive linked appeal tickets. Raw Discord IDs remain on Railway.</p>
+          <div class="appeal-settings-grid">
+            <label class="toggle-setting"><input type="checkbox" data-owner-appeal-enabled><span><strong>Enable member appeals</strong><small>Allow linked members to submit from the dashboard or <code>/appeal</code>.</small></span></label>
+            <label class="toggle-setting"><input type="checkbox" data-owner-appeal-create-ticket><span><strong>Create a Discord ticket</strong><small>Open a private case-linked ticket after a successful appeal.</small></span></label>
+            <label class="toggle-setting"><input type="checkbox" data-owner-appeal-edit><span><strong>Allow pre-assignment edits</strong><small>Members may revise their statement until a reviewer is assigned.</small></span></label>
+            <label class="toggle-setting"><input type="checkbox" data-owner-appeal-continues><span><strong>Punishment continues during review</strong><small>Clarifies that submitting an appeal does not pause enforcement.</small></span></label>
+          </div>
+          <div class="dashboard-grid appeal-setting-fields"><label class="dialog-field"><span>Appeal deadline <small>1–90 days after case creation</small></span><input type="number" min="1" max="90" step="1" data-owner-appeal-deadline></label><label class="dialog-field"><span>Discord ticket category</span><select data-owner-appeal-category><option value="ticket_default">Use ticket-system open category</option></select></label><label class="dialog-field"><span>Appeal ticket support role</span><select data-owner-appeal-role><option value="ticket_default">Use ticket-system support role</option></select></label></div>
+          <label class="dialog-field"><span>Member instructions <small>20–2,000 characters</small></span><textarea rows="5" maxlength="2000" data-owner-appeal-instructions></textarea></label>
+          <div class="restart-dialog-message" role="status" data-owner-appeal-message hidden></div>
+          <button class="primary-action" type="button" data-save-appeal-settings>Save appeal settings</button>
+        </article>
       </section>
 
       <section class="dashboard-view" data-view-panel="settings" aria-labelledby="settings-title" hidden>
@@ -472,7 +500,25 @@
     </div>
   </dialog>
 
-  <script src="dashboard.js?v=1.17.0"></script>
+  <dialog class="login-dialog appeal-dialog" data-member-appeal-dialog aria-labelledby="member-appeal-dialog-title">
+    <form method="dialog" data-member-appeal-form>
+      <button class="dialog-close" type="button" aria-label="Close appeal form" data-member-appeal-cancel>×</button>
+      <span class="restart-mark" aria-hidden="true">⚖</span><p class="panel-kicker">Private case submission</p><h2 id="member-appeal-dialog-title" data-member-appeal-title>Submit appeal</h2><p data-member-appeal-copy>Your statement is visible to authorised reviewers.</p>
+      <div class="player-action-target"><span>Moderation case</span><strong data-member-appeal-case>—</strong><small data-member-appeal-case-detail>Review the selected action before submitting.</small></div>
+      <label class="dialog-field"><span>Appeal statement <small>20–2,000 characters</small></span><textarea rows="6" minlength="20" maxlength="2000" placeholder="Explain why this action should be reviewed and what outcome you are requesting." data-member-appeal-statement required></textarea></label>
+      <fieldset class="appeal-evidence-fields"><legend>Evidence references <small>Optional · maximum 5</small></legend>
+        <div class="appeal-evidence-row"><input type="text" maxlength="500" placeholder="HTTPS link or reference" data-member-appeal-evidence-reference><input type="text" maxlength="300" placeholder="What this evidence shows" data-member-appeal-evidence-summary></div>
+        <div class="appeal-evidence-row"><input type="text" maxlength="500" placeholder="HTTPS link or reference" data-member-appeal-evidence-reference><input type="text" maxlength="300" placeholder="What this evidence shows" data-member-appeal-evidence-summary></div>
+        <div class="appeal-evidence-row"><input type="text" maxlength="500" placeholder="HTTPS link or reference" data-member-appeal-evidence-reference><input type="text" maxlength="300" placeholder="What this evidence shows" data-member-appeal-evidence-summary></div>
+        <div class="appeal-evidence-row"><input type="text" maxlength="500" placeholder="HTTPS link or reference" data-member-appeal-evidence-reference><input type="text" maxlength="300" placeholder="What this evidence shows" data-member-appeal-evidence-summary></div>
+        <div class="appeal-evidence-row"><input type="text" maxlength="500" placeholder="HTTPS link or reference" data-member-appeal-evidence-reference><input type="text" maxlength="300" placeholder="What this evidence shows" data-member-appeal-evidence-summary></div>
+      </fieldset>
+      <div class="restart-dialog-message" role="status" data-member-appeal-message hidden></div><button class="primary-action wide" type="submit" data-submit-member-appeal>Submit appeal</button><button class="dialog-cancel" type="button" data-member-appeal-cancel>Cancel</button>
+    </form>
+  </dialog>
+  <dialog class="login-dialog restart-dialog" data-withdraw-appeal-dialog aria-labelledby="withdraw-appeal-title"><form method="dialog" data-withdraw-appeal-form><button class="dialog-close" type="button" aria-label="Close withdrawal form" data-withdraw-appeal-cancel>×</button><span class="restart-mark" aria-hidden="true">−</span><p class="panel-kicker">Appeal withdrawal</p><h2 id="withdraw-appeal-title">Withdraw this appeal?</h2><p>The moderation action and case history will remain unchanged.</p><label class="dialog-field"><span>Withdrawal reason <small>3–500 characters</small></span><textarea rows="4" maxlength="500" data-withdraw-appeal-reason required></textarea></label><div class="restart-dialog-message" role="status" data-withdraw-appeal-message hidden></div><button class="primary-action danger-action wide" type="submit" data-confirm-withdraw-appeal>Withdraw appeal</button><button class="dialog-cancel" type="button" data-withdraw-appeal-cancel>Cancel</button></form></dialog>
+
+  <script src="dashboard.js?v=1.18.0"></script>
   <script src="chernarus-map.js?v=1.7.0"></script>
 </body>
 </html>

@@ -1,5 +1,44 @@
 # Website Patch Notes
 
+## Version 1.18.0 — Member Appeals and Complete Command Access
+
+**Release date:** 5 August 2026
+
+### Git commit message
+
+```text
+Add member appeals and command library
+```
+
+### Member appeals
+
+- Added a protected My Appeals area for linked members.
+- Members can view only their own eligible moderation cases and appeal history.
+- Added bounded appeal statements, up to five evidence references, deadlines, cooldowns and duplicate protection.
+- Added optional editing before assignment and safe withdrawal before a decision.
+- Added optional case-linked Discord appeal tickets while Railway remains the authoritative case record.
+- Added clear upheld, reduced and overturned outcome states without exposing staff-only notes or evidence.
+
+### Owner configuration
+
+- Added Owner controls for appeal availability, deadline, ticket creation, ticket category, ticket support role, editing policy and member instructions.
+- Discord category and role selections use opaque keys; raw Discord IDs are not placed in the browser.
+- Appeal writes remain behind the existing Railway protected-action switch and live Discord verification.
+
+### Command access
+
+- Expanded the searchable command library from 30 to 83 top-level commands.
+- Added the new direct `/appeal` and `/support` commands plus direct member and Admin shortcuts.
+- Retained advanced groups where a grouped workflow remains clearer.
+- All direct shortcuts remain server-only and the complete command total stays below Discord's 100-command limit.
+
+### Deployment
+
+- Deploy bot version 1.16.0 before this website version.
+- Upload the version 1.18.0 website patch.
+- Wait for GitHub Pages to publish, then use Ctrl+F5.
+- No website files need to be deleted.
+
 ## Version 1.17.0 — Moderation Operations and Webhooks
 
 **Release date:** 4 August 2026

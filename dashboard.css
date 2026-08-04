@@ -2157,3 +2157,184 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .webhook-card-actions { justify-content: stretch; }
   .webhook-card-actions > * { flex: 1; }
 }
+
+/* Version 1.18.0 — member appeals and command access */
+.appeal-policy-grid,
+.appeal-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.appeal-policy-grid > div,
+.toggle-setting {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(8, 8, 9, 0.7);
+  padding: 1rem;
+  border-radius: 0.8rem;
+}
+
+.appeal-policy-grid span,
+.toggle-setting small {
+  display: block;
+  color: var(--muted, #a7a2a2);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.appeal-policy-grid strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #fff;
+}
+
+.appeal-card-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.appeal-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-left: 3px solid rgba(194, 32, 39, 0.9);
+  background: rgba(7, 7, 8, 0.76);
+  border-radius: 0.75rem;
+}
+
+.appeal-card-copy {
+  min-width: 0;
+}
+
+.appeal-card-copy h3,
+.appeal-card-copy p {
+  margin: 0;
+}
+
+.appeal-card-copy p {
+  color: var(--muted, #aaa4a4);
+  margin-top: 0.35rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.appeal-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.85rem;
+  margin-top: 0.65rem;
+  color: #c7c1c1;
+  font-size: 0.78rem;
+}
+
+.appeal-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.appeal-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.appeal-status.submitted { background: rgba(232, 171, 46, 0.16); color: #ffd279; }
+.appeal-status.decided { background: rgba(68, 179, 116, 0.16); color: #8ee0af; }
+.appeal-status.withdrawn { background: rgba(255, 255, 255, 0.08); color: #bbb5b5; }
+
+.appeal-dialog {
+  width: min(760px, calc(100vw - 2rem));
+}
+
+.appeal-evidence-fields {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.appeal-evidence-fields legend {
+  padding: 0 0.4rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.appeal-evidence-fields legend small {
+  color: var(--muted, #aaa4a4);
+  font-weight: 400;
+}
+
+.appeal-evidence-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.appeal-evidence-row input {
+  min-width: 0;
+}
+
+.appeal-settings-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.toggle-setting {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.toggle-setting input {
+  margin-top: 0.2rem;
+  accent-color: #c22027;
+}
+
+.toggle-setting strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.appeal-setting-fields {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+  .appeal-policy-grid,
+  .appeal-settings-grid,
+  .appeal-setting-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .appeal-policy-grid,
+  .appeal-settings-grid,
+  .appeal-setting-fields,
+  .appeal-evidence-row,
+  .appeal-card {
+    grid-template-columns: 1fr;
+  }
+
+  .appeal-card-actions {
+    justify-content: stretch;
+  }
+
+  .appeal-card-actions button {
+    flex: 1 1 auto;
+  }
+}
