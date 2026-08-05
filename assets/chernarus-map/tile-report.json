@@ -1,0 +1,74 @@
+{
+  "source": {
+    "archive_name": "WWZ Chernarus Map.rar",
+    "expected_grid": "32 x 32",
+    "expected_count": 1024,
+    "validated_count": 1024,
+    "dimensions": [
+      512,
+      512
+    ],
+    "modes": [
+      "RGBA"
+    ],
+    "duplicate_hash_groups": [],
+    "missing_coordinates": [],
+    "extra_coordinates": [],
+    "shared_border_pixels": 32,
+    "crop_margin_each_edge": 16,
+    "verified_horizontal_overlap_pairs": 992,
+    "verified_vertical_overlap_pairs": 992
+  },
+  "orientation": {
+    "column_index": "first filename number",
+    "row_index": "second filename number",
+    "horizontal_flip": false,
+    "vertical_flip": false,
+    "north_up": true,
+    "coastline": "east and south",
+    "coordinate_mapping": "cropped 15360 px source square maps 1:1 to DayZ X/Z 0..15360"
+  },
+  "alignment_correction": {
+    "cause": "Each 512 px source tile contains a 16 px perimeter gutter and shares 32 px with every adjacent tile.",
+    "fix": "Crop 16 px from all four edges before assembling or scaling any map level.",
+    "unique_source_tile_pixels": [
+      480,
+      480
+    ],
+    "corrected_native_pixels": 15360
+  },
+  "pyramid": {
+    "format": "webp",
+    "quality": 84,
+    "encoder_method": 0,
+    "tile_size": 480,
+    "min_zoom": 0,
+    "max_zoom": 5,
+    "native_pixels": 15360,
+    "world_size_meters": 15360,
+    "zoom_tile_counts": {
+      "0": 1,
+      "1": 4,
+      "2": 16,
+      "3": 64,
+      "4": 256,
+      "5": 1024
+    },
+    "zoom_bytes": {
+      "0": 34646,
+      "1": 113350,
+      "2": 396526,
+      "3": 1497988,
+      "4": 6769840,
+      "5": 37304316
+    },
+    "tile_count": 1365,
+    "overview_dimensions": [
+      3840,
+      3840
+    ],
+    "overview_bytes": 1538888,
+    "total_bytes": 47655554
+  },
+  "elapsed_seconds": 10.61
+}

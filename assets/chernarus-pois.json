@@ -6,11 +6,12 @@
     "tile_pyramid": {
       "base_path": "assets/chernarus-map/tiles",
       "format": "webp",
-      "tile_size": 512,
+      "tile_size": 480,
       "min_zoom": 0,
       "max_zoom": 5,
-      "native_pixels": 16384,
-      "source": "User-supplied Chernarus satellite layers"
+      "native_pixels": 15360,
+      "source": "User-supplied Chernarus satellite layers",
+      "cache_version": "1.22.4"
     },
     "attribution": "Chernarus and DayZ imagery \u00a9 Bohemia Interactive. Unofficial community dashboard; not affiliated with or endorsed by Bohemia Interactive."
   },
