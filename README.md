@@ -61,6 +61,15 @@ GitHub may take a few minutes to publish the first version.
 
 
 
+## Version 1.22.8 catalogue editor layout correction
+
+The Owner Item and Event Item windows now use the available screen height more
+efficiently. Item details and purchase rules scroll independently on wide screens,
+so long role and rule lists no longer force a large empty section beneath Event XML.
+The XML and zone editors remain fully accessible, the action bar stays visible, and
+the modal switches back to one natural scrolling column on tablets and mobile. No
+bot update or Railway database change is required.
+
 ## Version 1.22.7 familiar creation fields
 
 The Owner Item and Event Item windows now use the field names and order familiar

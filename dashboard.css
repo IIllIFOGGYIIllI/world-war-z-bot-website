@@ -4185,3 +4185,163 @@ a.side-link { text-decoration: none; }
   .dayz-shop-builder .event-template-grid { grid-template-columns: 1fr; }
   .dayz-shop-builder .dialog-field select[multiple] { min-height: 155px; }
 }
+
+/* v1.22.8 — catalogue editor viewport and scrolling corrections */
+body:has(.catalogue-builder-dialog[open]) {
+  overflow: hidden;
+}
+
+.catalogue-builder-dialog {
+  width: min(1560px, calc(100vw - 24px));
+  max-height: min(94vh, 980px);
+}
+
+.catalogue-builder-dialog .catalogue-builder-form {
+  max-height: min(94vh, 980px);
+  grid-template-rows: 56px minmax(0, 1fr) auto 68px;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder {
+  min-height: 0;
+  height: 100%;
+  margin: 0;
+  padding: 12px;
+  overflow: hidden;
+  align-items: stretch;
+  grid-template-columns: minmax(0, 2.15fr) minmax(330px, .85fr);
+}
+
+.catalogue-builder-dialog .dayz-shop-builder > .owner-builder-main,
+.catalogue-builder-dialog .dayz-shop-builder > .owner-builder-side {
+  min-height: 0;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder > .owner-builder-side {
+  position: static;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder > .owner-builder-main::-webkit-scrollbar,
+.catalogue-builder-dialog .dayz-shop-builder > .owner-builder-side::-webkit-scrollbar {
+  width: 10px;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder > .owner-builder-main::-webkit-scrollbar-thumb,
+.catalogue-builder-dialog .dayz-shop-builder > .owner-builder-side::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .22);
+  background-clip: padding-box;
+}
+
+.catalogue-builder-dialog.event-builder-mode .dayz-shop-builder .event-template-grid {
+  grid-template-columns: minmax(0, 1.45fr) minmax(270px, .65fr);
+}
+
+.catalogue-builder-dialog.event-builder-mode .dayz-shop-builder .event-code-editor-primary textarea {
+  min-height: 280px;
+}
+
+.catalogue-builder-dialog.event-builder-mode .dayz-shop-builder .event-code-editor-zone textarea {
+  min-height: 128px;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder .dialog-field select[multiple] {
+  height: 172px;
+  min-height: 172px;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder .dialog-field select[multiple] option {
+  padding: 5px 8px;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder .owner-builder-side-stack {
+  gap: 10px;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder .owner-builder-side-stack > .toggle-setting {
+  min-height: 0;
+  padding: 11px 13px;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder .owner-builder-side-stack > .toggle-setting strong {
+  font-size: 12px;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder .owner-builder-side-stack > .toggle-setting small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.catalogue-builder-dialog .dayz-shop-builder .builder-rule-divider {
+  margin: 1px 0;
+}
+
+.catalogue-builder-actions {
+  min-height: 68px;
+  padding: 10px 14px;
+}
+
+.catalogue-builder-actions .dialog-cancel.danger-action {
+  flex: 1 1 auto;
+}
+
+.catalogue-builder-actions .primary-action {
+  flex: 0 0 auto;
+  min-width: 112px;
+}
+
+@media (max-width: 1120px) {
+  .catalogue-builder-dialog {
+    width: min(1040px, calc(100vw - 18px));
+  }
+
+  .catalogue-builder-dialog .dayz-shop-builder {
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .catalogue-builder-dialog .dayz-shop-builder > .owner-builder-main,
+  .catalogue-builder-dialog .dayz-shop-builder > .owner-builder-side {
+    height: auto;
+    overflow: visible;
+  }
+
+  .catalogue-builder-dialog.event-builder-mode .dayz-shop-builder .event-template-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .catalogue-builder-dialog {
+    width: calc(100vw - 6px);
+    max-height: 99vh;
+  }
+
+  .catalogue-builder-dialog .catalogue-builder-form {
+    max-height: 99vh;
+    grid-template-rows: 48px minmax(0, 1fr) auto 62px;
+  }
+
+  .catalogue-builder-dialog .dayz-shop-builder {
+    padding: 5px;
+  }
+
+  .catalogue-builder-dialog .dayz-shop-builder .dialog-field select[multiple] {
+    height: 154px;
+    min-height: 154px;
+  }
+
+  .catalogue-builder-actions {
+    min-height: 62px;
+    padding: 8px;
+  }
+}

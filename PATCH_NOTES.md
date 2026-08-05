@@ -1,3 +1,15 @@
+# Version 1.22.8
+
+- Corrected the Item and Event Item editor viewport at desktop and laptop resolutions.
+- Gave the Item details and Rules columns independent vertical scrolling so one long column no longer leaves a large blank area beneath the other.
+- Prevented Event XML and Event Zone editors from being clipped by the modal body.
+- Reduced the height and spacing of the required-role selector and purchase-rule cards without changing their behaviour.
+- Kept the title bar and sticky Cancel/Create action bar visible while editing long items.
+- Removed the background-page scrollbar while a catalogue editor is open.
+- Preserved the familiar v1.22.7 field names, Railway-backed validation, member shop, Chernarus map and all existing shop data.
+- No bot or Railway deployment change is required.
+- No website files need to be deleted.
+
 # Version 1.22.7
 
 - Rebuilt both Owner creation windows around the familiar DayZ++ field names and order while preserving the World War Z theme.
