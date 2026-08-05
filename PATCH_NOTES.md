@@ -1,3 +1,17 @@
+# Version 1.22.9
+
+- Event Zone is now optional in Create/Edit Event Item while Event XML remains required.
+- Blank Event Zone fields validate successfully and clearly state that Railway will create the order position without a `<zone>` child.
+- Existing saved Event Zones remain editable and continue to be preserved in `cfgeventspawns.xml`.
+- Added Local and Global catalogue-scope controls to normal Item creation, matching the familiar administration layout.
+- Added up to 15 item-specific Discord role discounts directly inside Create/Edit Item.
+- Item-specific and global role discounts do not stack; Railway selects the single greatest eligible saving.
+- Added the stored scope to the Owner Items table and moved Hidden beside the normal item details.
+- Normal items remain separate from event-only XML and zone controls.
+- `cfgEffectArea.json` is not presented as an item or rental control because the World War Z workflow does not modify it.
+- Requires bot version 1.18.6 for optional zones and persisted catalogue scope.
+- No website files need to be deleted.
+
 # Version 1.22.8
 
 - Corrected the Item and Event Item editor viewport at desktop and laptop resolutions.

@@ -11,7 +11,7 @@
 <link href="site.webmanifest" rel="manifest"/>
 <link href="assets/favicon.png" rel="icon" type="image/png"/>
 <link href="assets/world-war-z-icon.png" rel="apple-touch-icon"/>
-<link href="dashboard.css?v=1.22.8" rel="stylesheet"/>
+<link href="dashboard.css?v=1.22.9" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-bot-website/dashboard.html" rel="canonical"/><meta content="World War Z Community" property="og:site_name"/><meta content="World War Z — Live DayZ Command Centre" property="og:title"/><meta content="Secure World War Z dashboard with live server status, survivor profiles, trader orders, moderation, event delivery and Nitrado controls." property="og:description"/><meta content="website" property="og:type"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/dashboard.html" property="og:url"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" property="og:image"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" property="og:image:secure_url"/><meta content="image/png" property="og:image:type"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="World War Z DayZ PS4 and PS5 Command Centre" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="World War Z — Live DayZ Command Centre" name="twitter:title"/><meta content="Secure World War Z dashboard with live server status, survivor profiles, trader orders, moderation, event delivery and Nitrado controls." name="twitter:description"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" name="twitter:image"/></head>
 <body>
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -377,10 +377,10 @@
 <button data-jump="shopadmin" data-jump-section="settings" type="button"><span>CF</span><strong>Configuration</strong><small>Access and discounts</small></button>
 </div>
 <article class="panel shop-admin-list-panel" data-dashboard-section="items" id="dashboard-shop-admin-items">
-<div class="panel-heading"><div><p class="panel-kicker">Local catalogue</p><h2>Items</h2></div><div class="heading-actions"><button class="secondary-action compact-action" data-refresh-shop-config="" type="button">Refresh</button><button class="primary-action compact-action" data-new-shop-item="" type="button">Create shop item</button></div></div>
-<div class="security-notice compact-notice"><span aria-hidden="true">IT</span><div><strong>Manual trader catalogue</strong><p>Configure player-facing names, DayZ class types, categories, prices, stock and purchase limits. Existing orders keep their original audit details.</p></div></div>
+<div class="panel-heading"><div><p class="panel-kicker">Catalogue scope</p><h2>Items</h2></div><div class="heading-actions"><button class="secondary-action compact-action" data-refresh-shop-config="" type="button">Refresh</button><button class="primary-action compact-action" data-new-shop-item="" type="button">Create shop item</button></div></div>
+<div class="security-notice compact-notice"><span aria-hidden="true">IT</span><div><strong>Manual trader catalogue</strong><p>Configure player-facing names, DayZ class types, categories, local/global scope, prices, stock and purchase limits. Existing orders keep their original audit details.</p></div></div>
 <div class="shop-management-toolbar"><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search regular shop items</span><input data-owner-shop-search="" placeholder="ID, name, category or SKU…" type="search"/></label><label class="dialog-field compact-select"><span>Category</span><select data-owner-shop-category=""><option value="all">All categories</option></select></label></div>
-<div class="responsive-table shop-config-table"><table><thead><tr><th>ID / item</th><th>Category</th><th>Price</th><th>Stock</th><th>Limits</th><th>Status</th><th>Action</th></tr></thead><tbody data-owner-shop-item-list=""></tbody></table></div>
+<div class="responsive-table shop-config-table"><table><thead><tr><th>ID / item</th><th>Category</th><th>Scope</th><th>Price</th><th>Stock</th><th>Limits</th><th>Status</th><th>Action</th></tr></thead><tbody data-owner-shop-item-list=""></tbody></table></div>
 <p class="table-note" data-owner-shop-empty="" hidden="">No regular shop items exist yet.</p>
 <p class="table-note history-error" data-owner-shop-error="" hidden="">Shop configuration is temporarily unavailable.</p>
 </article>
@@ -640,8 +640,8 @@
 </article>
 <article class="event-code-editor event-code-editor-zone">
 <div class="event-code-heading"><div><span>Event Zone</span><small>Optional · one &lt;zone … /&gt; element</small></div><div aria-label="Event Zone tools" class="event-code-tools"><button data-event-zone-action="format" type="button">Format</button><button data-event-zone-action="minify" type="button">Minify</button><button data-event-zone-action="copy" type="button">Copy</button><button data-event-zone-action="clear" type="button">Clear</button></div></div>
-<textarea autocapitalize="off" autocomplete="off" data-shop-event-zone="" maxlength="1000" placeholder='&lt;zone smin="1" smax="3" dmin="3" dmax="5" r="45" /&gt;' required="" rows="5" spellcheck="false"></textarea>
-<div class="event-code-footer"><small data-event-zone-status="">Used in the generated cfgeventspawns entry.</small><span data-event-zone-count="">0 / 1,000</span></div>
+<textarea autocapitalize="off" autocomplete="off" data-shop-event-zone="" maxlength="1000" placeholder='&lt;zone smin="1" smax="3" dmin="3" dmax="5" r="45" /&gt;' rows="5" spellcheck="false"></textarea>
+<div class="event-code-footer"><small data-event-zone-status="">Optional. Leave blank when the rental only needs its event position.</small><span data-event-zone-count="">0 / 1,000</span></div>
 </article>
 </div>
 <label class="dialog-field"><span>Detected DayZ classname <small>Read from Event XML</small></span><input data-shop-event-child-readout="" readonly="" type="text" value="Not detected"/></label>
@@ -649,9 +649,28 @@
 <div class="owner-builder-basic-grid">
 <label class="dialog-field"><span>Category</span><input data-shop-item-category="" maxlength="60" placeholder="Optional category" type="text"/></label>
 <label class="dialog-field" data-shop-event-profile="" hidden=""><span>Event group</span><input data-shop-profile-name="" maxlength="100" placeholder="Optional group" type="text"/></label>
+<label class="toggle-setting compact-hidden-control"><input data-shop-item-hidden="" type="checkbox"/><span><strong>Hidden</strong><small>Keep this item out of the member shop while preserving its history.</small></span></label>
 </div>
 <div class="quick-value-row"><span>Common categories</span><div aria-label="Common item categories" class="quick-chip-group"><button data-shop-category-value="Weapons" type="button">Weapons</button><button data-shop-category-value="Ammo" type="button">Ammo</button><button data-shop-category-value="Tools" type="button">Tools</button><button data-shop-category-value="Food" type="button">Food</button><button data-shop-category-value="Medical" type="button">Medical</button><button data-shop-category-value="Clothing" type="button">Clothing</button><button data-shop-category-value="Vehicles" type="button">Vehicles</button><button data-shop-category-value="Building" type="button">Building</button><button data-shop-category-value="Other" type="button">Other</button></div></div>
 <label class="dialog-field"><span>Description <small>Optional · player-facing</small></span><textarea data-shop-item-description="" maxlength="1000" placeholder="Explain what the player receives." rows="4"></textarea></label>
+<fieldset class="catalogue-scope-control" data-shop-manual-only="">
+<legend>Catalogue scope</legend>
+<div class="catalogue-scope-options">
+<label><input checked="" data-shop-item-scope="" name="shop-item-scope" type="radio" value="local"/><span><strong>Local</strong><small>Available for this DayZ service.</small></span></label>
+<label><input data-shop-item-scope="" name="shop-item-scope" type="radio" value="global"/><span><strong>Global</strong><small>Marked for a shared multi-server catalogue.</small></span></label>
+</div>
+<p class="field-help">With the current single-server setup, both scopes remain available here. The value is stored for future multi-server separation.</p>
+</fieldset>
+<section class="item-discount-builder" data-shop-manual-only="">
+<div class="item-discount-heading">
+<div><span class="panel-kicker">Discounts</span><h4>Item role discounts <span class="optional-kicker">Optional</span></h4></div>
+<span class="muted-label" data-shop-item-discount-count="">0 / 15</span>
+</div>
+<div class="security-notice compact-notice item-discount-notice"><span aria-hidden="true">%</span><div><strong>Optional item-specific prices.</strong><p>Choose a Discord role and set a percentage or fixed-dollar reduction. Railway applies the single greatest eligible saving and never stacks discounts.</p></div></div>
+<div class="item-discount-list" data-shop-item-discount-list=""></div>
+<p class="table-note" data-shop-item-discount-empty="">No item-specific discounts yet.</p>
+<button class="secondary-action compact-action" data-add-shop-item-discount="" type="button">+ Add discount</button>
+</section>
 <details class="builder-advanced-details">
 <summary>Advanced internal details</summary>
 <div class="owner-builder-basic-grid">
@@ -692,7 +711,6 @@
 <label class="dialog-field"><span>Maximum restarts <small>Hard cap: 30,000</small></span><input data-shop-profile-max-restarts="" max="30000" min="1" type="number" value="30000"/></label>
 <label class="toggle-setting"><input checked="" data-shop-profile-approval="" type="checkbox"/><span><strong>Require Admin approval</strong><small>Recommended for vehicles and high-value restart orders.</small></span></label>
 </section>
-<label class="toggle-setting"><input data-shop-item-hidden="" type="checkbox"/><span><strong>Hidden</strong><small>Hidden items remain in audit history but are not visible or purchasable.</small></span></label>
 </div>
 </aside>
 </div>
@@ -700,7 +718,7 @@
 <footer class="catalogue-builder-actions"><button class="dialog-cancel danger-action" data-shop-item-cancel="" type="button">Cancel</button><button class="primary-action" data-save-shop-item="" type="submit">Create</button></footer>
 </form>
 </dialog>
-<script src="dashboard.js?v=1.22.8"></script>
+<script src="dashboard.js?v=1.22.9"></script>
 <script src="chernarus-map.js?v=1.22.4"></script>
 </body>
 </html>

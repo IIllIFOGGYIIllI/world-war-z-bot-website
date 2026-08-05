@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add event XML editors`
+4. Enter the commit message: `Refine item and rental controls`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -60,6 +60,16 @@ GitHub may take a few minutes to publish the first version.
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
 
+
+## Version 1.22.9 optional event zones and item scope
+
+Event XML remains required for restart-bound rentals, but Event Zone is now optional.
+Leaving the zone blank still creates the unique `events.xml` rental and the buyer's
+`cfgeventspawns.xml` position; only the optional `<zone>` element is omitted. Normal
+Item creation now includes familiar Local and Global scope controls and up to 15
+item-specific Discord role discounts, while all event-only XML controls stay out
+of the normal item form. Global and item-specific discounts never stack; Railway
+selects the greatest eligible saving. Bot version 1.18.6 is required.
 
 ## Version 1.22.8 catalogue editor layout correction
 

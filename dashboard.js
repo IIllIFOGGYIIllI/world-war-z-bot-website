@@ -3901,6 +3901,11 @@ const shopItemLimitCount = document.querySelector('[data-shop-item-limit-count]'
 const shopItemLimitSeconds = document.querySelector('[data-shop-item-limit-seconds]');
 const shopPurchaseWindow = document.querySelector('[data-shop-purchase-window]');
 const shopItemHidden = document.querySelector('[data-shop-item-hidden]');
+const shopItemScopeInputs = [...document.querySelectorAll('[data-shop-item-scope]')];
+const shopItemDiscountList = document.querySelector('[data-shop-item-discount-list]');
+const shopItemDiscountEmpty = document.querySelector('[data-shop-item-discount-empty]');
+const shopItemDiscountCount = document.querySelector('[data-shop-item-discount-count]');
+const addShopItemDiscountButton = document.querySelector('[data-add-shop-item-discount]');
 const shopManualOnlyFields = [...document.querySelectorAll('[data-shop-manual-only]')];
 const shopEventProfileEditors = [...document.querySelectorAll('[data-shop-event-profile]')];
 const shopEventXml = document.querySelector('[data-shop-event-xml]');
@@ -3940,6 +3945,7 @@ let selectedShopOrderAction = '';
 let ownerShopItems = [];
 let ownerShopRoles = [];
 let ownerShopDiscounts = [];
+let editingShopItemDiscounts = [];
 let editingShopItemId = null;
 let shopPurchasesEnabled = false;
 let shopRequestInProgress = false;
@@ -3971,7 +3977,6 @@ const DEFAULT_EVENT_XML = `<event name="Vehicle">
         <child lootmax="0" lootmin="0" max="1" min="1" type="VehiclePLACEHOLDER" />
     </children>
 </event>`;
-const DEFAULT_EVENT_ZONE = '<zone smin="1" smax="3" dmin="3" dmax="5" r="45" />';
 
 const shopStatusLabel = (status) => titleCaseState(status || 'unknown');
 const shopStockText = (item) => item.stock_quantity == null ? 'Unlimited stock' : `${Number(item.stock_quantity)} in stock`;
@@ -4560,7 +4565,7 @@ const renderOwnerShopItems = () => {
   const manualCategory = ownerShopCategory?.value || 'all'; const eventCategory = ownerEventCategory?.value || 'all';
   const manualItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && (manualCategory === 'all' || item.category === manualCategory) && (!manualQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category}`.toLowerCase().includes(manualQuery)));
   const eventItems = ownerShopItems.filter((item) => item.fulfilment_type === 'event' && (eventCategory === 'all' || item.category === eventCategory) && (!eventQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(eventQuery)));
-  manualItems.forEach((item) => { const row=document.createElement('tr'); const itemCell=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; itemCell.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const stock=document.createElement('td'); stock.textContent=item.stock_quantity==null?'Unlimited':String(item.stock_quantity); const limits=document.createElement('td'); limits.textContent=`${item.max_per_order}/order · ${item.max_per_player==null?'No player limit':`${item.max_per_player}/player`}`; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(itemCell,category,price,stock,limits,state,action); ownerShopItemList.append(row); });
+  manualItems.forEach((item) => { const row=document.createElement('tr'); const itemCell=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; itemCell.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const scope=document.createElement('td'); scope.textContent=String(item.catalogue_scope||'local').toLowerCase()==='global'?'Global':'Local'; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const stock=document.createElement('td'); stock.textContent=item.stock_quantity==null?'Unlimited':String(item.stock_quantity); const limits=document.createElement('td'); limits.textContent=`${item.max_per_order}/order · ${item.max_per_player==null?'No player limit':`${item.max_per_player}/player`}`; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(itemCell,category,scope,price,stock,limits,state,action); ownerShopItemList.append(row); });
   eventItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=`${formatMoney(item.price)} / restart`; const restarts=document.createElement('td'); restarts.textContent=`${Number(profile.minimum_restarts||1).toLocaleString()}–${Number(profile.maximum_restarts||30000).toLocaleString()}`; const approval=document.createElement('td'); approval.textContent=profile.requires_approval?'Admin approval':'Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,restarts,approval,state,action); ownerEventItemList.append(row); });
   if (ownerShopEmpty) ownerShopEmpty.hidden = manualItems.length !== 0;
   if (ownerEventItemEmpty) ownerEventItemEmpty.hidden = eventItems.length !== 0;
@@ -4649,7 +4654,9 @@ const parseEventXmlEditor = (value) => {
 };
 
 const parseEventZoneEditor = (value) => {
-  const root = parseXmlEditorSnippet(value, 'Event Zone', 'zone');
+  const text = String(value || '').trim();
+  if (!text) return null;
+  const root = parseXmlEditorSnippet(text, 'Event Zone', 'zone');
   if (root.children.length || String(root.textContent || '').trim()) throw new Error('Event Zone cannot contain text or child elements.');
   const required = ['smin', 'smax', 'dmin', 'dmax', 'r'];
   const unknown = [...root.attributes].map((attribute) => attribute.name).filter((name) => !required.includes(name));
@@ -4719,12 +4726,17 @@ const validateEventTemplateEditors = ({ throwOnError = false } = {}) => {
   }
   try {
     parsedZone = parseEventZoneEditor(shopEventZone?.value || '');
-    setEventEditorStatus(shopEventZone, shopEventZoneStatus, 'Valid event zone.', true);
+    setEventEditorStatus(
+      shopEventZone,
+      shopEventZoneStatus,
+      parsedZone ? 'Valid optional event zone.' : 'Optional zone omitted; the position entry will be created without a <zone>.',
+      true
+    );
   } catch (error) {
     setEventEditorStatus(shopEventZone, shopEventZoneStatus, error.message || 'Event Zone is invalid.', false);
     if (throwOnError) { shopEventZone?.focus(); throw error; }
   }
-  if (throwOnError && (!parsedEvent || !parsedZone)) throw new Error('Complete the Event XML and Event Zone fields.');
+  if (throwOnError && !parsedEvent) throw new Error('Complete the Event XML field.');
   return { parsedEvent, parsedZone };
 };
 
@@ -4750,8 +4762,9 @@ const handleEventEditorTool = async (field, status, rootTag, action) => {
   try {
     if (action === 'copy') return copyEventEditor(field, status);
     if (action === 'clear') field.value = '';
-    if (action === 'format') field.value = formatXmlEditor(field.value, rootTag === 'event' ? 'Event XML' : 'Event Zone', rootTag);
-    if (action === 'minify') field.value = minifyXmlEditor(field.value, rootTag === 'event' ? 'Event XML' : 'Event Zone', rootTag);
+    const emptyOptionalZone = rootTag === 'zone' && !String(field?.value || '').trim();
+    if (action === 'format' && !emptyOptionalZone) field.value = formatXmlEditor(field.value, rootTag === 'event' ? 'Event XML' : 'Event Zone', rootTag);
+    if (action === 'minify' && !emptyOptionalZone) field.value = minifyXmlEditor(field.value, rootTag === 'event' ? 'Event XML' : 'Event Zone', rootTag);
     updateEventEditorCounts();
     validateEventTemplateEditors();
     field.focus();
@@ -4850,7 +4863,6 @@ const syncShopItemDeliveryEditor = () => {
   shopItemDialog?.classList.toggle('event-builder-mode', isEvent);
   if (isEvent) {
     if (shopEventXml && !shopEventXml.value.trim()) shopEventXml.value = DEFAULT_EVENT_XML;
-    if (shopEventZone && !shopEventZone.value.trim()) shopEventZone.value = DEFAULT_EVENT_ZONE;
     updateEventEditorCounts();
     validateEventTemplateEditors();
   }
@@ -4880,7 +4892,7 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
     '[data-shop-item-limit-count]': purchaseLimit.max_purchases || 1,
     '[data-shop-item-limit-seconds]': purchaseLimit.per_seconds || 60,
     '[data-shop-event-xml]': isEventEditor ? (profile.event_xml || (item ? legacyEventXmlFromProfile(profile) : DEFAULT_EVENT_XML)) : '',
-    '[data-shop-event-zone]': isEventEditor ? (profile.event_zone || DEFAULT_EVENT_ZONE) : ''
+    '[data-shop-event-zone]': isEventEditor ? (profile.event_zone || '') : ''
   };
   Object.entries(values).forEach(([selector, value]) => { const element = document.querySelector(selector); if (element) element.value = String(value); });
   populateShopItemRoleSelect(item?.required_roles || []);
@@ -4888,6 +4900,18 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
   if (shopItemCooldownEnabled) shopItemCooldownEnabled.checked = Boolean(item?.purchase_limit);
   if (shopItemLimitGlobal) shopItemLimitGlobal.checked = Boolean(purchaseLimit.shared_across_players);
   if (shopItemHidden) shopItemHidden.checked = item ? !Boolean(item.active) : false;
+  const catalogueScope = String(item?.catalogue_scope || 'local').toLowerCase();
+  shopItemScopeInputs.forEach((input) => { input.checked = input.value === catalogueScope; });
+  editingShopItemDiscounts = isEventEditor
+    ? []
+    : (Array.isArray(item?.discounts) ? item.discounts : []).map((entry) => ({
+        role_id: String(entry.role_id || ''),
+        role_name: String(entry.role_name || ''),
+        amount: Number(entry.amount || 1),
+        is_percentage: entry.is_percentage !== false,
+        active: entry.active !== false
+      }));
+  renderShopItemDiscounts();
   const flagValues = {
     '[data-shop-profile-approval]': profile.requires_approval ?? true,
     '[data-shop-profile-deletable]': profile.flags?.deletable ?? false,
@@ -4921,6 +4945,108 @@ shopCategoryQuickButtons.forEach((button) => button.addEventListener('click', ()
   if (input) { input.value = String(button.dataset.shopCategoryValue || ''); input.focus(); }
 }));
 shopItemCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!ownerShopRequestInProgress) shopItemDialog?.close?.(); }));
+
+const renderShopItemDiscounts = () => {
+  if (!shopItemDiscountList) return;
+  shopItemDiscountList.replaceChildren();
+  editingShopItemDiscounts.forEach((discount, index) => {
+    const row = document.createElement('article');
+    row.className = 'item-discount-row';
+
+    const roleField = document.createElement('label');
+    roleField.className = 'dialog-field item-discount-role';
+    const roleLabel = document.createElement('span');
+    roleLabel.textContent = 'Target role';
+    const roleSelect = document.createElement('select');
+    roleSelect.append(new Option('Select Discord role', ''));
+    ownerShopRoles.forEach((role) => roleSelect.append(new Option(role.name, role.id)));
+    roleSelect.value = String(discount.role_id || '');
+    roleSelect.addEventListener('change', () => {
+      const role = ownerShopRoles.find((entry) => String(entry.id) === roleSelect.value);
+      editingShopItemDiscounts[index].role_id = roleSelect.value;
+      editingShopItemDiscounts[index].role_name = role?.name || '';
+    });
+    roleField.append(roleLabel, roleSelect);
+
+    const amountField = document.createElement('label');
+    amountField.className = 'dialog-field item-discount-amount';
+    const amountLabel = document.createElement('span');
+    amountLabel.textContent = 'Amount';
+    const amountInput = document.createElement('input');
+    amountInput.type = 'number';
+    amountInput.min = '1';
+    amountInput.step = '1';
+    amountInput.value = String(discount.amount || 1);
+    amountInput.max = discount.is_percentage !== false ? '100' : '1000000000';
+    amountInput.addEventListener('input', () => {
+      editingShopItemDiscounts[index].amount = Number(amountInput.value || 0);
+    });
+    amountField.append(amountLabel, amountInput);
+
+    const percentage = document.createElement('label');
+    percentage.className = 'toggle-setting compact-toggle item-discount-toggle';
+    const percentageInput = document.createElement('input');
+    percentageInput.type = 'checkbox';
+    percentageInput.checked = discount.is_percentage !== false;
+    percentageInput.addEventListener('change', () => {
+      editingShopItemDiscounts[index].is_percentage = percentageInput.checked;
+      amountInput.max = percentageInput.checked ? '100' : '1000000000';
+    });
+    const percentageCopy = document.createElement('span');
+    const percentageStrong = document.createElement('strong');
+    percentageStrong.textContent = 'As percentage';
+    const percentageSmall = document.createElement('small');
+    percentageSmall.textContent = 'Turn off for a fixed-dollar reduction.';
+    percentageCopy.append(percentageStrong, percentageSmall);
+    percentage.append(percentageInput, percentageCopy);
+
+    const active = document.createElement('label');
+    active.className = 'toggle-setting compact-toggle item-discount-toggle';
+    const activeInput = document.createElement('input');
+    activeInput.type = 'checkbox';
+    activeInput.checked = discount.active !== false;
+    activeInput.addEventListener('change', () => {
+      editingShopItemDiscounts[index].active = activeInput.checked;
+    });
+    const activeCopy = document.createElement('span');
+    const activeStrong = document.createElement('strong');
+    activeStrong.textContent = 'Active';
+    const activeSmall = document.createElement('small');
+    activeSmall.textContent = 'Available to matching members.';
+    activeCopy.append(activeStrong, activeSmall);
+    active.append(activeInput, activeCopy);
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'primary-action danger-action compact-action item-discount-remove';
+    remove.textContent = 'Remove';
+    remove.addEventListener('click', () => {
+      editingShopItemDiscounts.splice(index, 1);
+      renderShopItemDiscounts();
+    });
+
+    row.append(roleField, amountField, percentage, active, remove);
+    shopItemDiscountList.append(row);
+  });
+  if (shopItemDiscountEmpty) shopItemDiscountEmpty.hidden = editingShopItemDiscounts.length !== 0;
+  if (shopItemDiscountCount) shopItemDiscountCount.textContent = `${editingShopItemDiscounts.length} / 15`;
+  if (addShopItemDiscountButton) addShopItemDiscountButton.disabled = editingShopItemDiscounts.length >= 15;
+};
+
+addShopItemDiscountButton?.addEventListener('click', () => {
+  if (editingShopItemDiscounts.length >= 15) {
+    showInlineMessage(shopItemMessage, 'A maximum of 15 role discounts is supported per item.');
+    return;
+  }
+  editingShopItemDiscounts.push({
+    role_id: '',
+    role_name: '',
+    amount: 10,
+    is_percentage: true,
+    active: true
+  });
+  renderShopItemDiscounts();
+});
 
 const populateOwnerShopRoleSelect = () => {
   if (!ownerShopRequiredRole) return;
@@ -5003,6 +5129,7 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
     const settings = payload.settings || {};
     ownerShopRoles = Array.isArray(payload.roles) ? payload.roles : [];
     populateShopItemRoleSelect(selectedShopItemRoles());
+    renderShopItemDiscounts();
     if (ownerShopEnabled) ownerShopEnabled.checked = Boolean(settings.enabled);
     if (ownerShopWebsiteEnabled) ownerShopWebsiteEnabled.checked = settings.website_enabled !== false;
     if (ownerShopTitle) ownerShopTitle.value = String(settings.title || '');
@@ -5105,6 +5232,14 @@ shopItemForm?.addEventListener('submit', async (event) => {
         purchase_limit_count: shopItemCooldownEnabled?.checked ? value('[data-shop-item-limit-count]') : '',
         purchase_limit_seconds: shopItemCooldownEnabled?.checked ? value('[data-shop-item-limit-seconds]') : '',
         purchase_limit_global: Boolean(shopItemCooldownEnabled?.checked && shopItemLimitGlobal?.checked),
+        catalogue_scope: isEvent ? 'local' : (shopItemScopeInputs.find((input) => input.checked)?.value || 'local'),
+        discounts: isEvent ? [] : editingShopItemDiscounts.map((entry) => ({
+          role_id: String(entry.role_id || ''),
+          role_name: String(entry.role_name || ''),
+          amount: Number(entry.amount || 0),
+          is_percentage: entry.is_percentage !== false,
+          active: entry.active !== false
+        })),
         stock_quantity: value('[data-shop-item-stock]'), max_per_order: isEvent ? 1 : value('[data-shop-item-max-order]'),
         max_per_player: isEvent ? '' : value('[data-shop-item-max-player]'), sort_order: value('[data-shop-item-sort]'),
         description, fulfilment_instructions: value('[data-shop-item-fulfilment]'),
