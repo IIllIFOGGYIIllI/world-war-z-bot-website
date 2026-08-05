@@ -1,17 +1,18 @@
-World War Z Bot Website v1.22.5 Patch File List
-================================================
+World War Z Bot Website v1.22.6 Patch File List
 
-Updated or added files: 8
-
-changelog.html
-dashboard.css
-dashboard.html
-dashboard.js
 DELETE_THESE_FILES.txt
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
+changelog.html
+dashboard.css
+dashboard.html
+dashboard.js
+index.html
+shop.css
+shop.html
+shop.js
+sitemap.xml
 
-Deleted files: none
-Map assets: unchanged from v1.22.4
-Railway database: not included or modified
+Total: 13 added or updated files.
+No files need to be deleted.

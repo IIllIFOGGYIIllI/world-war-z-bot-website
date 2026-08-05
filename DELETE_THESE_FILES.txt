@@ -1,12 +1,5 @@
-NO FILES NEED TO BE DELETED FOR VERSION 1.22.5
+NO FILES NEED TO BE DELETED FOR VERSION 1.22.6
 
-The legacy `assets/chernarus-vector.svg` file is retained as a small fallback/reference asset and does not interfere with the new satellite map.
-
-Historical cleanup only:
-If any of these retired map files still exist in the GitHub repository, delete them:
-
-assets/chernarus-map.webp
-assets/chernarus-roads.webp
-assets/chernarus-tactical.webp
-
-GitHub uploads do not automatically delete files that already exist in the repository.
+The patch adds shop.html, shop.css and shop.js and updates existing dashboard and documentation files.
+Copy the patch contents over the repository root and allow Windows to merge folders and replace matching files.
+Do not delete the existing assets/chernarus-map directory or any other website assets.

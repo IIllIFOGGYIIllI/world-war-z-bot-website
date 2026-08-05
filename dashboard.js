@@ -32,7 +32,7 @@ const availableViews = new Set(viewPanels.map((panel) => panel.dataset.viewPanel
 
 const canOpenView = (view) => {
   if (['staff', 'delivery'].includes(view)) return ['staff', 'owner'].includes(dashboardAccessLevel);
-  if (['configuration', 'serverconfig'].includes(view)) return dashboardAccessLevel === 'owner';
+  if (['configuration', 'serverconfig', 'shopadmin'].includes(view)) return dashboardAccessLevel === 'owner';
   return true;
 };
 
@@ -3868,6 +3868,14 @@ const shopOrderActionMessage = document.querySelector('[data-shop-order-action-m
 const shopOrderActionCancelButtons = [...document.querySelectorAll('[data-shop-order-action-cancel]')];
 const confirmShopOrderActionButton = document.querySelector('[data-confirm-shop-order-action]');
 const ownerShopEnabled = document.querySelector('[data-owner-shop-enabled]');
+const ownerShopWebsiteEnabled = document.querySelector('[data-owner-shop-website-enabled]');
+const ownerShopRequiredRole = document.querySelector('[data-owner-shop-required-role]');
+const ownerShopImageUrl = document.querySelector('[data-owner-shop-image-url]');
+const ownerShopRestartMin = document.querySelector('[data-owner-shop-restart-min]');
+const ownerShopRestartMax = document.querySelector('[data-owner-shop-restart-max]');
+const ownerShopDiscountList = document.querySelector('[data-shop-discount-list]');
+const ownerShopDiscountEmpty = document.querySelector('[data-shop-discount-empty]');
+const addShopDiscountButton = document.querySelector('[data-add-shop-discount]');
 const ownerShopTitle = document.querySelector('[data-owner-shop-title]');
 const ownerShopDescription = document.querySelector('[data-owner-shop-description]');
 const ownerShopInstructions = document.querySelector('[data-owner-shop-instructions]');
@@ -3876,6 +3884,7 @@ const ownerShopItemList = document.querySelector('[data-owner-shop-item-list]');
 const ownerShopEmpty = document.querySelector('[data-owner-shop-empty]');
 const ownerShopError = document.querySelector('[data-owner-shop-error]');
 const refreshShopConfigButton = document.querySelector('[data-refresh-shop-config]');
+const refreshShopSettingsButton = document.querySelector('[data-refresh-shop-settings]');
 const saveShopSettingsButton = document.querySelector('[data-save-shop-settings]');
 const newShopItemButton = document.querySelector('[data-new-shop-item]');
 const shopItemDialog = document.querySelector('[data-shop-item-dialog]');
@@ -3919,6 +3928,8 @@ let selectedShopItem = null;
 let selectedShopOrder = null;
 let selectedShopOrderAction = '';
 let ownerShopItems = [];
+let ownerShopRoles = [];
+let ownerShopDiscounts = [];
 let editingShopItemId = null;
 let shopPurchasesEnabled = false;
 let shopRequestInProgress = false;
@@ -4847,20 +4858,98 @@ shopCategoryQuickButtons.forEach((button) => button.addEventListener('click', ()
 }));
 shopItemCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!ownerShopRequestInProgress) shopItemDialog?.close?.(); }));
 
+const populateOwnerShopRoleSelect = () => {
+  if (!ownerShopRequiredRole) return;
+  const selected = ownerShopRequiredRole.value || '';
+  ownerShopRequiredRole.replaceChildren();
+  const open = document.createElement('option'); open.value = ''; open.textContent = 'Anyone in the server'; ownerShopRequiredRole.append(open);
+  ownerShopRoles.forEach((role) => {
+    const option = document.createElement('option'); option.value = String(role.id); option.textContent = String(role.name); ownerShopRequiredRole.append(option);
+  });
+  ownerShopRequiredRole.value = [...ownerShopRequiredRole.options].some((option) => option.value === selected) ? selected : '';
+};
+
+const renderOwnerShopDiscounts = () => {
+  if (!ownerShopDiscountList) return;
+  ownerShopDiscountList.replaceChildren();
+  ownerShopDiscounts.forEach((discount, index) => {
+    const row = document.createElement('article'); row.className = 'shop-discount-row';
+    const roleField = document.createElement('label'); roleField.className = 'dialog-field';
+    const roleLabel = document.createElement('span'); roleLabel.textContent = 'Target role';
+    const roleSelect = document.createElement('select');
+    roleSelect.append(new Option('Select Discord role', ''));
+    ownerShopRoles.forEach((role) => roleSelect.append(new Option(role.name, role.id)));
+    roleSelect.value = String(discount.role_id || '');
+    roleSelect.addEventListener('change', () => {
+      const role = ownerShopRoles.find((entry) => String(entry.id) === roleSelect.value);
+      ownerShopDiscounts[index].role_id = roleSelect.value;
+      ownerShopDiscounts[index].role_name = role?.name || '';
+    });
+    roleField.append(roleLabel, roleSelect);
+    const amountField = document.createElement('label'); amountField.className = 'dialog-field';
+    const amountLabel = document.createElement('span'); amountLabel.textContent = 'Amount';
+    const amountInput = document.createElement('input'); amountInput.type = 'number'; amountInput.min = '1'; amountInput.step = '1'; amountInput.value = String(discount.amount || 1);
+    amountInput.addEventListener('input', () => { ownerShopDiscounts[index].amount = Number(amountInput.value || 0); });
+    amountField.append(amountLabel, amountInput);
+    const percentage = document.createElement('label'); percentage.className = 'toggle-setting compact-toggle';
+    const percentageInput = document.createElement('input'); percentageInput.type = 'checkbox'; percentageInput.checked = discount.is_percentage !== false;
+    percentageInput.addEventListener('change', () => {
+      ownerShopDiscounts[index].is_percentage = percentageInput.checked;
+      amountInput.max = percentageInput.checked ? '100' : '1000000000';
+    });
+    amountInput.max = percentageInput.checked ? '100' : '1000000000';
+    const percentageCopy = document.createElement('span');
+    const percentageStrong = document.createElement('strong'); percentageStrong.textContent = 'Percentage';
+    const percentageSmall = document.createElement('small'); percentageSmall.textContent = 'Otherwise a fixed dollar reduction.';
+    percentageCopy.append(percentageStrong, percentageSmall); percentage.append(percentageInput, percentageCopy);
+    const active = document.createElement('label'); active.className = 'toggle-setting compact-toggle';
+    const activeInput = document.createElement('input'); activeInput.type = 'checkbox'; activeInput.checked = discount.active !== false;
+    activeInput.addEventListener('change', () => { ownerShopDiscounts[index].active = activeInput.checked; });
+    const activeCopy = document.createElement('span');
+    const activeStrong = document.createElement('strong'); activeStrong.textContent = 'Active';
+    const activeSmall = document.createElement('small'); activeSmall.textContent = 'Applied automatically to matching members.';
+    activeCopy.append(activeStrong, activeSmall); active.append(activeInput, activeCopy);
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'primary-action danger-action compact-action'; remove.textContent = 'Remove';
+    remove.addEventListener('click', () => { ownerShopDiscounts.splice(index, 1); renderOwnerShopDiscounts(); });
+    row.append(roleField, amountField, percentage, active, remove);
+    ownerShopDiscountList.append(row);
+  });
+  if (ownerShopDiscountEmpty) ownerShopDiscountEmpty.hidden = ownerShopDiscounts.length !== 0;
+};
+
+addShopDiscountButton?.addEventListener('click', () => {
+  if (ownerShopDiscounts.length >= 25) {
+    showInlineMessage(ownerShopMessage, 'A maximum of 25 role discounts is supported.');
+    return;
+  }
+  ownerShopDiscounts.push({ role_id: '', role_name: '', amount: 10, is_percentage: true, active: true });
+  renderOwnerShopDiscounts();
+});
+
 const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
   if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopRequestInProgress) return false;
   ownerShopRequestInProgress = true;
   refreshShopConfigButton?.setAttribute('disabled', '');
+  refreshShopSettingsButton?.setAttribute('disabled', '');
   try {
     const response = await authFetch(OWNER_SHOP_CONFIG_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Configuration unavailable');
     const settings = payload.settings || {};
+    ownerShopRoles = Array.isArray(payload.roles) ? payload.roles : [];
     if (ownerShopEnabled) ownerShopEnabled.checked = Boolean(settings.enabled);
+    if (ownerShopWebsiteEnabled) ownerShopWebsiteEnabled.checked = settings.website_enabled !== false;
     if (ownerShopTitle) ownerShopTitle.value = String(settings.title || '');
     if (ownerShopDescription) ownerShopDescription.value = String(settings.description || '');
     if (ownerShopInstructions) ownerShopInstructions.value = String(settings.purchase_instructions || '');
+    if (ownerShopImageUrl) ownerShopImageUrl.value = String(settings.dashboard_image_url || '');
+    if (ownerShopRestartMin) ownerShopRestartMin.value = String(settings.event_restart_min || 1);
+    if (ownerShopRestartMax) ownerShopRestartMax.value = String(settings.event_restart_max || 30000);
+    populateOwnerShopRoleSelect();
+    if (ownerShopRequiredRole) ownerShopRequiredRole.value = String(settings.required_role?.id || '');
+    ownerShopDiscounts = (Array.isArray(settings.discounts) ? settings.discounts : []).map((entry) => ({ ...entry }));
+    renderOwnerShopDiscounts();
     ownerShopItems = Array.isArray(payload.items) ? payload.items : [];
     populateOwnerShopCategories();
     renderOwnerShopItems();
@@ -4872,11 +4961,13 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
   } finally {
     ownerShopRequestInProgress = false;
     refreshShopConfigButton?.removeAttribute('disabled');
+    refreshShopSettingsButton?.removeAttribute('disabled');
   }
 };
 [ownerShopSearch, ownerEventSearch].forEach((input) => input?.addEventListener('input', renderOwnerShopItems));
 [ownerShopCategory, ownerEventCategory].forEach((select) => select?.addEventListener('change', renderOwnerShopItems));
 refreshShopConfigButton?.addEventListener('click', () => loadOwnerShopConfig());
+refreshShopSettingsButton?.addEventListener('click', () => loadOwnerShopConfig());
 saveShopSettingsButton?.addEventListener('click', async () => {
   const sessionToken = storageGet(AUTH_SESSION_KEY);
   if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopRequestInProgress) return;
@@ -4888,8 +4979,23 @@ saveShopSettingsButton?.addEventListener('click', async () => {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
       body: JSON.stringify({
-        enabled: Boolean(ownerShopEnabled?.checked), title: ownerShopTitle?.value.trim() || '',
-        description: ownerShopDescription?.value.trim() || '', purchase_instructions: ownerShopInstructions?.value.trim() || ''
+        enabled: Boolean(ownerShopEnabled?.checked),
+        website_enabled: Boolean(ownerShopWebsiteEnabled?.checked),
+        title: ownerShopTitle?.value.trim() || '',
+        description: ownerShopDescription?.value.trim() || '',
+        purchase_instructions: ownerShopInstructions?.value.trim() || '',
+        dashboard_image_url: ownerShopImageUrl?.value.trim() || '',
+        required_role_id: ownerShopRequiredRole?.value || null,
+        required_role_name: ownerShopRequiredRole?.selectedOptions?.[0]?.textContent || '',
+        event_restart_min: Number(ownerShopRestartMin?.value || 1),
+        event_restart_max: Number(ownerShopRestartMax?.value || 30000),
+        discounts: ownerShopDiscounts.map((entry) => ({
+          role_id: entry.role_id,
+          role_name: entry.role_name,
+          amount: Number(entry.amount || 0),
+          is_percentage: entry.is_percentage !== false,
+          active: entry.active !== false
+        }))
       })
     });
     const payload = await response.json().catch(() => ({}));
@@ -4961,7 +5067,7 @@ window.addEventListener('wwz:viewchange', (event) => {
   const token = storageGet(AUTH_SESSION_KEY);
   if (view === 'shop') token ? loadMemberShop(token) : loadPublicShop();
   if (view === 'staff' && section === 'shop-orders') loadAdminShopOrders(token);
-  if (view === 'configuration' && section === 'shop-config') loadOwnerShopConfig(token);
+  if (view === 'shopadmin') loadOwnerShopConfig(token);
 });
 loadPublicShop();
 

@@ -61,6 +61,16 @@ GitHub may take a few minutes to publish the first version.
 
 
 
+## Version 1.22.6 separated member and Owner shop
+
+Members now use the dedicated `shop.html` Survivor Shop for catalogue browsing,
+role-adjusted prices, protected purchases, saved delivery coordinates and private
+order history. The dashboard Shop group is now an administration workspace: Owners
+manage normal items, restart-bound event items, access requirements, global restart
+limits and role discounts without mixing those controls into the member experience.
+Railway remains authoritative for identity, roles, balances, stock, limits, discounts
+and all writes. Bot version 1.18.4 is required for the new access and discount settings.
+
 ## Version 1.22.5 Event XML and zone editors
 
 The compact Owner Event Item window now includes full code-style Event XML and

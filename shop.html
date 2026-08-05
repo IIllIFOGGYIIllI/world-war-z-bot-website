@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html lang="en-AU">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#090808" name="theme-color"/>
+<meta content="World War Z member shop for PlayStation DayZ survivors." name="description"/>
+<meta content="World War Z Survivor Shop" property="og:title"/>
+<meta content="Browse approved DayZ items, event deliveries and your private order history." property="og:description"/>
+<meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" property="og:image"/>
+<title>Survivor Shop | World War Z</title>
+<link href="assets/favicon.png" rel="icon"/>
+<link href="dashboard.css?v=1.22.6" rel="stylesheet"/>
+<link href="shop.css?v=1.22.6" rel="stylesheet"/>
+<link href="https://iillifoggyiilli.github.io/world-war-z-bot-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/shop.html" property="og:url"/></head>
+<body class="member-shop-page">
+<a class="skip-link" href="#shop-main">Skip to shop</a>
+<header class="shop-topbar">
+<a aria-label="World War Z home" class="shop-brand" href="index.html">
+<img alt="World War Z logo" src="assets/world-war-z-logo.webp"/>
+<span><strong>WORLD WAR Z</strong><small>SURVIVOR SHOP</small></span>
+</a>
+<nav aria-label="Shop navigation" class="shop-topnav">
+<a href="#catalogue">Catalogue</a>
+<a href="#orders">My orders</a>
+<a href="dashboard.html#locations/saved">Saved locations</a>
+<a href="dashboard.html">Dashboard</a>
+</nav>
+<div class="shop-account-actions">
+<span class="connection-state" data-shop-api-state="loading"><span></span><span data-shop-api-label="">Connecting</span></span>
+<button class="discord-button" data-shop-auth-button="" type="button">
+<span class="shop-auth-avatar" data-shop-auth-avatar="">WZ</span>
+<span data-shop-auth-label="">Sign in with Discord</span>
+</button>
+<button class="secondary-action compact-action" data-shop-signout="" hidden="" type="button">Sign out</button>
+</div>
+</header>
+<main class="member-shop-shell" id="shop-main">
+<section aria-labelledby="shop-page-title" class="shop-hero">
+<div class="shop-hero-copy">
+<p class="panel-kicker">World War Z community economy</p>
+<h1 data-member-shop-title="" id="shop-page-title">Survivor Shop</h1>
+<p data-member-shop-description="">Spend your verified community balance on approved DayZ goods and services.</p>
+<div class="shop-hero-actions">
+<a class="primary-action" href="#catalogue">Browse catalogue</a>
+<a class="secondary-action" href="#orders">View my orders</a>
+</div>
+</div>
+<div class="shop-hero-image" data-shop-hero-image-wrap="">
+<img alt="World War Z survivor shop" data-shop-hero-image="" src="assets/world-war-z-dashboard-bg.webp"/>
+<div><span>PLAYSTATION</span><strong>CHERNARUS</strong><small>Railway-secured purchases</small></div>
+</div>
+</section>
+<section aria-label="Shop account summary" class="shop-account-strip panel">
+<div><span>Wallet balance</span><strong data-member-shop-wallet="">Sign in required</strong><small>Verified community currency</small></div>
+<div><span>Available items</span><strong data-member-shop-count="">—</strong><small>Items and event deliveries</small></div>
+<div><span>Open orders</span><strong data-member-shop-open-orders="">—</strong><small>Pending or processing</small></div>
+<div><span>Access</span><strong data-member-shop-access="">Guest</strong><small data-member-shop-access-note="">Discord verification required</small></div>
+</section>
+<div class="security-notice compact-notice member-shop-notice" data-member-shop-notice="">
+<span aria-hidden="true">✓</span>
+<div><strong data-member-shop-notice-title="">Protected commerce workflow</strong><p data-member-shop-notice-copy="">Railway validates your identity, wallet, stock, limits and delivery details before creating an order.</p></div>
+</div>
+<section aria-labelledby="catalogue-title" class="member-shop-section" id="catalogue">
+<div class="view-heading shop-section-heading">
+<div><p class="breadcrumb">Member Shop / Catalogue</p><h2 id="catalogue-title">Approved DayZ goods.</h2><p data-member-shop-instructions="">Staff will arrange fulfilment after purchase.</p></div>
+<button class="secondary-action compact-action" data-member-shop-refresh="" type="button">Refresh shop</button>
+</div>
+<div aria-label="Catalogue type" class="shop-mode-tabs" role="tablist">
+<button aria-selected="true" class="active" data-member-shop-mode="manual" role="tab" type="button"><span>▣</span><strong>Items</strong><small>Manual trader orders</small><b data-member-manual-count="">0</b></button>
+<button aria-selected="false" data-member-shop-mode="event" role="tab" type="button"><span>↻</span><strong>Event items</strong><small>Restart-bound deliveries</small><b data-member-event-count="">0</b></button>
+</div>
+<div class="shop-toolbar command-bar">
+<label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search shop</span><input autocomplete="off" data-member-shop-search="" placeholder="Search name, category or SKU…" type="search"/></label>
+<label class="dialog-field compact-select"><span>Category</span><select data-member-shop-category=""><option value="all">All categories</option></select></label>
+<div class="toolbar-view-note"><span>LIVE</span><strong data-member-shop-mode-label="">Items</strong><small>Connected to Railway</small></div>
+</div>
+<div aria-live="polite" class="member-shop-grid" data-member-shop-catalogue=""></div>
+<p class="empty-state" data-member-shop-empty="" hidden="">No active shop items match your filters.</p>
+<p class="table-note history-error" data-member-shop-error="" hidden="">The member shop is temporarily unavailable.</p>
+</section>
+<section aria-labelledby="orders-title" class="member-shop-section member-orders-section" id="orders">
+<div class="view-heading shop-section-heading">
+<div><p class="breadcrumb">Member Shop / Private history</p><h2 id="orders-title">My orders.</h2><p>Only orders attached to your verified Discord and PlayStation identity are shown.</p></div>
+<button class="secondary-action compact-action" data-member-orders-refresh="" type="button">Refresh orders</button>
+</div>
+<div class="locked-copy" data-member-orders-guest="">
+<span aria-hidden="true" class="large-lock">📦</span><h3>Sign in to track your orders.</h3><p>Your order history, balance and delivery status are private.</p><button class="primary-action" data-shop-login="" type="button">Sign in with Discord</button>
+</div>
+<div class="security-notice" data-member-orders-unlinked="" hidden=""><span aria-hidden="true">⌁</span><div><strong>A verified PlayStation link is required</strong><p>Use <code>/link</code> in Discord, then refresh this page.</p></div></div>
+<div class="member-order-list" data-member-order-list="" hidden=""></div>
+<p class="table-note" data-member-orders-empty="" hidden="">You have not placed a shop order yet.</p>
+</section>
+</main>
+<footer class="member-shop-footer">
+<span>World War Z · PlayStation DayZ · Chernarus</span>
+<span>Purchases and protected actions are processed by Railway.</span>
+</footer>
+<dialog aria-labelledby="member-login-title" class="login-dialog member-login-dialog" data-member-login-dialog="">
+<form method="dialog">
+<button aria-label="Close sign-in" class="dialog-close" value="close">×</button>
+<span aria-hidden="true" class="restart-mark">⌁</span>
+<p class="panel-kicker">Secure member access</p>
+<h2 id="member-login-title">Connect Discord.</h2>
+<p>Discord confirms your community membership and access roles. The website never receives your Discord password.</p>
+<div class="dialog-notice"><strong>Browser session</strong><span>Your session stays in this browser tab and expires automatically.</span></div>
+<button class="discord-button wide" data-member-start-login="" disabled="" type="button">Checking Discord sign-in…</button>
+<button class="dialog-cancel" value="close">Return to shop</button>
+</form>
+</dialog>
+<dialog aria-labelledby="member-purchase-title" class="login-dialog shop-purchase-dialog member-purchase-dialog" data-member-purchase-dialog="">
+<form data-member-purchase-form="" method="dialog">
+<button aria-label="Close purchase" class="dialog-close" data-member-purchase-cancel="" type="button">×</button>
+<p class="panel-kicker">Protected purchase</p>
+<h2 data-member-purchase-title="" id="member-purchase-title">Confirm purchase?</h2>
+<div class="shop-purchase-summary"><strong data-member-purchase-item="">—</strong><span data-member-purchase-price="">—</span></div>
+<label class="dialog-field"><span data-member-quantity-label="">Quantity</span><input data-member-purchase-quantity="" min="1" step="1" type="number" value="1"/><small data-member-quantity-help="">Number of items to purchase.</small></label>
+<div data-member-event-fields="" hidden="">
+<label class="dialog-field"><span>Saved delivery location</span><select data-member-delivery-location=""><option value="">Enter new coordinates</option></select></label>
+<div data-member-coordinate-inputs="">
+<div class="member-coordinate-grid">
+<label class="dialog-field"><span>X</span><input data-member-delivery-x="" max="15360" min="0" step="0.001" type="number"/></label>
+<label class="dialog-field"><span>Y / height</span><input data-member-delivery-y="" max="2000" min="-100" step="0.001" type="number" value="0"/></label>
+<label class="dialog-field"><span>Z</span><input data-member-delivery-z="" max="15360" min="0" step="0.001" type="number"/></label>
+<label class="dialog-field"><span>Rotation</span><input data-member-delivery-rotation="" max="360" min="0" step="0.1" type="number" value="0"/></label>
+</div>
+<div class="member-coordinate-map" data-member-coordinate-map="">
+<img alt="Chernarus satellite coordinate selector" data-member-coordinate-image="" draggable="false" src="assets/chernarus-map/overview.webp?v=1224"/>
+<span class="member-map-marker" data-member-map-marker="" hidden=""></span>
+<div class="member-map-readout"><strong data-member-map-readout="">No coordinates selected</strong><span>Click the map to set X/Z</span></div>
+</div>
+</div>
+<label class="toggle-setting"><input data-member-coordinate-confirm="" type="checkbox"/><span><strong>I checked the coordinates</strong><small>Unsafe or malformed points may be rejected by staff.</small></span></label>
+</div>
+<label class="dialog-field"><span>Order note <small>Optional</small></span><textarea data-member-purchase-note="" maxlength="500" placeholder="Delivery details or a short note for staff" rows="3"></textarea></label>
+<div class="shop-purchase-total"><span>Order total</span><strong data-member-purchase-total="">—</strong></div>
+<div class="restart-dialog-message" data-member-purchase-message="" hidden="" role="status"></div>
+<button class="primary-action wide" data-member-purchase-confirm="" type="submit">Place protected order</button>
+<button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
+</form>
+</dialog>
+<script defer="" src="shop.js?v=1.22.6"></script>
+</body>
+</html>

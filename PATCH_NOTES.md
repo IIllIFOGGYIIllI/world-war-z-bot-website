@@ -1,3 +1,18 @@
+# Version 1.22.6
+
+- Added a dedicated `shop.html` member-facing Survivor Shop separate from Owner administration.
+- Added member catalogue tabs for Items and Event Items, search, category filters, wallet status and private order history.
+- Added protected purchase confirmation with saved locations or exact Chernarus X/Y/Z/rotation selection for event deliveries.
+- Added role-discount pricing that shows the original price, effective price and qualifying discount returned by Railway.
+- Added member access states for shop disabled, missing required role, unlinked PlayStation account and purchase-ready accounts.
+- Reorganised the dashboard Shop navigation into Owner-only Items, Event Items and Configuration workspaces plus separate member links.
+- Added Owner configuration cards for core shop state, member-shop website access, required Discord role, global restart limits and role discounts.
+- Added standalone Owner item and event-item administration tables while preserving the existing create/edit windows and Event XML/Zone editors.
+- Added homepage, footer and sitemap links to the member shop.
+- Preserved the v1.22.4 Chernarus map, all existing catalogue data, delivery workflows, moderation tools and permission gating.
+- Requires bot v1.18.4 before enabling required-role access or discounts.
+- No website files need to be deleted.
+
 # Version 1.22.5
 
 - Added full Event XML and Event Zone editors to the existing compact Create/Edit Event Item window.
