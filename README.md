@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Refine item and rental controls`
+4. Enter the commit message: `Add interactive automatic checkout`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -33,7 +33,7 @@ GitHub may take a few minutes to publish the first version.
 - `script.js` — navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `dashboard.css` — dashboard layout and responsive design
-- `dashboard.js` — Railway health, Discord session, role visibility, member data, survivor-shop purchases, fulfilment controls, secure player lookup, moderation actions and protected audit history
+- `dashboard.js` — Railway health, Discord session, role visibility, member data, survivor-shop purchases, automatic-delivery monitoring, trader-ticket fulfilment, secure player lookup, moderation actions and protected audit history
 - `legal.html` — legal and policy document hub
 - `terms.html` — community Terms of Service
 - `privacy.html` — privacy, storage, service-provider and data-request information
@@ -60,6 +60,17 @@ GitHub may take a few minutes to publish the first version.
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
 
+
+## Version 1.22.10 automatic shop delivery
+
+The dedicated member shop now treats both normal Items and Event Items as
+automatic coordinate deliveries. Checkout uses an interactive Chernarus map with
+pan, zoom, reset, fullscreen, marker and accurate X/Z selection. The Admin
+dashboard now monitors Railway automation instead of offering approval, staging
+or verification buttons. Manual fulfilment is reserved for ticket-created
+in-game trader orders, with optional processing notes and required cancellation
+or refund reasons. Bot version 1.18.7 prepares and verifies the mission files
+immediately after purchase so the next scheduled restart loads the order.
 
 ## Version 1.22.9 optional event zones and item scope
 

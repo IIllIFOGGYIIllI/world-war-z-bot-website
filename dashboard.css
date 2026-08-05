@@ -4464,3 +4464,14 @@ body:has(.catalogue-builder-dialog[open]) {
   .item-discount-row { grid-template-columns: 1fr; }
   .item-discount-builder > .secondary-action { width: 100%; }
 }
+
+.delivery-automation-note {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(66, 153, 225, 0.24);
+  border-radius: 0.65rem;
+  background: rgba(27, 89, 146, 0.1);
+  color: var(--muted-text, #aeb7c2);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}

@@ -3864,6 +3864,8 @@ const shopOrderNavBadge = document.querySelector('[data-shop-order-nav-badge]');
 const shopOrderActionDialog = document.querySelector('[data-shop-order-action-dialog]');
 const shopOrderActionForm = document.querySelector('[data-shop-order-action-form]');
 const shopOrderActionNote = document.querySelector('[data-shop-order-action-note]');
+const shopOrderActionNoteLabel = document.querySelector('[data-shop-order-action-note-label]');
+const shopOrderActionNoteHelp = document.querySelector('[data-shop-order-action-note-help]');
 const shopOrderActionMessage = document.querySelector('[data-shop-order-action-message]');
 const shopOrderActionCancelButtons = [...document.querySelectorAll('[data-shop-order-action-cancel]')];
 const confirmShopOrderActionButton = document.querySelector('[data-confirm-shop-order-action]');
@@ -4109,7 +4111,7 @@ const openShopPurchase = (item) => {
   if (!shopPurchasesEnabled || !item?.available || shopPurchaseInProgress) return;
   selectedShopItem = item;
   shopPurchaseForm?.reset();
-  const isEvent = item.delivery_type === 'event' || item.requires_coordinates;
+  const isEvent = item.delivery_type === 'event';
   if (shopPurchaseQuantity) {
     const minimumRestarts = Math.max(1, Number(item.delivery?.minimum_restarts || 1));
     const maximumRestarts = Math.min(30000, Math.max(minimumRestarts, Number(item.delivery?.maximum_restarts || 30000)));
@@ -4133,7 +4135,7 @@ const openShopPurchase = (item) => {
   syncShopDeliveryForm();
   setText('[data-shop-purchase-title]', `Buy ${item.name}?`);
   setText('[data-shop-purchase-item]', `${item.name} · ${item.sku}`);
-  const deliveryText = isEvent ? 'Restart-bound event spawn' : 'Manual trader fulfilment';
+  const deliveryText = isEvent ? 'Restart-bound event spawn' : 'Automatic coordinate delivery';
   setText('[data-shop-purchase-price]', `${formatMoney(item.price)} ${isEvent ? 'per restart' : 'each'} · ${shopStockText(item)} · ${deliveryText}`);
   showInlineMessage(shopPurchaseMessage, '');
   updateShopPurchaseTotal();
@@ -4204,7 +4206,7 @@ const renderShopCatalogue = () => {
     const meta = document.createElement('div');
     meta.className = 'shop-item-meta';
     [
-      item.delivery_type === 'event' ? `Event item · ${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts` : 'Manual trader order',
+      item.delivery_type === 'event' ? `Event item · ${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts` : 'Automatic item delivery',
       shopStockText(item),
       `Max ${item.max_per_order}/order`,
       shopMemberLimitText(item)
@@ -4247,7 +4249,9 @@ const renderMemberShopOrders = (orders) => {
     if (order.delivery) {
       const delivery = document.createElement('small');
       const point = order.delivery.location || {};
-      delivery.textContent = `Event delivery: ${shopStatusLabel(order.delivery.status)} · ${Number(order.delivery.remaining_restarts ?? order.event_restarts ?? 1).toLocaleString()} restart(s) remaining · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`;
+      delivery.textContent = order.delivery_type === 'event'
+        ? `Automatic event delivery: ${shopStatusLabel(order.delivery.status)} · ${Number(order.delivery.remaining_restarts ?? order.event_restarts ?? 1).toLocaleString()} restart(s) remaining · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`
+        : `Automatic item delivery: ${shopStatusLabel(order.delivery.status)} · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`;
       card.append(delivery);
     }
     if (order.buyer_note) {
@@ -4257,7 +4261,7 @@ const renderMemberShopOrders = (orders) => {
     }
     if (order.fulfilment_note) {
       const note = document.createElement('small');
-      note.textContent = `Staff update: ${order.fulfilment_note}`;
+      note.textContent = `Order update: ${order.fulfilment_note}`;
       card.append(note);
     }
     shopOrderList.append(card);
@@ -4354,7 +4358,7 @@ shopModeButtons.forEach((button) => button.addEventListener('click', () => {
   if (shopCategory) shopCategory.value = 'all';
   populateShopCategories();
   setText('[data-shop-mode-label]', shopCatalogueMode === 'event' ? 'Event items' : 'Items');
-  setText('[data-shop-mode-help]', shopCatalogueMode === 'event' ? 'Price per restart · exact coordinates' : 'Manual trader catalogue');
+  setText('[data-shop-mode-help]', shopCatalogueMode === 'event' ? 'Price per restart · exact coordinates' : 'Automatic item catalogue');
   renderShopCatalogue();
 }));
 shopSearch?.addEventListener('input', renderShopCatalogue);
@@ -4424,6 +4428,18 @@ const adminShopActionButton = (label, action, order, danger = false) => {
     selectedShopOrder = order;
     selectedShopOrderAction = action;
     shopOrderActionForm?.reset();
+    const reasonRequired = ['cancel', 'refund'].includes(action);
+    if (shopOrderActionNote) {
+      shopOrderActionNote.required = reasonRequired;
+      shopOrderActionNote.minLength = reasonRequired ? 3 : 0;
+      shopOrderActionNote.placeholder = reasonRequired
+        ? 'Explain why this order is being cancelled or refunded.'
+        : 'Optional processing or fulfilment note.';
+    }
+    if (shopOrderActionNoteLabel) shopOrderActionNoteLabel.textContent = reasonRequired ? 'Reason' : 'Action note';
+    if (shopOrderActionNoteHelp) shopOrderActionNoteHelp.textContent = reasonRequired
+      ? 'Required · 3–1,000 characters'
+      : 'Optional for processing and fulfilment';
     setText('[data-shop-order-action-title]', `${label} order #${order.order_id}?`);
     setText('[data-shop-order-action-target]', `${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`);
     setText('[data-shop-order-action-detail]', `${formatMoney(order.total_price)} · ${shopStatusLabel(order.status)}`);
@@ -4527,7 +4543,7 @@ shopOrderActionForm?.addEventListener('submit', async (event) => {
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
     if (!response.ok) throw new Error(payload.message || 'The order could not be updated.');
     showInlineMessage(shopOrderActionMessage, payload.message || 'Order updated.', 'success');
-    await Promise.all([loadAdminShopOrders(sessionToken), loadMemberShop(sessionToken)]);
+    await Promise.all([loadAdminShopOrders(sessionToken), loadDeliveryQueue(sessionToken), loadMemberShop(sessionToken)]);
     window.setTimeout(() => shopOrderActionDialog?.close?.(), 800);
   } catch (error) {
     showInlineMessage(shopOrderActionMessage, error.message || 'The order could not be updated.');
@@ -4566,7 +4582,7 @@ const renderOwnerShopItems = () => {
   const manualItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && (manualCategory === 'all' || item.category === manualCategory) && (!manualQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category}`.toLowerCase().includes(manualQuery)));
   const eventItems = ownerShopItems.filter((item) => item.fulfilment_type === 'event' && (eventCategory === 'all' || item.category === eventCategory) && (!eventQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(eventQuery)));
   manualItems.forEach((item) => { const row=document.createElement('tr'); const itemCell=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; itemCell.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const scope=document.createElement('td'); scope.textContent=String(item.catalogue_scope||'local').toLowerCase()==='global'?'Global':'Local'; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const stock=document.createElement('td'); stock.textContent=item.stock_quantity==null?'Unlimited':String(item.stock_quantity); const limits=document.createElement('td'); limits.textContent=`${item.max_per_order}/order · ${item.max_per_player==null?'No player limit':`${item.max_per_player}/player`}`; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(itemCell,category,scope,price,stock,limits,state,action); ownerShopItemList.append(row); });
-  eventItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=`${formatMoney(item.price)} / restart`; const restarts=document.createElement('td'); restarts.textContent=`${Number(profile.minimum_restarts||1).toLocaleString()}–${Number(profile.maximum_restarts||30000).toLocaleString()}`; const approval=document.createElement('td'); approval.textContent=profile.requires_approval?'Admin approval':'Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,restarts,approval,state,action); ownerEventItemList.append(row); });
+  eventItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=`${formatMoney(item.price)} / restart`; const restarts=document.createElement('td'); restarts.textContent=`${Number(profile.minimum_restarts||1).toLocaleString()}–${Number(profile.maximum_restarts||30000).toLocaleString()}`; const approval=document.createElement('td'); approval.textContent='Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,restarts,approval,state,action); ownerEventItemList.append(row); });
   if (ownerShopEmpty) ownerShopEmpty.hidden = manualItems.length !== 0;
   if (ownerEventItemEmpty) ownerEventItemEmpty.hidden = eventItems.length !== 0;
 };
@@ -4913,7 +4929,6 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
       }));
   renderShopItemDiscounts();
   const flagValues = {
-    '[data-shop-profile-approval]': profile.requires_approval ?? true,
     '[data-shop-profile-deletable]': profile.flags?.deletable ?? false,
     '[data-shop-profile-random]': profile.flags?.init_random ?? false,
     '[data-shop-profile-remove-damaged]': profile.flags?.remove_damaged ?? false
@@ -5252,7 +5267,7 @@ shopItemForm?.addEventListener('submit', async (event) => {
           cleanupradius: value('[data-shop-profile-cleanupradius]'), attachments: parseProfileList(value('[data-shop-profile-attachments]')),
           cargo: parseProfileList(value('[data-shop-profile-cargo]')),
           event_xml: value('[data-shop-event-xml]'), event_zone: value('[data-shop-event-zone]'),
-          requires_approval: Boolean(document.querySelector('[data-shop-profile-approval]')?.checked),
+          requires_approval: false,
           deletable: Boolean(document.querySelector('[data-shop-profile-deletable]')?.checked),
           init_random: Boolean(document.querySelector('[data-shop-profile-random]')?.checked),
           remove_damaged: Boolean(document.querySelector('[data-shop-profile-remove-damaged]')?.checked)
@@ -5458,15 +5473,18 @@ const deliveryNavBadge = document.querySelector('[data-delivery-nav-badge]');
 let deliveryQueueRequestInProgress = false;
 let deliveryActionInProgress = false;
 
-const deliveryStatusActions = {
-  awaiting_approval: [['Approve', 'approve']],
-  ready: [['Preview XML', 'preview'], ['Stage files', 'stage']],
-  previewed: [['Refresh preview', 'preview'], ['Stage files', 'stage']],
-  restart_pending: [['Start server', 'restart'], ['Rollback files', 'rollback']],
-  verification: [['Verify spawn', 'verify'], ['Rollback files', 'rollback']],
-  active: [['Record restart manually', 'record_restart'], ['Rollback files', 'rollback']],
-  cleanup_due: [['Clean up & fulfil', 'cleanup'], ['Rollback files', 'rollback']],
-  failed: [['Retry preview', 'preview'], ['Retry staging', 'stage'], ['Rollback files', 'rollback']]
+const deliveryStatusHelp = {
+  awaiting_approval: 'Railway is releasing this legacy approval state automatically.',
+  ready: 'Queued for automatic validation, backup and upload.',
+  previewed: 'Prepared and waiting for automatic deployment.',
+  restart_pending: 'Mission files are verified and this order will spawn at the next restart.',
+  verification: 'The order has spawned and Railway is reconciling its restart state.',
+  active: 'The rental is active and its remaining restarts are tracked automatically.',
+  cleanup_due: 'The purchased restart count is complete; file cleanup is queued automatically.',
+  failed: 'The last deployment failed. Railway retries this order automatically every 30 seconds.',
+  fulfilled: 'The automatic delivery and cleanup workflow is complete.',
+  cancelled: 'The order was cancelled and its temporary file definitions are being removed.',
+  cancelled_cleaned: 'The cancelled order has been refunded and its temporary file definitions were removed.'
 };
 
 const previewText = (preview) => {
@@ -5539,10 +5557,10 @@ const renderDeliveryQueue = (payload) => {
   deliveryOrderList.replaceChildren();
   const summary = payload?.summary || {};
   setText('[data-delivery-open]', String(Number(summary.open || 0)));
-  setText('[data-delivery-awaiting]', String(Number(summary.awaiting_approval || 0)));
-  setText('[data-delivery-restart]', String(Number(summary.restart_pending || 0)));
-  setText('[data-delivery-verification]', String(Number(summary.verification || 0) + Number(summary.active || 0) + Number(summary.cleanup_due || 0)));
-  setText('[data-delivery-failed]', String(Number(summary.failed || 0)));
+  setText('[data-delivery-awaiting]', String(Number(summary.pending || 0)));
+  setText('[data-delivery-restart]', String(Number(summary.processing || 0)));
+  setText('[data-delivery-verification]', String(Number(summary.fulfilled || 0)));
+  setText('[data-delivery-failed]', String(Number(summary.refunded || 0) + Number(summary.cancelled || 0)));
   const openCount = Number(summary.open || 0);
   if (deliveryNavBadge) {
     deliveryNavBadge.textContent = String(openCount);
@@ -5550,14 +5568,18 @@ const renderDeliveryQueue = (payload) => {
   }
   const orders = Array.isArray(payload?.orders) ? payload.orders : [];
   orders.forEach((order) => {
+    const delivery = order.delivery || {};
+    const location = delivery.location || {};
+    const deliveryKind = delivery.delivery_kind === 'event' ? 'Event Item' : 'Item';
     const card = document.createElement('article');
-    card.className = `delivery-order-card delivery-${order.status}`;
+    card.className = `delivery-order-card delivery-${delivery.status || order.status}`;
+
     const heading = document.createElement('div');
     heading.className = 'delivery-order-heading';
     const copy = document.createElement('div');
     const kicker = document.createElement('p');
     kicker.className = 'panel-kicker';
-    kicker.textContent = `Order #${order.order_id} · ${order.event_name}`;
+    kicker.textContent = `Order #${order.order_id} · ${deliveryKind}`;
     const title = document.createElement('h2');
     title.textContent = `${order.item.name} → ${order.buyer.psn_id}`;
     copy.append(kicker, title);
@@ -5565,16 +5587,20 @@ const renderDeliveryQueue = (payload) => {
     status.className = `shop-order-status ${order.status}`;
     status.textContent = shopStatusLabel(order.status);
     heading.append(copy, status);
+
     const details = document.createElement('div');
     details.className = 'delivery-detail-grid';
+    const deliveryState = delivery.status || 'queued';
+    const itemDetail = delivery.delivery_kind === 'event'
+      ? `${Number(order.event_restarts || 1).toLocaleString()} purchased restart(s)`
+      : `${Number(order.quantity || 1).toLocaleString()} × ${(order.item.types || []).join(', ') || order.item.sku}`;
     [
-      ['Profile', `${order.item.profile_name} · ${order.item.child_type}`],
-      ['Location', `${order.location.name} · X ${order.location.x}, Y ${order.location.y}, Z ${order.location.z}`],
-      ['Rotation', `${order.location.rotation}°`],
+      ['Automation', shopStatusLabel(deliveryState)],
+      ['Delivery', itemDetail],
+      ['Location', location.x == null ? 'Coordinates unavailable' : `${location.name || 'Selected point'} · X ${location.x}, Y ${location.y}, Z ${location.z}`],
+      ['Rotation', `${Number(location.rotation || 0).toLocaleString()}°`],
       ['Value', formatMoney(order.total_price)],
       ['Created', formatAccountDate(order.created_at)],
-      ['Restarts', `${Number(order.remaining_restarts ?? order.purchased_restarts ?? 1).toLocaleString()} of ${Number(order.purchased_restarts || 1).toLocaleString()} remaining`],
-      ['Approval', order.requires_approval ? 'Required' : 'Not required']
     ].forEach(([label, value]) => {
       const block = document.createElement('div');
       const small = document.createElement('span'); small.textContent = label;
@@ -5582,16 +5608,26 @@ const renderDeliveryQueue = (payload) => {
       block.append(small, strong); details.append(block);
     });
     card.append(heading, details);
-    if (order.last_error) {
+
+    if (delivery.last_error) {
       const error = document.createElement('p');
       error.className = 'delivery-error-copy';
-      error.textContent = `Last error: ${order.last_error}`;
+      error.textContent = `Last deployment error: ${delivery.last_error}`;
       card.append(error);
     }
+    const automationNote = document.createElement('p');
+    automationNote.className = 'delivery-automation-note';
+    automationNote.textContent = deliveryStatusHelp[deliveryState]
+      || 'Railway is managing this delivery automatically.';
+    card.append(automationNote);
+
     const actions = document.createElement('div');
     actions.className = 'heading-actions delivery-actions';
-    (deliveryStatusActions[order.status] || []).forEach(([label, action]) => actions.append(deliveryActionButton(order, label, action)));
-    if (['awaiting_approval', 'ready', 'previewed'].includes(order.status)) actions.append(deliveryActionButton(order, 'Cancel delivery', 'cancel'));
+    if (['pending', 'processing'].includes(order.status)) {
+      actions.append(adminShopActionButton('Cancel & refund', 'cancel', order, true));
+    } else if (order.status === 'fulfilled') {
+      actions.append(adminShopActionButton('Refund order', 'refund', order, true));
+    }
     if (actions.childElementCount) card.append(actions);
     deliveryOrderList.append(card);
   });
@@ -5605,12 +5641,12 @@ const loadDeliveryQueue = async (token = storageGet(AUTH_SESSION_KEY)) => {
   refreshDeliveryQueueButton?.setAttribute('disabled', '');
   try {
     const scope = encodeURIComponent(deliveryScope?.value || 'open');
-    const response = await authFetch(`${ADMIN_SHOP_DELIVERY_URL}?status=${scope}&limit=100`, {
+    const response = await authFetch(`${ADMIN_SHOP_ORDERS_URL}?mode=automatic&status=${scope}&limit=100`, {
       headers: { Accept: 'application/json', Authorization: `Bearer ${token}` }
     });
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
-    if (!response.ok) throw new Error(payload.message || 'The event delivery queue is unavailable.');
+    if (!response.ok) throw new Error(payload.message || 'The automatic order monitor is unavailable.');
     renderDeliveryQueue(payload);
     return true;
   } catch (error) {

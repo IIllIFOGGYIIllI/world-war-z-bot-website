@@ -1,6 +1,4 @@
-world-war-z-bot-website v1.22.9 patch files
-============================================
-
+DELETE_THESE_FILES.txt
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
@@ -8,3 +6,6 @@ changelog.html
 dashboard.css
 dashboard.html
 dashboard.js
+shop.css
+shop.html
+shop.js

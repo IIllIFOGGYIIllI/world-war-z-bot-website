@@ -1,5 +1,5 @@
-NO FILES NEED TO BE DELETED FOR VERSION 1.22.6
+NO FILES NEED TO BE DELETED FOR VERSION 1.22.10
 
-The patch adds shop.html, shop.css and shop.js and updates existing dashboard and documentation files.
 Copy the patch contents over the repository root and allow Windows to merge folders and replace matching files.
 Do not delete the existing assets/chernarus-map directory or any other website assets.
+The map tile pyramid is unchanged and is not repeated in the changed-files-only patch.

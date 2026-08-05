@@ -53,12 +53,14 @@ const elements = {
   eventFields: $('[data-member-event-fields]'), location: $('[data-member-delivery-location]'),
   coordinateInputs: $('[data-member-coordinate-inputs]'), x: $('[data-member-delivery-x]'),
   y: $('[data-member-delivery-y]'), z: $('[data-member-delivery-z]'), rotation: $('[data-member-delivery-rotation]'),
-  coordinateMap: $('[data-member-coordinate-map]'), coordinateImage: $('[data-member-coordinate-image]'),
+  coordinateMap: $('[data-member-coordinate-map]'), coordinateStage: $('[data-member-coordinate-stage]'), coordinateImage: $('[data-member-coordinate-image]'),
+  mapZoomIn: $('[data-member-map-zoom-in]'), mapZoomOut: $('[data-member-map-zoom-out]'), mapReset: $('[data-member-map-reset]'), mapFullscreen: $('[data-member-map-fullscreen]'),
   marker: $('[data-member-map-marker]'), mapReadout: $('[data-member-map-readout]'),
   coordinateConfirm: $('[data-member-coordinate-confirm]'), note: $('[data-member-purchase-note]'),
   total: $('[data-member-purchase-total]'), purchaseMessage: $('[data-member-purchase-message]'),
   purchaseConfirm: $('[data-member-purchase-confirm]')
 };
+const checkoutMap = { x: 0, y: 0, zoom: 1, minZoom: 1, maxZoom: 5, dragging: false, moved: false, pointerId: null, startX: 0, startY: 0, originX: 0, originY: 0 };
 
 const money = (value) => `$${new Intl.NumberFormat('en-AU').format(Math.max(0, Number(value) || 0))}`;
 const dateText = (value) => {
@@ -334,6 +336,35 @@ const syncLocationMode = () => {
     if (location) { elements.x.value = location.x; elements.y.value = location.y; elements.z.value = location.z; elements.rotation.value = location.rotation; updateMarker(); }
   }
 };
+const clampMap = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
+const constrainCheckoutMap = () => {
+  const frame = elements.coordinateMap.getBoundingClientRect();
+  const size = frame.width * checkoutMap.zoom;
+  checkoutMap.x = clampMap(checkoutMap.x, Math.min(0, frame.width - size), 0);
+  checkoutMap.y = clampMap(checkoutMap.y, Math.min(0, frame.height - size), 0);
+};
+const renderCheckoutMap = () => {
+  constrainCheckoutMap();
+  elements.coordinateStage.style.transform = `translate3d(${checkoutMap.x}px,${checkoutMap.y}px,0) scale(${checkoutMap.zoom})`;
+  elements.marker.style.setProperty('--checkout-marker-scale', String(1 / checkoutMap.zoom));
+};
+const resetCheckoutMap = () => {
+  checkoutMap.x = 0; checkoutMap.y = 0; checkoutMap.zoom = 1;
+  renderCheckoutMap();
+};
+const zoomCheckoutMap = (factor, clientX = null, clientY = null) => {
+  const frame = elements.coordinateMap.getBoundingClientRect();
+  const px = clientX == null ? frame.width / 2 : clientX - frame.left;
+  const py = clientY == null ? frame.height / 2 : clientY - frame.top;
+  const oldZoom = checkoutMap.zoom;
+  const nextZoom = clampMap(oldZoom * factor, checkoutMap.minZoom, checkoutMap.maxZoom);
+  const worldX = (px - checkoutMap.x) / oldZoom;
+  const worldY = (py - checkoutMap.y) / oldZoom;
+  checkoutMap.zoom = nextZoom;
+  checkoutMap.x = px - worldX * nextZoom;
+  checkoutMap.y = py - worldY * nextZoom;
+  renderCheckoutMap();
+};
 const updateMarker = () => {
   const x = Number(elements.x.value), z = Number(elements.z.value);
   const valid = Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= 15360 && z >= 0 && z <= 15360;
@@ -342,11 +373,36 @@ const updateMarker = () => {
   if (valid) { elements.marker.style.left = `${x / 15360 * 100}%`; elements.marker.style.top = `${(1 - z / 15360) * 100}%`; }
 };
 const setMapCoordinates = (event) => {
-  if (elements.location.value) return;
-  const rect = elements.coordinateImage.getBoundingClientRect();
-  const x = Math.min(15360, Math.max(0, (event.clientX - rect.left) / rect.width * 15360));
-  const z = Math.min(15360, Math.max(0, (1 - (event.clientY - rect.top) / rect.height) * 15360));
-  elements.x.value = x.toFixed(3); elements.z.value = z.toFixed(3); if (elements.y.value === '') elements.y.value = '0'; updateMarker();
+  if (elements.location.value || checkoutMap.moved) return;
+  const rect = elements.coordinateMap.getBoundingClientRect();
+  const mapX = (event.clientX - rect.left - checkoutMap.x) / checkoutMap.zoom;
+  const mapY = (event.clientY - rect.top - checkoutMap.y) / checkoutMap.zoom;
+  if (mapX < 0 || mapY < 0 || mapX > rect.width || mapY > rect.height) return;
+  const x = clampMap(mapX / rect.width * 15360, 0, 15360);
+  const z = clampMap((1 - mapY / rect.height) * 15360, 0, 15360);
+  elements.x.value = x.toFixed(3); elements.z.value = z.toFixed(3);
+  if (elements.y.value === '') elements.y.value = '0';
+  updateMarker();
+};
+const beginMapDrag = (event) => {
+  if (elements.location.value || event.button > 0) return;
+  checkoutMap.dragging = true; checkoutMap.moved = false; checkoutMap.pointerId = event.pointerId;
+  checkoutMap.startX = event.clientX; checkoutMap.startY = event.clientY;
+  checkoutMap.originX = checkoutMap.x; checkoutMap.originY = checkoutMap.y;
+  elements.coordinateMap.setPointerCapture?.(event.pointerId);
+};
+const moveMapDrag = (event) => {
+  if (!checkoutMap.dragging || event.pointerId !== checkoutMap.pointerId) return;
+  const dx = event.clientX - checkoutMap.startX, dy = event.clientY - checkoutMap.startY;
+  if (Math.abs(dx) + Math.abs(dy) > 5) checkoutMap.moved = true;
+  checkoutMap.x = checkoutMap.originX + dx; checkoutMap.y = checkoutMap.originY + dy;
+  renderCheckoutMap();
+};
+const endMapDrag = (event) => {
+  if (!checkoutMap.dragging || event.pointerId !== checkoutMap.pointerId) return;
+  checkoutMap.dragging = false;
+  elements.coordinateMap.releasePointerCapture?.(event.pointerId);
+  window.setTimeout(() => { checkoutMap.moved = false; }, 0);
 };
 const updateTotal = () => {
   const quantity = Math.max(1, Number(elements.quantity.value || 1));
@@ -355,7 +411,7 @@ const updateTotal = () => {
 const openPurchase = (item) => {
   if (!canPurchase(item)) return;
   state.selectedItem = item; elements.purchaseForm.reset(); elements.y.value = '0'; elements.rotation.value = '0';
-  const eventItem = item.delivery_type === 'event' || item.requires_coordinates;
+  const eventItem = item.delivery_type === 'event';
   const minimum = eventItem ? Math.max(1, Number(item.delivery?.minimum_restarts || state.settings.event_restart_min || 1)) : 1;
   const maximum = eventItem
     ? Math.min(30000, Number(item.delivery?.maximum_restarts || state.settings.event_restart_max || 30000))
@@ -363,19 +419,19 @@ const openPurchase = (item) => {
   elements.quantity.value = String(minimum); elements.quantity.min = String(minimum); elements.quantity.max = String(maximum);
   elements.quantityLabel.textContent = eventItem ? 'Number of restarts' : 'Quantity';
   elements.quantityHelp.textContent = eventItem ? `Allowed ${minimum.toLocaleString()}–${maximum.toLocaleString()} restarts.` : `Maximum ${maximum.toLocaleString()} per order.`;
-  elements.eventFields.hidden = !eventItem;
+  elements.eventFields.hidden = false;
   elements.purchaseTitle.textContent = `Buy ${item.name}?`; elements.purchaseItem.textContent = `${item.name} · ${item.sku}`;
   elements.purchasePrice.textContent = `${money(item.price)}${eventItem ? ' per restart' : ' each'} · ${stockText(item)}`;
-  populateLocations(); updateMarker(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
+  populateLocations(); resetCheckoutMap(); updateMarker(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
 };
 const submitPurchase = async (event) => {
   event.preventDefault();
   if (!state.token || !state.selectedItem || state.purchasing) return;
   state.purchasing = true; elements.purchaseConfirm.disabled = true; showMessage('Railway is validating your wallet, stock and access.', 'info');
   try {
-    const eventItem = state.selectedItem.delivery_type === 'event' || state.selectedItem.requires_coordinates;
+    const eventItem = state.selectedItem.delivery_type === 'event';
     let delivery = null;
-    if (eventItem) {
+    {
       if (!elements.coordinateConfirm.checked) throw new Error('Confirm that you checked the delivery coordinates.');
       delivery = elements.location.value ? { location_id: Number(elements.location.value) } : {
         x: elements.x.value, y: elements.y.value, z: elements.z.value, rotation: elements.rotation.value || 0
@@ -418,6 +474,22 @@ elements.quantity.addEventListener('input', updateTotal);
 elements.location.addEventListener('change', syncLocationMode);
 [elements.x,elements.z].forEach((input) => input.addEventListener('input', updateMarker));
 elements.coordinateMap.addEventListener('click', setMapCoordinates);
+elements.coordinateMap.addEventListener('wheel', (event) => { event.preventDefault(); zoomCheckoutMap(event.deltaY < 0 ? 1.25 : 0.8, event.clientX, event.clientY); }, { passive: false });
+elements.coordinateMap.addEventListener('pointerdown', beginMapDrag);
+elements.coordinateMap.addEventListener('pointermove', moveMapDrag);
+elements.coordinateMap.addEventListener('pointerup', endMapDrag);
+elements.coordinateMap.addEventListener('pointercancel', endMapDrag);
+elements.mapZoomIn.addEventListener('click', () => zoomCheckoutMap(1.4));
+elements.mapZoomOut.addEventListener('click', () => zoomCheckoutMap(1 / 1.4));
+elements.mapReset.addEventListener('click', resetCheckoutMap);
+elements.mapFullscreen.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement === elements.coordinateMap) await document.exitFullscreen();
+    else await elements.coordinateMap.requestFullscreen();
+    window.setTimeout(renderCheckoutMap, 80);
+  } catch {}
+});
+window.addEventListener('resize', renderCheckoutMap);
 $$('[data-member-purchase-cancel]').forEach((button) => button.addEventListener('click', () => { if (!state.purchasing) elements.purchaseDialog.close(); }));
 elements.purchaseForm.addEventListener('submit', submitPurchase);
 

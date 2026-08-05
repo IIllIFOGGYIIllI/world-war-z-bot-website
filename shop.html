@@ -11,8 +11,8 @@
 <meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/assets/world-war-z-social-preview.png" property="og:image"/>
 <title>Survivor Shop | World War Z</title>
 <link href="assets/favicon.png" rel="icon"/>
-<link href="dashboard.css?v=1.22.7" rel="stylesheet"/>
-<link href="shop.css?v=1.22.6" rel="stylesheet"/>
+<link href="dashboard.css?v=1.22.10" rel="stylesheet"/>
+<link href="shop.css?v=1.22.10" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-bot-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-bot-website/shop.html" property="og:url"/></head>
 <body class="member-shop-page">
 <a class="skip-link" href="#shop-main">Skip to shop</a>
@@ -54,7 +54,7 @@
 </section>
 <section aria-label="Shop account summary" class="shop-account-strip panel">
 <div><span>Wallet balance</span><strong data-member-shop-wallet="">Sign in required</strong><small>Verified community currency</small></div>
-<div><span>Available items</span><strong data-member-shop-count="">—</strong><small>Items and event deliveries</small></div>
+<div><span>Available items</span><strong data-member-shop-count="">—</strong><small>Automatic item and event deliveries</small></div>
 <div><span>Open orders</span><strong data-member-shop-open-orders="">—</strong><small>Pending or processing</small></div>
 <div><span>Access</span><strong data-member-shop-access="">Guest</strong><small data-member-shop-access-note="">Discord verification required</small></div>
 </section>
@@ -64,11 +64,11 @@
 </div>
 <section aria-labelledby="catalogue-title" class="member-shop-section" id="catalogue">
 <div class="view-heading shop-section-heading">
-<div><p class="breadcrumb">Member Shop / Catalogue</p><h2 id="catalogue-title">Approved DayZ goods.</h2><p data-member-shop-instructions="">Staff will arrange fulfilment after purchase.</p></div>
+<div><p class="breadcrumb">Member Shop / Catalogue</p><h2 id="catalogue-title">Approved DayZ goods.</h2><p data-member-shop-instructions="">Railway prepares each paid order automatically for the next server restart.</p></div>
 <button class="secondary-action compact-action" data-member-shop-refresh="" type="button">Refresh shop</button>
 </div>
 <div aria-label="Catalogue type" class="shop-mode-tabs" role="tablist">
-<button aria-selected="true" class="active" data-member-shop-mode="manual" role="tab" type="button"><span>▣</span><strong>Items</strong><small>Manual trader orders</small><b data-member-manual-count="">0</b></button>
+<button aria-selected="true" class="active" data-member-shop-mode="manual" role="tab" type="button"><span>▣</span><strong>Items</strong><small>Automatic item deliveries</small><b data-member-manual-count="">0</b></button>
 <button aria-selected="false" data-member-shop-mode="event" role="tab" type="button"><span>↻</span><strong>Event items</strong><small>Restart-bound deliveries</small><b data-member-event-count="">0</b></button>
 </div>
 <div class="shop-toolbar command-bar">
@@ -126,20 +126,28 @@
 <label class="dialog-field"><span>Rotation</span><input data-member-delivery-rotation="" max="360" min="0" step="0.1" type="number" value="0"/></label>
 </div>
 <div class="member-coordinate-map" data-member-coordinate-map="">
+<div class="member-coordinate-stage" data-member-coordinate-stage="">
 <img alt="Chernarus satellite coordinate selector" data-member-coordinate-image="" draggable="false" src="assets/chernarus-map/overview.webp?v=1224"/>
 <span class="member-map-marker" data-member-map-marker="" hidden=""></span>
-<div class="member-map-readout"><strong data-member-map-readout="">No coordinates selected</strong><span>Click the map to set X/Z</span></div>
+</div>
+<div aria-label="Map controls" class="member-map-controls">
+<button aria-label="Zoom in" data-member-map-zoom-in="" type="button">+</button>
+<button aria-label="Zoom out" data-member-map-zoom-out="" type="button">−</button>
+<button aria-label="Reset map" data-member-map-reset="" type="button">⌂</button>
+<button aria-label="Fullscreen map" data-member-map-fullscreen="" type="button">⛶</button>
+</div>
+<div class="member-map-readout"><strong data-member-map-readout="">No coordinates selected</strong><span>Pan, zoom, then click to set X/Z</span></div>
 </div>
 </div>
-<label class="toggle-setting"><input data-member-coordinate-confirm="" type="checkbox"/><span><strong>I checked the coordinates</strong><small>Unsafe or malformed points may be rejected by staff.</small></span></label>
+<label class="toggle-setting"><input data-member-coordinate-confirm="" type="checkbox"/><span><strong>I checked the coordinates</strong><small>The automatic delivery uses these exact in-game coordinates.</small></span></label>
 </div>
-<label class="dialog-field"><span>Order note <small>Optional</small></span><textarea data-member-purchase-note="" maxlength="500" placeholder="Delivery details or a short note for staff" rows="3"></textarea></label>
+<label class="dialog-field"><span>Order note <small>Optional</small></span><textarea data-member-purchase-note="" maxlength="500" placeholder="Optional delivery note" rows="3"></textarea></label>
 <div class="shop-purchase-total"><span>Order total</span><strong data-member-purchase-total="">—</strong></div>
 <div class="restart-dialog-message" data-member-purchase-message="" hidden="" role="status"></div>
 <button class="primary-action wide" data-member-purchase-confirm="" type="submit">Place protected order</button>
 <button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
 </form>
 </dialog>
-<script defer="" src="shop.js?v=1.22.7"></script>
+<script defer="" src="shop.js?v=1.22.10"></script>
 </body>
 </html>

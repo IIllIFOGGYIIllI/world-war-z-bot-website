@@ -1,3 +1,17 @@
+# Version 1.22.10
+
+- Made the member-shop checkout map fully interactive with click/tap coordinate selection, drag panning, wheel/button zoom, Reset, Fullscreen and a persistent X/Z marker/readout.
+- Required a saved location or complete X, Y and Z coordinates for both normal Items and Event Items because all Discord/website catalogue orders now use automatic in-game delivery.
+- Reworded the member shop and order states around automatic Railway preparation and next-restart delivery.
+- Replaced the legacy Event Item Admin-approval option with a fixed Automatic Railway delivery notice.
+- Replaced the old approval/staging/verification interface with an automatic-delivery monitor.
+- Restricted Manual Fulfilment to ticket-created in-game trader orders.
+- Made processing and fulfilment notes optional while keeping cancellation and refund reasons required.
+- Added automatic-order cancellation/refund controls without exposing manual stage or verify actions.
+- Preserved the existing World War Z theme, Chernarus assets, member privacy, role visibility and Railway authorization.
+- Requires bot version 1.18.7.
+- No website files need to be deleted.
+
 # Version 1.22.9
 
 - Event Zone is now optional in Create/Edit Event Item while Event XML remains required.
