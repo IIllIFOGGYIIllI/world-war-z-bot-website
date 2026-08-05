@@ -1,6 +1,5 @@
-World War Z Bot Website v1.22.6 Patch File List
+World War Z Bot Website v1.22.7 Patch File List
 
-DELETE_THESE_FILES.txt
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
@@ -8,11 +7,8 @@ changelog.html
 dashboard.css
 dashboard.html
 dashboard.js
-index.html
-shop.css
 shop.html
 shop.js
-sitemap.xml
 
-Total: 13 added or updated files.
+Total: 9 added or updated files.
 No files need to be deleted.

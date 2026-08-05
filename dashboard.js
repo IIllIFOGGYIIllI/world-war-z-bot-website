@@ -3892,6 +3892,16 @@ const shopItemForm = document.querySelector('[data-shop-item-form]');
 const shopItemCancelButtons = [...document.querySelectorAll('[data-shop-item-cancel]')];
 const shopItemMessage = document.querySelector('[data-shop-item-message]');
 const shopItemDeliveryType = document.querySelector('[data-shop-item-delivery-type]');
+const shopItemTypes = document.querySelector('[data-shop-item-types]');
+const shopItemRequiredRoles = document.querySelector('[data-shop-item-required-roles]');
+const shopItemRequireAllRoles = document.querySelector('[data-shop-item-require-all-roles]');
+const shopItemCooldownEnabled = document.querySelector('[data-shop-item-cooldown-enabled]');
+const shopItemLimitGlobal = document.querySelector('[data-shop-item-limit-global]');
+const shopItemLimitCount = document.querySelector('[data-shop-item-limit-count]');
+const shopItemLimitSeconds = document.querySelector('[data-shop-item-limit-seconds]');
+const shopPurchaseWindow = document.querySelector('[data-shop-purchase-window]');
+const shopItemHidden = document.querySelector('[data-shop-item-hidden]');
+const shopManualOnlyFields = [...document.querySelectorAll('[data-shop-manual-only]')];
 const shopEventProfileEditors = [...document.querySelectorAll('[data-shop-event-profile]')];
 const shopEventXml = document.querySelector('[data-shop-event-xml]');
 const shopEventZone = document.querySelector('[data-shop-event-zone]');
@@ -4775,32 +4785,76 @@ const legacyEventXmlFromProfile = (profile = {}) => {
 </event>`;
 };
 
+const parseShopItemTypes = (text) => String(text || '').split(/\r?\n/).map((value) => value.trim()).filter(Boolean);
+
+const generatedShopSku = (name, isEvent) => {
+  const base = String(name || '').trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32) || 'ITEM';
+  return `${isEvent ? 'EVENT' : 'ITEM'}-${base}`.slice(0, 40);
+};
+
+const populateShopItemRoleSelect = (selectedRoles = []) => {
+  if (!shopItemRequiredRoles) return;
+  const selected = new Set((Array.isArray(selectedRoles) ? selectedRoles : []).map((role) => String(role?.id || role?.role_id || role || '')));
+  shopItemRequiredRoles.replaceChildren();
+  ownerShopRoles.slice(0, 250).forEach((role) => {
+    const option = document.createElement('option');
+    option.value = String(role.id);
+    option.textContent = String(role.name);
+    option.selected = selected.has(String(role.id));
+    shopItemRequiredRoles.append(option);
+  });
+  const help = shopItemRequiredRoles.closest('label')?.querySelector('small');
+  if (help) help.textContent = `${shopItemRequiredRoles.selectedOptions.length} / 5 selected`;
+};
+
+const selectedShopItemRoles = () => [...(shopItemRequiredRoles?.selectedOptions || [])].slice(0, 5).map((option) => ({
+  role_id: String(option.value), role_name: String(option.textContent || 'Discord role')
+}));
+
+const syncShopPurchaseWindow = () => {
+  const enabled = Boolean(shopItemCooldownEnabled?.checked);
+  if (shopPurchaseWindow) shopPurchaseWindow.hidden = !enabled;
+  if (shopItemLimitGlobal) shopItemLimitGlobal.disabled = !enabled;
+  [shopItemLimitCount, shopItemLimitSeconds].forEach((input) => {
+    if (!input) return;
+    input.disabled = !enabled;
+    input.required = enabled;
+  });
+};
+
 const syncShopItemDeliveryEditor = () => {
   const isEvent = shopItemDeliveryType?.value === 'event';
   shopEventProfileEditors.forEach((editor) => { editor.hidden = !isEvent; });
   document.querySelectorAll('[data-shop-event-profile] input, [data-shop-event-profile] select, [data-shop-event-profile] textarea').forEach((field) => {
     field.disabled = !isEvent;
   });
+  shopManualOnlyFields.forEach((field) => { field.hidden = isEvent; });
+  if (shopItemTypes) {
+    shopItemTypes.disabled = isEvent;
+    shopItemTypes.required = !isEvent;
+  }
   const maxOrder = document.querySelector('[data-shop-item-max-order]');
-  const priceLabel = document.querySelector('[data-shop-item-price]')?.closest('label')?.querySelector('span');
   if (maxOrder) { maxOrder.disabled = isEvent; if (isEvent) maxOrder.value = '1'; }
-  if (priceLabel) priceLabel.childNodes[0].textContent = isEvent ? 'Price per restart ' : 'Price ';
-  shopItemDialog?.classList.toggle('event-builder-mode', isEvent);
-  const editorName = String(document.querySelector('[data-shop-item-name]')?.value || '').trim();
   const isEditing = editingShopItemId != null;
-  setText('[data-shop-item-dialog-title]', isEvent ? 'Event Item' : 'Item');
+  const editorName = String(document.querySelector('[data-shop-item-name]')?.value || '').trim();
+  setText('[data-shop-item-dialog-title]', isEditing ? (isEvent ? 'Edit Event Item' : 'Edit Item') : (isEvent ? 'Create Event Item' : 'Create Item'));
   setText('[data-shop-builder-subtitle]', isEditing
-    ? `Editing ${editorName || (isEvent ? 'event item' : 'catalogue item')}`
-    : isEvent
-      ? 'Create a restart-bound event item.'
-      : 'Create a new catalogue item.');
+    ? `Editing ${editorName || (isEvent ? 'event item' : 'shop item')}`
+    : isEvent ? 'Create a restart-bound event item.' : 'Create a purchasable shop item.');
+  setText('[data-shop-builder-kicker]', isEvent ? 'Event item' : 'Catalogue item');
+  setText('[data-shop-builder-main-title]', isEvent ? 'Create Event Item' : 'Create Item');
+  setText('[data-shop-price-label]', isEvent ? 'Price per restart' : 'Price');
+  setText('[data-shop-builder-notice-title]', isEvent ? 'Configure an event the player can restart from the shop.' : 'Start with the fields players see first.');
+  setText('[data-shop-builder-notice-copy]', isEvent ? 'Event XML, zone, category and restart bounds use the familiar DayZ event workflow.' : 'Name, price, types and category define what the player purchases.');
   setText('[data-save-shop-item]', isEditing ? 'Save changes' : 'Create');
+  shopItemDialog?.classList.toggle('event-builder-mode', isEvent);
   if (isEvent) {
     if (shopEventXml && !shopEventXml.value.trim()) shopEventXml.value = DEFAULT_EVENT_XML;
     if (shopEventZone && !shopEventZone.value.trim()) shopEventZone.value = DEFAULT_EVENT_ZONE;
     updateEventEditorCounts();
     validateEventTemplateEditors();
   }
+  syncShopPurchaseWindow();
 };
 
 const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
@@ -4808,24 +4862,32 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
   shopItemForm?.reset();
   const profile = item?.delivery_profile || {};
   const isEventEditor = forceEvent || item?.fulfilment_type === 'event';
+  if (shopItemDeliveryType) shopItemDeliveryType.value = isEventEditor ? 'event' : 'manual';
+  const purchaseLimit = item?.purchase_limit || {};
   const values = {
     '[data-shop-item-sku]': item?.sku || '', '[data-shop-item-name]': item?.name || '',
-    '[data-shop-item-category]': item?.category || (forceEvent ? 'Vehicles' : ''), '[data-shop-item-price]': item?.price || '',
+    '[data-shop-item-category]': item?.category || (forceEvent ? 'Vehicles' : ''), '[data-shop-item-price]': item?.base_price || item?.price || '',
+    '[data-shop-item-types]': Array.isArray(item?.types) ? item.types.join('\n') : '',
     '[data-shop-item-stock]': item?.stock_quantity ?? '', '[data-shop-item-max-order]': item?.max_per_order || 1,
     '[data-shop-item-max-player]': item?.max_per_player ?? '', '[data-shop-item-sort]': item?.sort_order || 0,
     '[data-shop-item-description]': item?.description || '', '[data-shop-item-fulfilment]': item?.fulfilment_instructions || '',
-    '[data-shop-profile-name]': profile.profile_name || item?.name || '', '[data-shop-profile-child]': profile.child_type || '',
+    '[data-shop-profile-name]': profile.profile_name || '', '[data-shop-profile-child]': profile.child_type || '',
     '[data-shop-profile-secondary]': profile.secondary_event || '', '[data-shop-profile-lifetime]': profile.lifetime ?? 3888000,
     '[data-shop-profile-restock]': profile.restock ?? 0, '[data-shop-profile-min-restarts]': profile.minimum_restarts ?? 1, '[data-shop-profile-max-restarts]': profile.maximum_restarts ?? 30000, '[data-shop-profile-limit]': profile.event_limit || 'custom',
     '[data-shop-profile-saferadius]': profile.saferadius ?? 0, '[data-shop-profile-distanceradius]': profile.distanceradius ?? 0,
     '[data-shop-profile-cleanupradius]': profile.cleanupradius ?? 0, '[data-shop-profile-attachments]': profileListText(profile.attachments),
     '[data-shop-profile-cargo]': profileListText(profile.cargo),
+    '[data-shop-item-limit-count]': purchaseLimit.max_purchases || 1,
+    '[data-shop-item-limit-seconds]': purchaseLimit.per_seconds || 60,
     '[data-shop-event-xml]': isEventEditor ? (profile.event_xml || (item ? legacyEventXmlFromProfile(profile) : DEFAULT_EVENT_XML)) : '',
     '[data-shop-event-zone]': isEventEditor ? (profile.event_zone || DEFAULT_EVENT_ZONE) : ''
   };
   Object.entries(values).forEach(([selector, value]) => { const element = document.querySelector(selector); if (element) element.value = String(value); });
-  if (shopItemDeliveryType) shopItemDeliveryType.value = forceEvent ? 'event' : (item?.fulfilment_type || 'manual');
-  const active = document.querySelector('[data-shop-item-active]'); if (active) active.checked = item ? Boolean(item.active) : true;
+  populateShopItemRoleSelect(item?.required_roles || []);
+  if (shopItemRequireAllRoles) shopItemRequireAllRoles.checked = item?.require_all_roles !== false;
+  if (shopItemCooldownEnabled) shopItemCooldownEnabled.checked = Boolean(item?.purchase_limit);
+  if (shopItemLimitGlobal) shopItemLimitGlobal.checked = Boolean(purchaseLimit.shared_across_players);
+  if (shopItemHidden) shopItemHidden.checked = item ? !Boolean(item.active) : false;
   const flagValues = {
     '[data-shop-profile-approval]': profile.requires_approval ?? true,
     '[data-shop-profile-deletable]': profile.flags?.deletable ?? false,
@@ -4844,6 +4906,8 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
 newShopItemButton?.addEventListener('click', () => openShopItemEditor());
 newEventItemButton?.addEventListener('click', () => openShopItemEditor(null, { forceEvent: true }));
 shopItemDeliveryType?.addEventListener('change', syncShopItemDeliveryEditor);
+shopItemCooldownEnabled?.addEventListener('change', syncShopPurchaseWindow);
+shopItemRequiredRoles?.addEventListener('change', () => populateShopItemRoleSelect(selectedShopItemRoles()));
 shopEventXml?.addEventListener('input', () => { updateEventEditorCounts(); validateEventTemplateEditors(); });
 shopEventZone?.addEventListener('input', () => { updateEventEditorCounts(); validateEventTemplateEditors(); });
 shopEventXmlTools.forEach((button) => button.addEventListener('click', () => handleEventEditorTool(shopEventXml, shopEventXmlStatus, 'event', button.dataset.eventXmlAction)));
@@ -4938,6 +5002,7 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Configuration unavailable');
     const settings = payload.settings || {};
     ownerShopRoles = Array.isArray(payload.roles) ? payload.roles : [];
+    populateShopItemRoleSelect(selectedShopItemRoles());
     if (ownerShopEnabled) ownerShopEnabled.checked = Boolean(settings.enabled);
     if (ownerShopWebsiteEnabled) ownerShopWebsiteEnabled.checked = settings.website_enabled !== false;
     if (ownerShopTitle) ownerShopTitle.value = String(settings.title || '');
@@ -5020,19 +5085,32 @@ shopItemForm?.addEventListener('submit', async (event) => {
   showInlineMessage(shopItemMessage, 'Saving catalogue item…', 'info');
   const value = (selector) => document.querySelector(selector)?.value ?? '';
   try {
-    if (shopItemDeliveryType?.value === 'event') validateEventTemplateEditors({ throwOnError: true });
+    const isEvent = shopItemDeliveryType?.value === 'event';
+    if (isEvent) validateEventTemplateEditors({ throwOnError: true });
+    const name = String(value('[data-shop-item-name]')).trim();
+    const types = isEvent ? [] : parseShopItemTypes(value('[data-shop-item-types]'));
+    if (!isEvent && !types.length) throw new Error('Add at least one DayZ classname to Types.');
+    const sku = String(value('[data-shop-item-sku]')).trim() || generatedShopSku(name, isEvent);
+    const description = String(value('[data-shop-item-description]')).trim() || `${name} catalogue item.`;
+    const eventGroup = String(value('[data-shop-profile-name]')).trim() || name;
     const response = await protectedActionFetch(OWNER_SHOP_ITEM_URL, {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
       body: JSON.stringify({
-        item_id: editingShopItemId, sku: value('[data-shop-item-sku]'), name: value('[data-shop-item-name]'),
-        category: value('[data-shop-item-category]'), price: value('[data-shop-item-price]'),
-        stock_quantity: value('[data-shop-item-stock]'), max_per_order: value('[data-shop-item-max-order]'),
-        max_per_player: value('[data-shop-item-max-player]'), sort_order: value('[data-shop-item-sort]'),
-        description: value('[data-shop-item-description]'), fulfilment_instructions: value('[data-shop-item-fulfilment]'),
-        fulfilment_type: shopItemDeliveryType?.value || 'manual',
-        delivery_profile: shopItemDeliveryType?.value === 'event' ? {
-          profile_name: value('[data-shop-profile-name]'), child_type: value('[data-shop-profile-child]'),
+        item_id: editingShopItemId, sku, name,
+        category: value('[data-shop-item-category]') || (isEvent ? 'Events' : 'Other'), price: value('[data-shop-item-price]'),
+        types,
+        required_roles: selectedShopItemRoles(),
+        require_all_roles: Boolean(shopItemRequireAllRoles?.checked),
+        purchase_limit_count: shopItemCooldownEnabled?.checked ? value('[data-shop-item-limit-count]') : '',
+        purchase_limit_seconds: shopItemCooldownEnabled?.checked ? value('[data-shop-item-limit-seconds]') : '',
+        purchase_limit_global: Boolean(shopItemCooldownEnabled?.checked && shopItemLimitGlobal?.checked),
+        stock_quantity: value('[data-shop-item-stock]'), max_per_order: isEvent ? 1 : value('[data-shop-item-max-order]'),
+        max_per_player: isEvent ? '' : value('[data-shop-item-max-player]'), sort_order: value('[data-shop-item-sort]'),
+        description, fulfilment_instructions: value('[data-shop-item-fulfilment]'),
+        fulfilment_type: isEvent ? 'event' : 'manual',
+        delivery_profile: isEvent ? {
+          profile_name: eventGroup, child_type: value('[data-shop-profile-child]'),
           secondary_event: value('[data-shop-profile-secondary]'), lifetime: value('[data-shop-profile-lifetime]'),
           restock: value('[data-shop-profile-restock]'), minimum_restarts: value('[data-shop-profile-min-restarts]'), maximum_restarts: value('[data-shop-profile-max-restarts]'), event_limit: value('[data-shop-profile-limit]'),
           saferadius: value('[data-shop-profile-saferadius]'), distanceradius: value('[data-shop-profile-distanceradius]'),
@@ -5044,7 +5122,7 @@ shopItemForm?.addEventListener('submit', async (event) => {
           init_random: Boolean(document.querySelector('[data-shop-profile-random]')?.checked),
           remove_damaged: Boolean(document.querySelector('[data-shop-profile-remove-damaged]')?.checked)
         } : null,
-        active: Boolean(document.querySelector('[data-shop-item-active]')?.checked)
+        active: !Boolean(shopItemHidden?.checked)
       })
     });
     const payload = await response.json().catch(() => ({}));

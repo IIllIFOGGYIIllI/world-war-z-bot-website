@@ -178,7 +178,7 @@ const renderCatalogue = () => {
   const category = elements.category.value || 'all';
   const visible = state.items.filter((item) => {
     const mode = item.delivery_type === 'event' ? 'event' : 'manual';
-    const haystack = `${item.name} ${item.category} ${item.sku} ${item.description}`.toLowerCase();
+    const haystack = `${item.name} ${item.category} ${item.sku} ${item.description} ${(item.types || []).join(' ')} ${(item.required_roles || []).map((role) => role.name).join(' ')}`.toLowerCase();
     return mode === state.mode && (category === 'all' || item.category === category) && (!query || haystack.includes(query));
   });
   elements.catalogue.replaceChildren();
@@ -206,9 +206,13 @@ const renderCatalogue = () => {
     const values = [
       item.delivery_type === 'event'
         ? `${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts`
-        : 'Manual trader order',
+        : `${Array.isArray(item.types) && item.types.length ? item.types.length : 0} DayZ type${Array.isArray(item.types) && item.types.length === 1 ? '' : 's'}`,
       stockText(item), `Max ${item.max_per_order}/order`, limitText(item)
     ];
+    if (Array.isArray(item.required_roles) && item.required_roles.length) {
+      values.push(`${item.require_all_roles ? 'All' : 'Any'} roles: ${item.required_roles.map((role) => role.name).join(', ')}`);
+    }
+    if (item.purchase_limit) values.push(`${item.purchase_limit.max_purchases} per ${item.purchase_limit.per_seconds}s${item.purchase_limit.shared_across_players ? ' shared' : ''}`);
     values.forEach((value) => { const chip = document.createElement('span'); chip.textContent = value; meta.append(chip); });
     const button = document.createElement('button'); button.type = 'button'; button.className = 'primary-action';
     if (!state.user) button.textContent = 'Sign in to buy';
@@ -216,6 +220,7 @@ const renderCatalogue = () => {
     else if (!state.access.has_required_role) button.textContent = 'Required role missing';
     else if (!state.access.can_purchase && !state.access.linked) button.textContent = 'Link PSN to buy';
     else if (!state.settings.enabled) button.textContent = 'Purchases paused';
+    else if (item.has_required_roles === false) button.textContent = 'Required item role missing';
     else button.textContent = item.available ? (item.delivery_type === 'event' ? 'Order event delivery' : 'Buy item') : 'Unavailable';
     button.disabled = Boolean(state.user && !canPurchase(item));
     button.addEventListener('click', () => state.user ? openPurchase(item) : openLogin());

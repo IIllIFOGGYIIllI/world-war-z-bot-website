@@ -61,6 +61,16 @@ GitHub may take a few minutes to publish the first version.
 
 
 
+## Version 1.22.7 familiar creation fields
+
+The Owner Item and Event Item windows now use the field names and order familiar
+from DayZ++ while retaining the World War Z dark-red interface. Normal items use
+Name, Price, Types and Category, where Types contains the actual DayZ classnames.
+Event items use Name, Price per restart, Event XML, Event Zone, Category and Event
+group. Required roles and purchase-window controls are stored and enforced by
+Railway through bot version 1.18.5. Internal SKU and fulfilment fields remain
+available in a collapsed advanced section.
+
 ## Version 1.22.6 separated member and Owner shop
 
 Members now use the dedicated `shop.html` Survivor Shop for catalogue browsing,

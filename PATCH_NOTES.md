@@ -1,3 +1,16 @@
+# Version 1.22.7
+
+- Rebuilt both Owner creation windows around the familiar DayZ++ field names and order while preserving the World War Z theme.
+- Normal Item creation now starts with Name, Price, Types and Category, with the actual DayZ classnames entered one per line.
+- Event Item creation now starts with Name, Price per restart, Event XML, Event Zone, Category and Event group.
+- Added per-item Required roles, all-role matching, Purchase cooldown, shared-limit, Max purchases and Per (seconds) controls.
+- Renamed the inactive state to Hidden inside the creation window.
+- Moved SKU, sort order, internal instructions, attachments and cargo into Advanced internal details.
+- SKU and a basic player-facing description are generated automatically when left blank.
+- Preserved Event XML validation, Event Zone validation, the 30,000 restart cap and the separate member-facing shop page.
+- Requires bot version 1.18.5 for DayZ types, per-item role access and purchase-window enforcement.
+- No website files need to be deleted.
+
 # Version 1.22.6
 
 - Added a dedicated `shop.html` member-facing Survivor Shop separate from Owner administration.
