@@ -3789,8 +3789,8 @@ h3 > .optional-kicker { margin-left: 7px; }
 }
 
 .map-stage {
-  width: 16384px;
-  height: 16384px;
+  width: 15360px;
+  height: 15360px;
   overflow: visible;
   background: #080b08;
 }

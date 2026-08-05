@@ -1,28 +1,14 @@
-World War Z Bot Website v1.22.3 Patch File List
-================================================
+World War Z Bot Website v1.22.4 Patch File List
 
-Updated files: 10
-Added files before this manifest: 1368
-Total patch files including this manifest: 1379
-Deleted files: 0
+Total updated or added files: 1,379
 
-UPDATED
--------
 CHERNARUS_MAP_PLAN.md
+CHERNARUS_MAP_VALIDATION.md
 DELETE_THESE_FILES.txt
 MAP_ATTRIBUTION.md
+PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
-assets/chernarus-pois.json
-changelog.html
-chernarus-map.js
-dashboard.css
-dashboard.html
-
-ADDED
------
-PATCH_FILE_LIST.txt
-CHERNARUS_MAP_VALIDATION.md
 assets/chernarus-map/overview.webp
 assets/chernarus-map/tile-report.json
 assets/chernarus-map/tiles/0/0/0.webp
@@ -1390,3 +1376,8 @@ assets/chernarus-map/tiles/5/9/6.webp
 assets/chernarus-map/tiles/5/9/7.webp
 assets/chernarus-map/tiles/5/9/8.webp
 assets/chernarus-map/tiles/5/9/9.webp
+assets/chernarus-pois.json
+changelog.html
+chernarus-map.js
+dashboard.css
+dashboard.html

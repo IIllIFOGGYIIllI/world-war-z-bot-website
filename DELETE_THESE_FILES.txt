@@ -1,4 +1,4 @@
-NO FILES NEED TO BE DELETED FOR VERSION 1.22.3
+NO FILES NEED TO BE DELETED FOR VERSION 1.22.4
 
 The legacy `assets/chernarus-vector.svg` file is retained as a small fallback/reference asset and does not interfere with the new satellite map.
 

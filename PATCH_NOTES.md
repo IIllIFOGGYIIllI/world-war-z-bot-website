@@ -1,3 +1,16 @@
+# Version 1.22.4
+
+- Fixed roads, field boundaries and terrain features shifting at source-tile joins.
+- Confirmed every adjacent source pair shares an exact 32-pixel border: 992 horizontal pairs and 992 vertical pairs.
+- Identified the converted 512 × 512 source tiles as 480 × 480 unique map pixels surrounded by a 16-pixel gutter on every edge.
+- Rebuilt all zoom levels after cropping the 16-pixel gutters before any stitching or downsampling.
+- Corrected the native browser map from 16,384 pixels to 15,360 pixels, providing a direct one-pixel-to-one-DayZ-metre X/Z mapping.
+- Rebuilt the event-item coordinate overview from the corrected map output.
+- Added map-asset cache versioning so GitHub Pages and browsers request the corrected tile files immediately.
+- Reduced map asset size while retaining the full zoom 0–5 pyramid and all 1,365 browser tiles.
+- No bot, Railway API, permission or database change is required.
+- No website files need to be deleted.
+
 # Version 1.22.3
 
 - Validated all 1,024 uploaded Chernarus satellite PNG tiles as a complete 32 × 32 grid of 512 × 512 RGBA images.

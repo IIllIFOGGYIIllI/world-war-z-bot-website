@@ -28,12 +28,13 @@
   const view = { x: 0, y: 0, zoom: 1, minZoom: 0.02, maxZoom: 1.35 };
 
   let mapSize = 15360;
-  let worldPixels = 16384;
-  let tileSize = 512;
+  let worldPixels = 15360;
+  let tileSize = 480;
   let minTileZoom = 0;
   let maxTileZoom = 5;
   let tileBasePath = 'assets/chernarus-map/tiles';
   let tileFormat = 'webp';
+  let tileCacheVersion = '1.22.4';
   let publicPois = [];
   let selectedCategory = 'All';
   let selectedPoiId = null;
@@ -178,7 +179,10 @@
     return clamp(Math.ceil(ideal), minTileZoom, maxTileZoom);
   };
 
-  const tilePath = (zoom, x, y) => `${tileBasePath}/${zoom}/${x}/${y}.${tileFormat}`;
+  const tilePath = (zoom, x, y) => {
+    const version = tileCacheVersion ? `?v=${encodeURIComponent(tileCacheVersion)}` : '';
+    return `${tileBasePath}/${zoom}/${x}/${y}.${tileFormat}${version}`;
+  };
 
   const renderVisibleTiles = () => {
     tileRenderFrame = 0;
@@ -212,8 +216,8 @@
         tile.loading = 'eager';
         tile.style.left = `${x * span}px`;
         tile.style.top = `${y * span}px`;
-        tile.style.width = `${span + 1}px`;
-        tile.style.height = `${span + 1}px`;
+        tile.style.width = `${span + 0.25}px`;
+        tile.style.height = `${span + 0.25}px`;
         tile.src = tilePath(zoom, x, y);
         tile.addEventListener('load', () => {
           tile.classList.add('loaded');
@@ -435,6 +439,7 @@
     const configuredWorldPixels = Number(raw?.native_pixels);
     const configuredMinZoom = Number(raw?.min_zoom);
     const configuredMaxZoom = Number(raw?.max_zoom);
+    const configuredCacheVersion = validText(raw?.cache_version, 40) || '';
     if (!basePath?.startsWith('assets/') || !/^[a-z0-9-]+$/i.test(format || '')) return null;
     if (!Number.isInteger(configuredTileSize) || configuredTileSize < 128 || configuredTileSize > 1024) return null;
     if (!Number.isInteger(configuredWorldPixels) || configuredWorldPixels < configuredTileSize) return null;
@@ -447,7 +452,8 @@
       tileSize: configuredTileSize,
       worldPixels: configuredWorldPixels,
       minZoom: configuredMinZoom,
-      maxZoom: configuredMaxZoom
+      maxZoom: configuredMaxZoom,
+      cacheVersion: configuredCacheVersion
     };
   };
 
@@ -471,6 +477,7 @@
       worldPixels = pyramid.worldPixels;
       minTileZoom = pyramid.minZoom;
       maxTileZoom = pyramid.maxZoom;
+      tileCacheVersion = pyramid.cacheVersion;
       stage.style.width = `${worldPixels}px`;
       stage.style.height = `${worldPixels}px`;
 

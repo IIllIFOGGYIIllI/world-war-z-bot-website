@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add Chernarus satellite map`
+4. Enter the commit message: `Fix Chernarus tile alignment`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -50,7 +50,7 @@ GitHub may take a few minutes to publish the first version.
 - `assets/world-war-z-dashboard-bg.webp` — desktop command-centre atmosphere
 - `assets/world-war-z-dashboard-bg-mobile.webp` — mobile command-centre atmosphere
 - `assets/chernarus-map/tiles/` — locally generated multilevel WebP Chernarus satellite tiles
-- `assets/chernarus-map/overview.webp` — 4,096 px satellite overview used by compact coordinate selectors
+- `assets/chernarus-map/overview.webp` — 3,840 px seamless satellite overview used by compact coordinate selectors
 - `assets/chernarus-map/tile-report.json` — source-tile validation and generated-pyramid report
 - `assets/chernarus-vector.svg` — retained legacy vector fallback; no deletion is required
 - `PATCH_NOTES.md` — version history and update notes
@@ -59,6 +59,11 @@ GitHub may take a few minutes to publish the first version.
 - `CHERNARUS_MAP_VALIDATION.md` — tile completeness, orientation and output validation
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
+
+
+## Version 1.22.4 Chernarus alignment correction
+
+The source PNGs contain 32 pixels of duplicated imagery between neighbouring files. Version 1.22.4 crops the 16-pixel perimeter gutter from every source tile before generating the browser pyramid. Roads, coastlines, field boundaries and terrain now continue correctly across tile joins, and the corrected 15,360-pixel map maps directly to Chernarus X/Z metres.
 
 
 ## Version 1.22.3 Chernarus satellite map
@@ -175,7 +180,7 @@ The redesigned command centre now includes an Admin-only active moderation-case 
 
 Never add Discord bot tokens, Discord client secrets, Nitrado API tokens, `.env` files or other secrets to this repository. GitHub Pages is public and all uploaded website files can be viewed by visitors. Discord OAuth, member-data queries, protected player administration, Start, Stop and Restart requests, and protected audit-history queries are handled by Railway. The website keeps only an opaque dashboard session in the current tab. Every protected player request requires fresh Admin/Owner authorization and returns only allowlisted fields. Player write actions require a reason, a clear confirmation dialog for the selected PlayStation ID, target protection and permanent audit logging. Railway still validates the selected PSN internally; Admins no longer need to retype it for every action. Ban actions may be permanent or scheduled; Railway validates the expiry and a persistent worker performs and audits automatic Discord or Nitrado unbans. Every server action requires an explicit confirmation prompt, fresh Admin/Owner authorization, a safe live state, duplicate protection and backend audit logging.
 
-The main public map is currently a Coming Soon workspace. The local Chernarus vector remains active in trader checkout for click-to-coordinate selection and does not publish private bases, live players, Admin positions or unpublished event coordinates.
+The public satellite map and trader coordinate selector are locally hosted and expose only approved public POIs. They do not publish private bases, live players, Admin positions or unpublished event coordinates.
 
 ## Disclaimer
 
