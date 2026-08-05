@@ -3884,6 +3884,15 @@ const shopItemCancelButtons = [...document.querySelectorAll('[data-shop-item-can
 const shopItemMessage = document.querySelector('[data-shop-item-message]');
 const shopItemDeliveryType = document.querySelector('[data-shop-item-delivery-type]');
 const shopEventProfileEditors = [...document.querySelectorAll('[data-shop-event-profile]')];
+const shopEventXml = document.querySelector('[data-shop-event-xml]');
+const shopEventZone = document.querySelector('[data-shop-event-zone]');
+const shopEventXmlStatus = document.querySelector('[data-event-xml-status]');
+const shopEventZoneStatus = document.querySelector('[data-event-zone-status]');
+const shopEventXmlCount = document.querySelector('[data-event-xml-count]');
+const shopEventZoneCount = document.querySelector('[data-event-zone-count]');
+const shopEventChildReadout = document.querySelector('[data-shop-event-child-readout]');
+const shopEventXmlTools = [...document.querySelectorAll('[data-event-xml-action]')];
+const shopEventZoneTools = [...document.querySelectorAll('[data-event-zone-action]')];
 const shopPriceQuickButtons = [...document.querySelectorAll('[data-shop-price-value]')];
 const shopCategoryQuickButtons = [...document.querySelectorAll('[data-shop-category-value]')];
 const ownerEventItemList = document.querySelector('[data-owner-event-item-list]');
@@ -3923,6 +3932,25 @@ let coordinatePickerZoom = 1;
 let coordinatePickerX = 0;
 let coordinatePickerY = 0;
 let coordinatePickerDrag = null;
+
+const DEFAULT_EVENT_XML = `<event name="Vehicle">
+    <nominal>1</nominal>
+    <min>1</min>
+    <max>1</max>
+    <lifetime>3888000</lifetime>
+    <restock>0</restock>
+    <saferadius>1</saferadius>
+    <distanceradius>1</distanceradius>
+    <cleanupradius>100</cleanupradius>
+    <flags deletable="0" init_random="0" remove_damaged="1" />
+    <position>fixed</position>
+    <limit>child</limit>
+    <active>1</active>
+    <children>
+        <child lootmax="0" lootmin="0" max="1" min="1" type="VehiclePLACEHOLDER" />
+    </children>
+</event>`;
+const DEFAULT_EVENT_ZONE = '<zone smin="1" smax="3" dmin="3" dmax="5" r="45" />';
 
 const shopStatusLabel = (status) => titleCaseState(status || 'unknown');
 const shopStockText = (item) => item.stock_quantity == null ? 'Unlimited stock' : `${Number(item.stock_quantity)} in stock`;
@@ -4528,6 +4556,214 @@ const parseProfileList = (value) => String(value || '').split(/\r?\n/).map((line
   return { name: type, chance: rawChance === undefined || rawChance === '' ? 1 : Number(rawChance) };
 });
 
+const xmlDirectChild = (root, tag) => [...root.children].filter((child) => child.tagName.toLowerCase() === tag.toLowerCase());
+
+const parseXmlEditorSnippet = (value, label, rootTag) => {
+  const text = String(value || '').trim();
+  if (!text) throw new Error(`${label} is required.`);
+  if (/<\?xml|<!doctype|<!entity/i.test(text)) throw new Error(`${label} cannot contain an XML declaration, DTD or entity.`);
+  const documentValue = new DOMParser().parseFromString(text, 'application/xml');
+  if (documentValue.querySelector('parsererror')) throw new Error(`${label} is not valid XML.`);
+  const root = documentValue.documentElement;
+  if (!root || root.tagName.toLowerCase() !== rootTag) throw new Error(`${label} must contain one <${rootTag}> element.`);
+  return root;
+};
+
+const requiredXmlChild = (root, tag) => {
+  const matches = xmlDirectChild(root, tag);
+  if (matches.length !== 1) throw new Error(`Event XML must contain exactly one <${tag}> element.`);
+  return matches[0];
+};
+
+const eventXmlInteger = (root, tag, { minimum = 0 } = {}) => {
+  const raw = String(requiredXmlChild(root, tag).textContent || '').trim();
+  if (!/^\d+$/.test(raw) || Number(raw) < minimum || Number(raw) > 2147483647) {
+    throw new Error(`Event XML <${tag}> must be a whole number${minimum ? ` of at least ${minimum}` : ''}.`);
+  }
+  return Number(raw);
+};
+
+const parseEventXmlEditor = (value) => {
+  const root = parseXmlEditorSnippet(value, 'Event XML', 'event');
+  if (!/^[A-Za-z0-9_.-]+$/.test(String(root.getAttribute('name') || ''))) throw new Error('Event XML requires a valid name attribute.');
+  const minimum = eventXmlInteger(root, 'min');
+  const maximum = eventXmlInteger(root, 'max');
+  if (minimum > maximum) throw new Error('Event XML <min> cannot exceed <max>.');
+  eventXmlInteger(root, 'nominal');
+  const lifetime = eventXmlInteger(root, 'lifetime', { minimum: 1 });
+  const restock = eventXmlInteger(root, 'restock');
+  const saferadius = eventXmlInteger(root, 'saferadius');
+  const distanceradius = eventXmlInteger(root, 'distanceradius');
+  const cleanupradius = eventXmlInteger(root, 'cleanupradius');
+  const position = String(requiredXmlChild(root, 'position').textContent || '').trim().toLowerCase();
+  if (position !== 'fixed') throw new Error('Restart-bound Event XML must use <position>fixed</position>.');
+  const limit = String(requiredXmlChild(root, 'limit').textContent || '').trim().toLowerCase();
+  if (!['custom', 'child', 'parent', 'mixed'].includes(limit)) throw new Error('Event XML <limit> must be custom, child, parent or mixed.');
+  const active = String(requiredXmlChild(root, 'active').textContent || '').trim();
+  if (!['0', '1'].includes(active)) throw new Error('Event XML <active> must be 0 or 1.');
+  const flags = requiredXmlChild(root, 'flags');
+  const flag = (name) => {
+    const raw = String(flags.getAttribute(name) || '');
+    if (!['0', '1'].includes(raw)) throw new Error(`Event XML ${name} flag must be 0 or 1.`);
+    return raw === '1';
+  };
+  const children = requiredXmlChild(root, 'children');
+  const childNodes = [...children.children].filter((child) => child.tagName.toLowerCase() === 'child');
+  if (childNodes.length !== 1) throw new Error('Event XML must contain exactly one <child> element.');
+  const child = childNodes[0];
+  const childType = String(child.getAttribute('type') || '').trim();
+  if (!/^[A-Za-z0-9_.-]+$/.test(childType)) throw new Error('Event XML child requires a valid DayZ classname.');
+  ['min', 'max', 'lootmin', 'lootmax'].forEach((attribute) => {
+    if (!/^\d+$/.test(String(child.getAttribute(attribute) || ''))) throw new Error(`Event XML child ${attribute} must be a whole number.`);
+  });
+  if (Number(child.getAttribute('min')) > Number(child.getAttribute('max'))) throw new Error('Event XML child min cannot exceed child max.');
+  const secondaryNodes = xmlDirectChild(root, 'secondary');
+  if (secondaryNodes.length > 1) throw new Error('Event XML may contain only one <secondary> element.');
+  const secondary = secondaryNodes.length ? String(secondaryNodes[0].textContent || '').trim() : '';
+  if (secondary && !/^[A-Za-z0-9_.-]+$/.test(secondary)) throw new Error('Event XML secondary event is not a valid classname.');
+  return {
+    root, childType, secondary, lifetime, restock, saferadius, distanceradius, cleanupradius, limit,
+    deletable: flag('deletable'), initRandom: flag('init_random'), removeDamaged: flag('remove_damaged')
+  };
+};
+
+const parseEventZoneEditor = (value) => {
+  const root = parseXmlEditorSnippet(value, 'Event Zone', 'zone');
+  if (root.children.length || String(root.textContent || '').trim()) throw new Error('Event Zone cannot contain text or child elements.');
+  const required = ['smin', 'smax', 'dmin', 'dmax', 'r'];
+  const unknown = [...root.attributes].map((attribute) => attribute.name).filter((name) => !required.includes(name));
+  if (unknown.length) throw new Error(`Event Zone has unsupported attributes: ${unknown.join(', ')}.`);
+  const values = {};
+  required.forEach((name) => {
+    const raw = String(root.getAttribute(name) || '').trim();
+    if (!/^\d+$/.test(raw) || Number(raw) > 2147483647) throw new Error(`Event Zone ${name} must be a non-negative whole number.`);
+    values[name] = Number(raw);
+  });
+  if (values.smin > values.smax) throw new Error('Event Zone smin cannot exceed smax.');
+  if (values.dmin > values.dmax) throw new Error('Event Zone dmin cannot exceed dmax.');
+  return { root, values };
+};
+
+const minifyXmlEditor = (value, label, rootTag) => new XMLSerializer().serializeToString(parseXmlEditorSnippet(value, label, rootTag));
+
+const formatXmlEditor = (value, label, rootTag) => {
+  const compact = minifyXmlEditor(value, label, rootTag).replace(/>\s+</g, '><').replace(/></g, '>\n<');
+  let depth = 0;
+  return compact.split('\n').map((line) => {
+    const trimmed = line.trim();
+    if (/^<\//.test(trimmed)) depth = Math.max(0, depth - 1);
+    const result = `${'    '.repeat(depth)}${trimmed}`;
+    if (/^<[^!?/][^>]*>$/.test(trimmed) && !/\/>$/.test(trimmed) && !/<\/[^>]+>$/.test(trimmed)) depth += 1;
+    return result;
+  }).join('\n');
+};
+
+const setEventEditorStatus = (field, status, message, valid) => {
+  if (field) field.setCustomValidity(valid ? '' : message);
+  if (status) {
+    status.textContent = message;
+    status.classList.toggle('valid', valid);
+    status.classList.toggle('invalid', !valid);
+  }
+};
+
+const syncParsedEventFields = (parsed) => {
+  const setValue = (selector, value) => { const field = document.querySelector(selector); if (field) field.value = String(value); };
+  const setChecked = (selector, value) => { const field = document.querySelector(selector); if (field) field.checked = Boolean(value); };
+  setValue('[data-shop-profile-child]', parsed.childType);
+  setValue('[data-shop-profile-secondary]', parsed.secondary);
+  setValue('[data-shop-profile-lifetime]', parsed.lifetime);
+  setValue('[data-shop-profile-restock]', parsed.restock);
+  setValue('[data-shop-profile-saferadius]', parsed.saferadius);
+  setValue('[data-shop-profile-distanceradius]', parsed.distanceradius);
+  setValue('[data-shop-profile-cleanupradius]', parsed.cleanupradius);
+  setValue('[data-shop-profile-limit]', parsed.limit);
+  setChecked('[data-shop-profile-deletable]', parsed.deletable);
+  setChecked('[data-shop-profile-random]', parsed.initRandom);
+  setChecked('[data-shop-profile-remove-damaged]', parsed.removeDamaged);
+  if (shopEventChildReadout) shopEventChildReadout.value = parsed.childType;
+};
+
+const validateEventTemplateEditors = ({ throwOnError = false } = {}) => {
+  let parsedEvent = null;
+  let parsedZone = null;
+  try {
+    parsedEvent = parseEventXmlEditor(shopEventXml?.value || '');
+    syncParsedEventFields(parsedEvent);
+    setEventEditorStatus(shopEventXml, shopEventXmlStatus, `Valid event · child ${parsedEvent.childType}`, true);
+  } catch (error) {
+    if (shopEventChildReadout) shopEventChildReadout.value = 'Not detected';
+    setEventEditorStatus(shopEventXml, shopEventXmlStatus, error.message || 'Event XML is invalid.', false);
+    if (throwOnError) { shopEventXml?.focus(); throw error; }
+  }
+  try {
+    parsedZone = parseEventZoneEditor(shopEventZone?.value || '');
+    setEventEditorStatus(shopEventZone, shopEventZoneStatus, 'Valid event zone.', true);
+  } catch (error) {
+    setEventEditorStatus(shopEventZone, shopEventZoneStatus, error.message || 'Event Zone is invalid.', false);
+    if (throwOnError) { shopEventZone?.focus(); throw error; }
+  }
+  if (throwOnError && (!parsedEvent || !parsedZone)) throw new Error('Complete the Event XML and Event Zone fields.');
+  return { parsedEvent, parsedZone };
+};
+
+const updateEventEditorCounts = () => {
+  if (shopEventXmlCount) shopEventXmlCount.textContent = `${String(shopEventXml?.value || '').length.toLocaleString()} / 20,000`;
+  if (shopEventZoneCount) shopEventZoneCount.textContent = `${String(shopEventZone?.value || '').length.toLocaleString()} / 1,000`;
+};
+
+const copyEventEditor = async (field, status) => {
+  const text = String(field?.value || '');
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    if (status) status.textContent = 'Copied to clipboard.';
+  } catch (_error) {
+    field?.select();
+    document.execCommand?.('copy');
+    if (status) status.textContent = 'Copied to clipboard.';
+  }
+};
+
+const handleEventEditorTool = async (field, status, rootTag, action) => {
+  try {
+    if (action === 'copy') return copyEventEditor(field, status);
+    if (action === 'clear') field.value = '';
+    if (action === 'format') field.value = formatXmlEditor(field.value, rootTag === 'event' ? 'Event XML' : 'Event Zone', rootTag);
+    if (action === 'minify') field.value = minifyXmlEditor(field.value, rootTag === 'event' ? 'Event XML' : 'Event Zone', rootTag);
+    updateEventEditorCounts();
+    validateEventTemplateEditors();
+    field.focus();
+  } catch (error) {
+    setEventEditorStatus(field, status, error.message || 'The XML could not be processed.', false);
+    field?.focus();
+  }
+};
+
+const legacyEventXmlFromProfile = (profile = {}) => {
+  const flags = profile.flags || {};
+  const child = String(profile.child_type || 'VehiclePLACEHOLDER');
+  const secondary = String(profile.secondary_event || '').trim();
+  return `<event name="Vehicle">
+    <nominal>1</nominal>
+    <min>1</min>
+    <max>1</max>
+    <lifetime>${Number(profile.lifetime ?? 3888000)}</lifetime>
+    <restock>${Number(profile.restock ?? 0)}</restock>
+    <saferadius>${Number(profile.saferadius ?? 0)}</saferadius>
+    <distanceradius>${Number(profile.distanceradius ?? 0)}</distanceradius>
+    <cleanupradius>${Number(profile.cleanupradius ?? 0)}</cleanupradius>${secondary ? `
+    <secondary>${secondary}</secondary>` : ''}
+    <flags deletable="${flags.deletable ? 1 : 0}" init_random="${flags.init_random ? 1 : 0}" remove_damaged="${flags.remove_damaged ? 1 : 0}" />
+    <position>fixed</position>
+    <limit>${String(profile.event_limit || 'custom')}</limit>
+    <active>1</active>
+    <children>
+        <child lootmax="0" lootmin="0" max="1" min="1" type="${child}" />
+    </children>
+</event>`;
+};
+
 const syncShopItemDeliveryEditor = () => {
   const isEvent = shopItemDeliveryType?.value === 'event';
   shopEventProfileEditors.forEach((editor) => { editor.hidden = !isEvent; });
@@ -4548,12 +4784,19 @@ const syncShopItemDeliveryEditor = () => {
       ? 'Create a restart-bound event item.'
       : 'Create a new catalogue item.');
   setText('[data-save-shop-item]', isEditing ? 'Save changes' : 'Create');
+  if (isEvent) {
+    if (shopEventXml && !shopEventXml.value.trim()) shopEventXml.value = DEFAULT_EVENT_XML;
+    if (shopEventZone && !shopEventZone.value.trim()) shopEventZone.value = DEFAULT_EVENT_ZONE;
+    updateEventEditorCounts();
+    validateEventTemplateEditors();
+  }
 };
 
 const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
   editingShopItemId = item?.item_id == null ? null : Number(item.item_id);
   shopItemForm?.reset();
   const profile = item?.delivery_profile || {};
+  const isEventEditor = forceEvent || item?.fulfilment_type === 'event';
   const values = {
     '[data-shop-item-sku]': item?.sku || '', '[data-shop-item-name]': item?.name || '',
     '[data-shop-item-category]': item?.category || (forceEvent ? 'Vehicles' : ''), '[data-shop-item-price]': item?.price || '',
@@ -4565,7 +4808,9 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
     '[data-shop-profile-restock]': profile.restock ?? 0, '[data-shop-profile-min-restarts]': profile.minimum_restarts ?? 1, '[data-shop-profile-max-restarts]': profile.maximum_restarts ?? 30000, '[data-shop-profile-limit]': profile.event_limit || 'custom',
     '[data-shop-profile-saferadius]': profile.saferadius ?? 0, '[data-shop-profile-distanceradius]': profile.distanceradius ?? 0,
     '[data-shop-profile-cleanupradius]': profile.cleanupradius ?? 0, '[data-shop-profile-attachments]': profileListText(profile.attachments),
-    '[data-shop-profile-cargo]': profileListText(profile.cargo)
+    '[data-shop-profile-cargo]': profileListText(profile.cargo),
+    '[data-shop-event-xml]': isEventEditor ? (profile.event_xml || (item ? legacyEventXmlFromProfile(profile) : DEFAULT_EVENT_XML)) : '',
+    '[data-shop-event-zone]': isEventEditor ? (profile.event_zone || DEFAULT_EVENT_ZONE) : ''
   };
   Object.entries(values).forEach(([selector, value]) => { const element = document.querySelector(selector); if (element) element.value = String(value); });
   if (shopItemDeliveryType) shopItemDeliveryType.value = forceEvent ? 'event' : (item?.fulfilment_type || 'manual');
@@ -4578,6 +4823,8 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
   };
   Object.entries(flagValues).forEach(([selector, value]) => { const element = document.querySelector(selector); if (element) element.checked = Boolean(value); });
   syncShopItemDeliveryEditor();
+  updateEventEditorCounts();
+  if (isEventEditor) validateEventTemplateEditors();
   showInlineMessage(shopItemMessage, '');
   if (typeof shopItemDialog?.showModal === 'function') shopItemDialog.showModal();
   else shopItemDialog?.setAttribute('open', '');
@@ -4586,6 +4833,10 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
 newShopItemButton?.addEventListener('click', () => openShopItemEditor());
 newEventItemButton?.addEventListener('click', () => openShopItemEditor(null, { forceEvent: true }));
 shopItemDeliveryType?.addEventListener('change', syncShopItemDeliveryEditor);
+shopEventXml?.addEventListener('input', () => { updateEventEditorCounts(); validateEventTemplateEditors(); });
+shopEventZone?.addEventListener('input', () => { updateEventEditorCounts(); validateEventTemplateEditors(); });
+shopEventXmlTools.forEach((button) => button.addEventListener('click', () => handleEventEditorTool(shopEventXml, shopEventXmlStatus, 'event', button.dataset.eventXmlAction)));
+shopEventZoneTools.forEach((button) => button.addEventListener('click', () => handleEventEditorTool(shopEventZone, shopEventZoneStatus, 'zone', button.dataset.eventZoneAction)));
 shopPriceQuickButtons.forEach((button) => button.addEventListener('click', () => {
   const input = document.querySelector('[data-shop-item-price]');
   if (input) { input.value = String(button.dataset.shopPriceValue || ''); input.focus(); }
@@ -4663,6 +4914,7 @@ shopItemForm?.addEventListener('submit', async (event) => {
   showInlineMessage(shopItemMessage, 'Saving catalogue item…', 'info');
   const value = (selector) => document.querySelector(selector)?.value ?? '';
   try {
+    if (shopItemDeliveryType?.value === 'event') validateEventTemplateEditors({ throwOnError: true });
     const response = await protectedActionFetch(OWNER_SHOP_ITEM_URL, {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
@@ -4680,6 +4932,7 @@ shopItemForm?.addEventListener('submit', async (event) => {
           saferadius: value('[data-shop-profile-saferadius]'), distanceradius: value('[data-shop-profile-distanceradius]'),
           cleanupradius: value('[data-shop-profile-cleanupradius]'), attachments: parseProfileList(value('[data-shop-profile-attachments]')),
           cargo: parseProfileList(value('[data-shop-profile-cargo]')),
+          event_xml: value('[data-shop-event-xml]'), event_zone: value('[data-shop-event-zone]'),
           requires_approval: Boolean(document.querySelector('[data-shop-profile-approval]')?.checked),
           deletable: Boolean(document.querySelector('[data-shop-profile-deletable]')?.checked),
           init_random: Boolean(document.querySelector('[data-shop-profile-random]')?.checked),

@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Fix Chernarus tile alignment`
+4. Enter the commit message: `Add event XML editors`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -60,6 +60,15 @@ GitHub may take a few minutes to publish the first version.
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
 
+
+## Version 1.22.5 Event XML and zone editors
+
+The compact Owner Event Item window now includes full code-style Event XML and
+Event Zone editors. Both fields provide format, minify, copy and clear tools,
+live validity feedback and responsive layouts. Railway remains authoritative:
+it validates and stores the snippets, replaces the template event name with the
+unique order identifier and injects the approved delivery coordinates during
+staging. Existing event items remain compatible.
 
 ## Version 1.22.4 Chernarus alignment correction
 

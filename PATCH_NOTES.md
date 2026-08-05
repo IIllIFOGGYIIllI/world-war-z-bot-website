@@ -1,3 +1,15 @@
+# Version 1.22.5
+
+- Added full Event XML and Event Zone editors to the existing compact Create/Edit Event Item window.
+- Added Format, Minify, Copy and Clear tools for both XML snippets.
+- Added live character counts, validation states and detected child-classname feedback.
+- Added browser-side validation matching Railway for required event elements, numeric values, flags, fixed positioning, event limits, one child classname and zone bounds.
+- Preserved the current World War Z dark-red theme, sticky action bar and responsive desktop, tablet and mobile modal layout.
+- Existing event items open with their saved templates; legacy profiles receive generated templates without destructive migration.
+- Event XML and Event Zone values are now sent to Railway and are not cosmetic-only fields.
+- The Chernarus map, map tiles, public map controls and coordinate checkout remain unchanged from v1.22.4.
+- No website files need to be deleted.
+
 # Version 1.22.4
 
 - Fixed roads, field boundaries and terrain features shifting at source-tile joins.
