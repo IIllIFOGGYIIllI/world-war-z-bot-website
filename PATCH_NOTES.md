@@ -1,3 +1,12 @@
+# Version 1.22.11
+
+- Added `/rental` and `/adminrental` groups and all six rental command paths to the searchable command library.
+- Changed the library label from top-level commands to command paths so grouped subcommands are represented accurately.
+- Added a clear partial-source notice when Nitrado's live DayZ ban list is unavailable and Railway displays active bot-managed cases instead.
+- Labelled fallback entries as bot-managed DayZ bans rather than implying that the unavailable Nitrado list was read successfully.
+- Requires bot version 1.18.10 for restored rental registration, configuration-command sync and dashboard availability fallbacks.
+- No Chernarus map, shop, catalogue or member-order files were changed.
+
 # Version 1.22.10
 
 - Made the member-shop checkout map fully interactive with click/tap coordinate selection, drag panning, wheel/button zoom, Reset, Fullscreen and a persistent X/Z marker/readout.

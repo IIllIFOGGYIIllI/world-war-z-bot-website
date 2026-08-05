@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-bot-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Add interactive automatic checkout`
+4. Enter the commit message: `Restore rental commands and status`
 5. Select **Commit changes**.
 
 ## Enabling GitHub Pages
@@ -60,6 +60,15 @@ GitHub may take a few minutes to publish the first version.
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
 
+
+## Version 1.22.11 rental commands and status recovery
+
+The searchable dashboard library now includes the `/rental` and `/adminrental`
+command groups together with their list, buy, purchased and cancel paths. The
+Admin ban-list view also identifies when Railway is showing only active
+bot-managed DayZ bans because Nitrado's live list endpoint is unavailable. This
+website patch pairs with bot version 1.18.10 and does not alter the member shop,
+Chernarus map or existing order data.
 
 ## Version 1.22.10 automatic shop delivery
 

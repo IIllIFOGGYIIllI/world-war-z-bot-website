@@ -2382,7 +2382,7 @@ const renderBanlistSource = (source, type) => {
       : psnId || 'Banned PlayStation ID';
     const identity = isDiscord
       ? (psnId ? `PSN ${psnId}` : 'No linked PSN account')
-      : 'Nitrado game ban list';
+      : (source?.source === 'bot_cases' ? 'Bot-managed DayZ ban' : 'Nitrado game ban list');
     appendAdminActivity(list, {
       symbolText: '⊘',
       symbolClass: 'red',
@@ -2397,9 +2397,10 @@ const renderCurrentBanlists = (payload) => {
   renderBanlistSource(payload?.discord, 'discord');
   renderBanlistSource(payload?.dayz, 'dayz');
   if (banlistChecked) {
-    const partial = !payload?.discord?.available || !payload?.dayz?.available;
+    const partial = !payload?.discord?.available || !payload?.dayz?.available || Boolean(payload?.dayz?.partial);
+    const sourceNote = payload?.dayz?.message ? ` ${String(payload.dayz.message)}` : '';
     banlistChecked.textContent = payload?.checked_at
-      ? `${partial ? 'Partially refreshed' : 'Refreshed'} ${formatAccountDate(payload.checked_at)}. Live sources are not cached.`
+      ? `${partial ? 'Partially refreshed' : 'Refreshed'} ${formatAccountDate(payload.checked_at)}.${sourceNote}`
       : 'The current ban lists could not be fully refreshed.';
   }
 };
@@ -5950,7 +5951,15 @@ const commands = [
   {"name": "shop", "category": "Shop", "description": "Browse the active survivor shop catalogue.", "access": "Member"},
   {"name": "buy", "category": "Shop", "description": "Purchase an active shop item with community currency.", "access": "Member"},
   {"name": "orders", "category": "Shop", "description": "View your recent shop orders and fulfilment status.", "access": "Member"},
-  {"name": "order", "category": "Shop", "description": "View one shop order and its audit history.", "access": "Member"}
+  {"name": "order", "category": "Shop", "description": "View one shop order and its audit history.", "access": "Member"},
+  {"name": "rental", "category": "Shop & delivery", "description": "Restart-bound Event Item rental command group.", "access": "Member"},
+  {"name": "rental list", "category": "Shop & delivery", "description": "Browse restart-bound rentals available for purchase.", "access": "Member"},
+  {"name": "rental buy", "category": "Shop & delivery", "description": "Purchase a rental at exact Chernarus coordinates for a selected number of restarts.", "access": "Member"},
+  {"name": "rental purchased", "category": "Shop & delivery", "description": "View purchased rentals, delivery state and remaining restarts.", "access": "Member"},
+  {"name": "rental cancel", "category": "Shop & delivery", "description": "Cancel one of your current rentals and receive an automatic refund when eligible.", "access": "Member"},
+  {"name": "adminrental", "category": "Shop & delivery", "description": "Administrator rental-management command group.", "access": "Admin"},
+  {"name": "adminrental list", "category": "Shop & delivery", "description": "View current and historical rentals across the server.", "access": "Admin"},
+  {"name": "adminrental cancel", "category": "Shop & delivery", "description": "Cancel or refund a rental and queue automatic DayZ file cleanup.", "access": "Admin"}
 ];
 
 const commandResults = document.querySelector('[data-command-results]');
