@@ -26,8 +26,8 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `assets/css/pages/home.css` — public homepage design and mobile layout
 - `assets/js/pages/home.js` — homepage navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
-- `assets/css/pages/dashboard.css` — dashboard layout and responsive design
-- `assets/js/pages/dashboard.js` — Railway health, Discord session, role visibility, member data, shop, delivery, moderation and configuration workspaces
+- `assets/css/dashboard/` — ordered core, moderation, workspace and catalogue dashboard style bundles
+- `assets/js/dashboard/` — ordered shell, shared control, administration, account, shop and delivery dashboard runtimes
 - `legal.html` — legal and policy document hub
 - `terms.html` — community Terms of Service
 - `privacy.html` — privacy, storage, service-provider and data-request information
@@ -38,7 +38,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `404.html` — custom missing-page screen
 - `site.webmanifest` — website metadata
 - `.nojekyll` — forces GitHub Pages to publish the static site without Jekyll processing
-- `assets/world-war-z-banner.png` — social sharing banner
+- `assets/world-war-z-banner.webp` — social sharing banner
 - `assets/world-war-z-logo.webp` — refined local header and interface logo
 - `assets/world-war-z-icon.png` and `assets/favicon.png` — local application icons
 - `assets/world-war-z-dashboard-bg.webp` — desktop command-centre atmosphere
@@ -61,19 +61,20 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
-## Version 1.22.17 asset organisation and performance
+## Version 1.22.18 dashboard split and transfer reduction
 
-- Organises CSS, JavaScript, command data and Chernarus data into feature-based asset folders.
-- Adds a shared browser HTTP helper with consistent timeout and abort handling.
-- Defers dashboard entry scripts and lazy-loads the interactive map workspace.
-- Validates local references, JSON and JavaScript before GitHub Pages uploads the artifact.
-- Keeps all root HTML URLs, GitHub Pages settings, Railway API routes and dashboard behaviour unchanged.
-- Pairs with World War Z Discord Bot v1.18.15.
+- Splits the large dashboard JavaScript runtime into six ordered feature files.
+- Splits the large dashboard stylesheet into four ordered responsibility bundles.
+- Preserves the original script execution order and CSS cascade.
+- Replaces the 3.0 MB homepage banner PNG with a roughly 206 KB WebP asset.
+- Updates static validation for the new module paths and refreshes cache markers.
+- Keeps all public URLs, Railway API routes, Discord permissions and database behaviour unchanged.
+- Pairs with World War Z Discord Bot v1.18.16.
 
 Commit message:
 
 ```text
-Organise website assets
+Split dashboard modules
 ```
 
 ## Version 1.22.16 roadmap and deployment maintenance

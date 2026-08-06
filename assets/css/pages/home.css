@@ -154,7 +154,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   position: absolute;
   inset: 0;
   z-index: -3;
-  background: #080707 url("../../world-war-z-banner.png") center / cover no-repeat;
+  background: #080707 url("../../world-war-z-banner.webp") center / cover no-repeat;
   filter: saturate(0.8) brightness(0.68);
   transform: scale(1.025);
   animation: hero-settle 1.6s cubic-bezier(.2,.7,.2,1) both;

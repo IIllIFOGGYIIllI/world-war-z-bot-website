@@ -7,7 +7,7 @@
     if (mapLoadPromise) return mapLoadPromise;
     mapLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'assets/js/map/chernarus-map.js?v=1.22.17';
+      script.src = 'assets/js/map/chernarus-map.js?v=1.22.18';
       script.defer = true;
       script.dataset.wwzMapModule = 'loaded';
       script.addEventListener('load', resolve, { once: true });

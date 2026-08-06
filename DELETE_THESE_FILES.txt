@@ -1,15 +1,8 @@
-DELETE THESE LEGACY FILES AFTER UPLOADING VERSION 1.22.17:
+DELETE ONLY THESE LEGACY FILES AFTER UPLOADING VERSION 1.22.18:
 
-assets/chernarus-pois.json
-assets/chernarus-vector.svg
-chernarus-map.js
-command-library.js
-dashboard.css
-dashboard.js
-pages.css
-script.js
-shop.css
-shop.js
-styles.css
+assets/css/pages/dashboard.css
+assets/js/pages/dashboard.js
+assets/world-war-z-banner.png
 
-They were moved into organised assets/css, assets/js, assets/data and assets/images folders.
+Their replacements are included under assets/css/dashboard/, assets/js/dashboard/ and assets/world-war-z-banner.webp.
+Do not delete any Chernarus map tiles, JSON data, HTML pages or other assets.

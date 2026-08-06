@@ -1,3 +1,27 @@
+# Version 1.22.18
+
+## Dashboard module split
+
+- Split the 5,831-line dashboard runtime into six ordered feature files for navigation, shared controls, administration, account/status, shop and delivery/configuration workspaces.
+- Split the 4,477-line dashboard stylesheet into four ordered bundles for core layout, moderation, workspace/shop and map/catalogue features.
+- Kept the original execution and cascade order exactly, so existing DOM bindings, Railway API routes and dashboard behaviour remain unchanged.
+- Updated the static-site validator to require every new bundle and reject missing local references before Pages deployment.
+
+## Performance
+
+- Converted the 3.0 MB decorative homepage PNG to a 206 KB WebP asset, reducing the initial banner transfer by more than 90% without changing its displayed dimensions.
+- Preserved deferred dashboard scripts and lazy loading of the full Chernarus map implementation.
+- Refreshed all browser cache markers to v1.22.18.
+
+## Compatibility and safety
+
+- No public page URL, OAuth callback, Railway endpoint, Content Security Policy rule or dashboard permission changed.
+- No Chernarus tile, shop record, order record or database migration changed.
+- Railway remains authoritative for `/app/data/players.db`; no database is included.
+- Pairs with Bot v1.18.16.
+
+---
+
 # Version 1.22.17
 
 ## Asset organisation
