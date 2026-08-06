@@ -1,3 +1,13 @@
+# Version 1.22.14
+
+## Vehicle attachment guidance
+
+- Clarified that blank Event Item Attachments and Cargo fields inherit the live `cfgspawnabletypes.xml` profile.
+- Clarified that each line represents an independent attachment/cargo group.
+- Documented that duplicate attachment classnames are intentional for multi-slot parts such as wheels and headlights.
+- Updated the dashboard cache version and visible release marker.
+- Requires Bot v1.18.13 for the corrected Railway merge and backup-recovery behaviour.
+
 # Version 1.22.13
 
 ## Command library recovery

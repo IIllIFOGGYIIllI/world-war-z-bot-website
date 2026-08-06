@@ -61,6 +61,13 @@ GitHub may take a few minutes to publish the first version.
 
 
 
+## Version 1.22.14 vehicle attachment guidance
+
+The Event Item editor now explains that blank Attachments/Cargo fields preserve
+the live `cfgspawnabletypes.xml` profile. Every supplied line becomes an
+independent slot, and duplicate classnames are supported for vehicles that need
+multiple identical parts. Bot v1.18.13 provides the matching Railway behaviour.
+
 ## Version 1.22.13 command library recovery
 
 The dashboard Command Library is now loaded by an isolated script, so its
