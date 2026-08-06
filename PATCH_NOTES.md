@@ -1,3 +1,13 @@
+# Version 1.22.16
+
+- Published a comprehensive roadmap covering every currently valid completed, maintenance, live-verification, multi-server and later-development item.
+- Synced the compact dashboard roadmap and corrected stale dashboard, member-shop, delivery and privacy wording.
+- Reaffirmed that Railway owns `/app/data/players.db` and that maintenance releases must not replace it.
+- Updated the Pages workflow to Node 24-compatible action majors.
+- Removed the unsupported 30-minute Pages deployment timeout and restored the supported 10-minute job limit.
+- Corrected GitHub Pages deployment instructions, synchronized the paired bot/website release markers and refreshed website cache markers.
+- Updated one stale shop-fulfilment statement in the Terms of Service.
+
 # Version 1.22.15
 
 ## Reliable GitHub Pages deployment

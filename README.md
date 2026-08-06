@@ -8,23 +8,17 @@ After GitHub Pages is enabled, the site will be available at:
 
 `https://iillifoggyiilli.github.io/world-war-z-website/`
 
-## Uploading the website
+## Uploading and deploying the website
 
 1. Open the `world-war-z-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
-3. Upload everything in this package, including the `assets` folder.
-4. Enter the commit message: `Restore rental commands and status`
+3. Upload everything in this package, including `.github`, `.nojekyll` and the `assets` folder.
+4. Enter the commit message: `Publish roadmap and maintenance`
 5. Select **Commit changes**.
+6. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
+7. Open **Actions → Deploy World War Z Website** and run it manually only if the push did not start it automatically.
 
-## Enabling GitHub Pages
-
-1. Open **Settings** in the repository.
-2. Select **Pages** under **Code and automation**.
-3. Under **Build and deployment**, set **Source** to `Deploy from a branch`.
-4. Select the `main` branch and the `/ (root)` folder.
-5. Select **Save**.
-
-GitHub may take a few minutes to publish the first version.
+Do not select **Deploy from a branch** while the included Pages workflow is being used. GitHub may take several minutes to publish the large local Chernarus map artifact.
 
 ## Files
 
@@ -60,6 +54,21 @@ GitHub may take a few minutes to publish the first version.
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
 
+
+
+## Version 1.22.16 roadmap and deployment maintenance
+
+This version publishes the complete current roadmap, separates completed features
+from the paired maintenance release, live verification, multi-server work and later
+possibilities, and keeps the homepage, dashboard, member shop, privacy copy and
+release history synchronized. It also updates the Pages workflow to current action
+releases and returns the deploy timeout to GitHub Pages' supported 10-minute limit.
+
+Commit message:
+
+```text
+Publish roadmap and maintenance
+```
 
 ## Version 1.22.15 reliable Pages deployment
 
@@ -192,7 +201,7 @@ The Owner catalogue editors now use the supplied split Create Item / Rules layou
 - Separate regular Items and Event Items catalogue workspaces.
 - Event-item prices are charged per purchased server restart, capped at 30,000.
 - Click/tap Chernarus coordinate selection automatically fills X and Z.
-- The main public map is a Coming Soon workspace pending its high-detail rebuild.
+- The original v1.22.0 public-map placeholder was later replaced by the complete high-detail local Chernarus satellite map.
 - Rich Open Graph and Twitter metadata supplies a branded Discord link preview.
 - `.nojekyll` explicitly publishes the project as a static GitHub Pages site.
 

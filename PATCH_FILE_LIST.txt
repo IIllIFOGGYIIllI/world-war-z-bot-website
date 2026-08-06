@@ -1,9 +1,16 @@
-world-war-z-website v1.22.15 updated and added files
+world-war-z-website v1.22.16 updated files
 
 .github/workflows/pages.yml
-DELETE_THESE_FILES.txt
-PATCH_FILE_LIST.txt
-PATCH_NOTES.md
 README.md
-changelog.html
+PATCH_NOTES.md
+PATCH_FILE_LIST.txt
+DELETE_THESE_FILES.txt
+index.html
+styles.css
 dashboard.html
+dashboard.js
+shop.html
+shop.js
+privacy.html
+changelog.html
+terms.html

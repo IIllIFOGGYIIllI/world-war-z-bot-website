@@ -4276,7 +4276,7 @@ const applyShopPayload = (payload, { member = false } = {}) => {
   shopItems = Array.isArray(payload?.items) ? payload.items : [];
   setText('[data-shop-title]', settings.title || 'Survivor shop.');
   setText('[data-shop-description]', settings.description || 'Spend your verified community balance on approved goods and services.');
-  setText('[data-shop-instructions]', settings.purchase_instructions || 'Staff will arrange fulfilment after purchase.');
+  setText('[data-shop-instructions]', settings.purchase_instructions || 'Railway prepares paid orders automatically for the next server restart.');
   setText('[data-shop-item-count]', String(shopItems.length));
   if (shopManualCount) shopManualCount.textContent = String(shopItems.filter((item) => item.delivery_type !== 'event').length);
   if (shopEventCount) shopEventCount.textContent = String(shopItems.filter((item) => item.delivery_type === 'event').length);

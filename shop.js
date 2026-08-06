@@ -251,7 +251,7 @@ const renderOrders = () => {
     card.append(head, meta);
     if (order.discount) { const line = document.createElement('small'); line.textContent = `Discount applied: ${order.discount.label}`; card.append(line); }
     if (order.delivery) { const line = document.createElement('small'); const point = order.delivery.location || {}; line.textContent = `Delivery: ${titleCase(order.delivery.status)} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`; card.append(line); }
-    if (order.fulfilment_note) { const line = document.createElement('small'); line.textContent = `Staff update: ${order.fulfilment_note}`; card.append(line); }
+    if (order.fulfilment_note) { const line = document.createElement('small'); line.textContent = `Order update: ${order.fulfilment_note}`; card.append(line); }
     elements.orderList.append(card);
   });
   elements.ordersEmpty.hidden = state.orders.length > 0;
@@ -266,7 +266,7 @@ const applyPayload = (payload, member = false) => {
   state.orders = member && Array.isArray(payload.orders) ? payload.orders : [];
   elements.title.textContent = state.settings.title || 'Survivor Shop';
   elements.description.textContent = state.settings.description || 'Spend your verified community balance on approved DayZ goods and services.';
-  elements.instructions.textContent = state.settings.purchase_instructions || 'Staff will arrange fulfilment after purchase.';
+  elements.instructions.textContent = state.settings.purchase_instructions || 'Railway prepares paid orders automatically for the next server restart.';
   elements.count.textContent = String(state.items.length);
   elements.manualCount.textContent = String(state.items.filter((item) => item.delivery_type !== 'event').length);
   elements.eventCount.textContent = String(state.items.filter((item) => item.delivery_type === 'event').length);

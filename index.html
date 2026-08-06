@@ -10,7 +10,7 @@
 <link href="site.webmanifest" rel="manifest"/>
 <link href="assets/favicon.png" rel="icon" type="image/png"/>
 <link href="assets/world-war-z-icon.png" rel="apple-touch-icon"/>
-<link href="styles.css?v=1.22.0" rel="stylesheet"/>
+<link href="styles.css?v=1.22.16" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-website/" rel="canonical"/><meta content="World War Z Community" property="og:site_name"/><meta content="World War Z — DayZ PS4/PS5 Command Centre" property="og:title"/><meta content="Live server status, survivor economy, trader shop, moderation workflows and protected Nitrado controls for the World War Z PlayStation community." property="og:description"/><meta content="website" property="og:type"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/" property="og:url"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image:secure_url"/><meta content="image/png" property="og:image:type"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="World War Z DayZ PS4 and PS5 Command Centre" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="World War Z — DayZ PS4/PS5 Command Centre" name="twitter:title"/><meta content="Live server status, survivor economy, trader shop, moderation workflows and protected Nitrado controls for the World War Z PlayStation community." name="twitter:description"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" name="twitter:image"/></head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -148,37 +148,105 @@
 </section>
 <section aria-labelledby="roadmap-title" class="roadmap section section-dark" id="roadmap">
 <div class="shell">
-<div class="section-heading reveal">
+<div class="section-heading reveal roadmap-heading">
+<div>
 <p class="eyebrow">Development roadmap</p>
-<h2 id="roadmap-title">Growing one reliable version at a time.</h2>
-<p>The bot is under active development. New systems are tested progressively before becoming part of the main community experience.</p>
+<h2 id="roadmap-title">What is live, what is being checked and what comes next.</h2>
+<p>This roadmap reflects the current bot, website and Railway-backed systems. Completed features stay listed so members and Admins can see the full scope without relying on old Discord posts.</p>
 </div>
-<ol class="timeline">
-<li class="complete reveal">
-<span class="timeline-marker"></span>
-<div><small>Available now</small><h3>Community foundation</h3><p>Accounts, profiles, economy, moderation, logging, tickets and core Nitrado tools.</p></div>
-</li>
-<li class="complete reveal">
-<span class="timeline-marker"></span>
-<div><small>Completed</small><h3>Configuration Control Centre</h3><p>A versioned backup, validation, comparison and restore engine designed for safer server changes.</p></div>
-</li>
-<li class="complete reveal">
-<span class="timeline-marker"></span>
-<div><small>Connected</small><h3>Member dashboard data</h3><p>The dashboard securely connects each signed-in member to their own survivor profile, activity, PvP and economy information.</p></div>
-</li>
-<li class="complete reveal">
-<span class="timeline-marker"></span>
-<div><small>Available now</small><h3>Interactive Chernarus map</h3><p>A locally hosted public map with pan, zoom, search, filters and approved points of interest.</p></div>
-</li>
-<li class="active reveal">
-<span class="timeline-marker"></span>
-<div><small>Connected</small><h3>Secure Admin server controls</h3><p>Verified Admins and the Owner can submit confirmed, state-checked and permanently audited Start, Stop and Restart requests through Railway.</p></div>
-</li>
-<li class="future reveal">
-<span class="timeline-marker"></span>
-<div><small>Planned</small><h3>Expanded server support</h3><p>Architecture prepared to support another DayZ server when the community is ready.</p></div>
-</li>
-</ol>
+<div class="roadmap-release" aria-label="Current roadmap release">
+<small>Roadmap updated</small>
+<strong>7 August 2026</strong>
+<span>Website v1.22.16 · Bot v1.18.14</span>
+</div>
+</div>
+<div class="roadmap-status-key reveal" aria-label="Roadmap status key">
+<span class="complete">Available now</span>
+<span class="active">Current release</span>
+<span class="verification">Live verification</span>
+<span class="next">Next major build</span>
+<span class="future">Later possibilities</span>
+</div>
+<div class="roadmap-grid">
+<article class="roadmap-card roadmap-card-complete reveal">
+<div class="roadmap-card-heading"><span>01</span><div><small>Available now</small><h3>Connected community platform</h3></div></div>
+<p>The main bot, website and protected Railway systems are built and operating as one platform.</p>
+<ul>
+<li>Discord and PlayStation account linking, verification, profiles and self-service account views.</li>
+<li>Live DayZ status, population, bot health, uptime and protected Nitrado Start, Stop and Restart controls.</li>
+<li>ADM monitoring, player activity, join/leave feeds, PvP statistics, leaderboards and intelligence tools.</li>
+<li>Economy balances, daily rewards, transfers, persistent transaction history and standalone Coinflip, Dice, Slots, Roulette, Jackpot and Blackjack games.</li>
+<li>Bounties, contracts, direct member/Admin command shortcuts and a searchable library covering the complete 92-command bot tree.</li>
+<li>Adjustable bot presence, controlled bot speech, announcements and protected message-management tools.</li>
+<li>Player search, notes, warnings, Discord and DayZ moderation, numbered cases, evidence, independent reviews and temporary-ban expiry.</li>
+<li>Member appeals, protected appeal decisions, optional case-linked Discord tickets, support tickets and transcripts.</li>
+<li>Permanent action auditing, managed Discord log destinations, configurable event routes and retryable webhook notifications.</li>
+<li>Configuration backups, validation, history, exact comparisons, restore, loot, events, positions, weather, gameplay, temperature and message controls.</li>
+<li>High-detail local Chernarus map with pan, zoom, fullscreen, reset, public POIs and accurate X/Z selection.</li>
+<li>Member Survivor Shop, Owner catalogue editor, Items, Event Items, role rules, discounts, stock and purchase limits.</li>
+<li>Automatic coordinate delivery, saved locations, restart-bound rentals, receipts, cancellation, refund and cleanup workflows.</li>
+<li>Responsive member, Admin and Owner dashboard areas with Discord sign-in and server-side role checks.</li>
+<li>Railway-owned persistent database at <code>/app/data/players.db</code>, preserved through additive migrations and excluded from releases.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-active reveal">
+<div class="roadmap-card-heading"><span>02</span><div><small>Current release</small><h3>Repository and deployment hardening</h3></div></div>
+<p>Website v1.22.16 and Bot v1.18.14 keep the existing platform current, testable and safe to deploy.</p>
+<ul>
+<li>Added automated bot validation and the complete test suite to GitHub Actions for Python 3.13 and 3.14.</li>
+<li>Strengthened repository safeguards for databases, backups, transcripts, reports, caches and secrets.</li>
+<li>Updated retired Railway, website-repository and Discord OAuth example URLs.</li>
+<li>Corrected current command-count, runtime and deployment documentation.</li>
+<li>Modernised the GitHub Pages workflow for current action runtimes.</li>
+<li>Removed the ineffective Pages timeout override while retaining one controlled deployment queue.</li>
+<li>Revalidated the exact 92-command tree and all repository protection checks.</li>
+<li>Kept every maintenance change non-destructive to Railway data and existing member records.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-verification reveal">
+<div class="roadmap-card-heading"><span>03</span><div><small>Live verification</small><h3>Production workflow testing</h3></div></div>
+<p>These systems exist now but still need repeatable end-to-end checks against the live DayZ, Discord, Nitrado and Railway setup.</p>
+<ul>
+<li>Normal Item and Event Item purchases, coordinate delivery and Discord purchase receipts.</li>
+<li>Vehicle attachments, duplicate parts, cargo and inherited <code>cfgspawnabletypes.xml</code> profiles.</li>
+<li>Scheduled restart detection, rental restart counting, expiry and automatic mission-file cleanup.</li>
+<li>Order cancellation, eligible refunds, receipt updates and retry recovery.</li>
+<li>Saved delivery locations and Chernarus X/Z accuracy across desktop and mobile.</li>
+<li>Configuration backup, comparison, protected apply, restore and rollback behaviour.</li>
+<li>Discord moderation, DayZ bans/unbans, temporary-ban expiry, evidence, reviews and appeals.</li>
+<li>Discord log routing, managed webhooks, delivery retries and failure visibility.</li>
+<li>Desktop, tablet, mobile and browser regression testing for public, member, Admin and Owner access.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-next reveal">
+<div class="roadmap-card-heading"><span>04</span><div><small>Next major build</small><h3>Second DayZ server support</h3></div></div>
+<p>After maintenance and live verification, the next large stage is separating systems cleanly across multiple servers.</p>
+<ul>
+<li>Website server selector and separate live status panels.</li>
+<li>Per-server Nitrado service settings and operational controls.</li>
+<li>Per-server mission roots, configuration files, backups and validation history.</li>
+<li>Per-server shop items alongside optional Global catalogue items.</li>
+<li>Per-server Event Items, rentals, delivery queues and restart accounting.</li>
+<li>Per-server player activity, PvP statistics and leaderboards.</li>
+<li>Per-server Admin permissions, audit context and protected actions.</li>
+<li>Safe migration of the existing server into the new model without replacing Railway data.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-future reveal">
+<div class="roadmap-card-heading"><span>05</span><div><small>Later possibilities</small><h3>Expansion after multi-server support</h3></div></div>
+<p>These are valid future directions, but they are not promised for the next release and may be reordered.</p>
+<ul>
+<li>Bulk moderation actions and expanded case-management tools.</li>
+<li>Member data-access and deletion-request workflows.</li>
+<li>Additional account-management and recovery controls.</li>
+<li>Expanded server, player and economy analytics.</li>
+<li>Event scheduling, reusable event plans and automatic announcements.</li>
+<li>More notification destinations and member preference controls.</li>
+<li>Further dashboard accessibility, performance and visual polish.</li>
+</ul>
+</article>
+</div>
+<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap and release rule:</strong> completed features remain visible, verification work is separated from future development, Website v1.22.16 pairs with Bot v1.18.14, and every database change must preserve Railway's existing persistent records.</p></div>
 </div>
 </section>
 <section aria-labelledby="faq-title" class="faq section" id="faq">
@@ -247,6 +315,6 @@
 <p>© <span data-year=""></span> World War Z Community.</p>
 </div>
 </footer>
-<script src="script.js?v=1.22.0"></script>
+<script src="script.js?v=1.22.16"></script>
 </body>
 </html>
