@@ -1,3 +1,27 @@
+# Version 1.22.17
+
+## Asset organisation
+
+- Moved large root CSS and JavaScript files into feature-based asset folders.
+- Moved public Chernarus POI data and the vector fallback into dedicated data and image folders.
+- Added `docs/asset-architecture.md`.
+
+## Performance
+
+- Added a shared timeout-aware HTTP helper used by the dashboard, member shop and Chernarus map.
+- Deferred dashboard JavaScript execution.
+- Lazy-loads the 690-line interactive map module and its POI request only when the map workspace is opened.
+- Preserved the existing tile-on-demand renderer, API request guards and browser cache markers.
+- Added pre-deployment validation for required files, local HTML/CSS references, map JSON and all browser JavaScript.
+
+## Compatibility and safety
+
+- No API endpoint, public page URL, OAuth callback, Discord permission, Nitrado operation or database schema changed.
+- Railway remains authoritative for `/app/data/players.db`; no database is included.
+- Pairs with Bot v1.18.15.
+
+---
+
 # Version 1.22.16
 
 - Published a comprehensive roadmap covering every currently valid completed, maintenance, live-verification, multi-server and later-development item.

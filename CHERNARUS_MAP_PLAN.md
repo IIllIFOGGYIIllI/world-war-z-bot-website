@@ -37,4 +37,4 @@ The public map supports mouse-wheel zoom, pointer and touch dragging, two-finger
 
 ## Privacy and access
 
-The map is public and read only. It renders only POIs explicitly marked `visibility: public` in `assets/chernarus-pois.json`. Private bases, live player locations, Admin positions and protected Railway data are not loaded by the map. Admin-only and Owner-only dashboard functions continue to use the existing Railway-verified visibility controls.
+The map is public and read only. It renders only POIs explicitly marked `visibility: public` in `assets/data/chernarus/pois.json`. Private bases, live player locations, Admin positions and protected Railway data are not loaded by the map. Admin-only and Owner-only dashboard functions continue to use the existing Railway-verified visibility controls.

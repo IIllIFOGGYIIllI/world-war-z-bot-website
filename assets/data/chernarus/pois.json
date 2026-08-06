@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "map": {
+    "name": "ChernarusPlus",
+    "size_meters": 15360,
+    "tile_pyramid": {
+      "base_path": "assets/chernarus-map/tiles",
+      "format": "webp",
+      "tile_size": 480,
+      "min_zoom": 0,
+      "max_zoom": 5,
+      "native_pixels": 15360,
+      "source": "User-supplied Chernarus satellite layers",
+      "cache_version": "1.22.4"
+    },
+    "attribution": "Chernarus and DayZ imagery \u00a9 Bohemia Interactive. Unofficial community dashboard; not affiliated with or endorsed by Bohemia Interactive."
+  },
+  "pois": [
+    {
+      "id": "northwest-airfield",
+      "name": "Northwest Airfield",
+      "category": "Airfield",
+      "description": "The largest airfield in Chernarus and a major public navigation landmark.",
+      "x": 4500,
+      "z": 10300,
+      "visibility": "public"
+    },
+    {
+      "id": "balota-airfield",
+      "name": "Balota Airfield",
+      "category": "Airfield",
+      "description": "A southern coastal airfield west of Chernogorsk.",
+      "x": 4900,
+      "z": 2500,
+      "visibility": "public"
+    },
+    {
+      "id": "chernogorsk",
+      "name": "Chernogorsk",
+      "category": "City",
+      "description": "The large southern coastal city commonly known as Cherno.",
+      "x": 6600,
+      "z": 2500,
+      "visibility": "public"
+    },
+    {
+      "id": "elektrozavodsk",
+      "name": "Elektrozavodsk",
+      "category": "City",
+      "description": "A major industrial city on the south-east coast, commonly known as Elektro.",
+      "x": 10300,
+      "z": 2200,
+      "visibility": "public"
+    },
+    {
+      "id": "berezino",
+      "name": "Berezino",
+      "category": "City",
+      "description": "A large public navigation point on the north-east coast.",
+      "x": 12100,
+      "z": 9500,
+      "visibility": "public"
+    },
+    {
+      "id": "stary-sobor",
+      "name": "Stary Sobor",
+      "category": "Village",
+      "description": "A central settlement and useful crossroads for travelling across Chernarus.",
+      "x": 6100,
+      "z": 7800,
+      "visibility": "public"
+    },
+    {
+      "id": "kamenka",
+      "name": "Kamenka",
+      "category": "Village",
+      "description": "A coastal village in the far south-west of Chernarus.",
+      "x": 1900,
+      "z": 2200,
+      "visibility": "public"
+    },
+    {
+      "id": "green-mountain",
+      "name": "Green Mountain",
+      "category": "Landmark",
+      "description": "A prominent radio tower and navigation landmark in western Chernarus.",
+      "x": 3700,
+      "z": 6000,
+      "visibility": "public"
+    },
+    {
+      "id": "radio-zenit",
+      "name": "Radio Zenit",
+      "category": "Landmark",
+      "description": "The broadcast complex at Altar, visible from much of central Chernarus.",
+      "x": 8100,
+      "z": 9300,
+      "visibility": "public"
+    },
+    {
+      "id": "tisy-military",
+      "name": "Tisy Military Base",
+      "category": "Landmark",
+      "description": "A public navigation landmark in the far north-west of Chernarus.",
+      "x": 1400,
+      "z": 14000,
+      "visibility": "public"
+    }
+  ]
+}

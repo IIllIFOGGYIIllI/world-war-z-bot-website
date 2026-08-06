@@ -1,16 +1,32 @@
-world-war-z-website v1.22.16 updated files
+world-war-z-website v1.22.17 updated and added files
 
 .github/workflows/pages.yml
-README.md
-PATCH_NOTES.md
-PATCH_FILE_LIST.txt
+CHERNARUS_MAP_PLAN.md
 DELETE_THESE_FILES.txt
-index.html
-styles.css
-dashboard.html
-dashboard.js
-shop.html
-shop.js
-privacy.html
+PATCH_FILE_LIST.txt
+PATCH_NOTES.md
+README.md
+assets/css/pages/dashboard.css
+assets/css/pages/home.css
+assets/css/pages/policies.css
+assets/css/pages/shop.css
+assets/data/chernarus/pois.json
+assets/images/maps/chernarus-vector.svg
+assets/js/core/http.js
+assets/js/data/command-library.js
+assets/js/map/chernarus-map.js
+assets/js/pages/dashboard-map-loader.js
+assets/js/pages/dashboard.js
+assets/js/pages/home.js
+assets/js/pages/shop.js
 changelog.html
+community-guidelines.html
+dashboard.html
+docs/asset-architecture.md
+index.html
+legal.html
+moderation-policy.html
+privacy.html
+scripts/validate_site.py
+shop.html
 terms.html

@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including `.github`, `.nojekyll` and the `assets` folder.
-4. Enter the commit message: `Publish roadmap and maintenance`
+4. Enter the commit message: `Organise website assets`
 5. Select **Commit changes**.
 6. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
 7. Open **Actions → Deploy World War Z Website** and run it manually only if the push did not start it automatically.
@@ -23,18 +23,18 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 ## Files
 
 - `index.html` — website content and structure
-- `styles.css` — full visual design and mobile layout
-- `script.js` — navigation, header and scroll effects
+- `assets/css/pages/home.css` — public homepage design and mobile layout
+- `assets/js/pages/home.js` — homepage navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
-- `dashboard.css` — dashboard layout and responsive design
-- `dashboard.js` — Railway health, Discord session, role visibility, member data, survivor-shop purchases, automatic-delivery monitoring, trader-ticket fulfilment, secure player lookup, moderation actions and protected audit history
+- `assets/css/pages/dashboard.css` — dashboard layout and responsive design
+- `assets/js/pages/dashboard.js` — Railway health, Discord session, role visibility, member data, shop, delivery, moderation and configuration workspaces
 - `legal.html` — legal and policy document hub
 - `terms.html` — community Terms of Service
 - `privacy.html` — privacy, storage, service-provider and data-request information
 - `community-guidelines.html` — acceptable conduct and safety rules
 - `moderation-policy.html` — cases, evidence, bans, expiry and appeal practices
 - `changelog.html` — browser-readable website release history
-- `pages.css` — shared privacy and changelog page design
+- `assets/css/pages/policies.css` — shared legal, privacy and changelog page design
 - `404.html` — custom missing-page screen
 - `site.webmanifest` — website metadata
 - `.nojekyll` — forces GitHub Pages to publish the static site without Jekyll processing
@@ -46,7 +46,12 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `assets/chernarus-map/tiles/` — locally generated multilevel WebP Chernarus satellite tiles
 - `assets/chernarus-map/overview.webp` — 3,840 px seamless satellite overview used by compact coordinate selectors
 - `assets/chernarus-map/tile-report.json` — source-tile validation and generated-pyramid report
-- `assets/chernarus-vector.svg` — retained legacy vector fallback; no deletion is required
+- `assets/data/chernarus/pois.json` — public read-only map locations and tile configuration
+- `assets/js/map/chernarus-map.js` — interactive tile renderer and coordinate tools
+- `assets/js/pages/dashboard-map-loader.js` — lazy map workspace loader
+- `assets/js/core/http.js` — shared timeout-aware browser request helper
+- `assets/images/maps/chernarus-vector.svg` — retained legacy vector fallback
+- `scripts/validate_site.py` — static asset and reference validation used by GitHub Actions
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
 - `CHERNARUS_MAP_PLAN.md` — implemented satellite map architecture and operating notes
@@ -55,6 +60,21 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+
+## Version 1.22.17 asset organisation and performance
+
+- Organises CSS, JavaScript, command data and Chernarus data into feature-based asset folders.
+- Adds a shared browser HTTP helper with consistent timeout and abort handling.
+- Defers dashboard entry scripts and lazy-loads the interactive map workspace.
+- Validates local references, JSON and JavaScript before GitHub Pages uploads the artifact.
+- Keeps all root HTML URLs, GitHub Pages settings, Railway API routes and dashboard behaviour unchanged.
+- Pairs with World War Z Discord Bot v1.18.15.
+
+Commit message:
+
+```text
+Organise website assets
+```
 
 ## Version 1.22.16 roadmap and deployment maintenance
 

@@ -1,1 +1,15 @@
-NO FILES NEED TO BE DELETED FOR VERSION 1.22.16
+DELETE THESE LEGACY FILES AFTER UPLOADING VERSION 1.22.17:
+
+assets/chernarus-pois.json
+assets/chernarus-vector.svg
+chernarus-map.js
+command-library.js
+dashboard.css
+dashboard.js
+pages.css
+script.js
+shop.css
+shop.js
+styles.css
+
+They were moved into organised assets/css, assets/js, assets/data and assets/images folders.
