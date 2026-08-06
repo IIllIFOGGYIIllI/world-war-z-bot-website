@@ -1,4 +1,4 @@
-const API_BASE = 'https://world-war-z-discord-bot-production.up.railway.app';
+const API_BASE = 'https://world-war-z.up.railway.app';
 const URLS = {
   authConfig: `${API_BASE}/api/auth/config`,
   authLogin: `${API_BASE}/api/auth/discord/login`,

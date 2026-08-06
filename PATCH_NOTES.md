@@ -1,3 +1,13 @@
+# Version 1.22.12
+
+## Railway domain and repository migration
+
+- Updated the dashboard and member shop API base URL from the retired Railway domain to `https://world-war-z.up.railway.app`.
+- Updated the dashboard Content Security Policy so browser requests may reach the new Railway API.
+- Updated canonical URLs, Open Graph metadata, sitemap entries, robots.txt and internal documentation for the renamed `world-war-z-website` repository.
+- Updated dashboard and shop cache-busting versions so browsers do not retain the old API address.
+- No bot code, database or Chernarus map assets were changed.
+
 # Version 1.22.11
 
 - Added `/rental` and `/adminrental` groups and all six rental command paths to the searchable command library.

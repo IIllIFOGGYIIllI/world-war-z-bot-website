@@ -238,7 +238,7 @@ document.querySelectorAll('[data-year]').forEach((item) => {
   item.textContent = new Date().getFullYear();
 });
 
-const DASHBOARD_API_BASE = 'https://world-war-z-discord-bot-production.up.railway.app';
+const DASHBOARD_API_BASE = 'https://world-war-z.up.railway.app';
 const SERVER_STATUS_URL = `${DASHBOARD_API_BASE}/api/server/status`;
 const AUTH_CONFIG_URL = `${DASHBOARD_API_BASE}/api/auth/config`;
 const AUTH_LOGIN_URL = `${DASHBOARD_API_BASE}/api/auth/discord/login`;

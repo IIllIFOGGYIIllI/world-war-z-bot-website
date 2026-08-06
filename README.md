@@ -6,11 +6,11 @@ The official website of the World War Z community's unofficial DayZ Discord bot.
 
 After GitHub Pages is enabled, the site will be available at:
 
-`https://iillifoggyiilli.github.io/world-war-z-bot-website/`
+`https://iillifoggyiilli.github.io/world-war-z-website/`
 
 ## Uploading the website
 
-1. Open the `world-war-z-bot-website` repository on GitHub.
+1. Open the `world-war-z-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including the `assets` folder.
 4. Enter the commit message: `Restore rental commands and status`
@@ -60,6 +60,10 @@ GitHub may take a few minutes to publish the first version.
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
 
+
+## Version 1.22.12 Railway and repository migration
+
+The website now connects to `https://world-war-z.up.railway.app` and uses the renamed GitHub Pages path at `world-war-z-website`.
 
 ## Version 1.22.11 rental commands and status recovery
 

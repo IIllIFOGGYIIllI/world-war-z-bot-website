@@ -16,7 +16,7 @@ Treat the copied URL like a password. Do not post it in chat, place it in the pu
 
 ## GitHub webhook fields
 
-Open the `world-war-z-bot-website` repository, then select **Settings** → **Webhooks** → **Add webhook**.
+Open the `world-war-z-website` repository, then select **Settings** → **Webhooks** → **Add webhook**.
 
 - **Payload URL:** Paste the Discord webhook URL and add `/github` to the end.
 - **Content type:** `application/json`
