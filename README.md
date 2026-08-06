@@ -61,6 +61,19 @@ GitHub may take a few minutes to publish the first version.
 
 
 
+## Version 1.22.13 command library recovery
+
+The dashboard Command Library is now loaded by an isolated script, so its
+command count, category filters and search results remain available even if an
+unrelated protected dashboard module fails. Rental and Admin rental command
+paths remain included.
+
+Commit message:
+
+```text
+Fix dashboard command library
+```
+
 ## Version 1.22.12 Railway and repository migration
 
 The website now connects to `https://world-war-z.up.railway.app` and uses the renamed GitHub Pages path at `world-war-z-website`.

@@ -1,3 +1,14 @@
+# Version 1.22.13
+
+## Command library recovery
+
+- Fixed the dashboard Command Library remaining at `0 command paths`.
+- Moved the searchable bot-command catalogue into the independent `command-library.js` runtime.
+- The command list now loads even when an unrelated protected dashboard module encounters a runtime or API error.
+- Restored filtering and search results for `/rental`, `/adminrental` and every existing command path.
+- Added a cache-busted command-library asset and updated the dashboard version marker.
+- No bot code, Railway database, shop data or Chernarus map assets were changed.
+
 # Version 1.22.12
 
 ## Railway domain and repository migration

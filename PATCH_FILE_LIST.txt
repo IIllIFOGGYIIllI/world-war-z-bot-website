@@ -1,21 +1,10 @@
-world-war-z-website v1.22.12 updated files
+world-war-z-website v1.22.13 updated and added files
 
-404.html
 DELETE_THESE_FILES.txt
+PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
-WEBHOOK_SETUP.md
 changelog.html
-community-guidelines.html
+command-library.js
 dashboard.html
 dashboard.js
-index.html
-legal.html
-moderation-policy.html
-privacy.html
-robots.txt
-shop.html
-shop.js
-sitemap.xml
-terms.html
-PATCH_FILE_LIST.txt
