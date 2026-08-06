@@ -61,6 +61,21 @@ GitHub may take a few minutes to publish the first version.
 
 
 
+## Version 1.22.15 reliable Pages deployment
+
+This version adds `.github/workflows/pages.yml`, which deploys the static site
+through the official GitHub Pages actions with a 30-minute deployment timeout
+and a single Pages concurrency group.
+
+After committing this patch, set **Settings → Pages → Source** to
+**GitHub Actions**, then run **Deploy World War Z Website** from the Actions tab.
+
+Commit message:
+
+```text
+Add reliable Pages deployment
+```
+
 ## Version 1.22.14 vehicle attachment guidance
 
 The Event Item editor now explains that blank Attachments/Cargo fields preserve

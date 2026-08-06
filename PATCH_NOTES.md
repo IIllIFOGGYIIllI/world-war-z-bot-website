@@ -1,3 +1,14 @@
+# Version 1.22.15
+
+## Reliable GitHub Pages deployment
+
+- Added a dedicated GitHub Actions workflow for the static website.
+- Increased the Pages deployment polling timeout from the default 10 minutes to 30 minutes.
+- Added workflow concurrency protection so multiple Pages deployments do not stack up.
+- Added manual workflow dispatch so the website can be redeployed without editing site files.
+- Updated the dashboard version and cache-busting references.
+- No bot code, Railway database, shop data or Chernarus map assets were changed.
+
 # Version 1.22.14
 
 ## Vehicle attachment guidance
