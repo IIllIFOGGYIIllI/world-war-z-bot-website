@@ -634,3 +634,168 @@
   }
 }
 
+
+
+/* v1.22.19 — authoritative ban-list presentation */
+.current-banlists-panel {
+  border-color: rgba(255, 255, 255, 0.13);
+  background:
+    linear-gradient(145deg, rgba(38, 39, 43, 0.98), rgba(20, 20, 23, 0.98));
+}
+
+.current-banlists-panel > .panel-heading h2 {
+  text-shadow: 0 5px 18px rgba(0, 0, 0, 0.45);
+}
+
+.nitrado-banlist-panel {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(243, 58, 40, 0.26);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(212, 36, 24, 0.11), transparent 38%),
+    linear-gradient(155deg, rgba(30, 31, 35, 0.98), rgba(17, 17, 20, 0.98));
+}
+
+.nitrado-banlist-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--red-bright), var(--red-dark));
+  box-shadow: 0 0 24px rgba(243, 58, 40, 0.3);
+}
+
+.banlist-status-stack {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.source-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  min-height: 28px;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  color: #d7d2ce;
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.source-pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.source-pill.is-live {
+  border-color: rgba(78, 178, 106, 0.32);
+  background: rgba(78, 178, 106, 0.09);
+  color: #8ed5a1;
+}
+
+.source-pill.is-file {
+  border-color: rgba(93, 167, 255, 0.32);
+  background: rgba(93, 167, 255, 0.08);
+  color: #9bc9ff;
+}
+
+.source-pill.is-stale,
+.source-pill.is-loading {
+  border-color: rgba(212, 161, 43, 0.3);
+  background: rgba(212, 161, 43, 0.08);
+  color: #e3c66e;
+}
+
+.source-pill.is-error {
+  border-color: rgba(243, 58, 40, 0.34);
+  background: rgba(243, 58, 40, 0.09);
+  color: #ff8f82;
+}
+
+.source-pill.is-loading::before {
+  animation: banlist-source-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes banlist-source-pulse {
+  0%, 100% { opacity: 0.42; transform: scale(0.84); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.banlist-authority-line {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: center;
+  margin: 0.9rem 0 1rem;
+  padding: 0.78rem 0.9rem;
+  border: 1px solid rgba(243, 58, 40, 0.16);
+  border-radius: 0.6rem;
+  background: rgba(212, 36, 24, 0.045);
+}
+
+.banlist-authority-line > span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(243, 58, 40, 0.26);
+  border-radius: 50%;
+  background: rgba(243, 58, 40, 0.08);
+  color: #ff7568;
+  font-size: 0.65rem;
+}
+
+.banlist-authority-line strong,
+.banlist-authority-line small {
+  display: block;
+}
+
+.banlist-authority-line strong {
+  color: #f1ebe5;
+  font-size: 0.78rem;
+  letter-spacing: 0.015em;
+}
+
+.banlist-authority-line small {
+  margin-top: 0.15rem;
+  color: #8f8984;
+  font-size: 0.69rem;
+  line-height: 1.45;
+}
+
+.current-banlist-list > li {
+  border-radius: 0.5rem;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.current-banlist-list > li:hover {
+  border-color: rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.035);
+  transform: translateY(-1px);
+}
+
+.banlist-checked {
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+@media (max-width: 640px) {
+  .banlist-status-stack { justify-content: flex-start; }
+  .nitrado-banlist-panel .panel-heading { align-items: flex-start; }
+  .banlist-authority-line { grid-template-columns: 24px minmax(0, 1fr); padding: 0.72rem; }
+  .banlist-authority-line > span { width: 24px; height: 24px; }
+}

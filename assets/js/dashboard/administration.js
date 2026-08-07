@@ -196,7 +196,11 @@ const resetAdminPlayerAdministration = () => {
   if (dayzBanlistError) dayzBanlistError.hidden = true;
   setText('[data-discord-banlist-count]', '—');
   setText('[data-dayz-banlist-count]', '—');
-  if (banlistChecked) banlistChecked.textContent = 'Ban lists have not been refreshed during this session.';
+  if (dayzBanlistSource) {
+    dayzBanlistSource.textContent = 'Nitrado';
+    dayzBanlistSource.className = 'source-pill is-loading';
+  }
+  if (banlistChecked) banlistChecked.textContent = 'Ban Lists Have Not Been Refreshed During This Session';
   adminPlayerDetail?.setAttribute('hidden', '');
   if (adminPlayerEmpty) adminPlayerEmpty.hidden = true;
   if (adminPlayerError) adminPlayerError.hidden = true;
@@ -343,7 +347,7 @@ const renderModerationCases = (payload) => {
   });
 
   moderationCaseList.hidden = cases.length === 0;
-  setText('[data-moderation-case-heading]', scope === 'recent' ? 'Recent moderation cases' : 'Active moderation cases');
+  setText('[data-moderation-case-heading]', scope === 'recent' ? 'Recent Moderation Cases' : 'Active Moderation Cases');
   if (moderationCaseEmpty) {
     moderationCaseEmpty.hidden = cases.length !== 0;
     moderationCaseEmpty.textContent = scope === 'recent'
@@ -1383,6 +1387,18 @@ const renderBanlistSource = (source, type) => {
 
   list.replaceChildren();
   const available = Boolean(source?.available);
+  if (!isDiscord && dayzBanlistSource) {
+    const sourceName = String(source?.source || 'nitrado_unavailable');
+    const sourceState = sourceName === 'nitrado_api'
+      ? ['Nitrado Live', 'is-live']
+      : sourceName === 'nitrado_file'
+        ? ['Nitrado File', 'is-file']
+        : sourceName === 'nitrado_cache'
+          ? ['Nitrado Cached', 'is-stale']
+          : ['Nitrado Offline', 'is-error'];
+    dayzBanlistSource.textContent = sourceState[0];
+    dayzBanlistSource.className = `source-pill ${sourceState[1]}`;
+  }
   const entries = available && Array.isArray(source?.entries) ? source.entries : [];
   const reportedCount = Number(source?.count);
   const count = Number.isFinite(reportedCount) ? Math.max(0, Math.trunc(reportedCount)) : entries.length;
@@ -1405,9 +1421,14 @@ const renderBanlistSource = (source, type) => {
     const title = isDiscord
       ? String(entry?.discord_name || 'Banned Discord account')
       : psnId || 'Banned PlayStation ID';
+    const dayzIdentity = source?.source === 'nitrado_file'
+      ? 'Nitrado DayZ ban.txt'
+      : source?.source === 'nitrado_cache'
+        ? 'Last confirmed Nitrado ban list'
+        : 'Nitrado Player Management';
     const identity = isDiscord
-      ? (psnId ? `PSN ${psnId}` : 'No linked PSN account')
-      : (source?.source === 'bot_cases' ? 'Bot-managed DayZ ban' : 'Nitrado game ban list');
+      ? (psnId ? `PSN ${psnId}` : 'No Linked PSN Account')
+      : dayzIdentity;
     appendAdminActivity(list, {
       symbolText: '⊘',
       symbolClass: 'red',
@@ -1423,10 +1444,10 @@ const renderCurrentBanlists = (payload) => {
   renderBanlistSource(payload?.dayz, 'dayz');
   if (banlistChecked) {
     const partial = !payload?.discord?.available || !payload?.dayz?.available || Boolean(payload?.dayz?.partial);
-    const sourceNote = payload?.dayz?.message ? ` ${String(payload.dayz.message)}` : '';
+    const sourceNote = String(payload?.dayz?.message || '').trim();
     banlistChecked.textContent = payload?.checked_at
-      ? `${partial ? 'Partially refreshed' : 'Refreshed'} ${formatAccountDate(payload.checked_at)}.${sourceNote}`
-      : 'The current ban lists could not be fully refreshed.';
+      ? `${partial ? 'Partially Refreshed' : 'Refreshed'} ${formatAccountDate(payload.checked_at)}${sourceNote ? ` · ${sourceNote}` : ''}`
+      : 'The Current Ban Lists Could Not Be Fully Refreshed';
   }
 };
 

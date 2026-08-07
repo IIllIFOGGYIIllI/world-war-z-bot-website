@@ -1,8 +1,5 @@
-DELETE ONLY THESE LEGACY FILES AFTER UPLOADING VERSION 1.22.18:
+world-war-z-website v1.22.19
 
-assets/css/pages/dashboard.css
-assets/js/pages/dashboard.js
-assets/world-war-z-banner.png
+No files need to be deleted for this patch.
 
-Their replacements are included under assets/css/dashboard/, assets/js/dashboard/ and assets/world-war-z-banner.webp.
 Do not delete any Chernarus map tiles, JSON data, HTML pages or other assets.

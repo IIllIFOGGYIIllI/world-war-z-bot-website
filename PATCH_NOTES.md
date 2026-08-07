@@ -1,3 +1,29 @@
+# Version 1.22.19
+
+## Professional Nitrado ban-list presentation
+
+- The Admin DayZ ban-list panel now shows a clear source badge for Nitrado Live, Nitrado File, Nitrado Cached or Nitrado Offline.
+- Added an authoritative-source notice explaining the Player Management → Nitrado `ban.txt` fallback path.
+- Removed stale visual wording that could imply bot-managed moderation cases were the current Nitrado ban list.
+- Added stronger hierarchy, status treatment and responsive presentation for the ban-list workspace.
+
+## Commands and typography
+
+- Added `/banlist show`, `/banlist add`, `/banlist remove`, `/banlist wipe`, `/purge messages` and `/purge banlist last-login` to the searchable Command Library.
+- Updated current command-count wording to the 93-command bot tree.
+- Standardised all public/dashboard H1–H6 headings so each word starts with a capital letter.
+- Removed unnecessary trailing full stops from website headings while preserving meaningful punctuation such as question marks.
+- Refreshed browser cache markers to v1.22.19.
+
+## Compatibility and safety
+
+- Pairs with Bot v1.18.19.
+- No public URL, Discord OAuth callback or existing Railway API path changed.
+- No database file or destructive migration is included.
+- Railway remains authoritative for `/app/data/players.db`.
+
+---
+
 # Version 1.22.18
 
 ## Dashboard module split

@@ -186,6 +186,7 @@ const discordBanlistError = document.querySelector('[data-discord-banlist-error]
 const dayzBanlist = document.querySelector('[data-dayz-banlist-list]');
 const dayzBanlistEmpty = document.querySelector('[data-dayz-banlist-empty]');
 const dayzBanlistError = document.querySelector('[data-dayz-banlist-error]');
+const dayzBanlistSource = document.querySelector('[data-dayz-banlist-source]');
 const refreshBanlistsButton = document.querySelector('[data-refresh-banlists]');
 const banlistChecked = document.querySelector('[data-banlist-checked]');
 const adminPlayerSearchForm = document.querySelector('[data-admin-player-search-form]');

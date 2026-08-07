@@ -1,30 +1,20 @@
-world-war-z-website v1.22.18 updated and added files
+world-war-z-website v1.22.19 updated files
 
-DELETE_THESE_FILES.txt
-PATCH_FILE_LIST.txt
+404.html
 PATCH_NOTES.md
 README.md
-assets/css/dashboard/catalogue.css
-assets/css/dashboard/core.css
 assets/css/dashboard/moderation.css
-assets/css/dashboard/workspace.css
-assets/css/pages/home.css
-assets/js/dashboard/account.js
 assets/js/dashboard/administration.js
 assets/js/dashboard/core.js
-assets/js/dashboard/delivery.js
-assets/js/dashboard/shell.js
-assets/js/dashboard/shop.js
-assets/js/pages/dashboard-map-loader.js
-assets/world-war-z-banner.webp
+assets/js/data/command-library.js
 changelog.html
 community-guidelines.html
 dashboard.html
-docs/asset-architecture.md
 index.html
 legal.html
 moderation-policy.html
 privacy.html
-scripts/validate_site.py
 shop.html
 terms.html
+PATCH_FILE_LIST.txt
+DELETE_THESE_FILES.txt

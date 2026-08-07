@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including `.github`, `.nojekyll` and the `assets` folder.
-4. Enter the commit message: `Organise website assets`
+4. Enter the commit message: `Polish ban list and headings`
 5. Select **Commit changes**.
 6. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
 7. Open **Actions → Deploy World War Z Website** and run it manually only if the push did not start it automatically.
@@ -59,6 +59,24 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `MAP_ATTRIBUTION.md` — ChernarusPlus source, licence and modification notice
 
 
+
+
+## Version 1.22.19 professional ban-list controls and headings
+
+- The Admin DayZ ban-list panel now identifies whether the authoritative list came from Nitrado Player Management, Nitrado `ban.txt`, the last confirmed Nitrado snapshot or an unavailable source.
+- Removed the old behaviour that could visually imply local bot-managed cases were the current live Nitrado list.
+- Added the new `/banlist` and `/purge banlist last-login` paths to the searchable Command Library.
+- Updated the command library for the 93-command bot tree and the direct `/purge messages` path.
+- Standardised public and dashboard H1–H6 headings to capitalise the beginning of every word and removed unnecessary trailing full stops.
+- Added a stronger Nitrado status presentation while retaining the existing dark red World War Z visual system.
+- Refreshed browser cache markers to v1.22.19.
+- Pairs with World War Z Discord Bot v1.18.19.
+
+Commit message:
+
+```text
+Polish ban list and headings
+```
 
 
 ## Version 1.22.18 dashboard split and transfer reduction
