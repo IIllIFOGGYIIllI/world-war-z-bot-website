@@ -1,11 +1,20 @@
-world-war-z-website v1.22.23 patch files
+world-war-z-website v1.22.24 patch files
 
-assets/js/dashboard/administration.js
+PATCH_NOTES.md
+README.md
+assets/js/dashboard/delivery.js
+assets/js/dashboard/shop.js
+assets/js/data/command-library.js
+assets/js/pages/shop.js
+changelog.html
+community-guidelines.html
 dashboard.html
 index.html
-changelog.html
-README.md
-PATCH_NOTES.md
+legal.html
+moderation-policy.html
+privacy.html
+shop.html
+terms.html
 PATCH_FILE_LIST.txt
 DELETE_THESE_FILES.txt
 

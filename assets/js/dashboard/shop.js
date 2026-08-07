@@ -46,8 +46,6 @@ const ownerShopEnabled = document.querySelector('[data-owner-shop-enabled]');
 const ownerShopWebsiteEnabled = document.querySelector('[data-owner-shop-website-enabled]');
 const ownerShopRequiredRole = document.querySelector('[data-owner-shop-required-role]');
 const ownerShopImageUrl = document.querySelector('[data-owner-shop-image-url]');
-const ownerShopRestartMin = document.querySelector('[data-owner-shop-restart-min]');
-const ownerShopRestartMax = document.querySelector('[data-owner-shop-restart-max]');
 const ownerShopDiscountList = document.querySelector('[data-shop-discount-list]');
 const ownerShopDiscountEmpty = document.querySelector('[data-shop-discount-empty]');
 const addShopDiscountButton = document.querySelector('[data-add-shop-discount]');
@@ -286,18 +284,17 @@ const openShopPurchase = (item) => {
   shopPurchaseForm?.reset();
   const isEvent = item.delivery_type === 'event';
   if (shopPurchaseQuantity) {
-    const minimumRestarts = Math.max(1, Number(item.delivery?.minimum_restarts || 1));
-    const maximumRestarts = Math.min(30000, Math.max(minimumRestarts, Number(item.delivery?.maximum_restarts || 30000)));
-    shopPurchaseQuantity.value = String(isEvent ? minimumRestarts : 1);
-    shopPurchaseQuantity.min = String(isEvent ? minimumRestarts : 1);
-    shopPurchaseQuantity.max = String(isEvent ? maximumRestarts : Math.max(1, Math.min(
+    shopPurchaseQuantity.value = '1';
+    shopPurchaseQuantity.min = '1';
+    shopPurchaseQuantity.max = String(isEvent ? 1 : Math.max(1, Math.min(
       Number(item.max_per_order || 1),
       item.stock_quantity == null ? 100 : Number(item.stock_quantity),
       item.remaining_member_limit == null ? 100 : Number(item.remaining_member_limit)
     )));
     shopPurchaseQuantity.disabled = false;
-    if (shopQuantityLabel) shopQuantityLabel.textContent = isEvent ? 'Number of restarts' : 'Quantity';
-    if (shopQuantityHelp) shopQuantityHelp.textContent = isEvent ? `Price is per restart · allowed ${minimumRestarts.toLocaleString()}–${maximumRestarts.toLocaleString()}.` : 'Number of items to purchase.';
+    shopPurchaseQuantity.readOnly = isEvent;
+    if (shopQuantityLabel) shopQuantityLabel.textContent = 'Quantity';
+    if (shopQuantityHelp) shopQuantityHelp.textContent = isEvent ? 'One Event Item per next-restart delivery.' : 'Number of items to purchase.';
   }
   if (shopDeliveryY) shopDeliveryY.value = '0';
   if (shopDeliveryRotation) shopDeliveryRotation.value = '0';
@@ -308,8 +305,8 @@ const openShopPurchase = (item) => {
   syncShopDeliveryForm();
   setText('[data-shop-purchase-title]', `Buy ${item.name}?`);
   setText('[data-shop-purchase-item]', `${item.name} · ${item.sku}`);
-  const deliveryText = isEvent ? 'Restart-bound event spawn' : 'Automatic coordinate delivery';
-  setText('[data-shop-purchase-price]', `${formatMoney(item.price)} ${isEvent ? 'per restart' : 'each'} · ${shopStockText(item)} · ${deliveryText}`);
+  const deliveryText = isEvent ? 'Next-restart Central Economy delivery' : 'Next-restart Central Economy delivery';
+  setText('[data-shop-purchase-price]', `${formatMoney(item.price)}${isEvent ? '' : ' each'} · ${shopStockText(item)} · ${deliveryText}`);
   showInlineMessage(shopPurchaseMessage, '');
   updateShopPurchaseTotal();
   if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal();
@@ -372,14 +369,14 @@ const renderShopCatalogue = () => {
     copy.append(categoryText, title);
     const price = document.createElement('strong');
     price.className = 'shop-item-price';
-    price.textContent = item.delivery_type === 'event' ? `${formatMoney(item.price)}/restart` : formatMoney(item.price);
+    price.textContent = formatMoney(item.price);
     heading.append(copy, price);
     const description = document.createElement('p');
     description.textContent = item.description;
     const meta = document.createElement('div');
     meta.className = 'shop-item-meta';
     [
-      item.delivery_type === 'event' ? `Event item · ${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts` : 'Automatic item delivery',
+      item.delivery_type === 'event' ? 'Event Item · Next scheduled restart' : 'Item · Next scheduled restart',
       shopStockText(item),
       `Max ${item.max_per_order}/order`,
       shopMemberLimitText(item)
@@ -411,7 +408,7 @@ const renderMemberShopOrders = (orders) => {
     card.className = 'shop-order-card';
     const heading = document.createElement('div');
     const title = document.createElement('strong');
-    title.textContent = order.delivery_type === 'event' ? `Order #${order.order_id} · ${Number(order.event_restarts || 1).toLocaleString()} restart(s) · ${order.item.name}` : `Order #${order.order_id} · ${order.quantity} × ${order.item.name}`;
+    title.textContent = order.delivery_type === 'event' ? `Order #${order.order_id} · Event Item · ${order.item.name}` : `Order #${order.order_id} · ${order.quantity} × ${order.item.name}`;
     const status = document.createElement('span');
     status.className = `shop-order-status ${String(order.status)}`;
     status.textContent = shopStatusLabel(order.status);
@@ -423,7 +420,7 @@ const renderMemberShopOrders = (orders) => {
       const delivery = document.createElement('small');
       const point = order.delivery.location || {};
       delivery.textContent = order.delivery_type === 'event'
-        ? `Automatic event delivery: ${shopStatusLabel(order.delivery.status)} · ${Number(order.delivery.remaining_restarts ?? order.event_restarts ?? 1).toLocaleString()} restart(s) remaining · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`
+        ? `Automatic Event Item delivery: ${shopStatusLabel(order.delivery.status)} · Next-restart lifecycle · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`
         : `Automatic item delivery: ${shopStatusLabel(order.delivery.status)} · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`;
       card.append(delivery);
     }
@@ -531,7 +528,7 @@ shopModeButtons.forEach((button) => button.addEventListener('click', () => {
   if (shopCategory) shopCategory.value = 'all';
   populateShopCategories();
   setText('[data-shop-mode-label]', shopCatalogueMode === 'event' ? 'Event items' : 'Items');
-  setText('[data-shop-mode-help]', shopCatalogueMode === 'event' ? 'Price per restart · exact coordinates' : 'Automatic item catalogue');
+  setText('[data-shop-mode-help]', shopCatalogueMode === 'event' ? 'Fixed price · exact coordinates · next restart' : 'Automatic Item catalogue');
   renderShopCatalogue();
 }));
 shopSearch?.addEventListener('input', renderShopCatalogue);
@@ -553,7 +550,7 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
       body: JSON.stringify({
         item_id: Number(selectedShopItem.item_id),
         quantity: (selectedShopItem.delivery_type === 'event' ? 1 : Number(shopPurchaseQuantity?.value || 1)),
-        event_restarts: (selectedShopItem.delivery_type === 'event' ? Number(shopPurchaseQuantity?.value || 1) : 1),
+        event_restarts: 1,
         buyer_note: shopPurchaseNote?.value.trim() || '',
         purchase_key: `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`,
         delivery: (selectedShopItem.delivery_type === 'event' || selectedShopItem.requires_coordinates) ? (() => {
@@ -640,7 +637,7 @@ const renderAdminShopOrders = (payload) => {
     card.className = 'shop-order-card admin-order';
     const heading = document.createElement('div');
     const title = document.createElement('strong');
-    title.textContent = order.delivery_type === 'event' ? `#${order.order_id} · ${order.buyer.psn_id} · ${Number(order.event_restarts || 1).toLocaleString()} restart(s) · ${order.item.name}` : `#${order.order_id} · ${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`;
+    title.textContent = order.delivery_type === 'event' ? `#${order.order_id} · ${order.buyer.psn_id} · Event Item · ${order.item.name}` : `#${order.order_id} · ${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`;
     const status = document.createElement('span');
     status.className = `shop-order-status ${order.status}`;
     status.textContent = shopStatusLabel(order.status);
@@ -755,7 +752,7 @@ const renderOwnerShopItems = () => {
   const manualItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && (manualCategory === 'all' || item.category === manualCategory) && (!manualQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category}`.toLowerCase().includes(manualQuery)));
   const eventItems = ownerShopItems.filter((item) => item.fulfilment_type === 'event' && (eventCategory === 'all' || item.category === eventCategory) && (!eventQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(eventQuery)));
   manualItems.forEach((item) => { const row=document.createElement('tr'); const itemCell=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; itemCell.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const scope=document.createElement('td'); scope.textContent=String(item.catalogue_scope||'local').toLowerCase()==='global'?'Global':'Local'; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const stock=document.createElement('td'); stock.textContent=item.stock_quantity==null?'Unlimited':String(item.stock_quantity); const limits=document.createElement('td'); limits.textContent=`${item.max_per_order}/order · ${item.max_per_player==null?'No player limit':`${item.max_per_player}/player`}`; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(itemCell,category,scope,price,stock,limits,state,action); ownerShopItemList.append(row); });
-  eventItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=`${formatMoney(item.price)} / restart`; const restarts=document.createElement('td'); restarts.textContent=`${Number(profile.minimum_restarts||1).toLocaleString()}–${Number(profile.maximum_restarts||30000).toLocaleString()}`; const approval=document.createElement('td'); approval.textContent='Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,restarts,approval,state,action); ownerEventItemList.append(row); });
+  eventItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const delivery=document.createElement('td'); delivery.textContent='Next restart'; const approval=document.createElement('td'); approval.textContent='Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,delivery,approval,state,action); ownerEventItemList.append(row); });
   if (ownerShopEmpty) ownerShopEmpty.hidden = manualItems.length !== 0;
   if (ownerEventItemEmpty) ownerEventItemEmpty.hidden = eventItems.length !== 0;
 };
@@ -811,7 +808,7 @@ const parseEventXmlEditor = (value) => {
   const distanceradius = eventXmlInteger(root, 'distanceradius');
   const cleanupradius = eventXmlInteger(root, 'cleanupradius');
   const position = String(requiredXmlChild(root, 'position').textContent || '').trim().toLowerCase();
-  if (position !== 'fixed') throw new Error('Restart-bound Event XML must use <position>fixed</position>.');
+  if (position !== 'fixed') throw new Error('Event Item XML must use <position>fixed</position>.');
   const limit = String(requiredXmlChild(root, 'limit').textContent || '').trim().toLowerCase();
   if (!['custom', 'child', 'parent', 'mixed'].includes(limit)) throw new Error('Event XML <limit> must be custom, child, parent or mixed.');
   const active = String(requiredXmlChild(root, 'active').textContent || '').trim();
@@ -1042,12 +1039,12 @@ const syncShopItemDeliveryEditor = () => {
   setText('[data-shop-item-dialog-title]', isEditing ? (isEvent ? 'Edit Event Item' : 'Edit Item') : (isEvent ? 'Create Event Item' : 'Create Item'));
   setText('[data-shop-builder-subtitle]', isEditing
     ? `Editing ${editorName || (isEvent ? 'event item' : 'shop item')}`
-    : isEvent ? 'Create a restart-bound event item.' : 'Create a purchasable shop item.');
+    : isEvent ? 'Create an automatic next-restart Event Item.' : 'Create a purchasable shop item.');
   setText('[data-shop-builder-kicker]', isEvent ? 'Event item' : 'Catalogue item');
   setText('[data-shop-builder-main-title]', isEvent ? 'Create Event Item' : 'Create Item');
-  setText('[data-shop-price-label]', isEvent ? 'Price per restart' : 'Price');
-  setText('[data-shop-builder-notice-title]', isEvent ? 'Configure an event the player can restart from the shop.' : 'Start with the fields players see first.');
-  setText('[data-shop-builder-notice-copy]', isEvent ? 'Event XML, zone, category and restart bounds use the familiar DayZ event workflow.' : 'Name, price, types and category define what the player purchases.');
+  setText('[data-shop-price-label]', 'Price');
+  setText('[data-shop-builder-notice-title]', isEvent ? 'Configure a Central Economy Event Item delivery.' : 'Start with the fields players see first.');
+  setText('[data-shop-builder-notice-copy]', isEvent ? 'Event XML, zone and coordinates stage once for the next scheduled restart, then the temporary event definition is retired automatically.' : 'Name, price, types and category define what the player purchases.');
   setText('[data-save-shop-item]', isEditing ? 'Save changes' : 'Create');
   shopItemDialog?.classList.toggle('event-builder-mode', isEvent);
   if (isEvent) {
@@ -1074,7 +1071,7 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
     '[data-shop-item-description]': item?.description || '', '[data-shop-item-fulfilment]': item?.fulfilment_instructions || '',
     '[data-shop-profile-name]': profile.profile_name || '', '[data-shop-profile-child]': profile.child_type || '',
     '[data-shop-profile-secondary]': profile.secondary_event || '', '[data-shop-profile-lifetime]': profile.lifetime ?? 3888000,
-    '[data-shop-profile-restock]': profile.restock ?? 0, '[data-shop-profile-min-restarts]': profile.minimum_restarts ?? 1, '[data-shop-profile-max-restarts]': profile.maximum_restarts ?? 30000, '[data-shop-profile-limit]': profile.event_limit || 'custom',
+    '[data-shop-profile-restock]': profile.restock ?? 0, '[data-shop-profile-limit]': profile.event_limit || 'custom',
     '[data-shop-profile-saferadius]': profile.saferadius ?? 0, '[data-shop-profile-distanceradius]': profile.distanceradius ?? 0,
     '[data-shop-profile-cleanupradius]': profile.cleanupradius ?? 0, '[data-shop-profile-attachments]': profileListText(profile.attachments),
     '[data-shop-profile-cargo]': profileListText(profile.cargo),
@@ -1324,8 +1321,6 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
     if (ownerShopDescription) ownerShopDescription.value = String(settings.description || '');
     if (ownerShopInstructions) ownerShopInstructions.value = String(settings.purchase_instructions || '');
     if (ownerShopImageUrl) ownerShopImageUrl.value = String(settings.dashboard_image_url || '');
-    if (ownerShopRestartMin) ownerShopRestartMin.value = String(settings.event_restart_min || 1);
-    if (ownerShopRestartMax) ownerShopRestartMax.value = String(settings.event_restart_max || 30000);
     populateOwnerShopRoleSelect();
     if (ownerShopRequiredRole) ownerShopRequiredRole.value = String(settings.required_role?.id || '');
     ownerShopDiscounts = (Array.isArray(settings.discounts) ? settings.discounts : []).map((entry) => ({ ...entry }));
@@ -1367,8 +1362,6 @@ saveShopSettingsButton?.addEventListener('click', async () => {
         dashboard_image_url: ownerShopImageUrl?.value.trim() || '',
         required_role_id: ownerShopRequiredRole?.value || null,
         required_role_name: ownerShopRequiredRole?.selectedOptions?.[0]?.textContent || '',
-        event_restart_min: Number(ownerShopRestartMin?.value || 1),
-        event_restart_max: Number(ownerShopRestartMax?.value || 30000),
         discounts: ownerShopDiscounts.map((entry) => ({
           role_id: entry.role_id,
           role_name: entry.role_name,
@@ -1435,7 +1428,7 @@ shopItemForm?.addEventListener('submit', async (event) => {
         delivery_profile: isEvent ? {
           profile_name: eventGroup, child_type: value('[data-shop-profile-child]'),
           secondary_event: value('[data-shop-profile-secondary]'), lifetime: value('[data-shop-profile-lifetime]'),
-          restock: value('[data-shop-profile-restock]'), minimum_restarts: value('[data-shop-profile-min-restarts]'), maximum_restarts: value('[data-shop-profile-max-restarts]'), event_limit: value('[data-shop-profile-limit]'),
+          restock: value('[data-shop-profile-restock]'), minimum_restarts: 1, maximum_restarts: 1, event_limit: value('[data-shop-profile-limit]'),
           saferadius: value('[data-shop-profile-saferadius]'), distanceradius: value('[data-shop-profile-distanceradius]'),
           cleanupradius: value('[data-shop-profile-cleanupradius]'), attachments: parseProfileList(value('[data-shop-profile-attachments]')),
           cargo: parseProfileList(value('[data-shop-profile-cargo]')),

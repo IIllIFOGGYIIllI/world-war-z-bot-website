@@ -1,3 +1,17 @@
+# Version 1.22.24
+
+## Unified Next-Restart Shop Delivery
+
+- Removed buyer-facing Event Item restart-duration selection and per-restart pricing.
+- Event Items now display one fixed price and one automatic delivery at the next scheduled restart.
+- Removed Owner global restart minimum/maximum settings and Event Item minimum/maximum restart fields.
+- Updated member checkout, Owner catalogue tables, automatic-delivery monitoring and order summaries for the simplified lifecycle.
+- Normal Items and Event Items now describe the same Central Economy delivery model used by Bot v1.18.25.
+- Updated the public roadmap, terms/privacy wording and command library to match the new shop model.
+- No Railway database reset or destructive migration is required.
+
+---
+
 # Version 1.22.23
 
 ## Live Nitrado Ban Synchronisation
