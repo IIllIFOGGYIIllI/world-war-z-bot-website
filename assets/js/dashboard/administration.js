@@ -1398,7 +1398,7 @@ const renderBanlistSource = (source, type) => {
   const available = Boolean(source?.available);
   if (!isDiscord && dayzBanlistSource) {
     const sourceName = String(source?.source || 'nitrado_unavailable');
-    const sourceState = sourceName === 'nitrado_api'
+    const sourceState = (sourceName === 'nitrado_settings' || sourceName === 'nitrado_api')
       ? ['Nitrado Live', 'is-live']
       : sourceName === 'nitrado_file'
         ? ['Nitrado File', 'is-file']
@@ -1430,11 +1430,13 @@ const renderBanlistSource = (source, type) => {
     const title = isDiscord
       ? String(entry?.discord_name || 'Banned Discord account')
       : psnId || 'Banned PlayStation ID';
-    const dayzIdentity = source?.source === 'nitrado_file'
-      ? 'Nitrado DayZ ban.txt'
-      : source?.source === 'nitrado_cache'
-        ? 'Last confirmed Nitrado ban list'
-        : 'Nitrado Player Management';
+    const dayzIdentity = source?.source === 'nitrado_settings'
+      ? 'Nitrado Live Ban List'
+      : source?.source === 'nitrado_file'
+        ? 'Nitrado DayZ ban.txt'
+        : source?.source === 'nitrado_cache'
+          ? 'Last Confirmed Nitrado Ban List'
+          : 'Nitrado Player Management';
     const identity = isDiscord
       ? (psnId ? `PSN ${psnId}` : 'No Linked PSN Account')
       : dayzIdentity;

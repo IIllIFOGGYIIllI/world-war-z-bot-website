@@ -157,7 +157,7 @@
 <div aria-label="Current roadmap release" class="roadmap-release">
 <small>Roadmap updated</small>
 <strong>7 August 2026</strong>
-<span>Website v1.22.22 · Bot v1.18.23</span>
+<span>Website v1.22.23 · Bot v1.18.24</span>
 </div>
 </div>
 <div aria-label="Roadmap status key" class="roadmap-status-key reveal">
@@ -191,10 +191,10 @@
 </article>
 <article class="roadmap-card roadmap-card-active reveal">
 <div class="roadmap-card-heading"><span>02</span><div><small>Current Release</small><h3>Authoritative Ban Lists And Interface Polish</h3></div></div>
-<p>Website v1.22.22 and Bot v1.18.23 strengthen DayZ moderation while making the command centre cleaner and easier to scan.</p>
+<p>Website v1.22.23 and Bot v1.18.24 keep DayZ bans synchronized with Nitrado's live Banlist setting while preserving the professional command-centre presentation.</p>
 <ul>
 <li>Uses Nitrado as the authoritative DayZ ban-list source instead of presenting local bot cases as a live Nitrado list.</li>
-<li>Falls back from Nitrado Player Management to the authenticated DayZ <code>ban.txt</code> file when the live player-management endpoint is temporarily unavailable.</li>
+<li>Uses Nitrado's live gameserver Banlist setting first so add/remove changes can apply without a restart, while retaining Player Management and authenticated <code>ban.txt</code> fallbacks.</li>
 <li>Adds direct <code>/banlist show</code>, <code>/banlist add</code>, <code>/banlist remove</code> and <code>/banlist wipe</code> controls.</li>
 <li>Adds protected <code>/purge banlist last-login</code> cleanup and keeps unknown last-login entries untouched.</li>
 <li>Moves direct Discord message cleanup to <code>/purge messages</code> while retaining <code>/mod purge</code>.</li>
@@ -246,7 +246,7 @@
 </ul>
 </article>
 </div>
-<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap and release rule:</strong> completed features remain visible, verification work is separated from future development, Website v1.22.22 pairs with Bot v1.18.23, and every database change must preserve Railway's existing persistent records.</p></div>
+<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap and release rule:</strong> completed features remain visible, verification work is separated from future development, Website v1.22.23 pairs with Bot v1.18.24, and every database change must preserve Railway's existing persistent records.</p></div>
 </div>
 </section>
 <section aria-labelledby="faq-title" class="faq section" id="faq">

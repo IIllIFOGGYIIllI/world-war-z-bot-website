@@ -1,4 +1,4 @@
-world-war-z-website v1.22.22 patch files
+world-war-z-website v1.22.23 patch files
 
 assets/js/dashboard/administration.js
 dashboard.html
@@ -9,4 +9,4 @@ PATCH_NOTES.md
 PATCH_FILE_LIST.txt
 DELETE_THESE_FILES.txt
 
-Other HTML files are included in the complete backup with refreshed v1.22.22 cache markers.
+No files need to be deleted.

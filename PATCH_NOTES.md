@@ -1,3 +1,15 @@
+# Version 1.22.23
+
+## Live Nitrado Ban Synchronisation
+
+- Recognises the bot's live Nitrado settings source as `Nitrado Live` in the Current Ban Lists workspace.
+- Displays entries sourced from Nitrado's `general.bans` gameserver setting as `Nitrado Live Ban List`.
+- Pairs with Bot v1.18.24, which now writes DayZ console bans through Nitrado's live gameserver setting so bans/unbans do not wait for a restart.
+- Keeps Player Management, `ban.txt`, cached and offline states as fallbacks.
+- No public route, OAuth flow, permission model or Railway database schema changed.
+
+---
+
 # Version 1.22.22
 
 ## Live Ban-List Refresh Reliability

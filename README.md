@@ -62,6 +62,15 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+## Version 1.22.23 Live Nitrado Ban Synchronisation
+
+- Recognises Bot v1.18.24's `nitrado_settings` source as the normal live Nitrado state.
+- Keeps the Current Ban Lists page marked **Nitrado Live** when the bot is reading Nitrado's web-interface `general.bans` setting.
+- Displays live-setting entries as **Nitrado Live Ban List** instead of incorrectly falling through to an offline/unknown source state.
+- Preserves the existing 75-second manual refresh window and exact Nitrado ban order.
+- No public URL, OAuth, permission or database schema change is required.
+
+
 ## Version 1.22.22 Reliable Live Ban-List Refresh
 
 - Allows the Current Ban Lists workspace enough time to complete Nitrado console file fallback instead of discarding the combined response at the generic 10-second HTTP timeout.
