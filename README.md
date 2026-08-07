@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including `.github`, `.nojekyll` and the `assets` folder.
-4. Enter the commit message: `Unify shop delivery`
+4. Enter the commit message: `Preserve rental durations`
 5. Select **Commit changes**.
 6. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
 7. Open **Actions → Deploy World War Z Website** and run it manually only if the push did not start it automatically.
@@ -62,9 +62,13 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+## Version 1.22.25 Preserve Restart-Bound Rentals
+
+Normal Items keep the new temporary Central Economy delivery path introduced in v1.22.24 / Bot v1.18.25, but Event Item rentals are restored to the established restart-bound model. Buyers again select the number of restarts, pricing is per restart, Owner global/profile restart limits are available, and remaining restarts are shown throughout member and Admin views. Bot v1.18.26 preserves existing rental data and only removes the legacy `dpp_shop.json` path from Normal Item delivery.
+
 ## Version 1.22.24 unified next-restart shop delivery
 
-The member and Owner shop no longer expose restart-duration pricing or minimum/maximum restart controls. Normal Items and Event Items are both fixed-price coordinate deliveries staged for the next scheduled server restart. Bot v1.18.25 now uses temporary Central Economy entries in `events.xml` and `cfgeventspawns.xml` for both delivery types and retires the legacy `dpp_shop.json` registration automatically. Existing legacy order data remains readable and the Railway database is not reset or replaced.
+Historical v1.22.24 temporarily simplified Event Item rentals to one next-restart delivery. Version 1.22.25 restores the original restart-duration rental workflow while retaining the new Central Economy path for Normal Items.
 
 ## Version 1.22.23 Live Nitrado Ban Synchronisation
 

@@ -1,4 +1,4 @@
-world-war-z-website v1.22.24 patch files
+world-war-z-website v1.22.25 patch files
 
 PATCH_NOTES.md
 README.md

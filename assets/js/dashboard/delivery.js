@@ -177,8 +177,8 @@ const deliveryStatusHelp = {
   previewed: 'Prepared and waiting for automatic deployment.',
   restart_pending: 'Mission files are verified and this order will spawn at the next restart.',
   verification: 'The order has spawned and Railway is reconciling its restart state.',
-  active: 'The Event Item has loaded and Railway is tracking automatic cleanup.',
-  cleanup_due: 'The delivery restart completed; temporary Central Economy definitions are queued for automatic cleanup.',
+  active: 'The rental is active and its remaining restarts are tracked automatically.',
+  cleanup_due: 'The purchased restart count is complete; file cleanup is queued automatically.',
   failed: 'The last deployment failed. Railway retries this order automatically every 30 seconds.',
   fulfilled: 'The automatic delivery and cleanup workflow is complete.',
   cancelled: 'The order was cancelled and its temporary file definitions are being removed.',
@@ -212,8 +212,8 @@ const performDeliveryAction = async (order, action) => {
   const warnings = {
     stage: 'The DayZ server must already be stopped. This will back up and upload events.xml, cfgeventspawns.xml and cfgspawnabletypes.xml.',
     restart: 'This will start the stopped Nitrado server so the staged delivery can spawn. Continue?',
-    verify: 'This verifies the Event Item spawn before cleanup.',
-    cleanup: 'The DayZ server must be fully stopped. This will retire the temporary event entries and mark the Event Item delivery fulfilled.',
+    verify: 'This verifies the initial spawn. Multi-restart rentals remain active until their restart count reaches zero.',
+    cleanup: 'The DayZ server must be fully stopped. This will retire the temporary event entries and mark the completed rental fulfilled.',
     rollback: 'This will restore the recorded pre-deployment backups.'
   };
   if (warnings[action] && !window.confirm(warnings[action])) return;
@@ -290,7 +290,7 @@ const renderDeliveryQueue = (payload) => {
     details.className = 'delivery-detail-grid';
     const deliveryState = delivery.status || 'queued';
     const itemDetail = delivery.delivery_kind === 'event'
-      ? 'Next-restart Event Item delivery'
+      ? `${Number(order.event_restarts || 1).toLocaleString()} purchased restart(s)`
       : `${Number(order.quantity || 1).toLocaleString()} × ${(order.item.types || []).join(', ') || order.item.sku}`;
     [
       ['Automation', shopStatusLabel(deliveryState)],

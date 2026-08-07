@@ -1,3 +1,17 @@
+# Version 1.22.25
+
+## Preserve Restart-Bound Rentals
+
+- Corrects v1.22.24 so only Normal Item delivery changes.
+- Restores Event Item / rental price-per-restart display and buyer-selected restart duration.
+- Restores global Owner restart minimum/maximum settings and per-profile minimum/maximum restart controls.
+- Restores remaining-restart counts in member orders, Admin delivery monitoring and rental command descriptions.
+- Normal Items continue using temporary Central Economy `events.xml` + `cfgeventspawns.xml` definitions instead of `dpp_shop.json`.
+- Existing rental orders and Railway database records are preserved.
+- Pairs with Bot v1.18.26.
+
+---
+
 # Version 1.22.24
 
 ## Unified Next-Restart Shop Delivery

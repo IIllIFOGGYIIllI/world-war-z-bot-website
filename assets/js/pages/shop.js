@@ -183,9 +183,9 @@ const renderCatalogue = () => {
     const title = document.createElement('h3'); title.textContent = item.name; copy.append(kicker, title);
     const price = document.createElement('strong'); price.className = 'member-shop-price';
     if (item.discount && Number(item.base_price) > Number(item.price)) {
-      const old = document.createElement('del'); old.textContent = money(item.base_price);
-      price.append(old, document.createTextNode(money(item.price)));
-    } else price.textContent = money(item.price);
+      const old = document.createElement('del'); old.textContent = item.delivery_type === 'event' ? `${money(item.base_price)}/restart` : money(item.base_price);
+      price.append(old, document.createTextNode(item.delivery_type === 'event' ? `${money(item.price)}/restart` : money(item.price)));
+    } else price.textContent = item.delivery_type === 'event' ? `${money(item.price)}/restart` : money(item.price);
     head.append(copy, price);
     const description = document.createElement('p'); description.textContent = item.description;
     card.append(head);
@@ -198,7 +198,7 @@ const renderCatalogue = () => {
     const meta = document.createElement('div'); meta.className = 'member-shop-meta';
     const values = [
       item.delivery_type === 'event'
-        ? 'Next-restart Central Economy delivery'
+        ? `${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts`
         : `${Array.isArray(item.types) && item.types.length ? item.types.length : 0} DayZ type${Array.isArray(item.types) && item.types.length === 1 ? '' : 's'}`,
       stockText(item), `Max ${item.max_per_order}/order`, limitText(item)
     ];
@@ -234,7 +234,7 @@ const renderOrders = () => {
     const head = document.createElement('div');
     const title = document.createElement('strong');
     title.textContent = order.delivery_type === 'event'
-      ? `Order #${order.order_id} · Event Item · ${order.item.name}`
+      ? `Order #${order.order_id} · ${Number(order.event_restarts || 1).toLocaleString()} restart(s) · ${order.item.name}`
       : `Order #${order.order_id} · ${order.quantity} × ${order.item.name}`;
     const status = document.createElement('span'); status.className = `shop-order-status ${order.status}`; status.textContent = titleCase(order.status);
     head.append(title, status);
@@ -403,16 +403,16 @@ const openPurchase = (item) => {
   if (!canPurchase(item)) return;
   state.selectedItem = item; elements.purchaseForm.reset(); elements.y.value = '0'; elements.rotation.value = '0';
   const eventItem = item.delivery_type === 'event';
+  const minimum = eventItem ? Math.max(1, Number(item.delivery?.minimum_restarts || state.settings.event_restart_min || 1)) : 1;
   const maximum = eventItem
-    ? 1
+    ? Math.min(30000, Number(item.delivery?.maximum_restarts || state.settings.event_restart_max || 30000))
     : Math.max(1, Math.min(Number(item.max_per_order || 1), item.stock_quantity == null ? 100 : Number(item.stock_quantity), item.remaining_member_limit == null ? 100 : Number(item.remaining_member_limit)));
-  elements.quantity.value = '1'; elements.quantity.min = '1'; elements.quantity.max = String(maximum);
-  elements.quantity.readOnly = eventItem;
-  elements.quantityLabel.textContent = 'Quantity';
-  elements.quantityHelp.textContent = eventItem ? 'One Event Item per next-restart delivery.' : `Maximum ${maximum.toLocaleString()} per order.`;
+  elements.quantity.value = String(minimum); elements.quantity.min = String(minimum); elements.quantity.max = String(maximum);
+  elements.quantityLabel.textContent = eventItem ? 'Number Of Restarts' : 'Quantity';
+  elements.quantityHelp.textContent = eventItem ? `Allowed ${minimum.toLocaleString()}–${maximum.toLocaleString()} restarts.` : `Maximum ${maximum.toLocaleString()} per order.`;
   elements.eventFields.hidden = false;
   elements.purchaseTitle.textContent = `Buy ${item.name}?`; elements.purchaseItem.textContent = `${item.name} · ${item.sku}`;
-  elements.purchasePrice.textContent = `${money(item.price)}${eventItem ? ' · next scheduled restart' : ' each'} · ${stockText(item)}`;
+  elements.purchasePrice.textContent = `${money(item.price)}${eventItem ? ' per restart' : ' each'} · ${stockText(item)}`;
   populateLocations(); resetCheckoutMap(); updateMarker(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
 };
 const submitPurchase = async (event) => {
@@ -432,7 +432,7 @@ const submitPurchase = async (event) => {
     const quantity = Math.max(1, Number(elements.quantity.value || 1));
     const body = {
       item_id: Number(state.selectedItem.item_id), quantity: eventItem ? 1 : quantity,
-      event_restarts: 1, buyer_note: elements.note.value.trim(),
+      event_restarts: eventItem ? quantity : 1, buyer_note: elements.note.value.trim(),
       purchase_key: `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`, delivery
     };
     const { response, payload } = await fetchJson(URLS.purchase, {
