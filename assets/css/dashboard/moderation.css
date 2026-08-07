@@ -735,47 +735,10 @@
   50% { opacity: 1; transform: scale(1); }
 }
 
-.banlist-authority-line {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 0.7rem;
-  align-items: center;
-  margin: 0.9rem 0 1rem;
-  padding: 0.78rem 0.9rem;
-  border: 1px solid rgba(243, 58, 40, 0.16);
-  border-radius: 0.6rem;
-  background: rgba(212, 36, 24, 0.045);
-}
 
-.banlist-authority-line > span {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(243, 58, 40, 0.26);
-  border-radius: 50%;
-  background: rgba(243, 58, 40, 0.08);
-  color: #ff7568;
-  font-size: 0.65rem;
-}
 
-.banlist-authority-line strong,
-.banlist-authority-line small {
-  display: block;
-}
 
-.banlist-authority-line strong {
-  color: #f1ebe5;
-  font-size: 0.78rem;
-  letter-spacing: 0.015em;
-}
 
-.banlist-authority-line small {
-  margin-top: 0.15rem;
-  color: #8f8984;
-  font-size: 0.69rem;
-  line-height: 1.45;
-}
 
 .current-banlist-list > li {
   border-radius: 0.5rem;
@@ -796,12 +759,10 @@
 @media (max-width: 640px) {
   .banlist-status-stack { justify-content: flex-start; }
   .nitrado-banlist-panel .panel-heading { align-items: flex-start; }
-  .banlist-authority-line { grid-template-columns: 24px minmax(0, 1fr); padding: 0.72rem; }
-  .banlist-authority-line > span { width: 24px; height: 24px; }
 }
 
 
-/* v1.22.20 — service branding for live moderation sources */
+/* v1.22.21 — service branding for live moderation sources */
 .current-banlist-grid > .inset-panel:first-child {
   position: relative;
   overflow: hidden;
@@ -841,7 +802,6 @@
   object-fit: contain;
   filter: brightness(0) saturate(100%) invert(68%) sepia(38%) saturate(7427%) hue-rotate(204deg) brightness(103%) contrast(93%);
 }
-.banlist-authority-line strong,
 .current-banlist-list strong,
 .current-banlist-list .activity-row-action {
   text-transform: capitalize;

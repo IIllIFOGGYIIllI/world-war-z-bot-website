@@ -1,19 +1,17 @@
-world-war-z-website v1.22.20 updated files
+world-war-z-website v1.22.21 patch files
 
-dashboard.html
-shop.html
 index.html
+dashboard.html
 changelog.html
 README.md
 PATCH_NOTES.md
-PATCH_FILE_LIST.txt
 DELETE_THESE_FILES.txt
-assets/icons/discord.svg
-assets/css/dashboard/workspace.css
-assets/css/dashboard/moderation.css
-assets/css/pages/shop.css
+PATCH_FILE_LIST.txt
 assets/js/dashboard/core.js
+assets/js/dashboard/account.js
 assets/js/dashboard/administration.js
-assets/js/pages/shop.js
+assets/css/dashboard/core.css
+assets/css/dashboard/moderation.css
+assets/css/dashboard/workspace.css
 
-Additional HTML pages have refreshed heading casing/cache markers where applicable.
+Other HTML/CSS files are included only where the v1.22.21 browser cache marker changed.

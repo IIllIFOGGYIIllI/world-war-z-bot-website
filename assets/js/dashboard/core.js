@@ -99,6 +99,7 @@ const STATUS_LABELS = {
 
 const authMessage = document.querySelector('[data-auth-message]');
 const startDiscordLoginButton = document.querySelector('[data-start-discord-login]');
+const startDiscordLoginLabel = document.querySelector('[data-start-discord-login-label]');
 const signOutButton = document.querySelector('[data-sign-out]');
 const authDialogNotice = document.querySelector('[data-auth-dialog-notice]');
 const serverActionDialog = document.querySelector('[data-server-action-dialog]');

@@ -667,11 +667,11 @@ const configureDiscordAuth = async () => {
 
   if (discordAuthEnabled) {
     startDiscordLoginButton?.removeAttribute('disabled');
-    if (startDiscordLoginButton) startDiscordLoginButton.textContent = 'Continue securely with Discord';
+    if (startDiscordLoginLabel) startDiscordLoginLabel.textContent = 'Continue Securely With Discord';
     if (authDialogNotice) authDialogNotice.querySelector('span').textContent = 'Your dashboard session lasts for this browser tab and expires automatically.';
   } else {
     startDiscordLoginButton?.setAttribute('disabled', '');
-    if (startDiscordLoginButton) startDiscordLoginButton.textContent = 'Discord sign-in is being configured';
+    if (startDiscordLoginLabel) startDiscordLoginLabel.textContent = 'Discord Sign-In Is Being Configured';
     if (authDialogNotice) authDialogNotice.querySelector('span').textContent = 'The live server status remains available while Discord sign-in is being configured.';
   }
 

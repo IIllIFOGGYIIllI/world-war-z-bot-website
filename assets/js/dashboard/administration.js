@@ -1411,7 +1411,7 @@ const renderBanlistSource = (source, type) => {
   const entries = available && Array.isArray(source?.entries) ? source.entries : [];
   const reportedCount = Number(source?.count);
   const count = Number.isFinite(reportedCount) ? Math.max(0, Math.trunc(reportedCount)) : entries.length;
-  setText(countSelector, source?.truncated ? `${entries.length}+ shown` : `${count} current`);
+  setText(countSelector, source?.truncated ? `${entries.length}+ Shown` : `${count} Current`);
   if (empty) empty.hidden = !available || entries.length !== 0;
   if (error) {
     error.hidden = available;
@@ -1468,8 +1468,9 @@ const loadCurrentBanlists = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
   refreshBanlistsButton?.setAttribute('aria-busy', 'true');
 
   try {
-    const response = await authFetch(ADMIN_BANLISTS_URL, {
+    const response = await authFetch(`${ADMIN_BANLISTS_URL}?refresh=${Date.now()}`, {
       method: 'GET',
+      cache: 'no-store',
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${sessionToken}`

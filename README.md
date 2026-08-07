@@ -13,7 +13,7 @@ After GitHub Pages is enabled, the site will be available at:
 1. Open the `world-war-z-website` repository on GitHub.
 2. Select **Add file** and then **Upload files**.
 3. Upload everything in this package, including `.github`, `.nojekyll` and the `assets` folder.
-4. Enter the commit message: `Polish ban list and headings`
+4. Enter the commit message: `Sync live ban lists`
 5. Select **Commit changes**.
 6. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
 7. Open **Actions → Deploy World War Z Website** and run it manually only if the push did not start it automatically.
@@ -61,6 +61,14 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+
+## Version 1.22.21 Live Ban-List Synchronisation And Discord Sign-In Polish
+
+- Requests a fresh Nitrado DayZ ban list on every Admin refresh and displays it in the exact order stored by Nitrado.
+- Removes the redundant Authoritative Nitrado Source card from the DayZ ban-list panel.
+- Removes the duplicate Discord icon from the top-right sign-in control.
+- Uses a single Discord mark in the OAuth dialog and Continue button.
+- Pairs with World War Z Discord Bot v1.18.22.
 
 ## Version 1.22.20 Professional Navigation And Ban-List Polish
 

@@ -1,3 +1,25 @@
+# Version 1.22.21
+
+## Live Ban-List Synchronisation
+
+- The Admin DayZ Ban List requests a fresh Railway/Nitrado result on every refresh instead of being held behind an earlier failure retry window.
+- DayZ ban entries are displayed in the exact order returned by Nitrado/`ban.txt`, not alphabetically.
+- Removed the redundant `Authoritative Nitrado Source` information card.
+
+## Discord Sign-In Polish
+
+- Removed the duplicate Discord icon from the top-right sign-in control.
+- Added a single Discord mark to the OAuth sign-in dialog and its Continue button.
+- Refined title casing for authentication and ban-list interface labels.
+
+## Compatibility And Safety
+
+- Pairs with Bot v1.18.22.
+- No public URL, OAuth callback, permission model or database schema changed.
+- Railway `/app/data/players.db` remains untouched.
+
+---
+
 # Version 1.22.20
 
 - Replaced dashboard sidebar abbreviations with semantic SVG icons.

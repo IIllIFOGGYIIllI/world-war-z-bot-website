@@ -1703,3 +1703,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .current-banlist-list { max-height: none; }
 }
 
+
+/* v1.22.21 Discord sign-in polish */
+.login-dialog .discord-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: rgba(88, 101, 242, 0.15);
+  border: 1px solid rgba(88, 101, 242, 0.32);
+}
+.login-dialog .discord-mark img { width: 31px; height: 31px; display: block; }
+.login-dialog .discord-button.wide { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.login-dialog .discord-button.wide .discord-service-logo { width: 20px; height: 20px; flex: 0 0 auto; }
