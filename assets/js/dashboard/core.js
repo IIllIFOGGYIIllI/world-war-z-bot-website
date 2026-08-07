@@ -418,7 +418,7 @@ const setAuthBadgeState = (state, label) => {
   setText('[data-auth-badge-label]', label);
 };
 
-const renderDiscordAvatar = (selector, avatarUrl, fallback = 'WZ', alt = 'Discord avatar') => {
+const renderDiscordAvatar = (selector, avatarUrl, fallback = 'DISCORD', alt = 'Discord avatar') => {
   document.querySelectorAll(selector).forEach((container) => {
     container.replaceChildren();
     if (avatarUrl) {
@@ -429,9 +429,23 @@ const renderDiscordAvatar = (selector, avatarUrl, fallback = 'WZ', alt = 'Discor
       image.referrerPolicy = 'no-referrer';
       image.addEventListener('error', () => {
         container.replaceChildren();
-        container.textContent = fallback;
+        if (fallback === 'DISCORD') {
+          const brand = document.createElement('img');
+          brand.src = 'assets/icons/discord.svg';
+          brand.alt = '';
+          brand.className = 'discord-avatar-fallback';
+          container.append(brand);
+        } else {
+          container.textContent = fallback;
+        }
       }, { once: true });
       container.append(image);
+    } else if (fallback === 'DISCORD') {
+      const brand = document.createElement('img');
+      brand.src = 'assets/icons/discord.svg';
+      brand.alt = '';
+      brand.className = 'discord-avatar-fallback';
+      container.append(brand);
     } else {
       container.textContent = fallback;
     }
@@ -448,9 +462,9 @@ const applySignedOutState = ({ unavailable = false } = {}) => {
   setText('[data-access-card-title]', 'Guest access');
   setText('[data-access-card-copy]', 'Sign in will securely verify your community access.');
   setText('[data-access-icon]', '⌁');
-  renderDiscordAvatar('[data-account-avatar]', null, 'WZ');
-  renderDiscordAvatar('[data-topbar-avatar]', null, 'WZ');
-  renderDiscordAvatar('[data-profile-discord-avatar]', null, 'WZ');
+  renderDiscordAvatar('[data-account-avatar]', null, 'DISCORD');
+  renderDiscordAvatar('[data-topbar-avatar]', null, 'DISCORD');
+  renderDiscordAvatar('[data-profile-discord-avatar]', null, 'DISCORD');
   setText('[data-auth-description]', unavailable
     ? 'Discord verification is temporarily unavailable. Your existing browser session has not been exposed.'
     : 'Discord sign-in securely verifies your World War Z membership and current access level.');

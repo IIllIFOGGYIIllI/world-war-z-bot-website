@@ -1,3 +1,12 @@
+# Version 1.22.20
+
+- Replaced dashboard sidebar abbreviations with semantic SVG icons.
+- Added dedicated Discord service marks to Discord-specific navigation and ban-list surfaces.
+- Standardised title casing across dashboard and shop headings, navigation and action labels.
+- Strengthened selected-navigation and moderation-source presentation.
+- Added a local Discord SVG asset with no external runtime dependency.
+- Pairs with Bot v1.18.20.
+
 # Version 1.22.19
 
 ## Professional Nitrado ban-list presentation
@@ -13,7 +22,7 @@
 - Updated current command-count wording to the 93-command bot tree.
 - Standardised all public/dashboard H1–H6 headings so each word starts with a capital letter.
 - Removed unnecessary trailing full stops from website headings while preserving meaningful punctuation such as question marks.
-- Refreshed browser cache markers to v1.22.19.
+- Refreshed browser cache markers to v1.22.20.
 
 ## Compatibility and safety
 

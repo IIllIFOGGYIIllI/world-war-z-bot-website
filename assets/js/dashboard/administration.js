@@ -277,7 +277,7 @@ const renderAdminPlayerResults = (players) => {
   });
 };
 
-const appendAdminActivity = (list, { symbolText, symbolClass = '', titleText, detailText, actionButton = null, actionButtons = [] }) => {
+const appendAdminActivity = (list, { symbolText, symbolClass = '', symbolBrand = '', titleText, detailText, actionButton = null, actionButtons = [] }) => {
   if (!list) return;
   const item = document.createElement('li');
   const symbol = document.createElement('span');
@@ -286,7 +286,16 @@ const appendAdminActivity = (list, { symbolText, symbolClass = '', titleText, de
   const details = document.createElement('small');
 
   symbol.className = `activity-symbol ${symbolClass}`.trim();
-  symbol.textContent = symbolText;
+  if (symbolBrand === 'discord') {
+    symbol.classList.add('discord');
+    const brand = document.createElement('img');
+    brand.src = 'assets/icons/discord.svg';
+    brand.alt = '';
+    brand.className = 'activity-brand-icon';
+    symbol.append(brand);
+  } else {
+    symbol.textContent = symbolText;
+  }
   title.textContent = titleText;
   details.textContent = detailText;
   content.append(title, details);
@@ -1366,7 +1375,7 @@ const banlistOpenPlayerButton = (psnId) => {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'activity-row-action';
-  button.textContent = 'Open player';
+  button.textContent = 'Open Player';
   button.addEventListener('click', () => loadAdminPlayerDetails(cleanPsn));
   return button;
 };
@@ -1432,6 +1441,7 @@ const renderBanlistSource = (source, type) => {
     appendAdminActivity(list, {
       symbolText: '⊘',
       symbolClass: 'red',
+      symbolBrand: isDiscord ? 'discord' : '',
       titleText: title,
       detailText: `${identity} · ${caseLabel} · ${banScheduleLabel(entry)} · ${reason}${moderator}${created}`,
       actionButton: banlistOpenPlayerButton(psnId)

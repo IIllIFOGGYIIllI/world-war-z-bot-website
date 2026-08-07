@@ -97,3 +97,28 @@
   .member-coordinate-grid { grid-template-columns:1fr 1fr; }
   .member-purchase-dialog form { width:calc(100vw - 24px); }
 }
+
+
+/* v1.22.20 — consistent professional UI labels */
+.shop-topnav a,
+.shop-account-actions button,
+.shop-hero-actions a,
+.shop-mode-tabs strong,
+.shop-mode-tabs small,
+.shop-account-strip span,
+.shop-account-strip small,
+.member-shop-section button,
+.member-shop-section label > span,
+.member-shop-section h1,
+.member-shop-section h2,
+.member-shop-section h3 {
+  text-transform: capitalize;
+}
+.shop-auth-avatar .discord-avatar-fallback {
+  width: 60%;
+  height: 60%;
+  margin: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: .95;
+}

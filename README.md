@@ -61,6 +61,14 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+
+## Version 1.22.20 Professional Navigation And Ban-List Polish
+
+- Replaces sidebar abbreviations with semantic SVG icons and Discord service branding.
+- Standardises title casing across dashboard navigation, headings, actions and the member shop.
+- Adds Discord-logo fallbacks anywhere a Discord avatar is not yet available.
+- Improves the visual hierarchy of Current Ban Lists and pairs with Bot v1.18.20 for stronger Nitrado fallback discovery.
+
 ## Version 1.22.19 professional ban-list controls and headings
 
 - The Admin DayZ ban-list panel now identifies whether the authoritative list came from Nitrado Player Management, Nitrado `ban.txt`, the last confirmed Nitrado snapshot or an unavailable source.
@@ -69,7 +77,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - Updated the command library for the 93-command bot tree and the direct `/purge messages` path.
 - Standardised public and dashboard H1–H6 headings to capitalise the beginning of every word and removed unnecessary trailing full stops.
 - Added a stronger Nitrado status presentation while retaining the existing dark red World War Z visual system.
-- Refreshed browser cache markers to v1.22.19.
+- Refreshed browser cache markers to v1.22.20.
 - Pairs with World War Z Discord Bot v1.18.19.
 
 Commit message:

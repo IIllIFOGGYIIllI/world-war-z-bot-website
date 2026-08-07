@@ -11,8 +11,8 @@
 <meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image"/>
 <title>Survivor Shop | World War Z</title>
 <link href="assets/favicon.png" rel="icon"/>
-<link href="assets/css/dashboard/core.css?v=1.22.19" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.19" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.19" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.19" rel="stylesheet"/>
-<link href="assets/css/pages/shop.css?v=1.22.19" rel="stylesheet"/>
+<link href="assets/css/dashboard/core.css?v=1.22.20" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.20" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.20" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.20" rel="stylesheet"/>
+<link href="assets/css/pages/shop.css?v=1.22.20" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/></head>
 <body class="member-shop-page">
 <a class="skip-link" href="#shop-main">Skip to shop</a>
@@ -30,10 +30,10 @@
 <div class="shop-account-actions">
 <span class="connection-state" data-shop-api-state="loading"><span></span><span data-shop-api-label="">Connecting</span></span>
 <button class="discord-button" data-shop-auth-button="" type="button">
-<span class="shop-auth-avatar" data-shop-auth-avatar="">WZ</span>
+<span class="shop-auth-avatar" data-shop-auth-avatar=""><img alt="" aria-hidden="true" class="discord-avatar-fallback" src="assets/icons/discord.svg"/></span>
 <span data-shop-auth-label="">Sign in with Discord</span>
 </button>
-<button class="secondary-action compact-action" data-shop-signout="" hidden="" type="button">Sign out</button>
+<button class="secondary-action compact-action" data-shop-signout="" hidden="" type="button">Sign Out</button>
 </div>
 </header>
 <main class="member-shop-shell" id="shop-main">
@@ -65,7 +65,7 @@
 <section aria-labelledby="catalogue-title" class="member-shop-section" id="catalogue">
 <div class="view-heading shop-section-heading">
 <div><p class="breadcrumb">Member Shop / Catalogue</p><h2 id="catalogue-title">Approved DayZ Goods</h2><p data-member-shop-instructions="">Railway prepares each paid order automatically for the next server restart.</p></div>
-<button class="secondary-action compact-action" data-member-shop-refresh="" type="button">Refresh shop</button>
+<button class="secondary-action compact-action" data-member-shop-refresh="" type="button">Refresh Shop</button>
 </div>
 <div aria-label="Catalogue type" class="shop-mode-tabs" role="tablist">
 <button aria-selected="true" class="active" data-member-shop-mode="manual" role="tab" type="button"><span>▣</span><strong>Items</strong><small>Automatic item deliveries</small><b data-member-manual-count="">0</b></button>
@@ -83,10 +83,10 @@
 <section aria-labelledby="orders-title" class="member-shop-section member-orders-section" id="orders">
 <div class="view-heading shop-section-heading">
 <div><p class="breadcrumb">Member Shop / Private history</p><h2 id="orders-title">My Orders</h2><p>Only orders attached to your verified Discord and PlayStation identity are shown.</p></div>
-<button class="secondary-action compact-action" data-member-orders-refresh="" type="button">Refresh orders</button>
+<button class="secondary-action compact-action" data-member-orders-refresh="" type="button">Refresh Orders</button>
 </div>
 <div class="locked-copy" data-member-orders-guest="">
-<span aria-hidden="true" class="large-lock">📦</span><h3>Sign In To Track Your Orders</h3><p>Your order history, balance and delivery status are private.</p><button class="primary-action" data-shop-login="" type="button">Sign in with Discord</button>
+<span aria-hidden="true" class="large-lock">📦</span><h3>Sign In To Track Your Orders</h3><p>Your order history, balance and delivery status are private.</p><button class="primary-action" data-shop-login="" type="button">Sign In With Discord</button>
 </div>
 <div class="security-notice" data-member-orders-unlinked="" hidden=""><span aria-hidden="true">⌁</span><div><strong>A verified PlayStation link is required</strong><p>Use <code>/link</code> in Discord, then refresh this page.</p></div></div>
 <div class="member-order-list" data-member-order-list="" hidden=""></div>
@@ -105,8 +105,8 @@
 <h2 id="member-login-title">Connect Discord</h2>
 <p>Discord confirms your community membership and access roles. The website never receives your Discord password.</p>
 <div class="dialog-notice"><strong>Browser session</strong><span>Your session stays in this browser tab and expires automatically.</span></div>
-<button class="discord-button wide" data-member-start-login="" disabled="" type="button">Checking Discord sign-in…</button>
-<button class="dialog-cancel" value="close">Return to shop</button>
+<button class="discord-button wide" data-member-start-login="" disabled="" type="button">Checking Discord Sign-in…</button>
+<button class="dialog-cancel" value="close">Return To Shop</button>
 </form>
 </dialog>
 <dialog aria-labelledby="member-purchase-title" class="login-dialog shop-purchase-dialog member-purchase-dialog" data-member-purchase-dialog="">
@@ -127,7 +127,7 @@
 </div>
 <div class="member-coordinate-map" data-member-coordinate-map="">
 <div class="member-coordinate-stage" data-member-coordinate-stage="">
-<img alt="Chernarus satellite coordinate selector" data-member-coordinate-image="" draggable="false" src="assets/chernarus-map/overview.webp?v=1.22.19"/>
+<img alt="Chernarus satellite coordinate selector" data-member-coordinate-image="" draggable="false" src="assets/chernarus-map/overview.webp?v=1.22.20"/>
 <span class="member-map-marker" data-member-map-marker="" hidden=""></span>
 </div>
 <div aria-label="Map controls" class="member-map-controls">
@@ -144,10 +144,10 @@
 <label class="dialog-field"><span>Order note <small>Optional</small></span><textarea data-member-purchase-note="" maxlength="500" placeholder="Optional delivery note" rows="3"></textarea></label>
 <div class="shop-purchase-total"><span>Order total</span><strong data-member-purchase-total="">—</strong></div>
 <div class="restart-dialog-message" data-member-purchase-message="" hidden="" role="status"></div>
-<button class="primary-action wide" data-member-purchase-confirm="" type="submit">Place protected order</button>
+<button class="primary-action wide" data-member-purchase-confirm="" type="submit">Place Protected Order</button>
 <button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
 </form>
 </dialog>
-<script defer src="assets/js/core/http.js?v=1.22.19"></script><script defer src="assets/js/pages/shop.js?v=1.22.19"></script>
+<script defer="" src="assets/js/core/http.js?v=1.22.20"></script><script defer="" src="assets/js/pages/shop.js?v=1.22.20"></script>
 </body>
 </html>

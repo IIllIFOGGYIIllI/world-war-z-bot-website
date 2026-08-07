@@ -102,7 +102,7 @@ const startLogin = () => {
 const setSignedOut = () => {
   state.user = null;
   elements.authLabel.textContent = 'Sign in with Discord';
-  avatar('', 'WZ');
+  avatar('', 'DISCORD');
   elements.signout.hidden = true;
   elements.wallet.textContent = 'Sign in required';
   elements.openOrders.textContent = '—';
