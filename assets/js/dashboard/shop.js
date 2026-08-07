@@ -37,6 +37,7 @@ const shopOrderNavBadge = document.querySelector('[data-shop-order-nav-badge]');
 const shopOrderActionDialog = document.querySelector('[data-shop-order-action-dialog]');
 const shopOrderActionForm = document.querySelector('[data-shop-order-action-form]');
 const shopOrderActionNote = document.querySelector('[data-shop-order-action-note]');
+const shopOrderActionNoteField = shopOrderActionNote?.closest('.dialog-field');
 const shopOrderActionNoteLabel = document.querySelector('[data-shop-order-action-note-label]');
 const shopOrderActionNoteHelp = document.querySelector('[data-shop-order-action-note-help]');
 const shopOrderActionMessage = document.querySelector('[data-shop-order-action-message]');
@@ -591,18 +592,16 @@ const adminShopActionButton = (label, action, order, danger = false) => {
     selectedShopOrder = order;
     selectedShopOrderAction = action;
     shopOrderActionForm?.reset();
-    const reasonRequired = ['cancel', 'refund'].includes(action);
+    const hideActionNote = ['cancel', 'refund'].includes(action);
+    if (shopOrderActionNoteField) shopOrderActionNoteField.hidden = hideActionNote;
     if (shopOrderActionNote) {
-      shopOrderActionNote.required = reasonRequired;
-      shopOrderActionNote.minLength = reasonRequired ? 3 : 0;
-      shopOrderActionNote.placeholder = reasonRequired
-        ? 'Explain why this order is being cancelled or refunded.'
-        : 'Optional processing or fulfilment note.';
+      shopOrderActionNote.required = false;
+      shopOrderActionNote.minLength = 0;
+      shopOrderActionNote.value = '';
+      shopOrderActionNote.placeholder = 'Optional processing or fulfilment note.';
     }
-    if (shopOrderActionNoteLabel) shopOrderActionNoteLabel.textContent = reasonRequired ? 'Reason' : 'Action note';
-    if (shopOrderActionNoteHelp) shopOrderActionNoteHelp.textContent = reasonRequired
-      ? 'Required · 3–1,000 characters'
-      : 'Optional for processing and fulfilment';
+    if (shopOrderActionNoteLabel) shopOrderActionNoteLabel.textContent = 'Action note';
+    if (shopOrderActionNoteHelp) shopOrderActionNoteHelp.textContent = 'Optional for processing and fulfilment';
     setText('[data-shop-order-action-title]', `${label} order #${order.order_id}?`);
     setText('[data-shop-order-action-target]', `${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`);
     setText('[data-shop-order-action-detail]', `${formatMoney(order.total_price)} · ${shopStatusLabel(order.status)}`);

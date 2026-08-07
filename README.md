@@ -67,7 +67,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
-## Version 1.22.31 Shared Admin Public Map Markers
+## Version 1.22.32 Shared Admin Public Map Markers
 
 The main Chernarus map no longer ships the old hard-coded landmark pins. The authoritative bilingual settlement-name layer handles built-in city/village navigation, while shared public markers are now live server data from Railway.
 

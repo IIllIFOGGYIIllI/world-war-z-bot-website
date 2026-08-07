@@ -1,3 +1,16 @@
+# Version 1.22.32
+
+## Trader Refund Confirmation Cleanup
+
+- Removes the Reason textarea entirely from Cancel & Refund / Refund Order confirmation dialogs.
+- Cancel/refund actions no longer require staff to type a 3–1,000 character reason before confirming.
+- Processing and fulfilment actions keep their optional Action note field.
+- The refund, stock restoration, order-history and protected Railway action flow are unchanged.
+- Pairs with Bot v1.18.30, which accepts an empty cancellation/refund note.
+- No map, satellite, road, authentication or database-reset behaviour changed.
+
+---
+
 # Version 1.22.31
 
 ## Shared Admin Public Map Markers
