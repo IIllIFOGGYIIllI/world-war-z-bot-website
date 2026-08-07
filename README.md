@@ -17,7 +17,7 @@ Because the corrected Chernarus pyramid contains 4,810 JPG tiles, deploy this pa
 3. From the repository root, run `powershell -ExecutionPolicy Bypass -File .\scripts\install_chernarus_map_assets.ps1`.
 4. Confirm `py .\scripts\validate_site.py --require-map-assets` passes.
 5. Commit with: `Replace Chernarus map renderer`
-6. Push the commit, including the corrected JPG tiles and final road GeoJSON.
+6. Push the commit, including the corrected JPG tiles. The final road GeoJSON is already bundled in this patch.
 7. Keep **Settings → Pages → Source** set to **GitHub Actions**.
 8. The included Pages workflow validates the map assets and JavaScript before publishing.
 
@@ -54,7 +54,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `assets/js/pages/dashboard-map-loader.js` — lazy map workspace loader
 - `assets/js/core/http.js` — shared timeout-aware browser request helper
 - `scripts/validate_site.py` — static/reference/map-data validation used by GitHub Actions
-- `scripts/install_chernarus_map_assets.ps1` — copies the approved local production map assets into the repository and removes retired map files
+- `scripts/install_chernarus_map_assets.ps1` — copies the approved local corrected satellite pyramid into the repository, preserves the bundled production road GeoJSON and removes retired map files
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
 - `CHERNARUS_MAP_PLAN.md` — implemented satellite map architecture and operating notes
@@ -69,7 +69,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 The website now uses one shared Leaflet-based Chernarus renderer for the main interactive map, dashboard shop checkout, standalone Survivor Shop checkout and Saved Delivery Locations. It uses the corrected local JPG satellite pyramid, the final grouped WRP-derived production road overlay, the proven 15,360 m → 240 Leaflet coordinate conversion, one-decimal DayZ X/Z selection and the approved 180% road-width profile.
 
-Before deployment, run `scripts/install_chernarus_map_assets.ps1` from a local clone. It copies the completed `satellite-corrected` pyramid and `chernarus-roads-overlay-final.geojson` from the approved local map project, removes the retired WebP/vector map assets and runs strict validation. GitHub Pages also enforces those production assets before publishing.
+Before deployment, run `scripts/install_chernarus_map_assets.ps1` from a local clone. The final `chernarus-roads-overlay-final.geojson` is bundled in this patch; the installer copies only the completed `satellite-corrected` pyramid from the approved local map project, removes the retired WebP/vector map assets and runs strict validation. GitHub Pages also enforces those production assets before publishing.
 
 Pairs with Bot v1.18.26. No Railway API, database, Normal Item delivery, Event Item rental, moderation, authentication or permission behaviour changed.
 

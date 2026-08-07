@@ -14,7 +14,8 @@
 - Coordinate pickers populate native DayZ X/Z with one decimal place and retain existing saved-location and checkout behaviour.
 - Did not add a map to Events & Zones because the current website does not expose a coordinate-map workflow there; Event Zone remains optional where already supported.
 - Retired the old WebP tile pyramid, overview image, tile report and legacy vector map fallback.
-- Added a PowerShell asset installer for copying the user's completed corrected satellite pyramid and final road GeoJSON into the repository safely.
+- Bundled the validated final production road GeoJSON directly in the website patch.
+- Added a PowerShell asset installer for copying the user's completed corrected satellite pyramid into the repository safely.
 - GitHub Pages validation now refuses deployment if the production map assets are missing or retired map assets remain.
 - Pairs with Bot v1.18.26.
 - No Railway API, authentication, permission, moderation, shop/rental API contract or database behaviour changed.
@@ -22,9 +23,12 @@
 
 ## Production asset prerequisite
 
-The binary production map assets were not present in the uploaded website archive. Before deployment, copy:
+The validated final road GeoJSON is now bundled in this patch at:
+
+- `assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson`
+
+Before deployment, only the corrected satellite pyramid still needs to be copied:
 
 - `D:\Project Drive\DZ\road-overlay-work\chernarus-map\satellite-corrected\` → `assets/chernarus-map/satellite-corrected/`
-- `D:\Project Drive\DZ\road-overlay-work\chernarus-map\test\data\chernarus-roads-overlay-final.geojson` → `assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson`
 
-Run `scripts/install_chernarus_map_assets.ps1` from PowerShell to perform that copy, remove retired map assets and run strict validation automatically.
+Run `scripts/install_chernarus_map_assets.ps1` from PowerShell to copy the satellite pyramid, remove retired map assets and run strict validation automatically.

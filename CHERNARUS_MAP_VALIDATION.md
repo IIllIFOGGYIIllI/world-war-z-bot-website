@@ -2,7 +2,7 @@
 
 ## Required production assets
 
-The v1.22.27 code patch does not fabricate or substitute the completed map binaries. Before GitHub Pages deployment the repository must contain:
+The v1.22.27 patch now bundles the validated final production road GeoJSON. Before GitHub Pages deployment the repository must contain that bundled road file plus the corrected satellite pyramid:
 
 ```text
 assets/chernarus-map/satellite-corrected/0/0/0.jpg
@@ -35,7 +35,7 @@ From the root of a local clone of `world-war-z-website`:
 powershell -ExecutionPolicy Bypass -File .\scripts\install_chernarus_map_assets.ps1
 ```
 
-The script uses the approved local map project paths by default, removes retired map assets, copies the corrected JPG pyramid and final road GeoJSON, validates the tile count and then runs strict website validation.
+The script uses the approved local satellite path by default, removes retired map assets, copies the corrected JPG pyramid, preserves the bundled final road GeoJSON, validates the tile count and then runs strict website validation.
 
 ## Website validation
 

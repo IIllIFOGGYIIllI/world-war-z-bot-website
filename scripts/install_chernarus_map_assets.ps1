@@ -1,6 +1,6 @@
 param(
     [string]$SatelliteSource = "D:\Project Drive\DZ\road-overlay-work\chernarus-map\satellite-corrected",
-    [string]$RoadSource = "D:\Project Drive\DZ\road-overlay-work\chernarus-map\test\data\chernarus-roads-overlay-final.geojson",
+    [string]$RoadSource = "",
     [string]$RepositoryRoot = ""
 )
 
@@ -19,7 +19,11 @@ $RoadTarget = Join-Path $RoadTargetDir "chernarus-roads-overlay-final.geojson"
 Write-Host "=== World War Z Chernarus Production Map Installer ==="
 Write-Host "Repository: $RepositoryRoot"
 Write-Host "Satellite:  $SatelliteSource"
-Write-Host "Roads:      $RoadSource"
+if ([string]::IsNullOrWhiteSpace($RoadSource)) {
+    Write-Host "Roads:      bundled production GeoJSON"
+} else {
+    Write-Host "Roads:      $RoadSource"
+}
 Write-Host ""
 
 if (-not (Test-Path -LiteralPath $SatelliteSource -PathType Container)) {
@@ -28,10 +32,6 @@ if (-not (Test-Path -LiteralPath $SatelliteSource -PathType Container)) {
 
 if (-not (Test-Path -LiteralPath (Join-Path $SatelliteSource "0\0\0.jpg") -PathType Leaf)) {
     throw "The satellite source does not contain the expected root tile 0\0\0.jpg."
-}
-
-if (-not (Test-Path -LiteralPath $RoadSource -PathType Leaf)) {
-    throw "Production road GeoJSON was not found: $RoadSource"
 }
 
 $sourceJpg = @(Get-ChildItem -LiteralPath $SatelliteSource -Recurse -File -Filter "*.jpg")
@@ -74,9 +74,20 @@ foreach ($zoom in 0..6) {
     Copy-Item -LiteralPath (Join-Path $SatelliteSource ([string]$zoom)) -Destination $SatelliteTarget -Recurse -Force
 }
 
-Write-Host "Installing final production road GeoJSON..."
 New-Item -ItemType Directory -Path $RoadTargetDir -Force | Out-Null
-Copy-Item -LiteralPath $RoadSource -Destination $RoadTarget -Force
+
+if ([string]::IsNullOrWhiteSpace($RoadSource)) {
+    if (-not (Test-Path -LiteralPath $RoadTarget -PathType Leaf)) {
+        throw "Bundled production road GeoJSON is missing from the patch: $RoadTarget"
+    }
+    Write-Host "Using bundled final production road GeoJSON."
+} else {
+    if (-not (Test-Path -LiteralPath $RoadSource -PathType Leaf)) {
+        throw "Production road GeoJSON was not found: $RoadSource"
+    }
+    Write-Host "Installing supplied final production road GeoJSON..."
+    Copy-Item -LiteralPath $RoadSource -Destination $RoadTarget -Force
+}
 
 $installedJpg = @(Get-ChildItem -LiteralPath $SatelliteTarget -Recurse -File -Filter "*.jpg")
 if ($installedJpg.Count -ne 4810) {
@@ -104,5 +115,5 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host ""
 Write-Host "SUCCESS"
 Write-Host "Installed 4,810 corrected JPG satellite tiles."
-Write-Host "Installed chernarus-roads-overlay-final.geojson."
+Write-Host "Validated bundled chernarus-roads-overlay-final.geojson."
 Write-Host "The repository is ready for GitHub Pages validation/deployment."

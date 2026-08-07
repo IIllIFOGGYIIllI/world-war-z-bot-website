@@ -29,8 +29,8 @@ DELETE_THESE_FILES.txt
 ADDED
 assets/css/components/chernarus-map.css
 assets/chernarus-map/satellite-corrected/README.md
+assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson
 scripts/install_chernarus_map_assets.ps1
 
-PRODUCTION ASSETS TO COPY LOCALLY BEFORE DEPLOYMENT
+PRODUCTION ASSET TO COPY LOCALLY BEFORE DEPLOYMENT
 assets/chernarus-map/satellite-corrected/{z}/{x}/{y}.jpg
-assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson
