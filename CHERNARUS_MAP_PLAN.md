@@ -125,13 +125,43 @@ Events & Zones are not given a new map merely because the renderer exists. A sha
 - Satellite tiles are local static GitHub Pages assets.
 - Map instances lazy-initialise in hidden dashboard views only when needed.
 
-## v1.22.29 — map pins and place-name overlay
+## v1.22.30 — authoritative bilingual place-name overlay
 
-- Public and browser-local custom map locations use named location-pin markers instead of circular dots.
-- Marker labels are presentation-only and do not change stored DayZ X/Z coordinates.
-- Selecting an existing location highlights its real marker; the separate unsaved-selection pin is reserved for direct map clicks.
-- The main map exposes a `Names` layer beside Roads and Trails.
-- `assets/data/chernarus/place-names.json` stores settlement label anchors independently from WRP road geometry.
-- City, town and village labels are zoom-aware and non-interactive.
-- If a visible public/custom marker has the same name as a settlement label, the generic settlement label is suppressed to avoid duplicate text.
-- This architecture allows later bilingual/Cyrillic text, label hierarchy and anchor-position polish without rebuilding satellite tiles or touching road coordinates.
+The main dashboard map keeps the v1.22.29 public/custom location-pin marker system, but its generic settlement-name layer is now generated from the actual ChernarusPlus world config rather than manually positioned navigation labels.
+
+Source:
+
+```text
+D:\Project Drive\DZ\worlds\chernarusplus\world\config.cpp
+CfgWorlds > ChernarusPlus > Names
+```
+
+The source contains 306 named-map records across settlement, local, camp, hill, marine, ruin, railroad, office and viewpoint categories. The production settlement overlay intentionally includes only the config's 77 settlement records:
+
+- 2 `Capital`
+- 16 `City`
+- 59 `Village`
+
+No artificial `town` classification is introduced.
+
+For each settlement the website stores:
+
+- `sourceClass` (`Settlement_*`);
+- familiar Latin/transliterated name derived from that class;
+- exact Cyrillic `name` from the config;
+- exact DayZ X/Z `position[]`;
+- config `sourceType`;
+- presentation `type`;
+- minimum Leaflet zoom.
+
+Presentation:
+
+- Capital labels from zoom 0.
+- City labels from zoom 2.
+- Village labels from zoom 4.
+- Cyrillic appears above the Latin/transliterated label.
+- Collision suppression gives Capital → City → Village priority.
+- The label pane is non-interactive and sits below public/custom location pins.
+- If an existing visible pin carries the same Latin or Cyrillic name, the generic settlement label is hidden.
+
+`scripts/build_chernarus_place_names.py` can regenerate `assets/data/chernarus/place-names.json` from an extracted ChernarusPlus world config. The process never reads or modifies WRP road geometry.

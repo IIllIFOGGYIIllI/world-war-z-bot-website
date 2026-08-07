@@ -192,23 +192,54 @@ def validate_place_names(errors: list[str]) -> None:
         errors.append("assets/data/chernarus/place-names.json: places must be a non-empty array")
         return
 
-    valid_types = {"city", "town", "village"}
+    source = payload.get("source") if isinstance(payload, dict) else None
+    if not isinstance(source, dict):
+        errors.append("place-names.json: missing authoritative source metadata")
+    else:
+        if source.get("section") != "CfgWorlds > ChernarusPlus > Names":
+            errors.append("place-names.json: unexpected source section")
+        if source.get("sourceRecordsInNames") != 306:
+            errors.append("place-names.json: source record count must be 306")
+        if source.get("includedSettlementRecords") != 77:
+            errors.append("place-names.json: included settlement record count must be 77")
+
+    valid_types = {"capital", "city", "village"}
+    expected_type_counts = {"capital": 2, "city": 16, "village": 59}
+    type_counts = {kind: 0 for kind in valid_types}
     seen_ids: set[str] = set()
+    seen_source_classes: set[str] = set()
     for index, place in enumerate(places):
         if not isinstance(place, dict):
             errors.append(f"place-names.json: entry {index} is not an object")
             continue
         place_id = str(place.get("id") or "").strip()
         name = str(place.get("name") or "").strip()
+        native_name = str(place.get("nativeName") or "").strip()
+        source_class = str(place.get("sourceClass") or "").strip()
+        source_type = str(place.get("sourceType") or "").strip()
         place_type = str(place.get("type") or "").strip().lower()
-        if not place_id or not name:
-            errors.append(f"place-names.json: entry {index} is missing id/name")
+        if not place_id or not name or not native_name:
+            errors.append(f"place-names.json: entry {index} is missing id/name/nativeName")
         elif place_id in seen_ids:
             errors.append(f"place-names.json: duplicate id {place_id}")
         else:
             seen_ids.add(place_id)
+        if not source_class.startswith("Settlement_"):
+            errors.append(f"place-names.json: {place_id or index} has invalid sourceClass")
+        elif source_class in seen_source_classes:
+            errors.append(f"place-names.json: duplicate sourceClass {source_class}")
+        else:
+            seen_source_classes.add(source_class)
         if place_type not in valid_types:
             errors.append(f"place-names.json: {place_id or index} has unsupported type {place_type!r}")
+        else:
+            type_counts[place_type] += 1
+            expected_source_type = place_type.capitalize()
+            if source_type != expected_source_type:
+                errors.append(
+                    f"place-names.json: {place_id or index} sourceType {source_type!r} "
+                    f"does not match {expected_source_type!r}"
+                )
         for axis in ("x", "z"):
             value = place.get(axis)
             if not isinstance(value, (int, float)) or not 0 <= float(value) <= 15360:
@@ -216,6 +247,14 @@ def validate_place_names(errors: list[str]) -> None:
         zoom = place.get("minZoom")
         if not isinstance(zoom, (int, float)) or not 0 <= float(zoom) <= 14:
             errors.append(f"place-names.json: {place_id or index} has invalid minZoom")
+
+    if len(places) != 77:
+        errors.append(f"place-names.json: contains {len(places)} settlement labels; expected 77")
+    for place_type, expected in expected_type_counts.items():
+        if type_counts[place_type] != expected:
+            errors.append(
+                f"place-names.json: {place_type} count is {type_counts[place_type]}; expected {expected}"
+            )
 
 
 def normalise_group(value: object) -> str | None:

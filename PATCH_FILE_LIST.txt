@@ -1,4 +1,4 @@
-world-war-z-website v1.22.29 patch files
+world-war-z-website v1.22.30 patch files
 
 CHERNARUS_MAP_PLAN.md
 CHERNARUS_MAP_VALIDATION.md
@@ -10,11 +10,11 @@ README.md
 assets/css/components/chernarus-map.css
 assets/data/chernarus/place-names.json
 assets/data/chernarus/pois.json
-assets/js/map/chernarus-map.js
 assets/js/pages/dashboard-map-loader.js
 changelog.html
 dashboard.html
 index.html
+scripts/build_chernarus_place_names.py
 scripts/validate_site.py
 
 No bot files changed.

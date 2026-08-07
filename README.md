@@ -49,12 +49,13 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `assets/chernarus-map/satellite-corrected/` — corrected local JPG Chernarus satellite pyramid, native zooms 0–6
 - `assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson` — final grouped WRP-derived production road geometry
 - `assets/data/chernarus/pois.json` — public read-only map locations and tile configuration
-- `assets/data/chernarus/place-names.json` — zoom-aware city, town and village label anchors for the optional Names overlay
+- `assets/data/chernarus/place-names.json` — config-derived bilingual Capital/City/Village label anchors for the optional Names overlay
 - `assets/js/map/chernarus-map.js` — shared Leaflet satellite/road renderer and native DayZ coordinate tools
 - `assets/css/components/chernarus-map.css` — shared full-map and compact-picker presentation
 - `assets/js/pages/dashboard-map-loader.js` — lazy map workspace loader
 - `assets/js/core/http.js` — shared timeout-aware browser request helper
 - `scripts/validate_site.py` — static/reference/map-data validation used by GitHub Actions
+- `scripts/build_chernarus_place_names.py` — regenerates the authoritative settlement-label JSON from ChernarusPlus `world/config.cpp`
 - `scripts/install_chernarus_map_assets.ps1` — copies the approved local production map assets into the repository and removes retired map files
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
@@ -66,11 +67,11 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
-## Version 1.22.29 Map Pins and Place Names
+## Version 1.22.30 Authoritative Bilingual Chernarus Labels
 
-The main Chernarus workspace replaces circular POI dots with proper location-pin markers and keeps each public/custom marker name visible beside its pin. Selecting an existing marker highlights that marker without stacking a second selection pin on top of it.
+The main Chernarus **Names** overlay now uses the actual settlement records from `CfgWorlds > ChernarusPlus > Names` instead of the temporary manually positioned list. The local JSON contains all 77 settlement records from the game config: 2 Capital, 16 City and 59 Village entries.
 
-A new **Names** overlay renders zoom-aware city, town and village labels from `assets/data/chernarus/place-names.json`. The layer is independent from the satellite and road geometry, can be toggled without redrawing roads, and suppresses duplicate settlement text where a visible public/custom marker already supplies the same name. This release is the first label pass; bilingual/Cyrillic treatment and fine anchor adjustments can be refined independently later.
+Each label keeps the exact config X/Z anchor and Cyrillic name, with the familiar Latin/transliterated name derived from its `Settlement_*` class identifier. Labels render Cyrillic above Latin, use Capital → City → Village zoom/priority hierarchy and apply lightweight collision suppression. The layer stays independent from public/custom pins, satellite tiles and production road geometry.
 
 ## Version 1.22.28 Map Locations and Custom Pins
 

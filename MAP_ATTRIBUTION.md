@@ -23,4 +23,6 @@ Chernarus, DayZ and associated source imagery remain © Bohemia Interactive. The
 
 ## Settlement name overlay
 
-Version 1.22.29 adds a local city/town/village label dataset for navigation. The iZurvive screenshots supplied during development are treated only as a visual behaviour reference; this website patch does not include iZurvive map imagery, icons, tiles or copied overlay assets. Settlement labels are stored locally in `assets/data/chernarus/place-names.json` and can be independently corrected or expanded later.
+Version 1.22.30 derives the local settlement-name dataset from the extracted ChernarusPlus world configuration section `CfgWorlds > ChernarusPlus > Names`. The website retains the config's exact Cyrillic names, DayZ X/Z anchors and `Capital` / `City` / `Village` classifications; Latin/transliterated display names are derived from the corresponding `Settlement_*` class identifiers.
+
+The iZurvive screenshots supplied during development are used only as a visual behaviour reference for bilingual label presentation. This website does not include iZurvive map imagery, icons, tiles, label data or copied overlay assets. The resulting 77-label dataset is stored locally in `assets/data/chernarus/place-names.json`.

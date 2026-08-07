@@ -42,7 +42,7 @@
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
 }
 
-/* v1.22.29 — named map pins and settlement label overlay */
+/* v1.22.30 — named map pins and authoritative bilingual settlement labels */
 .wwz-map-location-div-icon,
 .wwz-map-place-name-div-icon {
   background: transparent !important;
@@ -153,43 +153,76 @@
   position: absolute;
   left: 0;
   top: 0;
-  display: block;
+  display: grid;
   width: max-content;
-  max-width: 180px;
+  max-width: 220px;
   transform: translate(-50%, -50%);
-  color: #f7f2e9;
-  font-size: 9px;
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: .015em;
+  gap: 1px;
+  color: #f8f4ec;
+  line-height: 1;
   text-align: center;
   white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .85));
+}
+
+.wwz-map-place-name-native,
+.wwz-map-place-name-latin {
+  display: block;
   text-shadow:
     -1px -1px 0 #080808,
      1px -1px 0 #080808,
     -1px  1px 0 #080808,
      1px  1px 0 #080808,
-     0 2px 3px rgba(0,0,0,.9);
-  pointer-events: none;
-  user-select: none;
+     0 2px 3px rgba(0,0,0,.95);
 }
 
-.wwz-map-place-name--city {
-  font-size: 12px;
+.wwz-map-place-name-native {
+  font-size: 9px;
   font-weight: 950;
-  letter-spacing: .045em;
+  letter-spacing: .025em;
   text-transform: uppercase;
 }
 
-.wwz-map-place-name--town {
-  font-size: 10px;
+.wwz-map-place-name-latin {
+  color: rgba(248, 244, 236, .92);
+  font-size: 7.5px;
+  font-weight: 780;
+  letter-spacing: .012em;
+}
+
+.wwz-map-place-name--capital .wwz-map-place-name-native {
+  font-size: 13px;
+  letter-spacing: .05em;
+}
+
+.wwz-map-place-name--capital .wwz-map-place-name-latin {
+  font-size: 9.5px;
   font-weight: 900;
 }
 
+.wwz-map-place-name--city .wwz-map-place-name-native {
+  font-size: 11px;
+  letter-spacing: .04em;
+}
+
+.wwz-map-place-name--city .wwz-map-place-name-latin {
+  font-size: 8.5px;
+  font-weight: 850;
+}
+
 .wwz-map-place-name--village {
-  color: #e8e0d6;
-  font-size: 8px;
-  font-weight: 800;
+  color: #eee7dc;
+}
+
+.wwz-map-place-name--village .wwz-map-place-name-native {
+  font-size: 9px;
+}
+
+.wwz-map-place-name--village .wwz-map-place-name-latin {
+  color: rgba(232, 224, 214, .9);
+  font-size: 7.5px;
 }
 
 .wwz-chernarus-map:fullscreen .wwz-map-location-pin-label {
@@ -333,7 +366,7 @@
 }
 
 
-/* v1.22.29 — map location index and personal browser pins */
+/* v1.22.30 — map location index and personal browser pins */
 .map-location-panel {
   overflow: hidden;
 }

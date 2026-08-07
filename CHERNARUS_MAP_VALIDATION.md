@@ -70,11 +70,30 @@ Verify all of these before publishing:
 
 Do not reopen WRP geometry reconstruction for minor thick-line intersection seams; those are renderer polish unless a genuine alignment defect is demonstrated.
 
-## v1.22.29 label and marker checks
+## v1.22.30 authoritative label checks
 
-- `assets/data/chernarus/place-names.json` must parse as JSON and contain a non-empty `places` array.
-- Place IDs must be unique.
-- Supported settlement types are `city`, `town` and `village`.
-- Every label anchor X/Z must remain within the 0–15,360 m Chernarus bounds.
-- Every label `minZoom` must remain within Leaflet zoom 0–14.
-- Location pins and place labels are UI overlays only; satellite tile counts and production road line-part validation remain unchanged.
+`assets/data/chernarus/place-names.json` is expected to be a generated representation of the ChernarusPlus world config `Names` section.
+
+Validation requires:
+
+- source section `CfgWorlds > ChernarusPlus > Names`;
+- 306 parsed source `Names` records;
+- exactly 77 included settlement labels;
+- exactly 2 `capital`, 16 `city` and 59 `village` records;
+- unique IDs and unique `Settlement_*` source classes;
+- non-empty Latin and Cyrillic names;
+- matching `sourceType` values (`Capital`, `City`, `Village`);
+- every X/Z anchor inside 0–15,360 m;
+- every minimum zoom inside Leaflet 0–14.
+
+Browser checks:
+
+1. At world overview, Chernogorsk and Novodmitrovsk are the highest-priority settlement labels.
+2. Labels display Cyrillic on the first line and Latin/transliterated text below.
+3. City labels appear as zoom increases; Village labels appear from zoom 4.
+4. Dense areas suppress lower-priority collisions rather than stacking unreadable text.
+5. Public/custom location pins remain above the settlement-name layer.
+6. The Names control toggles labels without redrawing or modifying road geometry.
+7. Existing visible pins with a matching settlement name suppress the duplicate generic label.
+
+Location labels are UI overlays only; satellite tile counts and production road line-part validation remain unchanged.

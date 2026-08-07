@@ -4,8 +4,8 @@
   const frame = document.querySelector('[data-map-frame]');
   if (!frame) return;
 
-  const DATA_URL = 'assets/data/chernarus/pois.json?v=1.22.29';
-  const PLACE_NAMES_URL = 'assets/data/chernarus/place-names.json?v=1.22.29';
+  const DATA_URL = 'assets/data/chernarus/pois.json?v=1.22.30';
+  const PLACE_NAMES_URL = 'assets/data/chernarus/place-names.json?v=1.22.30';
   const STORAGE_KEY = 'wwz.chernarus.customLocations.v1';
   const MAX_CUSTOM_LOCATIONS = 250;
   const COLOURS = Object.freeze({
@@ -94,12 +94,16 @@
   const validatePlaceName = (rawPlace) => {
     const id = validText(rawPlace?.id, 100);
     const name = validText(rawPlace?.name, 100);
-    const type = validText(rawPlace?.type, 30, 'village');
+    const nativeName = validText(rawPlace?.nativeName, 140, name);
+    const type = validText(rawPlace?.type, 30, 'village')?.toLowerCase();
+    const sourceClass = validText(rawPlace?.sourceClass, 120, '');
+    const sourceType = validText(rawPlace?.sourceType, 30, type);
     const x = clampCoordinate(rawPlace?.x);
     const z = clampCoordinate(rawPlace?.z);
-    const minZoom = Math.max(0, Math.min(14, Number(rawPlace?.minZoom) || 4));
-    if (!id || !name || x === null || z === null) return null;
-    return { id, name, type, x, z, minZoom };
+    const rawMinZoom = Number(rawPlace?.minZoom);
+    const minZoom = Number.isFinite(rawMinZoom) ? Math.max(0, Math.min(14, rawMinZoom)) : 4;
+    if (!id || !name || !nativeName || !['capital', 'city', 'village'].includes(type) || x === null || z === null) return null;
+    return { id, name, nativeName, type, sourceClass, sourceType, x, z, minZoom };
   };
 
   const loadCustomPois = () => {
@@ -338,28 +342,73 @@
     toggle?.setAttribute('aria-pressed', String(placeNamesVisible));
     if (!placeNamesVisible) return;
 
-    const zoom = mapInstance.map.getZoom();
-    const visibleMarkerNames = new Set(filteredLocations().map((poi) => poi.name.toLowerCase()));
-    placeNames.forEach((place) => {
-      if (zoom < place.minZoom || visibleMarkerNames.has(place.name.toLowerCase())) return;
-      const latlng = window.WWZChernarusMap.worldToLeaflet([place.x, place.z]);
-      if (!latlng) return;
-      const safeName = String(place.name).replace(/[&<>"']/g, (character) => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      }[character]));
-      const icon = window.L.divIcon({
-        className: 'wwz-map-place-name-div-icon',
-        html: `<span class=\"wwz-map-place-name wwz-map-place-name--${String(place.type).replace(/[^a-z0-9_-]/gi, '').toLowerCase()}\">${safeName}</span>`,
-        iconSize: [0, 0],
-        iconAnchor: [0, 0]
+    const map = mapInstance.map;
+    const zoom = map.getZoom();
+    const visibleMarkerNames = new Set();
+    filteredLocations().forEach((poi) => visibleMarkerNames.add(poi.name.toLowerCase()));
+
+    const priority = { capital: 0, city: 1, village: 2 };
+    const sizeProfile = {
+      capital: { native: 13, latin: 9.5, height: 28 },
+      city: { native: 11, latin: 8.5, height: 25 },
+      village: { native: 9, latin: 7.5, height: 22 }
+    };
+    const occupied = [];
+
+    const overlaps = (box, existing, padding) => !(
+      box.right + padding < existing.left ||
+      box.left - padding > existing.right ||
+      box.bottom + padding < existing.top ||
+      box.top - padding > existing.bottom
+    );
+
+    placeNames
+      .filter((place) => zoom >= place.minZoom)
+      .sort((left, right) => (priority[left.type] ?? 9) - (priority[right.type] ?? 9) || left.name.localeCompare(right.name))
+      .forEach((place) => {
+        const latinKey = place.name.toLowerCase();
+        const nativeKey = place.nativeName.toLowerCase();
+        if (visibleMarkerNames.has(latinKey) || visibleMarkerNames.has(nativeKey)) return;
+
+        const latlng = window.WWZChernarusMap.worldToLeaflet([place.x, place.z]);
+        if (!latlng) return;
+
+        const profile = sizeProfile[place.type] || sizeProfile.village;
+        const point = map.latLngToContainerPoint(latlng);
+        const width = Math.max(
+          place.nativeName.length * profile.native * 0.62,
+          place.name.length * profile.latin * 0.58
+        ) + 14;
+        const box = {
+          left: point.x - (width / 2),
+          right: point.x + (width / 2),
+          top: point.y - (profile.height / 2),
+          bottom: point.y + (profile.height / 2)
+        };
+        const collisionPadding = zoom <= 3 ? 10 : zoom <= 5 ? 6 : 2;
+        if (occupied.some((existing) => overlaps(box, existing, collisionPadding))) return;
+        occupied.push(box);
+
+        const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[character]));
+        const safeNative = escapeHtml(place.nativeName);
+        const safeLatin = escapeHtml(place.name);
+        const safeType = String(place.type).replace(/[^a-z0-9_-]/gi, '').toLowerCase();
+        const icon = window.L.divIcon({
+          className: 'wwz-map-place-name-div-icon',
+          html: `<span class=\"wwz-map-place-name wwz-map-place-name--${safeType}\"><span class=\"wwz-map-place-name-native\">${safeNative}</span><span class=\"wwz-map-place-name-latin\">${safeLatin}</span></span>`,
+          iconSize: [0, 0],
+          iconAnchor: [0, 0]
+        });
+        window.L.marker(latlng, {
+          icon,
+          pane: 'wwzPlaceNames',
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: 100 - ((priority[place.type] ?? 9) * 10)
+        }).addTo(placeNameLayer);
       });
-      window.L.marker(latlng, {
-        icon,
-        interactive: false,
-        keyboard: false,
-        zIndexOffset: 100
-      }).addTo(placeNameLayer);
-    });
   };
 
 
@@ -487,6 +536,11 @@
         }
       });
 
+      if (!mapInstance.map.getPane('wwzPlaceNames')) {
+        const placeNamePane = mapInstance.map.createPane('wwzPlaceNames');
+        placeNamePane.style.zIndex = '575';
+        placeNamePane.style.pointerEvents = 'none';
+      }
       placeNameLayer = window.L.layerGroup().addTo(mapInstance.map);
       poiLayer = window.L.layerGroup().addTo(mapInstance.map);
       customLayer = window.L.layerGroup().addTo(mapInstance.map);
