@@ -62,6 +62,12 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+## Version 1.22.22 Reliable Live Ban-List Refresh
+
+- Allows the Current Ban Lists workspace enough time to complete Nitrado console file fallback instead of discarding the combined response at the generic 10-second HTTP timeout.
+- Shows a clear live-refresh state while Discord and Nitrado are being checked.
+- Pairs with World War Z Discord Bot v1.18.23.
+
 ## Version 1.22.21 Live Ban-List Synchronisation And Discord Sign-In Polish
 
 - Requests a fresh Nitrado DayZ ban list on every Admin refresh and displays it in the exact order stored by Nitrado.

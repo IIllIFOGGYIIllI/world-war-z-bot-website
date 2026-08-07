@@ -1466,16 +1466,22 @@ const loadCurrentBanlists = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
   banlistRequestInProgress = true;
   refreshBanlistsButton?.setAttribute('disabled', '');
   refreshBanlistsButton?.setAttribute('aria-busy', 'true');
+  if (refreshBanlistsButton) refreshBanlistsButton.textContent = 'Refreshing Live Ban Lists…';
+  if (banlistChecked) banlistChecked.textContent = 'Refreshing Discord And Nitrado Ban Lists…';
 
   try {
-    const response = await authFetch(`${ADMIN_BANLISTS_URL}?refresh=${Date.now()}`, {
+    // Nitrado console ban-list reads can legitimately take longer than the
+    // normal 10-second dashboard request window because Railway may need to
+    // fall back from Player Management to the authenticated DayZ ban.txt file.
+    // Keep the request alive long enough for that live fallback to finish.
+    const response = await window.WWZHttp.request(`${ADMIN_BANLISTS_URL}?refresh=${Date.now()}`, {
       method: 'GET',
       cache: 'no-store',
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${sessionToken}`
       }
-    });
+    }, 75_000);
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload)) return;
     if (!payload?.discord || !payload?.dayz) throw new Error('Ban lists unavailable');
@@ -1489,6 +1495,7 @@ const loadCurrentBanlists = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
     banlistRequestInProgress = false;
     refreshBanlistsButton?.removeAttribute('disabled');
     refreshBanlistsButton?.removeAttribute('aria-busy');
+    if (refreshBanlistsButton) refreshBanlistsButton.textContent = 'Refresh Ban Lists';
   }
 };
 

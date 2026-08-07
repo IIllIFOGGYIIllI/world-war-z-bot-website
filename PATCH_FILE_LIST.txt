@@ -1,17 +1,12 @@
-world-war-z-website v1.22.21 patch files
+world-war-z-website v1.22.22 patch files
 
-index.html
+assets/js/dashboard/administration.js
 dashboard.html
+index.html
 changelog.html
 README.md
 PATCH_NOTES.md
-DELETE_THESE_FILES.txt
 PATCH_FILE_LIST.txt
-assets/js/dashboard/core.js
-assets/js/dashboard/account.js
-assets/js/dashboard/administration.js
-assets/css/dashboard/core.css
-assets/css/dashboard/moderation.css
-assets/css/dashboard/workspace.css
+DELETE_THESE_FILES.txt
 
-Other HTML/CSS files are included only where the v1.22.21 browser cache marker changed.
+Other HTML files are included in the complete backup with refreshed v1.22.22 cache markers.

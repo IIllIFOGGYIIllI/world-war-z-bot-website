@@ -1,3 +1,12 @@
+# Version 1.22.22
+
+## Live Ban-List Refresh Reliability
+
+- Fixed the Admin Current Ban Lists page timing out after 10 seconds while Railway was still completing the Nitrado console `ban.txt` fallback.
+- The ban-list request now allows up to 75 seconds and shows a clear live-refresh progress state.
+- Pairs with Bot v1.18.23.
+- No database, OAuth, permission or public-route change is required.
+
 # Version 1.22.21
 
 ## Live Ban-List Synchronisation
