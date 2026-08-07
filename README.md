@@ -48,11 +48,11 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `assets/world-war-z-dashboard-bg-mobile.webp` — mobile command-centre atmosphere
 - `assets/chernarus-map/satellite-corrected/` — corrected local JPG Chernarus satellite pyramid, native zooms 0–6
 - `assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson` — final grouped WRP-derived production road geometry
-- `assets/data/chernarus/pois.json` — public read-only map locations and tile configuration
+- `assets/data/chernarus/pois.json` — map metadata/configuration; retired hard-coded POI list is intentionally empty
 - `assets/data/chernarus/place-names.json` — config-derived bilingual Capital/City/Village label anchors for the optional Names overlay
 - `assets/js/map/chernarus-map.js` — shared Leaflet satellite/road renderer and native DayZ coordinate tools
 - `assets/css/components/chernarus-map.css` — shared full-map and compact-picker presentation
-- `assets/js/pages/dashboard-map-loader.js` — lazy map workspace loader
+- `assets/js/pages/dashboard-map-loader.js` — lazy map workspace loader, private browser pins and Railway-backed public marker client
 - `assets/js/core/http.js` — shared timeout-aware browser request helper
 - `scripts/validate_site.py` — static/reference/map-data validation used by GitHub Actions
 - `scripts/build_chernarus_place_names.py` — regenerates the authoritative settlement-label JSON from ChernarusPlus `world/config.cpp`
@@ -66,6 +66,16 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+
+## Version 1.22.31 Shared Admin Public Map Markers
+
+The main Chernarus map no longer ships the old hard-coded landmark pins. The authoritative bilingual settlement-name layer handles built-in city/village navigation, while shared public markers are now live server data from Railway.
+
+Admins (`staff` and `owner` access) can create, edit and delete public markers from the map. The website hides those controls from ordinary members, and Bot v1.18.27 independently repeats the live Discord access check for every write so browser-side tampering cannot grant publishing access. Public markers are visible to all map visitors.
+
+Member and guest custom pins remain private browser-local data. They are never uploaded to Railway and do not become public markers. Export/import continues to apply only to those private pins.
+
+Pairs with Bot v1.18.27. The bot creates the new marker table additively inside the existing Railway database; `/app/data/players.db` must not be deleted, reset, replaced or included in deployment files. Satellite imagery, 52,006 road line parts and the 77 config-derived settlement labels are unchanged.
 
 ## Version 1.22.30 Authoritative Bilingual Chernarus Labels
 

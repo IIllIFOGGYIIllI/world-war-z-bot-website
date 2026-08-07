@@ -1,4 +1,4 @@
-world-war-z-website v1.22.30 patch files
+world-war-z-website v1.22.31 patch files
 
 CHERNARUS_MAP_PLAN.md
 CHERNARUS_MAP_VALIDATION.md
@@ -8,15 +8,14 @@ PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
 assets/css/components/chernarus-map.css
-assets/data/chernarus/place-names.json
 assets/data/chernarus/pois.json
+assets/js/dashboard/core.js
 assets/js/pages/dashboard-map-loader.js
 changelog.html
 dashboard.html
 index.html
-scripts/build_chernarus_place_names.py
-scripts/validate_site.py
+privacy.html
 
-No bot files changed.
-No Railway database files are included.
-No satellite JPG tiles or production road geometry files are changed by this patch.
+Requires Bot v1.18.27 for shared public-marker persistence and protected writes.
+No satellite JPG tiles, production road GeoJSON or place-name geometry/data are changed by this patch.
+No Railway database file is included.

@@ -165,3 +165,16 @@ Presentation:
 - If an existing visible pin carries the same Latin or Cyrillic name, the generic settlement label is hidden.
 
 `scripts/build_chernarus_place_names.py` can regenerate `assets/data/chernarus/place-names.json` from an extracted ChernarusPlus world config. The process never reads or modifies WRP road geometry.
+## v1.22.31 — shared Admin public markers
+
+The authoritative `Capital` / `City` / `Village` Names overlay remains static website data, but the old hard-coded landmark POIs are retired. `assets/data/chernarus/pois.json` now keeps only map metadata and an empty legacy `pois` array.
+
+Dynamic marker model:
+
+- **Public markers:** loaded from Railway `GET /api/map/markers`; visible to everyone.
+- **Public marker writes:** `POST /api/admin/map/markers/action`; server-authorized for live Discord `staff` / `owner` access only.
+- **Private pins:** browser `localStorage` only; available to members/guests and never sent to Railway.
+- Public and private markers remain independent from settlement labels, satellite tiles and road geometry.
+
+The dashboard map listens for `wwz:accesschange` so Admin publishing controls are exposed only while the current Discord session has Admin/Owner access. This is presentation gating only; Bot v1.18.27 independently enforces the permission on every public-marker mutation.
+

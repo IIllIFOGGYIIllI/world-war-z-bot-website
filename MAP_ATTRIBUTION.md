@@ -26,3 +26,7 @@ Chernarus, DayZ and associated source imagery remain © Bohemia Interactive. The
 Version 1.22.30 derives the local settlement-name dataset from the extracted ChernarusPlus world configuration section `CfgWorlds > ChernarusPlus > Names`. The website retains the config's exact Cyrillic names, DayZ X/Z anchors and `Capital` / `City` / `Village` classifications; Latin/transliterated display names are derived from the corresponding `Settlement_*` class identifiers.
 
 The iZurvive screenshots supplied during development are used only as a visual behaviour reference for bilingual label presentation. This website does not include iZurvive map imagery, icons, tiles, label data or copied overlay assets. The resulting 77-label dataset is stored locally in `assets/data/chernarus/place-names.json`.
+## Shared marker data
+
+Website v1.22.31 does not derive shared public marker names or descriptions from a third-party map provider. Shared markers are community/Admin-authored records stored by the World War Z Railway service. Member private pins stay in browser local storage. The underlying Chernarus imagery and config-derived settlement names retain the attribution above.
+

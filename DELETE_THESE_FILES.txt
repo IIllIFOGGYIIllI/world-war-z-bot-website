@@ -1,7 +1,9 @@
-world-war-z-website v1.22.30 delete list
+world-war-z-website v1.22.31 delete list
 
-No files need to be deleted for this patch.
+No repository files need to be deleted for this patch.
+
+The retired hard-coded public markers are removed from assets/data/chernarus/pois.json by leaving its legacy pois array empty; the metadata file itself remains required.
 
 Do not delete assets/chernarus-map/satellite-corrected/.
 Do not delete assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson.
-The v1.22.30 marker and place-name features are presentation/data overlays only.
+Do not delete assets/data/chernarus/place-names.json.

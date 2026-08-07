@@ -1,3 +1,31 @@
+# Version 1.22.31
+
+## Shared Admin Public Map Markers
+
+- Retires the old hard-coded public landmark pins now that the authoritative bilingual settlement overlay provides built-in place navigation.
+- Keeps `assets/data/chernarus/pois.json` as map metadata but intentionally sets its legacy `pois` array to empty.
+- Loads shared public markers from Railway `GET /api/map/markers`.
+- Adds Admin-only **Create Public Marker**, edit and delete controls for authenticated `staff` / `owner` users.
+- Publishes public marker writes through protected `POST /api/admin/map/markers/action`; Bot v1.18.27 performs the real server-side Discord permission check.
+- Public markers support name, category, description, colour and one-decimal DayZ X/Z coordinates.
+- Member/guest custom pins remain browser-local and private; they are never sent to Railway.
+- Private pin export/import remains private-only.
+- Adds an access-change event so the map immediately gains or loses Admin controls after Discord sign-in/sign-out.
+- Preserves the 77 authoritative bilingual settlement labels, 4,810 corrected satellite JPGs and 52,006 production road line parts unchanged.
+- Pairs with Bot v1.18.27. Deploy the bot first so the Railway marker API/table exists before publishing the website.
+- No existing Railway record is reset or replaced; `/app/data/players.db` is never included in this website patch.
+
+## Deployment
+
+No satellite reinstall is required. After Bot v1.18.27 is deployed to Railway, apply this website patch and run:
+
+```powershell
+py .\scripts\validate_site.py --require-map-assets
+git add .
+git commit -m "Add admin public map markers"
+git push
+```
+
 # Version 1.22.30
 
 ## Authoritative Bilingual Chernarus Labels

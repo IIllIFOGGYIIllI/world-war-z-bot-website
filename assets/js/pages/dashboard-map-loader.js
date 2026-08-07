@@ -4,8 +4,9 @@
   const frame = document.querySelector('[data-map-frame]');
   if (!frame) return;
 
-  const DATA_URL = 'assets/data/chernarus/pois.json?v=1.22.30';
-  const PLACE_NAMES_URL = 'assets/data/chernarus/place-names.json?v=1.22.30';
+  const PUBLIC_MARKERS_URL = `${DASHBOARD_API_BASE}/api/map/markers`;
+  const ADMIN_MARKER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/map/markers/action`;
+  const PLACE_NAMES_URL = 'assets/data/chernarus/place-names.json?v=1.22.31';
   const STORAGE_KEY = 'wwz.chernarus.customLocations.v1';
   const MAX_CUSTOM_LOCATIONS = 250;
   const COLOURS = Object.freeze({
@@ -28,6 +29,8 @@
   let placeNameLayer = null;
   let placeNames = [];
   let placeNamesVisible = true;
+  let editorScope = 'custom';
+  let editingLocation = null;
   const poiMarkers = new Map();
   const customMarkers = new Map();
 
@@ -48,6 +51,9 @@
   const customTitle = document.querySelector('[data-map-custom-title]');
   const customCount = document.querySelector('[data-map-custom-count]');
   const scopeLabel = document.querySelector('[data-map-location-scope-label]');
+  const editorKicker = document.querySelector('[data-map-editor-kicker]');
+  const editorNote = document.querySelector('[data-map-editor-note]');
+  const editorSubmit = document.querySelector('[data-map-save-custom]');
 
   const formatCoordinate = (value) => window.WWZChernarusMap?.formatCoordinate(value, 1) ?? Number(value).toFixed(1);
 
@@ -67,16 +73,36 @@
     return `custom-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   };
 
+  const hasAdminAccess = () => {
+    try {
+      return ['staff', 'owner'].includes(dashboardAccessLevel);
+    } catch {
+      return false;
+    }
+  };
+
   const validatePoi = (rawPoi) => {
-    const id = validText(rawPoi?.id, 80);
-    const name = validText(rawPoi?.name, 100);
-    const category = validText(rawPoi?.category, 40);
-    const description = validText(rawPoi?.description, 320);
+    const markerId = Number(rawPoi?.marker_id);
+    const id = validText(rawPoi?.id, 100) || (Number.isInteger(markerId) && markerId > 0 ? `public-${markerId}` : null);
+    const name = validText(rawPoi?.name, 80);
+    const category = validText(rawPoi?.category, 40, 'Landmark');
+    const description = validText(rawPoi?.description, 240, 'Public server map marker.');
+    const colour = Object.hasOwn(COLOURS, rawPoi?.colour) ? rawPoi.colour : 'red';
     const x = clampCoordinate(rawPoi?.x);
     const z = clampCoordinate(rawPoi?.z);
-    if (!id || !name || !category || !description || x === null || z === null) return null;
-    if (rawPoi?.visibility !== 'public') return null;
-    return { id, name, category, description, x, z, visibility: 'public', scope: 'public' };
+    if (!id || !name || x === null || z === null) return null;
+    return {
+      id,
+      markerId: Number.isInteger(markerId) && markerId > 0 ? markerId : null,
+      name,
+      category,
+      description,
+      colour,
+      x,
+      z,
+      visibility: 'public',
+      scope: 'public'
+    };
   };
 
   const validateCustom = (rawPoi) => {
@@ -190,10 +216,12 @@
     empty?.setAttribute('hidden', '');
     content?.removeAttribute('hidden');
     const isCustom = poi.scope === 'custom';
+    const isPublic = poi.scope === 'public';
     const isSelection = poi.scope === 'selection';
+    const canManagePublic = isPublic && hasAdminAccess() && Number.isInteger(poi.markerId);
     const scope = document.querySelector('[data-map-detail-scope]');
     if (scope) {
-      scope.textContent = isCustom ? 'My Pin' : isSelection ? 'Unsaved' : 'Public';
+      scope.textContent = isCustom ? 'Private' : isSelection ? 'Unsaved' : 'Public';
       scope.dataset.scope = poi.scope;
     }
     const bindings = [
@@ -207,8 +235,8 @@
       const node = document.querySelector(selector);
       if (node) node.textContent = value;
     });
-    if (editButton) editButton.hidden = !isCustom;
-    if (deleteButton) deleteButton.hidden = !isCustom;
+    if (editButton) editButton.hidden = !(isCustom || canManagePublic);
+    if (deleteButton) deleteButton.hidden = !(isCustom || canManagePublic);
     if (saveSelectedButton) saveSelectedButton.hidden = !isSelection;
   };
 
@@ -228,20 +256,33 @@
 
   const selectedMapPoint = () => mapInstance?.getSelection?.() || null;
 
-  const openCustomEditor = (poi = null) => {
+  const openCustomEditor = (poi = null, scope = 'custom') => {
     if (!customPanel) return;
+    const requestedScope = scope === 'public' ? 'public' : 'custom';
+    if (requestedScope === 'public' && !hasAdminAccess()) return;
+    editorScope = requestedScope;
+    editingLocation = poi;
     const selection = selectedMapPoint();
     const base = poi || (selectedLocation?.scope === 'selection' ? selectedLocation : null);
     customId.value = poi?.id || '';
     customName.value = poi?.name || '';
     customCategory.value = poi?.category === 'Custom' ? '' : (poi?.category || '');
-    customColour.value = poi?.colour || 'amber';
-    customNotes.value = poi?.description === 'Personal custom map location.' ? '' : (poi?.description || '');
+    customColour.value = poi?.colour || (requestedScope === 'public' ? 'red' : 'amber');
+    const defaultDescription = requestedScope === 'public' ? 'Public server map marker.' : 'Personal custom map location.';
+    customNotes.value = poi?.description === defaultDescription ? '' : (poi?.description || '');
     const initialX = base?.x ?? selection?.x;
     const initialZ = base?.z ?? selection?.z;
     customX.value = Number.isFinite(Number(initialX)) ? formatCoordinate(initialX) : '';
     customZ.value = Number.isFinite(Number(initialZ)) ? formatCoordinate(initialZ) : '';
-    if (customTitle) customTitle.textContent = poi ? 'Edit Custom Location' : 'Save Custom Location';
+    if (customTitle) customTitle.textContent = poi
+      ? (requestedScope === 'public' ? 'Edit Public Marker' : 'Edit Private Pin')
+      : (requestedScope === 'public' ? 'Create Public Marker' : 'Save Private Pin');
+    if (editorKicker) editorKicker.textContent = requestedScope === 'public' ? 'Admin public marker' : 'Personal map pin';
+    if (editorNote) editorNote.textContent = requestedScope === 'public'
+      ? 'Published to every map user and stored in the Railway database. Only verified Admins can create, edit or delete public markers.'
+      : 'Saved only in this browser. Private pins are never published to other players or sent to Railway.';
+    if (editorSubmit) editorSubmit.textContent = requestedScope === 'public' ? (poi ? 'Update Public Marker' : 'Publish Marker') : 'Save Private Pin';
+    customPanel.dataset.editorScope = requestedScope;
     customPanel.hidden = false;
     customName.focus();
   };
@@ -250,6 +291,9 @@
     if (customPanel) customPanel.hidden = true;
     customForm?.reset();
     if (customId) customId.value = '';
+    editingLocation = null;
+    editorScope = 'custom';
+    delete customPanel?.dataset.editorScope;
   };
 
   const renderFilters = () => {
@@ -281,7 +325,7 @@
     symbol.className = 'map-location-symbol';
     symbol.setAttribute('aria-hidden', 'true');
     symbol.textContent = poi.scope === 'custom' ? '◆' : '⌖';
-    if (poi.scope === 'custom') symbol.style.setProperty('--pin-colour', COLOURS[poi.colour] || COLOURS.amber);
+    symbol.style.setProperty('--pin-colour', COLOURS[poi.colour] || (poi.scope === 'custom' ? COLOURS.amber : COLOURS.red));
 
     const copy = document.createElement('span');
     const heading = document.createElement('span');
@@ -289,7 +333,7 @@
     const name = document.createElement('strong');
     name.textContent = poi.name;
     const badge = document.createElement('em');
-    badge.textContent = poi.scope === 'custom' ? 'MY PIN' : poi.category;
+    badge.textContent = poi.scope === 'custom' ? 'PRIVATE' : poi.category;
     heading.append(name, badge);
     const meta = document.createElement('small');
     meta.textContent = `X ${formatCoordinate(poi.x)} · Z ${formatCoordinate(poi.z)}`;
@@ -321,7 +365,7 @@
       const marker = mapInstance.addPoi(poi, {
         layer: custom ? customLayer : poiLayer,
         custom,
-        colour: custom ? (COLOURS[poi.colour] || COLOURS.amber) : '#d52b1e',
+        colour: COLOURS[poi.colour] || (custom ? COLOURS.amber : COLOURS.red),
         selected: selectedLocation?.id === poi.id,
         showLabel: true,
         onClick: () => {
@@ -478,6 +522,67 @@
     }
   };
 
+  const loadPublicMarkers = async () => {
+    try {
+      const response = await authFetch(PUBLIC_MARKERS_URL, {
+        headers: { Accept: 'application/json' }
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Public map markers could not be loaded.');
+      publicPois = (Array.isArray(payload?.markers) ? payload.markers : []).map(validatePoi).filter(Boolean);
+      return true;
+    } catch (error) {
+      console.warn('Public map markers unavailable.', error);
+      publicPois = [];
+      return false;
+    }
+  };
+
+  const submitPublicMarker = async (poi) => {
+    if (!hasAdminAccess() || !sessionToken) throw new Error('Administrator sign-in is required.');
+    const editingPublic = editingLocation?.scope === 'public' && Number.isInteger(editingLocation.markerId);
+    const action = editingPublic ? 'update' : 'create';
+    const response = await authFetch(ADMIN_MARKER_ACTION_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionToken}`
+      },
+      body: JSON.stringify({
+        action,
+        marker_id: editingPublic ? editingLocation.markerId : undefined,
+        name: poi.name,
+        category: poi.category,
+        description: poi.description,
+        colour: poi.colour,
+        x: poi.x,
+        z: poi.z
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload?.message || 'The public marker could not be saved.');
+    await loadPublicMarkers();
+    const saved = validatePoi(payload?.marker) || publicPois.find((entry) => entry.markerId === editingLocation?.markerId) || null;
+    return saved;
+  };
+
+  const deletePublicMarker = async (poi) => {
+    if (!hasAdminAccess() || !sessionToken || !Number.isInteger(poi?.markerId)) throw new Error('Administrator sign-in is required.');
+    const response = await authFetch(ADMIN_MARKER_ACTION_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionToken}`
+      },
+      body: JSON.stringify({ action: 'delete', marker_id: poi.markerId })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload?.message || 'The public marker could not be deleted.');
+    await loadPublicMarkers();
+  };
+
   const initialise = async () => {
     if (mapInstance) {
       mapInstance.invalidateSize();
@@ -488,13 +593,10 @@
     loadPromise = (async () => {
       if (!window.WWZChernarusMap || !window.L) throw new Error('The production Chernarus map runtime is unavailable.');
 
-      const [response, placeResponse] = await Promise.all([
-        fetch(DATA_URL, { headers: { Accept: 'application/json' }, cache: 'force-cache' }),
+      const [, placeResponse] = await Promise.all([
+        loadPublicMarkers(),
         fetch(PLACE_NAMES_URL, { headers: { Accept: 'application/json' }, cache: 'force-cache' }).catch(() => null)
       ]);
-      if (!response.ok) throw new Error('Public map locations could not be loaded.');
-      const payload = await response.json();
-      publicPois = (Array.isArray(payload?.pois) ? payload.pois : []).map(validatePoi).filter(Boolean);
       if (placeResponse?.ok) {
         const placePayload = await placeResponse.json();
         placeNames = (Array.isArray(placePayload?.places) ? placePayload.places : []).map(validatePlaceName).filter(Boolean);
@@ -581,11 +683,14 @@
     if (await copyText(text)) setButtonFeedback(event.currentTarget);
   });
 
-  document.querySelector('[data-map-open-custom]')?.addEventListener('click', () => openCustomEditor());
-  document.querySelector('[data-map-add-custom]')?.addEventListener('click', () => openCustomEditor());
-  document.querySelector('[data-map-save-selected]')?.addEventListener('click', () => openCustomEditor());
+  document.querySelector('[data-map-open-custom]')?.addEventListener('click', () => openCustomEditor(null, 'custom'));
+  document.querySelector('[data-map-add-custom]')?.addEventListener('click', () => openCustomEditor(null, 'custom'));
+  document.querySelector('[data-map-open-public]')?.addEventListener('click', () => openCustomEditor(null, 'public'));
+  document.querySelector('[data-map-add-public]')?.addEventListener('click', () => openCustomEditor(null, 'public'));
+  document.querySelector('[data-map-save-selected]')?.addEventListener('click', () => openCustomEditor(null, 'custom'));
   document.querySelector('[data-map-edit-custom]')?.addEventListener('click', () => {
-    if (selectedLocation?.scope === 'custom') openCustomEditor(selectedLocation);
+    if (selectedLocation?.scope === 'custom') openCustomEditor(selectedLocation, 'custom');
+    else if (selectedLocation?.scope === 'public' && hasAdminAccess()) openCustomEditor(selectedLocation, 'public');
   });
   document.querySelector('[data-map-close-custom]')?.addEventListener('click', closeCustomEditor);
   document.querySelector('[data-map-cancel-custom]')?.addEventListener('click', closeCustomEditor);
@@ -600,22 +705,47 @@
     customZ.value = formatCoordinate(selection.z);
   });
 
-  customForm?.addEventListener('submit', (event) => {
+  customForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const id = validText(customId?.value, 100) || makeId();
-    const poi = validateCustom({
+    const publicMode = editorScope === 'public';
+    const id = publicMode ? (editingLocation?.id || 'public-pending') : (validText(customId?.value, 100) || makeId());
+    const validator = publicMode ? validatePoi : validateCustom;
+    const poi = validator({
       id,
+      marker_id: publicMode ? editingLocation?.markerId : undefined,
       name: customName?.value,
-      category: customCategory?.value || 'Custom',
-      description: customNotes?.value || 'Personal custom map location.',
+      category: customCategory?.value || (publicMode ? 'Landmark' : 'Custom'),
+      description: customNotes?.value || (publicMode ? 'Public server map marker.' : 'Personal custom map location.'),
       colour: customColour?.value,
       x: customX?.value,
-      z: customZ?.value
+      z: customZ?.value,
+      visibility: publicMode ? 'public' : undefined
     });
     if (!poi) {
       window.alert('Enter a name and valid Chernarus X/Z coordinates between 0 and 15360.');
       return;
     }
+
+    if (publicMode) {
+      try {
+        editorSubmit.disabled = true;
+        const saved = await submitPublicMarker(poi);
+        closeCustomEditor();
+        setScope('all');
+        if (saved) {
+          mapInstance?.setSelection(saved.x, saved.z, { notify: false, marker: false });
+          selectLocation(saved, { focus: true });
+        }
+        renderFilters();
+        renderResults();
+      } catch (error) {
+        window.alert(error.message || 'The public marker could not be saved.');
+      } finally {
+        if (editorSubmit) editorSubmit.disabled = false;
+      }
+      return;
+    }
+
     const index = customPois.findIndex((entry) => entry.id === id);
     if (index >= 0) customPois[index] = poi;
     else if (customPois.length < MAX_CUSTOM_LOCATIONS) customPois.unshift(poi);
@@ -632,11 +762,24 @@
     renderResults();
   });
 
-  document.querySelector('[data-map-delete-custom]')?.addEventListener('click', () => {
-    if (selectedLocation?.scope !== 'custom') return;
-    if (!window.confirm(`Delete “${selectedLocation.name}” from this browser?`)) return;
-    customPois = customPois.filter((poi) => poi.id !== selectedLocation.id);
-    persistCustomPois();
+  document.querySelector('[data-map-delete-custom]')?.addEventListener('click', async () => {
+    if (!selectedLocation) return;
+    if (selectedLocation.scope === 'public') {
+      if (!hasAdminAccess()) return;
+      if (!window.confirm(`Delete public marker “${selectedLocation.name}” for every map user?`)) return;
+      try {
+        await deletePublicMarker(selectedLocation);
+      } catch (error) {
+        window.alert(error.message || 'The public marker could not be deleted.');
+        return;
+      }
+    } else if (selectedLocation.scope === 'custom') {
+      if (!window.confirm(`Delete private pin “${selectedLocation.name}” from this browser?`)) return;
+      customPois = customPois.filter((poi) => poi.id !== selectedLocation.id);
+      persistCustomPois();
+    } else {
+      return;
+    }
     mapInstance?.clearSelection({ notify: false });
     selectLocation(null, { focus: false });
     renderFilters();
@@ -648,6 +791,14 @@
     const input = event.currentTarget;
     await importCustomLocations(input.files?.[0]);
     input.value = '';
+  });
+
+  window.addEventListener('wwz:accesschange', () => {
+    if (editorScope === 'public' && !hasAdminAccess()) closeCustomEditor();
+    if (mapInstance) {
+      updateDetails(selectedLocation);
+      renderResults();
+    }
   });
 
   const requestedView = () => String(location.hash || '').replace(/^#/, '').split('/', 1)[0];

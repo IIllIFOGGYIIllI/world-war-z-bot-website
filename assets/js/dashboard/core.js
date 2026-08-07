@@ -390,6 +390,7 @@ const applyAccessVisibility = (level) => {
 
   syncServerActionControls();
   if (!hasAdminAccess) resetAdminPlayerAdministration();
+  window.dispatchEvent(new CustomEvent('wwz:accesschange', { detail: { level } }));
 
   const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel;
   if (activeView && !canOpenView(activeView)) showView('overview', false);

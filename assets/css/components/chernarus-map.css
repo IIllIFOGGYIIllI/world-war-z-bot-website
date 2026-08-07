@@ -42,7 +42,7 @@
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
 }
 
-/* v1.22.30 — named map pins and authoritative bilingual settlement labels */
+/* v1.22.31 — named map pins, authoritative bilingual labels and Admin public markers */
 .wwz-map-location-div-icon,
 .wwz-map-place-name-div-icon {
   background: transparent !important;
@@ -506,9 +506,18 @@
   font-size: 12px;
 }
 
-.map-location-button[data-scope="custom"] .map-location-symbol {
+.map-location-button[data-scope="custom"] .map-location-symbol,
+.map-location-button[data-scope="public"] .map-location-symbol {
   background: color-mix(in srgb, var(--pin-colour, #ffbd36) 13%, transparent);
   color: var(--pin-colour, #ffbd36);
+}
+
+.map-custom-panel[data-editor-scope="public"] {
+  border-color: rgba(239,75,62,.28);
+}
+
+.map-custom-panel[data-editor-scope="public"] .map-custom-note {
+  color: #ba8f89;
 }
 
 .map-location-button > span:nth-child(2) {

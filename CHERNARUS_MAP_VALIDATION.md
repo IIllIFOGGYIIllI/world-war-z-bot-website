@@ -66,7 +66,7 @@ Verify all of these before publishing:
 7. Saved Delivery Locations can select and edit native X/Z positions correctly.
 8. Fullscreen/reset/zoom controls do not accidentally select coordinates.
 9. Roads and Trails toggles on the full map work independently.
-10. Public POI search/details still work.
+10. Railway-backed public marker search/details work when Bot v1.18.27 is available; the retired hard-coded POI list remains empty.
 
 Do not reopen WRP geometry reconstruction for minor thick-line intersection seams; those are renderer polish unless a genuine alignment defect is demonstrated.
 
@@ -97,3 +97,16 @@ Browser checks:
 7. Existing visible pins with a matching settlement name suppress the duplicate generic label.
 
 Location labels are UI overlays only; satellite tile counts and production road line-part validation remain unchanged.
+## v1.22.31 shared-marker checks
+
+1. With no Discord sign-in, public markers load but public create/edit/delete controls stay hidden.
+2. An ordinary member can create/edit/delete only browser-private pins and never sees public publishing controls.
+3. A verified Admin/Owner sees **+ Public Marker**, can publish a marker, and every browser sees it after refresh.
+4. Editing/deleting a public marker persists through Railway; editing/deleting a private pin changes only the current browser.
+5. Direct calls to the public-marker write endpoint as an ordinary member receive HTTP 403.
+6. Private pin export/import contains only browser-private locations, never Railway public markers.
+7. `assets/data/chernarus/pois.json` contains no retired hard-coded marker entries.
+8. Public/private markers remain above the bilingual settlement-name pane without modifying road geometry.
+9. Sign-out immediately hides Admin publishing controls and closes any open public-marker editor.
+10. Existing satellite tile, road line-part and 77-settlement validation counts remain unchanged.
+
