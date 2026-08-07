@@ -105,6 +105,8 @@ const shopQuantityHelp = document.querySelector('[data-shop-quantity-help]');
 const shopCoordinateMap = document.querySelector('[data-shop-coordinate-map]');
 const shopCoordinateStage = document.querySelector('[data-shop-coordinate-stage]');
 const shopCoordinateImage = document.querySelector('[data-shop-coordinate-image]');
+const shopCoordinateRoadOverlay = document.querySelector('[data-shop-coordinate-road-overlay]');
+const shopMapRoadToggle = document.querySelector('[data-shop-map-road-toggle]');
 const shopCoordinateMarker = document.querySelector('[data-shop-coordinate-marker]');
 const shopMapSelected = document.querySelector('[data-shop-map-selected]');
 const ownerShopSearch = document.querySelector('[data-owner-shop-search]');
@@ -134,6 +136,8 @@ let coordinatePickerZoom = 1;
 let coordinatePickerX = 0;
 let coordinatePickerY = 0;
 let coordinatePickerDrag = null;
+let coordinateRoadOverlayAvailable = false;
+let coordinateRoadOverlayVisible = false;
 
 const DEFAULT_EVENT_XML = `<event name="Vehicle">
     <nominal>1</nominal>
@@ -208,6 +212,34 @@ const populatePurchaseLocationSelect = () => {
     const defaultLocation = savedDeliveryLocations.find((location) => location.is_default);
     shopDeliveryLocation.value = defaultLocation ? String(defaultLocation.location_id) : '';
   }
+};
+
+const configureCoordinateRoadOverlay = async () => {
+  if (!shopCoordinateRoadOverlay || !shopMapRoadToggle || !window.WWZHttp?.json) return;
+  try {
+    const { response, payload } = await window.WWZHttp.json('assets/data/chernarus/pois.json', {
+      method: 'GET',
+      headers: { Accept: 'application/json' }
+    }, 15000);
+    const overlay = payload?.map?.road_overlay;
+    const source = String(overlay?.overview_path || '').trim();
+    if (!response.ok || overlay?.enabled !== true || !source.startsWith('assets/')) return;
+    coordinateRoadOverlayAvailable = true;
+    coordinateRoadOverlayVisible = overlay.default_visible !== false;
+    const version = String(overlay?.tile_pyramid?.cache_version || '').trim();
+    shopCoordinateRoadOverlay.src = `${source}${version ? `?v=${encodeURIComponent(version)}` : ''}`;
+    shopCoordinateRoadOverlay.hidden = !coordinateRoadOverlayVisible;
+    shopMapRoadToggle.hidden = false;
+    shopMapRoadToggle.classList.toggle('active', coordinateRoadOverlayVisible);
+    shopMapRoadToggle.setAttribute('aria-pressed', String(coordinateRoadOverlayVisible));
+  } catch {}
+};
+const toggleCoordinateRoadOverlay = () => {
+  if (!coordinateRoadOverlayAvailable) return;
+  coordinateRoadOverlayVisible = !coordinateRoadOverlayVisible;
+  shopCoordinateRoadOverlay.hidden = !coordinateRoadOverlayVisible;
+  shopMapRoadToggle.classList.toggle('active', coordinateRoadOverlayVisible);
+  shopMapRoadToggle.setAttribute('aria-pressed', String(coordinateRoadOverlayVisible));
 };
 
 const clampCoordinatePicker = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
@@ -345,6 +377,7 @@ shopCoordinateMap?.addEventListener('pointercancel', () => { coordinatePickerDra
 document.querySelector('[data-shop-map-zoom-in]')?.addEventListener('click', () => { coordinatePickerZoom = clampCoordinatePicker(coordinatePickerZoom * 1.35, 1, 5); updateCoordinatePickerTransform(); });
 document.querySelector('[data-shop-map-zoom-out]')?.addEventListener('click', () => { coordinatePickerZoom = clampCoordinatePicker(coordinatePickerZoom / 1.35, 1, 5); if (coordinatePickerZoom === 1) { coordinatePickerX = 0; coordinatePickerY = 0; } updateCoordinatePickerTransform(); });
 document.querySelector('[data-shop-map-reset]')?.addEventListener('click', resetCoordinatePicker);
+shopMapRoadToggle?.addEventListener('click', toggleCoordinateRoadOverlay);
 
 const renderShopCatalogue = () => {
   if (!shopCatalogue) return;
@@ -1473,3 +1506,5 @@ window.addEventListener('wwz:viewchange', (event) => {
 loadPublicShop();
 
 
+
+configureCoordinateRoadOverlay();

@@ -53,14 +53,16 @@ const elements = {
   eventFields: $('[data-member-event-fields]'), location: $('[data-member-delivery-location]'),
   coordinateInputs: $('[data-member-coordinate-inputs]'), x: $('[data-member-delivery-x]'),
   y: $('[data-member-delivery-y]'), z: $('[data-member-delivery-z]'), rotation: $('[data-member-delivery-rotation]'),
-  coordinateMap: $('[data-member-coordinate-map]'), coordinateStage: $('[data-member-coordinate-stage]'), coordinateImage: $('[data-member-coordinate-image]'),
-  mapZoomIn: $('[data-member-map-zoom-in]'), mapZoomOut: $('[data-member-map-zoom-out]'), mapReset: $('[data-member-map-reset]'), mapFullscreen: $('[data-member-map-fullscreen]'),
+  coordinateMap: $('[data-member-coordinate-map]'), coordinateStage: $('[data-member-coordinate-stage]'), coordinateImage: $('[data-member-coordinate-image]'), coordinateRoadOverlay: $('[data-member-coordinate-road-overlay]'),
+  mapZoomIn: $('[data-member-map-zoom-in]'), mapZoomOut: $('[data-member-map-zoom-out]'), mapReset: $('[data-member-map-reset]'), mapFullscreen: $('[data-member-map-fullscreen]'), mapRoadToggle: $('[data-member-map-road-toggle]'),
   marker: $('[data-member-map-marker]'), mapReadout: $('[data-member-map-readout]'),
   coordinateConfirm: $('[data-member-coordinate-confirm]'), note: $('[data-member-purchase-note]'),
   total: $('[data-member-purchase-total]'), purchaseMessage: $('[data-member-purchase-message]'),
   purchaseConfirm: $('[data-member-purchase-confirm]')
 };
 const checkoutMap = { x: 0, y: 0, zoom: 1, minZoom: 1, maxZoom: 5, dragging: false, moved: false, pointerId: null, startX: 0, startY: 0, originX: 0, originY: 0 };
+let checkoutRoadOverlayVisible = false;
+let checkoutRoadOverlayAvailable = false;
 
 const money = (value) => `$${new Intl.NumberFormat('en-AU').format(Math.max(0, Number(value) || 0))}`;
 const dateText = (value) => {
@@ -327,6 +329,33 @@ const syncLocationMode = () => {
     if (location) { elements.x.value = location.x; elements.y.value = location.y; elements.z.value = location.z; elements.rotation.value = location.rotation; updateMarker(); }
   }
 };
+const configureCheckoutRoadOverlay = async () => {
+  if (!elements.coordinateRoadOverlay || !elements.mapRoadToggle) return;
+  try {
+    const { response, payload } = await fetchJson('assets/data/chernarus/pois.json', {
+      headers: { Accept: 'application/json' }
+    }, 15000);
+    const overlay = payload?.map?.road_overlay;
+    const source = String(overlay?.overview_path || '').trim();
+    if (!response.ok || overlay?.enabled !== true || !source.startsWith('assets/')) return;
+    checkoutRoadOverlayAvailable = true;
+    checkoutRoadOverlayVisible = overlay.default_visible !== false;
+    const version = String(overlay?.tile_pyramid?.cache_version || '').trim();
+    elements.coordinateRoadOverlay.src = `${source}${version ? `?v=${encodeURIComponent(version)}` : ''}`;
+    elements.coordinateRoadOverlay.hidden = !checkoutRoadOverlayVisible;
+    elements.mapRoadToggle.hidden = false;
+    elements.mapRoadToggle.classList.toggle('active', checkoutRoadOverlayVisible);
+    elements.mapRoadToggle.setAttribute('aria-pressed', String(checkoutRoadOverlayVisible));
+  } catch {}
+};
+const toggleCheckoutRoadOverlay = () => {
+  if (!checkoutRoadOverlayAvailable) return;
+  checkoutRoadOverlayVisible = !checkoutRoadOverlayVisible;
+  elements.coordinateRoadOverlay.hidden = !checkoutRoadOverlayVisible;
+  elements.mapRoadToggle.classList.toggle('active', checkoutRoadOverlayVisible);
+  elements.mapRoadToggle.setAttribute('aria-pressed', String(checkoutRoadOverlayVisible));
+};
+
 const clampMap = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 const constrainCheckoutMap = () => {
   const frame = elements.coordinateMap.getBoundingClientRect();
@@ -473,6 +502,7 @@ elements.coordinateMap.addEventListener('pointercancel', endMapDrag);
 elements.mapZoomIn.addEventListener('click', () => zoomCheckoutMap(1.4));
 elements.mapZoomOut.addEventListener('click', () => zoomCheckoutMap(1 / 1.4));
 elements.mapReset.addEventListener('click', resetCheckoutMap);
+elements.mapRoadToggle?.addEventListener('click', toggleCheckoutRoadOverlay);
 elements.mapFullscreen.addEventListener('click', async () => {
   try {
     if (document.fullscreenElement === elements.coordinateMap) await document.exitFullscreen();
@@ -485,6 +515,7 @@ $$('[data-member-purchase-cancel]').forEach((button) => button.addEventListener(
 elements.purchaseForm.addEventListener('submit', submitPurchase);
 
 const initialise = async () => {
+  configureCheckoutRoadOverlay();
   try {
     const { response, payload } = await fetchJson(URLS.authConfig, { headers: { Accept: 'application/json' } });
     state.authEnabled = Boolean(response.ok && payload?.discord_auth?.enabled);

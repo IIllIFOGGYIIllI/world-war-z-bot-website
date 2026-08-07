@@ -1,21 +1,19 @@
-world-war-z-website v1.22.25 patch files
+world-war-z-website v1.22.26 patch files
 
-PATCH_NOTES.md
-README.md
-assets/js/dashboard/delivery.js
-assets/js/dashboard/shop.js
-assets/js/data/command-library.js
+assets/data/chernarus/pois.json
+assets/js/map/chernarus-map.js
+assets/js/pages/dashboard-map-loader.js
 assets/js/pages/shop.js
-changelog.html
-community-guidelines.html
+assets/js/dashboard/shop.js
+assets/css/dashboard/catalogue.css
+assets/css/dashboard/workspace.css
+assets/css/pages/shop.css
+assets/chernarus-map/overlays/roads/README.md
 dashboard.html
-index.html
-legal.html
-moderation-policy.html
-privacy.html
 shop.html
-terms.html
+index.html
+changelog.html
+README.md
+PATCH_NOTES.md
 PATCH_FILE_LIST.txt
 DELETE_THESE_FILES.txt
-
-No files need to be deleted.

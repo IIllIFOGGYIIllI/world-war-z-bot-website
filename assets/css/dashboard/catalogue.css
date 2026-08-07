@@ -46,6 +46,7 @@
 }
 
 .map-tile-layer { z-index: 0; }
+.map-road-tile-layer { z-index: 1; pointer-events: none; }
 
 .map-tile {
   position: absolute;
@@ -61,7 +62,21 @@
 }
 
 .map-tile.loaded { opacity: 1; }
+.map-road-tile.loaded { opacity: var(--road-overlay-opacity, 1); }
 .map-tile.failed { visibility: hidden; }
+.map-road-toggle {
+  width: auto !important;
+  min-width: 58px;
+  padding-inline: 9px;
+  font-size: 10px !important;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.map-road-toggle.active {
+  border-color: rgba(255,190,42,.78) !important;
+  background: rgba(54,38,8,.94) !important;
+  color: #ffd35a !important;
+}
 .map-markers { z-index: 3; pointer-events: none; }
 .map-marker { pointer-events: auto; }
 

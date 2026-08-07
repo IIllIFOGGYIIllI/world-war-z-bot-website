@@ -63,8 +63,10 @@
 .member-coordinate-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
 .member-coordinate-map { position:relative; overflow:hidden; margin:14px 0; border:1px solid var(--line-strong); background:#080808; cursor:crosshair; aspect-ratio:1; touch-action:none; user-select:none; }
 .member-coordinate-stage { position:absolute; inset:0; width:100%; height:100%; transform-origin:0 0; will-change:transform; }
-.member-coordinate-map img { width:100%; height:100%; display:block; object-fit:fill; pointer-events:none; user-select:none; }
-.member-map-marker { position:absolute; width:16px; height:16px; border:3px solid white; border-radius:50%; background:var(--red); transform:translate(-50%,-50%) scale(var(--checkout-marker-scale,1)); box-shadow:0 0 0 5px rgba(212,36,24,.25); pointer-events:none; transform-origin:center; }
+.member-coordinate-map img { position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:fill; pointer-events:none; user-select:none; }
+.member-coordinate-map [data-member-coordinate-image] { z-index:0; }
+.member-coordinate-road-overlay { z-index:1; }
+.member-map-marker { position:absolute; z-index:2; width:16px; height:16px; border:3px solid white; border-radius:50%; background:var(--red); transform:translate(-50%,-50%) scale(var(--checkout-marker-scale,1)); box-shadow:0 0 0 5px rgba(212,36,24,.25); pointer-events:none; transform-origin:center; }
 .member-map-controls { position:absolute; z-index:4; left:10px; top:10px; display:grid; gap:5px; }
 .member-map-controls button { width:38px; height:38px; display:grid; place-items:center; border:1px solid rgba(255,255,255,.18); background:rgba(8,7,7,.92); color:#fff; font-size:20px; font-weight:900; cursor:pointer; }
 .member-map-controls button:hover { border-color:rgba(243,58,40,.7); background:rgba(45,17,15,.95); }

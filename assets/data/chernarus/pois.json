@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "map": {
     "name": "ChernarusPlus",
     "size_meters": 15360,
@@ -13,7 +13,23 @@
       "source": "User-supplied Chernarus satellite layers",
       "cache_version": "1.22.4"
     },
-    "attribution": "Chernarus and DayZ imagery \u00a9 Bohemia Interactive. Unofficial community dashboard; not affiliated with or endorsed by Bohemia Interactive."
+    "attribution": "Chernarus and DayZ imagery \u00a9 Bohemia Interactive. Unofficial community dashboard; not affiliated with or endorsed by Bohemia Interactive.",
+    "road_overlay": {
+      "enabled": false,
+      "name": "Roads",
+      "default_visible": true,
+      "opacity": 1.0,
+      "overview_path": "assets/chernarus-map/overlays/roads/overview.webp",
+      "tile_pyramid": {
+        "base_path": "assets/chernarus-map/overlays/roads/tiles",
+        "format": "webp",
+        "tile_size": 480,
+        "min_zoom": 0,
+        "max_zoom": 5,
+        "native_pixels": 15360,
+        "cache_version": "1.22.26"
+      }
+    }
   },
   "pois": [
     {

@@ -4,6 +4,8 @@
   const frame = document.querySelector('[data-map-frame]');
   const stage = document.querySelector('[data-map-stage]');
   const tileLayer = document.querySelector('[data-map-tiles]');
+  const roadTileLayer = document.querySelector('[data-map-road-tiles]');
+  const roadToggleButton = document.querySelector('[data-map-road-toggle]');
   const markersLayer = document.querySelector('[data-map-markers]');
   const selectionMarker = document.querySelector('[data-map-selection-marker]');
   const loading = document.querySelector('[data-map-loading]');
@@ -24,6 +26,7 @@
   const markerElements = new Map();
   const locationElements = new Map();
   const renderedTiles = new Map();
+  const renderedRoadTiles = new Map();
   const activePointers = new Map();
   const view = { x: 0, y: 0, zoom: 1, minZoom: 0.02, maxZoom: 1.35 };
 
@@ -35,6 +38,8 @@
   let tileBasePath = 'assets/chernarus-map/tiles';
   let tileFormat = 'webp';
   let tileCacheVersion = '1.22.4';
+  let roadOverlay = null;
+  let roadOverlayVisible = false;
   let publicPois = [];
   let selectedCategory = 'All';
   let selectedPoiId = null;
@@ -184,6 +189,29 @@
     return `${tileBasePath}/${zoom}/${x}/${y}.${tileFormat}${version}`;
   };
 
+  const overlayTilePath = (overlay, zoom, x, y) => {
+    const pyramid = overlay?.tilePyramid;
+    const version = pyramid?.cacheVersion ? `?v=${encodeURIComponent(pyramid.cacheVersion)}` : '';
+    return `${pyramid.basePath}/${zoom}/${x}/${y}.${pyramid.format}${version}`;
+  };
+
+  const clearRenderedRoadTiles = () => {
+    renderedRoadTiles.forEach((tile) => tile.remove());
+    renderedRoadTiles.clear();
+  };
+
+  const updateRoadToggle = () => {
+    if (!roadToggleButton) return;
+    const available = Boolean(roadOverlay?.enabled);
+    roadToggleButton.hidden = !available;
+    roadToggleButton.disabled = !available;
+    roadToggleButton.classList.toggle('active', available && roadOverlayVisible);
+    roadToggleButton.setAttribute('aria-pressed', String(available && roadOverlayVisible));
+    roadToggleButton.title = available
+      ? `${roadOverlayVisible ? 'Hide' : 'Show'} ${roadOverlay.name || 'roads'} overlay`
+      : 'Road overlay source not installed';
+  };
+
   const renderVisibleTiles = () => {
     tileRenderFrame = 0;
     if (!dataReady || !frame.clientWidth || !frame.clientHeight) return;
@@ -240,6 +268,42 @@
       tile.remove();
       renderedTiles.delete(key);
     });
+
+    if (roadTileLayer && roadOverlay?.enabled && roadOverlayVisible) {
+      const roadRequired = new Set();
+      for (let y = minY; y <= maxY; y += 1) {
+        for (let x = minX; x <= maxX; x += 1) {
+          const key = `${zoom}/${x}/${y}`;
+          roadRequired.add(key);
+          if (renderedRoadTiles.has(key)) continue;
+
+          const tile = document.createElement('img');
+          tile.className = 'map-tile map-road-tile';
+          tile.alt = '';
+          tile.draggable = false;
+          tile.decoding = 'async';
+          tile.loading = 'eager';
+          tile.style.left = `${x * span}px`;
+          tile.style.top = `${y * span}px`;
+          tile.style.width = `${span + 0.25}px`;
+          tile.style.height = `${span + 0.25}px`;
+          tile.style.setProperty('--road-overlay-opacity', String(roadOverlay.opacity));
+          tile.src = overlayTilePath(roadOverlay, zoom, x, y);
+          tile.addEventListener('load', () => tile.classList.add('loaded'), { once: true });
+          tile.addEventListener('error', () => tile.classList.add('failed'), { once: true });
+          roadTileLayer.append(tile);
+          renderedRoadTiles.set(key, tile);
+        }
+      }
+
+      renderedRoadTiles.forEach((tile, key) => {
+        if (roadRequired.has(key)) return;
+        tile.remove();
+        renderedRoadTiles.delete(key);
+      });
+    } else {
+      clearRenderedRoadTiles();
+    }
   };
 
   const scheduleTileRender = () => {
@@ -457,6 +521,29 @@
     };
   };
 
+  const validateRoadOverlay = (raw, basePyramid) => {
+    if (!raw || raw.enabled !== true) return { enabled: false };
+    const pyramid = validateTilePyramid(raw.tile_pyramid);
+    const name = validText(raw.name, 40) || 'Roads';
+    const overviewPath = validText(raw.overview_path, 180);
+    const opacity = Number(raw.opacity);
+    if (!pyramid || !overviewPath?.startsWith('assets/')) return { enabled: false };
+    if (
+      pyramid.tileSize !== basePyramid.tileSize ||
+      pyramid.worldPixels !== basePyramid.worldPixels ||
+      pyramid.minZoom !== basePyramid.minZoom ||
+      pyramid.maxZoom !== basePyramid.maxZoom
+    ) return { enabled: false };
+    return {
+      enabled: true,
+      name,
+      overviewPath,
+      opacity: Number.isFinite(opacity) ? clamp(opacity, 0.1, 1) : 1,
+      defaultVisible: raw.default_visible !== false,
+      tilePyramid: pyramid
+    };
+  };
+
   const loadMapData = async () => {
     try {
       const { response, payload } = await window.WWZHttp.json(DATA_URL, {
@@ -467,6 +554,10 @@
       const configuredSize = Number(payload?.map?.size_meters);
       const pyramid = validateTilePyramid(payload?.map?.tile_pyramid);
       if (!Number.isFinite(configuredSize) || configuredSize <= 0 || !pyramid) throw new Error('Invalid map configuration');
+      roadOverlay = validateRoadOverlay(payload?.map?.road_overlay, pyramid);
+      roadOverlayVisible = Boolean(roadOverlay.enabled && roadOverlay.defaultVisible);
+      if (roadTileLayer) roadTileLayer.hidden = !roadOverlayVisible;
+      updateRoadToggle();
 
       mapSize = configuredSize;
       tileBasePath = pyramid.basePath;
@@ -506,6 +597,14 @@
   document.querySelector('[data-map-zoom-in]')?.addEventListener('click', () => zoomAt(view.zoom * 1.45));
   document.querySelector('[data-map-zoom-out]')?.addEventListener('click', () => zoomAt(view.zoom / 1.45));
   document.querySelector('[data-map-reset]')?.addEventListener('click', fitMap);
+  roadToggleButton?.addEventListener('click', () => {
+    if (!roadOverlay?.enabled) return;
+    roadOverlayVisible = !roadOverlayVisible;
+    if (roadTileLayer) roadTileLayer.hidden = !roadOverlayVisible;
+    updateRoadToggle();
+    if (roadOverlayVisible) scheduleTileRender();
+    else clearRenderedRoadTiles();
+  });
   document.querySelector('[data-map-focus-selected]')?.addEventListener('click', () => {
     const poi = findPoi(selectedPoiId);
     if (poi) centreOnMapCoordinates(poi.x, poi.z);

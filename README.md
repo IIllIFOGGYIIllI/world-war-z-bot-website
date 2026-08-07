@@ -62,6 +62,14 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+## Version 1.22.26 Road Overlay Foundation
+
+The Chernarus map engine now supports an optional independent road overlay without altering the existing satellite tiles. The dashboard interactive map can render a second transparent tile pyramid, while the member and dashboard shop coordinate pickers can render a matching transparent overview image. Road-layer controls stay hidden while the overlay is disabled, so the production map remains visually unchanged until a clean high-resolution road source is generated and validated.
+
+The future overlay assets belong under `assets/chernarus-map/overlays/roads/`. Enabling the source is configuration-only through `assets/data/chernarus/pois.json`.
+
+Pairs with Bot v1.18.26. No Railway API, database, Normal Item delivery, Event Item rental, moderation or authentication behaviour changed.
+
 ## Version 1.22.25 Preserve Restart-Bound Rentals
 
 Normal Items keep the new temporary Central Economy delivery path introduced in v1.22.24 / Bot v1.18.25, but Event Item rentals are restored to the established restart-bound model. Buyers again select the number of restarts, pricing is per restart, Owner global/profile restart limits are available, and remaining restarts are shown throughout member and Admin views. Bot v1.18.26 preserves existing rental data and only removes the legacy `dpp_shop.json` path from Normal Item delivery.
