@@ -1,10 +1,7 @@
-world-war-z-website v1.22.27
+world-war-z-website v1.22.28 delete list
 
-Delete these retired Chernarus map assets before deployment:
+No files need to be deleted for this patch.
 
-assets/chernarus-map/overview.webp
-assets/chernarus-map/tile-report.json
-assets/chernarus-map/tiles/                 (delete the entire directory)
-assets/images/maps/chernarus-vector.svg
-
-The included scripts/install_chernarus_map_assets.ps1 removes these paths automatically.
+This patch does not replace or remove the corrected satellite pyramid or final production road GeoJSON.
+Do not delete assets/chernarus-map/satellite-corrected/.
+Do not delete assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson.
