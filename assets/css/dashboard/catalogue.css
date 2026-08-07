@@ -1,4 +1,4 @@
-/* v1.22.3 — locally hosted Chernarus satellite map */
+/* v1.22.27 — unified production Chernarus map */
 .map-live-preview {
   grid-template-columns: minmax(180px, 0.72fr) minmax(0, 1fr);
   min-height: 280px;
@@ -32,76 +32,6 @@
   isolation: isolate;
 }
 
-.map-stage {
-  width: 15360px;
-  height: 15360px;
-  overflow: visible;
-  background: #080b08;
-}
-
-.map-tile-layer,
-.map-markers {
-  position: absolute;
-  inset: 0;
-}
-
-.map-tile-layer { z-index: 0; }
-.map-road-tile-layer { z-index: 1; pointer-events: none; }
-
-.map-tile {
-  position: absolute;
-  display: block;
-  max-width: none;
-  opacity: 0;
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
-  image-rendering: auto;
-  backface-visibility: hidden;
-  transition: opacity 110ms linear;
-}
-
-.map-tile.loaded { opacity: 1; }
-.map-road-tile.loaded { opacity: var(--road-overlay-opacity, 1); }
-.map-tile.failed { visibility: hidden; }
-.map-road-toggle {
-  width: auto !important;
-  min-width: 58px;
-  padding-inline: 9px;
-  font-size: 10px !important;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-.map-road-toggle.active {
-  border-color: rgba(255,190,42,.78) !important;
-  background: rgba(54,38,8,.94) !important;
-  color: #ffd35a !important;
-}
-.map-markers { z-index: 3; pointer-events: none; }
-.map-marker { pointer-events: auto; }
-
-.map-selection-marker {
-  --marker-inverse-scale: 1;
-  position: absolute;
-  z-index: 6;
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border: 2px solid #fff;
-  border-radius: 50% 50% 50% 0;
-  background: var(--red-bright);
-  color: #fff;
-  font-size: 19px;
-  font-weight: 900;
-  box-shadow: 0 7px 20px rgba(0,0,0,.68), 0 0 0 9px rgba(238,50,36,.2);
-  transform: translate(-50%, -72%) rotate(-45deg) scale(var(--marker-inverse-scale));
-  transform-origin: center;
-  pointer-events: none;
-}
-
-.map-selection-marker::before { content: "⌖"; font-size: 19px; transform: rotate(45deg); }
-.map-selection-marker { font-size: 0; }
 
 .map-coordinate-readout {
   right: 14px;
@@ -211,7 +141,6 @@
   .map-coordinate-readout > div:first-child { display: none; }
   .map-coordinate-readout > div:nth-child(2) { min-width: 0; }
   .map-coordinate-readout button { grid-column: 2; grid-row: 1; }
-  .map-marker > span { display: none; }
   .map-toolbar { padding: 10px; }
   .map-filter-list { max-height: 82px; overflow-y: auto; }
 }

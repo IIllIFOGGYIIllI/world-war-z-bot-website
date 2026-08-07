@@ -1,0 +1,180 @@
+/* v1.22.27 — shared production Chernarus renderer */
+.wwz-chernarus-map {
+  position: relative;
+  overflow: hidden;
+  min-height: 320px;
+  background: #060606;
+  cursor: crosshair;
+  isolation: isolate;
+}
+
+.wwz-chernarus-map.leaflet-container {
+  background: #060606;
+  font-family: inherit;
+}
+
+.wwz-chernarus-map .leaflet-tile-pane {
+  filter: saturate(.88) brightness(.86) contrast(1.04);
+}
+
+.wwz-chernarus-map .leaflet-overlay-pane canvas {
+  pointer-events: none;
+}
+
+.wwz-chernarus-map .leaflet-control-container { pointer-events: none; }
+.wwz-chernarus-map .leaflet-control { pointer-events: auto; }
+
+.wwz-chernarus-map .leaflet-pane,
+.wwz-chernarus-map .leaflet-control-container { z-index: auto; }
+
+.wwz-chernarus-map .leaflet-tile-pane { z-index: 200; }
+.wwz-chernarus-map .leaflet-overlay-pane { z-index: 400; }
+.wwz-chernarus-map .leaflet-marker-pane { z-index: 600; }
+.wwz-chernarus-map .leaflet-tooltip-pane { z-index: 650; }
+.wwz-chernarus-map .leaflet-popup-pane { z-index: 700; }
+
+.wwz-map-selection-marker {
+  filter: drop-shadow(0 0 5px rgba(213, 43, 30, .75));
+}
+
+.wwz-map-poi-marker {
+  cursor: pointer;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
+}
+
+.wwz-map-selection-disabled { cursor: grab; }
+.wwz-map-selection-disabled:active { cursor: grabbing; }
+
+.wwz-chernarus-map--picker,
+.wwz-chernarus-map--delivery {
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 300px;
+  border: 1px solid var(--line-strong, rgba(255,255,255,.14));
+}
+
+.wwz-chernarus-map--saved-location {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 300px;
+  border: 1px solid var(--line-strong, rgba(255,255,255,.14));
+}
+
+.wwz-chernarus-map:fullscreen,
+.wwz-map-fullscreen-target:fullscreen .wwz-chernarus-map {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  aspect-ratio: auto;
+}
+
+.wwz-chernarus-map .map-controls,
+.wwz-chernarus-map .coordinate-picker-controls,
+.wwz-chernarus-map .member-map-controls,
+.wwz-chernarus-map .saved-location-map-controls {
+  z-index: 1000;
+}
+
+.wwz-chernarus-map .map-coordinate-readout,
+.wwz-chernarus-map .coordinate-picker-hint,
+.wwz-chernarus-map .member-map-readout,
+.wwz-chernarus-map .saved-location-map-readout,
+.wwz-chernarus-map .map-loading {
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.wwz-chernarus-map .map-loading.error {
+  border-color: rgba(224, 75, 61, .55);
+  background: rgba(42, 10, 8, .92);
+}
+
+.wwz-chernarus-map .map-loading.error span { display: none; }
+
+.saved-location-map-shell {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.saved-location-map-shell > small {
+  color: #8f8882;
+  line-height: 1.5;
+}
+
+.saved-location-map {
+  position: relative;
+  border-radius: 7px;
+}
+
+.saved-location-map-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 38px);
+  gap: 5px;
+}
+
+.saved-location-map-controls button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(8,7,7,.92);
+  color: #fff;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.saved-location-map-readout {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(7,6,6,.90);
+  font-size: 10px;
+}
+
+.saved-location-map-readout span { color: #9f9791; }
+
+.map-controls button.active,
+.coordinate-picker-controls button.active,
+.member-map-controls button.active {
+  border-color: rgba(255,190,42,.78) !important;
+  background: rgba(54,38,8,.94) !important;
+  color: #ffd35a !important;
+}
+
+.map-controls .map-layer-button {
+  width: auto !important;
+  min-width: 58px;
+  padding-inline: 9px;
+  font-size: 9px !important;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+
+.coordinate-picker-frame .leaflet-pane,
+.member-coordinate-map .leaflet-pane,
+.saved-location-map .leaflet-pane { border-radius: inherit; }
+
+@media (max-width: 720px) {
+  .wwz-chernarus-map--picker,
+  .wwz-chernarus-map--delivery { min-height: 280px; }
+
+  .wwz-chernarus-map--saved-location {
+    aspect-ratio: 1;
+    min-height: 280px;
+  }
+}
+

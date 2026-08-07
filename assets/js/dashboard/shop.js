@@ -103,11 +103,7 @@ const shopEventCount = document.querySelector('[data-shop-event-count]');
 const shopQuantityLabel = document.querySelector('[data-shop-quantity-label]');
 const shopQuantityHelp = document.querySelector('[data-shop-quantity-help]');
 const shopCoordinateMap = document.querySelector('[data-shop-coordinate-map]');
-const shopCoordinateStage = document.querySelector('[data-shop-coordinate-stage]');
-const shopCoordinateImage = document.querySelector('[data-shop-coordinate-image]');
-const shopCoordinateRoadOverlay = document.querySelector('[data-shop-coordinate-road-overlay]');
-const shopMapRoadToggle = document.querySelector('[data-shop-map-road-toggle]');
-const shopCoordinateMarker = document.querySelector('[data-shop-coordinate-marker]');
+const shopMapFullscreen = document.querySelector('[data-shop-map-fullscreen]');
 const shopMapSelected = document.querySelector('[data-shop-map-selected]');
 const ownerShopSearch = document.querySelector('[data-owner-shop-search]');
 const ownerShopCategory = document.querySelector('[data-owner-shop-category]');
@@ -132,12 +128,7 @@ let shopOrderActionInProgress = false;
 let ownerShopRequestInProgress = false;
 let savedDeliveryLocations = [];
 let shopCatalogueMode = 'manual';
-let coordinatePickerZoom = 1;
-let coordinatePickerX = 0;
-let coordinatePickerY = 0;
-let coordinatePickerDrag = null;
-let coordinateRoadOverlayAvailable = false;
-let coordinateRoadOverlayVisible = false;
+let shopCoordinateMapInstance = null;
 
 const DEFAULT_EVENT_XML = `<event name="Vehicle">
     <nominal>1</nominal>
@@ -214,69 +205,50 @@ const populatePurchaseLocationSelect = () => {
   }
 };
 
-const configureCoordinateRoadOverlay = async () => {
-  if (!shopCoordinateRoadOverlay || !shopMapRoadToggle || !window.WWZHttp?.json) return;
-  try {
-    const { response, payload } = await window.WWZHttp.json('assets/data/chernarus/pois.json', {
-      method: 'GET',
-      headers: { Accept: 'application/json' }
-    }, 15000);
-    const overlay = payload?.map?.road_overlay;
-    const source = String(overlay?.overview_path || '').trim();
-    if (!response.ok || overlay?.enabled !== true || !source.startsWith('assets/')) return;
-    coordinateRoadOverlayAvailable = true;
-    coordinateRoadOverlayVisible = overlay.default_visible !== false;
-    const version = String(overlay?.tile_pyramid?.cache_version || '').trim();
-    shopCoordinateRoadOverlay.src = `${source}${version ? `?v=${encodeURIComponent(version)}` : ''}`;
-    shopCoordinateRoadOverlay.hidden = !coordinateRoadOverlayVisible;
-    shopMapRoadToggle.hidden = false;
-    shopMapRoadToggle.classList.toggle('active', coordinateRoadOverlayVisible);
-    shopMapRoadToggle.setAttribute('aria-pressed', String(coordinateRoadOverlayVisible));
-  } catch {}
-};
-const toggleCoordinateRoadOverlay = () => {
-  if (!coordinateRoadOverlayAvailable) return;
-  coordinateRoadOverlayVisible = !coordinateRoadOverlayVisible;
-  shopCoordinateRoadOverlay.hidden = !coordinateRoadOverlayVisible;
-  shopMapRoadToggle.classList.toggle('active', coordinateRoadOverlayVisible);
-  shopMapRoadToggle.setAttribute('aria-pressed', String(coordinateRoadOverlayVisible));
+const ensureShopCoordinateMap = () => {
+  if (shopCoordinateMapInstance || !shopCoordinateMap || !window.WWZChernarusMap) return shopCoordinateMapInstance;
+  shopCoordinateMapInstance = window.WWZChernarusMap.create(shopCoordinateMap, {
+    mode: 'picker',
+    selectable: true,
+    copyOnSelect: false,
+    roadsVisible: true,
+    trailsVisible: false,
+    selectedElement: shopMapSelected,
+    zoomInButton: document.querySelector('[data-shop-map-zoom-in]'),
+    zoomOutButton: document.querySelector('[data-shop-map-zoom-out]'),
+    resetButton: document.querySelector('[data-shop-map-reset]'),
+    fullscreenButton: shopMapFullscreen,
+    fullscreenTarget: shopCoordinateMap,
+    emptySelectionText: 'No coordinates selected',
+    onSelect: ({ x, z }) => {
+      if (shopDeliveryLocation?.value) return;
+      if (shopDeliveryX) shopDeliveryX.value = x.toFixed(1);
+      if (shopDeliveryZ) shopDeliveryZ.value = z.toFixed(1);
+      if (shopDeliveryY && shopDeliveryY.value === '') shopDeliveryY.value = '0';
+      updateCoordinateMarker();
+    }
+  });
+  return shopCoordinateMapInstance;
 };
 
-const clampCoordinatePicker = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
-const updateCoordinatePickerTransform = () => {
-  if (!shopCoordinateStage) return;
-  shopCoordinateStage.style.transform = `translate(${coordinatePickerX}px, ${coordinatePickerY}px) scale(${coordinatePickerZoom})`;
-};
 const resetCoordinatePicker = () => {
-  coordinatePickerZoom = 1;
-  coordinatePickerX = 0;
-  coordinatePickerY = 0;
-  updateCoordinatePickerTransform();
+  const instance = ensureShopCoordinateMap();
+  instance?.reset();
 };
+
 const updateCoordinateMarker = () => {
-  if (!shopCoordinateMarker || !shopDeliveryX || !shopDeliveryZ) return;
-  const x = Number(shopDeliveryX.value);
-  const z = Number(shopDeliveryZ.value);
-  if (!Number.isFinite(x) || !Number.isFinite(z) || x < 0 || x > 15360 || z < 0 || z > 15360) {
-    shopCoordinateMarker.hidden = true;
-    if (shopMapSelected) shopMapSelected.textContent = 'No coordinates selected';
-    return;
+  const rawX = String(shopDeliveryX?.value ?? '').trim();
+  const rawZ = String(shopDeliveryZ?.value ?? '').trim();
+  const x = Number(rawX);
+  const z = Number(rawZ);
+  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= 15360 && z >= 0 && z <= 15360;
+  if (shopMapSelected && !shopCoordinateMapInstance) {
+    shopMapSelected.textContent = valid ? `X ${x.toFixed(1)} · Z ${z.toFixed(1)}` : 'No coordinates selected';
   }
-  shopCoordinateMarker.hidden = false;
-  shopCoordinateMarker.style.left = `${(x / 15360) * 100}%`;
-  shopCoordinateMarker.style.top = `${(1 - z / 15360) * 100}%`;
-  if (shopMapSelected) shopMapSelected.textContent = `X ${x.toFixed(3)} · Z ${z.toFixed(3)}`;
-};
-const setCoordinatesFromMap = (clientX, clientY) => {
-  if (!shopCoordinateImage || shopDeliveryLocation?.value) return;
-  const rect = shopCoordinateImage.getBoundingClientRect();
-  if (!rect.width || !rect.height || clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return;
-  const x = clampCoordinatePicker(((clientX - rect.left) / rect.width) * 15360, 0, 15360);
-  const z = clampCoordinatePicker((1 - ((clientY - rect.top) / rect.height)) * 15360, 0, 15360);
-  if (shopDeliveryX) shopDeliveryX.value = x.toFixed(3);
-  if (shopDeliveryZ) shopDeliveryZ.value = z.toFixed(3);
-  if (shopDeliveryY && shopDeliveryY.value === '') shopDeliveryY.value = '0';
-  updateCoordinateMarker();
+  if (!shopCoordinateMapInstance) return;
+  if (valid) shopCoordinateMapInstance.setSelection(x, z, { notify: false });
+  else shopCoordinateMapInstance.clearSelection({ notify: false });
+  shopCoordinateMapInstance.setSelectionEnabled(!shopDeliveryLocation?.value);
 };
 
 const syncShopDeliveryForm = () => {
@@ -333,8 +305,6 @@ const openShopPurchase = (item) => {
   }
   if (shopDeliveryY) shopDeliveryY.value = '0';
   if (shopDeliveryRotation) shopDeliveryRotation.value = '0';
-  resetCoordinatePicker();
-  updateCoordinateMarker();
   populatePurchaseLocationSelect();
   if (isEvent && !savedDeliveryLocations.length) loadDeliveryLocations(undefined, { quiet: true }).then(() => { populatePurchaseLocationSelect(); syncShopDeliveryForm(); });
   syncShopDeliveryForm();
@@ -346,6 +316,14 @@ const openShopPurchase = (item) => {
   updateShopPurchaseTotal();
   if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal();
   else shopPurchaseDialog?.setAttribute('open', '');
+  if (isEvent) {
+    window.setTimeout(() => {
+      const instance = ensureShopCoordinateMap();
+      resetCoordinatePicker();
+      updateCoordinateMarker();
+      instance?.invalidateSize();
+    }, 0);
+  }
 };
 
 const updateShopPurchaseTotal = () => {
@@ -357,27 +335,6 @@ shopPurchaseQuantity?.addEventListener('input', updateShopPurchaseTotal);
 shopDeliveryLocation?.addEventListener('change', syncShopDeliveryForm);
 shopSaveLocation?.addEventListener('change', syncShopDeliveryForm);
 [shopDeliveryX, shopDeliveryZ].forEach((input) => input?.addEventListener('input', updateCoordinateMarker));
-shopCoordinateMap?.addEventListener('pointerdown', (event) => {
-  if (event.target.closest('button')) return;
-  coordinatePickerDrag = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY };
-  shopCoordinateMap.setPointerCapture?.(event.pointerId);
-});
-shopCoordinateMap?.addEventListener('pointermove', (event) => {
-  if (!coordinatePickerDrag || coordinatePickerDrag.id !== event.pointerId) return;
-  coordinatePickerX += event.clientX - coordinatePickerDrag.x; coordinatePickerY += event.clientY - coordinatePickerDrag.y;
-  coordinatePickerDrag.x = event.clientX; coordinatePickerDrag.y = event.clientY; updateCoordinatePickerTransform();
-});
-shopCoordinateMap?.addEventListener('pointerup', (event) => {
-  if (!coordinatePickerDrag || coordinatePickerDrag.id !== event.pointerId) return;
-  const moved = Math.hypot(event.clientX - coordinatePickerDrag.startX, event.clientY - coordinatePickerDrag.startY);
-  shopCoordinateMap.releasePointerCapture?.(event.pointerId); coordinatePickerDrag = null;
-  if (moved < 7) setCoordinatesFromMap(event.clientX, event.clientY);
-});
-shopCoordinateMap?.addEventListener('pointercancel', () => { coordinatePickerDrag = null; });
-document.querySelector('[data-shop-map-zoom-in]')?.addEventListener('click', () => { coordinatePickerZoom = clampCoordinatePicker(coordinatePickerZoom * 1.35, 1, 5); updateCoordinatePickerTransform(); });
-document.querySelector('[data-shop-map-zoom-out]')?.addEventListener('click', () => { coordinatePickerZoom = clampCoordinatePicker(coordinatePickerZoom / 1.35, 1, 5); if (coordinatePickerZoom === 1) { coordinatePickerX = 0; coordinatePickerY = 0; } updateCoordinatePickerTransform(); });
-document.querySelector('[data-shop-map-reset]')?.addEventListener('click', resetCoordinatePicker);
-shopMapRoadToggle?.addEventListener('click', toggleCoordinateRoadOverlay);
 
 const renderShopCatalogue = () => {
   if (!shopCatalogue) return;
@@ -1505,6 +1462,3 @@ window.addEventListener('wwz:viewchange', (event) => {
 });
 loadPublicShop();
 
-
-
-configureCoordinateRoadOverlay();

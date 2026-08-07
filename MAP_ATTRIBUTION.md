@@ -1,13 +1,22 @@
 # Chernarus Map Attribution
 
-The interactive Chernarus satellite map is generated exclusively from the PNG tiles supplied by the World War Z server owner from their local DayZ installation.
+The World War Z website is an unofficial community dashboard and is not affiliated with or endorsed by Bohemia Interactive.
 
-- Source archive: `WWZ Chernarus Map.rar`
-- Source grid: 32 × 32 tiles
-- Source tile dimensions: 512 × 512 pixels, including a 16-pixel duplicated perimeter gutter
-- Browser output: locally hosted WebP tile pyramid in `assets/chernarus-map/tiles/`
-- No DayZ++, iZurvive or other third-party map-service tiles are copied, embedded or requested.
+## Source material
 
-Chernarus, DayZ and the underlying imagery are © Bohemia Interactive. This is an unofficial community dashboard and is not affiliated with or endorsed by Bohemia Interactive.
+The production Chernarus map uses the user's own converted ChernarusPlus satellite source material and the user's own WRP-derived road geometry work.
 
-The website adds only processing required for browser delivery: tile ordering, 16-pixel gutter removal, WebP conversion, multilevel downsampling, coordinate controls, public POI markers and World War Z interface styling. It does not claim ownership of Bohemia Interactive imagery or trademarks.
+Production browser assets are:
+
+- corrected local satellite pyramid: `assets/chernarus-map/satellite-corrected/{z}/{x}/{y}.jpg`;
+- final local road dataset: `assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson`.
+
+The website does not request satellite or road-map data from a third-party map service at runtime. Leaflet is used only as the browser mapping software/runtime.
+
+## Transformations
+
+The original converted 32 × 32 satellite source was corrected for duplicated tile-edge gutters and rebuilt as a browser JPG pyramid. The road overlay was reconstructed, reviewed and grouped from Chernarus WRP navigation geometry for efficient browser rendering.
+
+Map coordinates remain native DayZ Chernarus X/Z values over a 15,360 m × 15,360 m world.
+
+Chernarus, DayZ and associated source imagery remain © Bohemia Interactive. The World War Z community project claims no ownership of Bohemia Interactive game assets or trademarks.

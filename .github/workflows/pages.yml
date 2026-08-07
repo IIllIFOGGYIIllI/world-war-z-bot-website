@@ -28,7 +28,7 @@ jobs:
 
       - name: Validate static website
         run: |
-          python3 scripts/validate_site.py
+          python3 scripts/validate_site.py --require-map-assets
           find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
 
       - name: Upload website artifact

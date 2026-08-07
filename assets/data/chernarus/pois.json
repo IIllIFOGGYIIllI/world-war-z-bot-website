@@ -1,34 +1,71 @@
 {
-  "version": 3,
+  "version": 4,
   "map": {
     "name": "ChernarusPlus",
     "size_meters": 15360,
-    "tile_pyramid": {
-      "base_path": "assets/chernarus-map/tiles",
-      "format": "webp",
-      "tile_size": 480,
+    "crs": "L.CRS.Simple",
+    "bounds": [
+      [
+        -240,
+        0
+      ],
+      [
+        0,
+        240
+      ]
+    ],
+    "map_units": 240,
+    "scale": 0.015625,
+    "coordinate_format": "X, Z with one decimal place",
+    "satellite": {
+      "base_path": "assets/chernarus-map/satellite-corrected",
+      "url_template": "assets/chernarus-map/satellite-corrected/{z}/{x}/{y}.jpg",
+      "format": "jpg",
+      "tile_size": 256,
       "min_zoom": 0,
-      "max_zoom": 5,
-      "native_pixels": 15360,
-      "source": "User-supplied Chernarus satellite layers",
-      "cache_version": "1.22.4"
+      "max_native_zoom": 6,
+      "max_zoom": 14,
+      "source": "User-supplied corrected ChernarusPlus satellite pyramid",
+      "cache_version": "1.22.27"
     },
-    "attribution": "Chernarus and DayZ imagery \u00a9 Bohemia Interactive. Unofficial community dashboard; not affiliated with or endorsed by Bohemia Interactive.",
+    "attribution": "Chernarus and DayZ imagery © Bohemia Interactive. Unofficial community dashboard; not affiliated with or endorsed by Bohemia Interactive.",
     "road_overlay": {
-      "enabled": false,
-      "name": "Roads",
+      "enabled": true,
+      "name": "WRP production roads",
       "default_visible": true,
-      "opacity": 1.0,
-      "overview_path": "assets/chernarus-map/overlays/roads/overview.webp",
-      "tile_pyramid": {
-        "base_path": "assets/chernarus-map/overlays/roads/tiles",
-        "format": "webp",
-        "tile_size": 480,
-        "min_zoom": 0,
-        "max_zoom": 5,
-        "native_pixels": 15360,
-        "cache_version": "1.22.26"
-      }
+      "source": "assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson",
+      "renderer": "manual worldToLeaflet() -> L.polyline() on L.canvas({padding: 0.55})",
+      "interactive": false,
+      "production_width_multiplier": 1.8,
+      "source_features": 51416,
+      "line_parts": 52006,
+      "groups": [
+        "paved_primary",
+        "paved_secondary",
+        "paved_local",
+        "city",
+        "bridge",
+        "paved_other",
+        "gravel",
+        "mud",
+        "trail"
+      ],
+      "detail_min_zoom": {
+        "paved_primary": 0,
+        "paved_secondary": 2,
+        "paved_local": 3,
+        "city": 3,
+        "bridge": 2,
+        "gravel": 3,
+        "mud": 4,
+        "paved_other": 4,
+        "trail": 5
+      },
+      "excluded": {
+        "unresolved_records": 15,
+        "centerline_diagnostics": 68
+      },
+      "cache_version": "1.22.27"
     }
   },
   "pois": [

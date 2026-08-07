@@ -1,19 +1,36 @@
-world-war-z-website v1.22.26 patch files
+world-war-z-website v1.22.27 patch files
 
+UPDATED
+.github/workflows/pages.yml
+assets/css/dashboard/catalogue.css
+assets/css/dashboard/core.css
+assets/css/dashboard/workspace.css
+assets/css/pages/shop.css
 assets/data/chernarus/pois.json
+assets/js/dashboard/delivery.js
+assets/js/dashboard/shop.js
 assets/js/map/chernarus-map.js
 assets/js/pages/dashboard-map-loader.js
 assets/js/pages/shop.js
-assets/js/dashboard/shop.js
-assets/css/dashboard/catalogue.css
-assets/css/dashboard/workspace.css
-assets/css/pages/shop.css
 assets/chernarus-map/overlays/roads/README.md
 dashboard.html
 shop.html
 index.html
 changelog.html
+scripts/validate_site.py
 README.md
+MAP_ATTRIBUTION.md
+CHERNARUS_MAP_PLAN.md
+CHERNARUS_MAP_VALIDATION.md
 PATCH_NOTES.md
 PATCH_FILE_LIST.txt
 DELETE_THESE_FILES.txt
+
+ADDED
+assets/css/components/chernarus-map.css
+assets/chernarus-map/satellite-corrected/README.md
+scripts/install_chernarus_map_assets.ps1
+
+PRODUCTION ASSETS TO COPY LOCALLY BEFORE DEPLOYMENT
+assets/chernarus-map/satellite-corrected/{z}/{x}/{y}.jpg
+assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson

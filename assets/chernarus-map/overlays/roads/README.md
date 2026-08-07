@@ -1,11 +1,13 @@
-# Chernarus Road Overlay
+# Production Chernarus road overlay
 
-This directory is reserved for the optional high-resolution road overlay.
+Website v1.22.27 expects the approved production GeoJSON at:
 
-Expected generated assets when the overlay is ready:
+`assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson`
 
-- `overview.webp` — 3840 × 3840 transparent preview used by shop coordinate pickers.
-- `tiles/{z}/{x}/{y}.webp` — transparent 480 px road overlay tiles matching the existing satellite pyramid.
-- Zooms `0` through `5`, with the same 15360 px native square and north-up orientation as the satellite map.
+Copy it from the completed local map project:
 
-The road overlay is intentionally disabled in `assets/data/chernarus/pois.json` until a clean source is generated and validated. Enabling it requires no JavaScript changes; set `map.road_overlay.enabled` to `true` after the full overlay pyramid exists.
+`D:\Project Drive\DZ\road-overlay-work\chernarus-map\test\data\chernarus-roads-overlay-final.geojson`
+
+The browser renderer groups the geometry into the approved nine production classes and converts native DayZ `[X,Z]` points with `worldToLeaflet()` before drawing non-interactive `L.polyline()` layers. Do not replace this with raw `L.geoJSON()` coordinate interpretation.
+
+The 15 unresolved records and the 68 centerline diagnostic records are intentionally excluded from the production dataset and must not be reintroduced.

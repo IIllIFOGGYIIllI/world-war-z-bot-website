@@ -1,40 +1,126 @@
-# Chernarus Satellite Map Implementation
+# Chernarus Production Map Architecture
 
-## Current implementation
+## Version 1.22.27
 
-Version 1.22.4 corrects the source-tile gutter discovered after the first live deployment. The uploaded files remain a complete north-up 32 × 32 grid:
+The website now has one canonical Chernarus map renderer: `assets/js/map/chernarus-map.js`. The dashboard map, both shop coordinate pickers and Saved Delivery Locations all consume this shared implementation instead of maintaining separate map engines.
 
-- first filename number: horizontal column, west to east;
-- second filename number: vertical row, north to south;
-- horizontal flip: none;
-- vertical flip: none;
-- source file dimensions: 512 × 512 pixels;
-- duplicated perimeter gutter: 16 pixels on every edge;
-- shared imagery between neighbours: 32 pixels;
-- unique pixels per source tile: 480 × 480;
-- corrected native map square: 15,360 × 15,360 pixels;
-- DayZ coordinate square: X/Z 0 through 15,360.
+## Production raster
 
-Every adjacent border was compared exactly. All 992 horizontal pairs and all 992 vertical pairs contain the expected identical 32-pixel overlap. Cropping 16 pixels from each edge removes the duplicated area and creates a direct one-pixel-to-one-metre map. X increases west to east. Z increases south to north.
+Source to install:
 
-## Browser tile pyramid
+`D:\Project Drive\DZ\road-overlay-work\chernarus-map\satellite-corrected`
 
-The corrected pyramid uses 480 px WebP tiles:
+Repository target:
 
-- zoom 0: 1 tile;
-- zoom 1: 4 tiles;
-- zoom 2: 16 tiles;
-- zoom 3: 64 tiles;
-- zoom 4: 256 tiles;
-- zoom 5: 1,024 tiles;
-- total: 1,365 tiles.
+`assets/chernarus-map/satellite-corrected/{z}/{x}/{y}.jpg`
 
-Only visible tiles and a one-tile buffer are inserted into the page. The tile URLs include the current patch version so GitHub Pages and browsers do not retain the misaligned v1.22.3 files.
+- JPG only.
+- Native zooms 0–6.
+- 4,810 generated production tiles.
+- Browser overzoom allowed through zoom 14.
+- The corrected pyramid already removes the duplicated 16 px edge gutters from the original 512 px converted source tiles.
+- Effective map dimensions are 15,360 × 15,360 m.
 
-## Controls
+## Coordinate system
 
-The public map supports mouse-wheel zoom, pointer and touch dragging, two-finger pinch zoom, keyboard navigation, Reset, Fullscreen, pointer coordinates, click/tap X/Z selection, coordinate copying, public POI search and category filtering.
+Leaflet uses `L.CRS.Simple` with bounds:
 
-## Privacy and access
+```text
+[-240, 0]
+[0, 240]
+```
 
-The map is public and read only. It renders only POIs explicitly marked `visibility: public` in `assets/data/chernarus/pois.json`. Private bases, live player locations, Admin positions and protected Railway data are not loaded by the map. Admin-only and Owner-only dashboard functions continue to use the existing Railway-verified visibility controls.
+Constants:
+
+```text
+MAP_METRES = 15360
+MAP_UNITS  = 240
+SCALE      = 240 / 15360 = 0.015625
+```
+
+DayZ X/Z to Leaflet:
+
+```text
+lat = (Z - 15360) * SCALE
+lng = X * SCALE
+```
+
+Leaflet to DayZ:
+
+```text
+X = lng / SCALE
+Z = (lat / SCALE) + 15360
+```
+
+Displayed and copied coordinates use one decimal place.
+
+## Production roads
+
+Source to install:
+
+`D:\Project Drive\DZ\road-overlay-work\chernarus-map\test\data\chernarus-roads-overlay-final.geojson`
+
+Repository target:
+
+`assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson`
+
+Production data:
+
+- 51,416 source features.
+- 52,006 renderable line parts.
+- Nine groups: `paved_primary`, `paved_secondary`, `paved_local`, `city`, `bridge`, `paved_other`, `gravel`, `mud`, `trail`.
+- The 15 unresolved navigation records are excluded.
+- The 68 centerline diagnostic features are excluded.
+
+The renderer deliberately does **not** use `L.geoJSON()` for road coordinates. It manually converts native `[X,Z]` coordinates with `worldToLeaflet()` and draws grouped non-interactive `L.polyline()` geometry on Canvas renderers with `padding: 0.55`.
+
+Road casing and road surfaces use separate Canvas panes so thick casing is drawn consistently below all surfaces. Roads never own click interaction; selection belongs to the map itself.
+
+## Approved road detail
+
+The production width multiplier is fixed at **1.80**.
+
+Base zoom width profile:
+
+| Zoom | Multiplier |
+|---:|---:|
+| ≤0 | 0.38 |
+| 1 | 0.45 |
+| 2 | 0.55 |
+| 3 | 0.68 |
+| 4 | 0.82 |
+| 5 | 0.96 |
+| 6 | 1.10 |
+| >6 | `1.10 + ((zoom - 6) * 0.18)`, capped at 2.45 |
+
+Automatic detail thresholds:
+
+| Group | Minimum zoom |
+|---|---:|
+| Primary paved | 0 |
+| Secondary paved | 2 |
+| Bridges | 2 |
+| Local paved | 3 |
+| Town / city | 3 |
+| Gravel | 3 |
+| Dirt / mud | 4 |
+| Other paved / special | 4 |
+| Trails / paths | 5 |
+
+## Shared modes
+
+**Full map** provides zoom/pan, reset, fullscreen, pointer coordinates, click-to-copy, public POIs and independent Roads/Trails visibility.
+
+**Coordinate picker** provides compact zoom/reset/fullscreen controls, click selection and direct X/Z field population without the large diagnostic layer panel.
+
+**Saved location picker** uses the same compact renderer and can show an existing saved point while selection is locked.
+
+Events & Zones are not given a new map merely because the renderer exists. A shared map is used only where the website currently has a genuine Chernarus coordinate workflow.
+
+## Performance
+
+- The road GeoJSON is fetched once per page and cached through a shared Promise.
+- The nine production groups are rendered as grouped polylines, not tens of thousands of interactive Leaflet objects.
+- Road layers use Canvas and `interactive: false`.
+- Satellite tiles are local static GitHub Pages assets.
+- Map instances lazy-initialise in hidden dashboard views only when needed.

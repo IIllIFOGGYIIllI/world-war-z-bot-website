@@ -883,11 +883,6 @@ tbody tr:hover { background: rgba(22,136,248,.045); }
 .coordinate-picker-heading span,.coordinate-picker-heading small { color:#777d86; font-size:9px; }
 .coordinate-picker-heading strong { font:800 12px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace; }
 .coordinate-picker-frame { position:relative; min-height:500px; overflow:hidden; background:#080a0c; touch-action:none; cursor:crosshair; }
-.coordinate-picker-stage { position:absolute; inset:0; transform-origin:center; will-change:transform; }
-.coordinate-picker-stage img { position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:contain; user-select:none; pointer-events:none; }
-.coordinate-picker-stage [data-shop-coordinate-image] { z-index:0; }
-.coordinate-picker-road-overlay { z-index:1; }
-.coordinate-picker-marker { position:absolute; z-index:3; transform:translate(-50%,-88%) rotate(-45deg); width:34px; height:34px; display:grid; place-items:center; border:2px solid #fff; border-radius:50% 50% 50% 0; background:#e8382d; color:#fff; font-size:17px; box-shadow:0 0 0 8px rgba(232,56,45,.2),0 8px 22px rgba(0,0,0,.7); }
 .coordinate-picker-controls { position:absolute; z-index:5; top:12px; right:12px; display:grid; gap:6px; }
 .coordinate-picker-controls button { width:38px; height:38px; border:1px solid rgba(255,255,255,.14); border-radius:6px; background:rgba(12,14,17,.9); color:#fff; font-size:18px; cursor:pointer; }
 .coordinate-picker-hint { position:absolute; z-index:5; right:12px; bottom:12px; padding:8px 10px; border:1px solid rgba(255,255,255,.11); border-radius:6px; background:rgba(7,8,10,.86); color:#b7bcc4; font-size:9px; }

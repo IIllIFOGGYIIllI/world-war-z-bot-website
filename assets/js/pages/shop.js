@@ -53,16 +53,14 @@ const elements = {
   eventFields: $('[data-member-event-fields]'), location: $('[data-member-delivery-location]'),
   coordinateInputs: $('[data-member-coordinate-inputs]'), x: $('[data-member-delivery-x]'),
   y: $('[data-member-delivery-y]'), z: $('[data-member-delivery-z]'), rotation: $('[data-member-delivery-rotation]'),
-  coordinateMap: $('[data-member-coordinate-map]'), coordinateStage: $('[data-member-coordinate-stage]'), coordinateImage: $('[data-member-coordinate-image]'), coordinateRoadOverlay: $('[data-member-coordinate-road-overlay]'),
-  mapZoomIn: $('[data-member-map-zoom-in]'), mapZoomOut: $('[data-member-map-zoom-out]'), mapReset: $('[data-member-map-reset]'), mapFullscreen: $('[data-member-map-fullscreen]'), mapRoadToggle: $('[data-member-map-road-toggle]'),
-  marker: $('[data-member-map-marker]'), mapReadout: $('[data-member-map-readout]'),
+  coordinateMap: $('[data-member-coordinate-map]'),
+  mapZoomIn: $('[data-member-map-zoom-in]'), mapZoomOut: $('[data-member-map-zoom-out]'), mapReset: $('[data-member-map-reset]'), mapFullscreen: $('[data-member-map-fullscreen]'),
+  mapReadout: $('[data-member-map-readout]'),
   coordinateConfirm: $('[data-member-coordinate-confirm]'), note: $('[data-member-purchase-note]'),
   total: $('[data-member-purchase-total]'), purchaseMessage: $('[data-member-purchase-message]'),
   purchaseConfirm: $('[data-member-purchase-confirm]')
 };
-const checkoutMap = { x: 0, y: 0, zoom: 1, minZoom: 1, maxZoom: 5, dragging: false, moved: false, pointerId: null, startX: 0, startY: 0, originX: 0, originY: 0 };
-let checkoutRoadOverlayVisible = false;
-let checkoutRoadOverlayAvailable = false;
+let checkoutMapInstance = null;
 
 const money = (value) => `$${new Intl.NumberFormat('en-AU').format(Math.max(0, Number(value) || 0))}`;
 const dateText = (value) => {
@@ -326,104 +324,54 @@ const syncLocationMode = () => {
   [elements.x,elements.y,elements.z,elements.rotation].forEach((input) => { input.required = !saved; });
   if (saved) {
     const location = state.locations.find((entry) => String(entry.location_id) === elements.location.value);
-    if (location) { elements.x.value = location.x; elements.y.value = location.y; elements.z.value = location.z; elements.rotation.value = location.rotation; updateMarker(); }
+    if (location) { elements.x.value = location.x; elements.y.value = location.y; elements.z.value = location.z; elements.rotation.value = location.rotation; }
   }
-};
-const configureCheckoutRoadOverlay = async () => {
-  if (!elements.coordinateRoadOverlay || !elements.mapRoadToggle) return;
-  try {
-    const { response, payload } = await fetchJson('assets/data/chernarus/pois.json', {
-      headers: { Accept: 'application/json' }
-    }, 15000);
-    const overlay = payload?.map?.road_overlay;
-    const source = String(overlay?.overview_path || '').trim();
-    if (!response.ok || overlay?.enabled !== true || !source.startsWith('assets/')) return;
-    checkoutRoadOverlayAvailable = true;
-    checkoutRoadOverlayVisible = overlay.default_visible !== false;
-    const version = String(overlay?.tile_pyramid?.cache_version || '').trim();
-    elements.coordinateRoadOverlay.src = `${source}${version ? `?v=${encodeURIComponent(version)}` : ''}`;
-    elements.coordinateRoadOverlay.hidden = !checkoutRoadOverlayVisible;
-    elements.mapRoadToggle.hidden = false;
-    elements.mapRoadToggle.classList.toggle('active', checkoutRoadOverlayVisible);
-    elements.mapRoadToggle.setAttribute('aria-pressed', String(checkoutRoadOverlayVisible));
-  } catch {}
-};
-const toggleCheckoutRoadOverlay = () => {
-  if (!checkoutRoadOverlayAvailable) return;
-  checkoutRoadOverlayVisible = !checkoutRoadOverlayVisible;
-  elements.coordinateRoadOverlay.hidden = !checkoutRoadOverlayVisible;
-  elements.mapRoadToggle.classList.toggle('active', checkoutRoadOverlayVisible);
-  elements.mapRoadToggle.setAttribute('aria-pressed', String(checkoutRoadOverlayVisible));
-};
-
-const clampMap = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
-const constrainCheckoutMap = () => {
-  const frame = elements.coordinateMap.getBoundingClientRect();
-  const size = frame.width * checkoutMap.zoom;
-  checkoutMap.x = clampMap(checkoutMap.x, Math.min(0, frame.width - size), 0);
-  checkoutMap.y = clampMap(checkoutMap.y, Math.min(0, frame.height - size), 0);
-};
-const renderCheckoutMap = () => {
-  constrainCheckoutMap();
-  elements.coordinateStage.style.transform = `translate3d(${checkoutMap.x}px,${checkoutMap.y}px,0) scale(${checkoutMap.zoom})`;
-  elements.marker.style.setProperty('--checkout-marker-scale', String(1 / checkoutMap.zoom));
-};
-const resetCheckoutMap = () => {
-  checkoutMap.x = 0; checkoutMap.y = 0; checkoutMap.zoom = 1;
-  renderCheckoutMap();
-};
-const zoomCheckoutMap = (factor, clientX = null, clientY = null) => {
-  const frame = elements.coordinateMap.getBoundingClientRect();
-  const px = clientX == null ? frame.width / 2 : clientX - frame.left;
-  const py = clientY == null ? frame.height / 2 : clientY - frame.top;
-  const oldZoom = checkoutMap.zoom;
-  const nextZoom = clampMap(oldZoom * factor, checkoutMap.minZoom, checkoutMap.maxZoom);
-  const worldX = (px - checkoutMap.x) / oldZoom;
-  const worldY = (py - checkoutMap.y) / oldZoom;
-  checkoutMap.zoom = nextZoom;
-  checkoutMap.x = px - worldX * nextZoom;
-  checkoutMap.y = py - worldY * nextZoom;
-  renderCheckoutMap();
-};
-const updateMarker = () => {
-  const x = Number(elements.x.value), z = Number(elements.z.value);
-  const valid = Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= 15360 && z >= 0 && z <= 15360;
-  elements.marker.hidden = !valid;
-  elements.mapReadout.textContent = valid ? `X ${x.toFixed(3)} · Z ${z.toFixed(3)}` : 'No coordinates selected';
-  if (valid) { elements.marker.style.left = `${x / 15360 * 100}%`; elements.marker.style.top = `${(1 - z / 15360) * 100}%`; }
-};
-const setMapCoordinates = (event) => {
-  if (elements.location.value || checkoutMap.moved) return;
-  const rect = elements.coordinateMap.getBoundingClientRect();
-  const mapX = (event.clientX - rect.left - checkoutMap.x) / checkoutMap.zoom;
-  const mapY = (event.clientY - rect.top - checkoutMap.y) / checkoutMap.zoom;
-  if (mapX < 0 || mapY < 0 || mapX > rect.width || mapY > rect.height) return;
-  const x = clampMap(mapX / rect.width * 15360, 0, 15360);
-  const z = clampMap((1 - mapY / rect.height) * 15360, 0, 15360);
-  elements.x.value = x.toFixed(3); elements.z.value = z.toFixed(3);
-  if (elements.y.value === '') elements.y.value = '0';
   updateMarker();
 };
-const beginMapDrag = (event) => {
-  if (elements.location.value || event.button > 0) return;
-  checkoutMap.dragging = true; checkoutMap.moved = false; checkoutMap.pointerId = event.pointerId;
-  checkoutMap.startX = event.clientX; checkoutMap.startY = event.clientY;
-  checkoutMap.originX = checkoutMap.x; checkoutMap.originY = checkoutMap.y;
-  elements.coordinateMap.setPointerCapture?.(event.pointerId);
+const ensureCheckoutMap = () => {
+  if (checkoutMapInstance || !elements.coordinateMap || !window.WWZChernarusMap) return checkoutMapInstance;
+  checkoutMapInstance = window.WWZChernarusMap.create(elements.coordinateMap, {
+    mode: 'picker',
+    selectable: true,
+    copyOnSelect: false,
+    roadsVisible: true,
+    trailsVisible: false,
+    selectedElement: elements.mapReadout,
+    zoomInButton: elements.mapZoomIn,
+    zoomOutButton: elements.mapZoomOut,
+    resetButton: elements.mapReset,
+    fullscreenButton: elements.mapFullscreen,
+    fullscreenTarget: elements.coordinateMap,
+    emptySelectionText: 'No coordinates selected',
+    onSelect: ({ x, z }) => {
+      if (elements.location.value) return;
+      elements.x.value = x.toFixed(1);
+      elements.z.value = z.toFixed(1);
+      if (elements.y.value === '') elements.y.value = '0';
+      updateMarker();
+    }
+  });
+  return checkoutMapInstance;
 };
-const moveMapDrag = (event) => {
-  if (!checkoutMap.dragging || event.pointerId !== checkoutMap.pointerId) return;
-  const dx = event.clientX - checkoutMap.startX, dy = event.clientY - checkoutMap.startY;
-  if (Math.abs(dx) + Math.abs(dy) > 5) checkoutMap.moved = true;
-  checkoutMap.x = checkoutMap.originX + dx; checkoutMap.y = checkoutMap.originY + dy;
-  renderCheckoutMap();
+
+const resetCheckoutMap = () => {
+  ensureCheckoutMap()?.reset();
 };
-const endMapDrag = (event) => {
-  if (!checkoutMap.dragging || event.pointerId !== checkoutMap.pointerId) return;
-  checkoutMap.dragging = false;
-  elements.coordinateMap.releasePointerCapture?.(event.pointerId);
-  window.setTimeout(() => { checkoutMap.moved = false; }, 0);
+
+const updateMarker = () => {
+  const rawX = String(elements.x?.value ?? '').trim();
+  const rawZ = String(elements.z?.value ?? '').trim();
+  const x = Number(rawX), z = Number(rawZ);
+  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= 15360 && z >= 0 && z <= 15360;
+  if (elements.mapReadout && !checkoutMapInstance) {
+    elements.mapReadout.textContent = valid ? `X ${x.toFixed(1)} · Z ${z.toFixed(1)}` : 'No coordinates selected';
+  }
+  if (!checkoutMapInstance) return;
+  if (valid) checkoutMapInstance.setSelection(x, z, { notify: false });
+  else checkoutMapInstance.clearSelection({ notify: false });
+  checkoutMapInstance.setSelectionEnabled(!elements.location.value);
 };
+
 const updateTotal = () => {
   const quantity = Math.max(1, Number(elements.quantity.value || 1));
   elements.total.textContent = money(quantity * Number(state.selectedItem?.price || 0));
@@ -442,7 +390,13 @@ const openPurchase = (item) => {
   elements.eventFields.hidden = false;
   elements.purchaseTitle.textContent = `Buy ${item.name}?`; elements.purchaseItem.textContent = `${item.name} · ${item.sku}`;
   elements.purchasePrice.textContent = `${money(item.price)}${eventItem ? ' per restart' : ' each'} · ${stockText(item)}`;
-  populateLocations(); resetCheckoutMap(); updateMarker(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
+  populateLocations(); updateMarker(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
+  window.setTimeout(() => {
+    const instance = ensureCheckoutMap();
+    resetCheckoutMap();
+    updateMarker();
+    instance?.invalidateSize();
+  }, 0);
 };
 const submitPurchase = async (event) => {
   event.preventDefault();
@@ -493,29 +447,10 @@ elements.signout.addEventListener('click', async () => {
 elements.quantity.addEventListener('input', updateTotal);
 elements.location.addEventListener('change', syncLocationMode);
 [elements.x,elements.z].forEach((input) => input.addEventListener('input', updateMarker));
-elements.coordinateMap.addEventListener('click', setMapCoordinates);
-elements.coordinateMap.addEventListener('wheel', (event) => { event.preventDefault(); zoomCheckoutMap(event.deltaY < 0 ? 1.25 : 0.8, event.clientX, event.clientY); }, { passive: false });
-elements.coordinateMap.addEventListener('pointerdown', beginMapDrag);
-elements.coordinateMap.addEventListener('pointermove', moveMapDrag);
-elements.coordinateMap.addEventListener('pointerup', endMapDrag);
-elements.coordinateMap.addEventListener('pointercancel', endMapDrag);
-elements.mapZoomIn.addEventListener('click', () => zoomCheckoutMap(1.4));
-elements.mapZoomOut.addEventListener('click', () => zoomCheckoutMap(1 / 1.4));
-elements.mapReset.addEventListener('click', resetCheckoutMap);
-elements.mapRoadToggle?.addEventListener('click', toggleCheckoutRoadOverlay);
-elements.mapFullscreen.addEventListener('click', async () => {
-  try {
-    if (document.fullscreenElement === elements.coordinateMap) await document.exitFullscreen();
-    else await elements.coordinateMap.requestFullscreen();
-    window.setTimeout(renderCheckoutMap, 80);
-  } catch {}
-});
-window.addEventListener('resize', renderCheckoutMap);
 $$('[data-member-purchase-cancel]').forEach((button) => button.addEventListener('click', () => { if (!state.purchasing) elements.purchaseDialog.close(); }));
 elements.purchaseForm.addEventListener('submit', submitPurchase);
 
 const initialise = async () => {
-  configureCheckoutRoadOverlay();
   try {
     const { response, payload } = await fetchJson(URLS.authConfig, { headers: { Accept: 'application/json' } });
     state.authEnabled = Boolean(response.ok && payload?.discord_auth?.enabled);

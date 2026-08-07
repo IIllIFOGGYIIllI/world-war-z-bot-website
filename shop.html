@@ -11,8 +11,8 @@
 <meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image"/>
 <title>Survivor Shop | World War Z</title>
 <link href="assets/favicon.png" rel="icon"/>
-<link href="assets/css/dashboard/core.css?v=1.22.26" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.26" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.26" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.26" rel="stylesheet"/>
-<link href="assets/css/pages/shop.css?v=1.22.26" rel="stylesheet"/>
+<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/><link href="assets/css/dashboard/core.css?v=1.22.27" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.27" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.27" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.27" rel="stylesheet"/>
+<link href="assets/css/pages/shop.css?v=1.22.27" rel="stylesheet"/><link href="assets/css/components/chernarus-map.css?v=1.22.27" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/></head>
 <body class="member-shop-page">
 <a class="skip-link" href="#shop-main">Skip to shop</a>
@@ -120,23 +120,19 @@
 <label class="dialog-field"><span>Saved delivery location</span><select data-member-delivery-location=""><option value="">Enter new coordinates</option></select></label>
 <div data-member-coordinate-inputs="">
 <div class="member-coordinate-grid">
-<label class="dialog-field"><span>X</span><input data-member-delivery-x="" max="15360" min="0" step="0.001" type="number"/></label>
+<label class="dialog-field"><span>X</span><input data-member-delivery-x="" max="15360" min="0" step="0.1" type="number"/></label>
 <label class="dialog-field"><span>Y / height</span><input data-member-delivery-y="" max="2000" min="-100" step="0.001" type="number" value="0"/></label>
-<label class="dialog-field"><span>Z</span><input data-member-delivery-z="" max="15360" min="0" step="0.001" type="number"/></label>
+<label class="dialog-field"><span>Z</span><input data-member-delivery-z="" max="15360" min="0" step="0.1" type="number"/></label>
 <label class="dialog-field"><span>Rotation</span><input data-member-delivery-rotation="" max="360" min="0" step="0.1" type="number" value="0"/></label>
 </div>
-<div class="member-coordinate-map" data-member-coordinate-map="">
-<div class="member-coordinate-stage" data-member-coordinate-stage="">
-<img alt="Chernarus satellite coordinate selector" data-member-coordinate-image="" draggable="false" src="assets/chernarus-map/overview.webp?v=1.22.26"/><img alt="" aria-hidden="true" class="member-coordinate-road-overlay" data-member-coordinate-road-overlay="" draggable="false" hidden=""/>
-<span class="member-map-marker" data-member-map-marker="" hidden=""></span>
-</div>
+<div aria-label="Chernarus delivery coordinate selector. Click or tap to fill X and Z." class="member-coordinate-map wwz-map-fullscreen-target" data-member-coordinate-map="" tabindex="0">
 <div aria-label="Map controls" class="member-map-controls">
 <button aria-label="Zoom in" data-member-map-zoom-in="" type="button">+</button>
 <button aria-label="Zoom out" data-member-map-zoom-out="" type="button">−</button>
 <button aria-label="Reset map" data-member-map-reset="" type="button">⌂</button>
-<button aria-label="Fullscreen map" data-member-map-fullscreen="" type="button">⛶</button><button aria-label="Toggle road overlay" aria-pressed="false" data-member-map-road-toggle="" hidden="" type="button">R</button>
+<button aria-label="Fullscreen map" data-member-map-fullscreen="" type="button">⛶</button>
 </div>
-<div class="member-map-readout"><strong data-member-map-readout="">No coordinates selected</strong><span>Pan, zoom, then click to set X/Z</span></div>
+<div class="member-map-readout"><strong data-member-map-readout="">No coordinates selected</strong><span>Corrected satellite + production roads · click to set X/Z</span></div>
 </div>
 </div>
 <label class="toggle-setting"><input data-member-coordinate-confirm="" type="checkbox"/><span><strong>I checked the coordinates</strong><small>The automatic delivery uses these exact in-game coordinates.</small></span></label>
@@ -148,6 +144,6 @@
 <button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
 </form>
 </dialog>
-<script defer="" src="assets/js/core/http.js?v=1.22.26"></script><script defer="" src="assets/js/pages/shop.js?v=1.22.26"></script>
+<script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script defer="" src="assets/js/map/chernarus-map.js?v=1.22.27"></script><script defer="" src="assets/js/core/http.js?v=1.22.27"></script><script defer="" src="assets/js/pages/shop.js?v=1.22.27"></script>
 </body>
 </html>

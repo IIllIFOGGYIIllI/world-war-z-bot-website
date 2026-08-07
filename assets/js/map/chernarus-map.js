@@ -1,149 +1,191 @@
 (() => {
   'use strict';
 
-  const frame = document.querySelector('[data-map-frame]');
-  const stage = document.querySelector('[data-map-stage]');
-  const tileLayer = document.querySelector('[data-map-tiles]');
-  const roadTileLayer = document.querySelector('[data-map-road-tiles]');
-  const roadToggleButton = document.querySelector('[data-map-road-toggle]');
-  const markersLayer = document.querySelector('[data-map-markers]');
-  const selectionMarker = document.querySelector('[data-map-selection-marker]');
-  const loading = document.querySelector('[data-map-loading]');
-  const search = document.querySelector('[data-map-search]');
-  const filters = document.querySelector('[data-map-filters]');
-  const locationList = document.querySelector('[data-map-location-list]');
-  const emptyState = document.querySelector('[data-map-empty]');
-  const resultCount = document.querySelector('[data-map-result-count]');
-  const pointerReadout = document.querySelector('[data-map-coordinates]');
-  const selectedReadout = document.querySelector('[data-map-selected-coordinates]');
-  const copyCoordinatesButton = document.querySelector('[data-map-copy-coordinates]');
-  const fullscreenButton = document.querySelector('[data-map-fullscreen]');
-  const fullscreenTarget = document.querySelector('[data-map-fullscreen-target]') || frame;
+  const MAP_METRES = 15360;
+  const MAP_UNITS = 240;
+  const SCALE = MAP_UNITS / MAP_METRES;
+  const MIN_ZOOM = 0;
+  const MAX_NATIVE_ZOOM = 6;
+  const MAX_ZOOM = 14;
+  const PRODUCTION_WIDTH_MULTIPLIER = 1.80;
+  const SATELLITE_URL = 'assets/chernarus-map/satellite-corrected/{z}/{x}/{y}.jpg?v=1.22.27';
+  const ROAD_URL = 'assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson?v=1.22.27';
 
-  if (!frame || !stage || !tileLayer || !markersLayer) return;
+  const ROAD_ORDER = [
+    'paved_primary',
+    'paved_secondary',
+    'bridge',
+    'paved_local',
+    'city',
+    'gravel',
+    'paved_other',
+    'mud',
+    'trail'
+  ];
 
-  const DATA_URL = 'assets/data/chernarus/pois.json';
-  const markerElements = new Map();
-  const locationElements = new Map();
-  const renderedTiles = new Map();
-  const renderedRoadTiles = new Map();
-  const activePointers = new Map();
-  const view = { x: 0, y: 0, zoom: 1, minZoom: 0.02, maxZoom: 1.35 };
+  const ROAD_STYLES = {
+    paved_primary:   { label: 'Primary paved',      minZoom: 0, width: 3.35, colour: '#f4df9a', casing: '#393224', opacity: 0.98 },
+    paved_secondary: { label: 'Secondary paved',    minZoom: 2, width: 2.85, colour: '#ead38b', casing: '#393224', opacity: 0.96 },
+    paved_local:     { label: 'Local paved',        minZoom: 3, width: 2.35, colour: '#d8cfad', casing: '#34312a', opacity: 0.94 },
+    city:            { label: 'Town / city',        minZoom: 3, width: 2.20, colour: '#d2c9aa', casing: '#34312a', opacity: 0.92 },
+    bridge:          { label: 'Bridge',             minZoom: 2, width: 3.10, colour: '#f4e4aa', casing: '#2d2921', opacity: 1.00 },
+    paved_other:     { label: 'Other paved',        minZoom: 4, width: 2.00, colour: '#c6bea3', casing: '#33312b', opacity: 0.90 },
+    gravel:          { label: 'Gravel',             minZoom: 3, width: 1.85, colour: '#b6a477', casing: '#40392c', opacity: 0.88 },
+    mud:             { label: 'Dirt / mud',         minZoom: 4, width: 1.60, colour: '#927653', casing: '#3b3024', opacity: 0.84 },
+    trail:           { label: 'Trails / paths',     minZoom: 5, width: 1.20, colour: '#9b9278', casing: '#353128', opacity: 0.72 }
+  };
 
-  let mapSize = 15360;
-  let worldPixels = 15360;
-  let tileSize = 480;
-  let minTileZoom = 0;
-  let maxTileZoom = 5;
-  let tileBasePath = 'assets/chernarus-map/tiles';
-  let tileFormat = 'webp';
-  let tileCacheVersion = '1.22.4';
-  let roadOverlay = null;
-  let roadOverlayVisible = false;
-  let publicPois = [];
-  let selectedCategory = 'All';
-  let selectedPoiId = null;
-  let selectedCoordinates = null;
-  let dataReady = false;
-  let hasFitted = false;
-  let firstTileLoaded = false;
-  let gesture = null;
-  let suppressCoordinateClick = false;
-  let tileRenderFrame = 0;
+  let roadGeometryPromise = null;
+  const instances = new Set();
 
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
-  const categorySlug = (category) => String(category || 'landmark')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'landmark';
-
-  const formatCoordinate = (value, decimals = 0) => new Intl.NumberFormat('en-AU', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
-  }).format(Number(value) || 0);
-
-  const validText = (value, maximumLength) => {
-    const text = String(value || '').trim();
-    return text && text.length <= maximumLength ? text : null;
+  const formatCoordinate = (value, decimals = 1) => {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return '—';
+    return number.toFixed(decimals);
   };
 
-  const validatePoi = (rawPoi) => {
-    const id = validText(rawPoi?.id, 80);
-    const name = validText(rawPoi?.name, 100);
-    const category = validText(rawPoi?.category, 40);
-    const description = validText(rawPoi?.description, 320);
-    const x = Number(rawPoi?.x);
-    const z = Number(rawPoi?.z);
-
-    if (!id || !name || !category || !description) return null;
+  const worldToLeaflet = (coordinate) => {
+    const x = Number(coordinate?.[0]);
+    const z = Number(coordinate?.[1]);
     if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
-    if (x < 0 || x > mapSize || z < 0 || z > mapSize) return null;
-    if (rawPoi?.visibility !== 'public') return null;
-
-    return { id, name, category, description, x, z, visibility: 'public' };
+    return [(z - MAP_METRES) * SCALE, x * SCALE];
   };
 
-  const setLoadingError = (message) => {
-    if (!loading) return;
-    loading.hidden = false;
-    loading.classList.add('error');
-    const label = loading.querySelector('strong');
-    if (label) label.textContent = message;
-  };
-
-  const finishInitialLoading = () => {
-    if (!dataReady || !firstTileLoaded || !loading) return;
-    loading.hidden = true;
-  };
-
-  const mapPointFromClient = (clientX, clientY) => {
-    const rect = frame.getBoundingClientRect();
-    const pixelX = (clientX - rect.left - view.x) / view.zoom;
-    const pixelY = (clientY - rect.top - view.y) / view.zoom;
-    if (pixelX < 0 || pixelX > worldPixels || pixelY < 0 || pixelY > worldPixels) return null;
-    return { pixelX, pixelY };
-  };
-
-  const coordinatesFromMapPoint = (point) => {
-    if (!point) return null;
+  const leafletToWorld = (latlng) => {
+    const lat = Number(latlng?.lat);
+    const lng = Number(latlng?.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
     return {
-      x: clamp((point.pixelX / worldPixels) * mapSize, 0, mapSize),
-      z: clamp((1 - point.pixelY / worldPixels) * mapSize, 0, mapSize)
+      x: clamp(lng / SCALE, 0, MAP_METRES),
+      z: clamp((lat / SCALE) + MAP_METRES, 0, MAP_METRES)
     };
   };
 
-  const updatePointerCoordinates = (clientX, clientY) => {
-    if (!pointerReadout) return;
-    const coordinates = coordinatesFromMapPoint(mapPointFromClient(clientX, clientY));
-    pointerReadout.textContent = coordinates
-      ? `X ${formatCoordinate(coordinates.x)} · Z ${formatCoordinate(coordinates.z)}`
-      : 'X — · Z —';
+  const normaliseRoadGroup = (rawValue) => {
+    const value = String(rawValue || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+
+    if (ROAD_STYLES[value]) return value;
+    if (value.includes('primary')) return 'paved_primary';
+    if (value.includes('secondary')) return 'paved_secondary';
+    if (value.includes('local')) return 'paved_local';
+    if (value.includes('city') || value.includes('town')) return 'city';
+    if (value.includes('bridge')) return 'bridge';
+    if (value.includes('gravel') || value.includes('grav')) return 'gravel';
+    if (value.includes('mud') || value.includes('dirt')) return 'mud';
+    if (value.includes('trail') || value.includes('path')) return 'trail';
+    if (value.includes('paved') || value.includes('asphalt') || value.includes('taxiway')) return 'paved_other';
+    return null;
   };
 
-  const updateSelectedCoordinateDisplay = () => {
-    if (selectedReadout) {
-      selectedReadout.textContent = selectedCoordinates
-        ? `X ${formatCoordinate(selectedCoordinates.x, 3)} · Z ${formatCoordinate(selectedCoordinates.z, 3)}`
-        : 'Click or tap the map';
+  const featureGroup = (feature) => {
+    const properties = feature?.properties || {};
+    const candidates = [
+      properties.group,
+      properties.road_group,
+      properties.production_group,
+      properties.category,
+      properties.class,
+      properties.style,
+      properties.surface,
+      properties.type,
+      feature?.id
+    ];
+    for (const candidate of candidates) {
+      const group = normaliseRoadGroup(candidate);
+      if (group) return group;
     }
-    if (copyCoordinatesButton) copyCoordinatesButton.disabled = !selectedCoordinates;
-    if (!selectionMarker) return;
-    if (!selectedCoordinates) {
-      selectionMarker.hidden = true;
+    return null;
+  };
+
+  const appendGeometry = (geometry, target) => {
+    if (!geometry) return;
+    if (Array.isArray(geometry)) {
+      if (!geometry.length) return;
+      const first = geometry[0];
+      if (Array.isArray(first) && typeof first[0] === 'number') {
+        appendGeometry({ type: 'LineString', coordinates: geometry }, target);
+      } else {
+        geometry.forEach((item) => appendGeometry(item, target));
+      }
       return;
     }
-    selectionMarker.hidden = false;
-    selectionMarker.style.left = `${(selectedCoordinates.x / mapSize) * 100}%`;
-    selectionMarker.style.top = `${(1 - selectedCoordinates.z / mapSize) * 100}%`;
+    if (geometry.type === 'LineString') {
+      const line = geometry.coordinates
+        .map(worldToLeaflet)
+        .filter(Boolean);
+      if (line.length >= 2) target.push(line);
+      return;
+    }
+    if (geometry.type === 'MultiLineString') {
+      geometry.coordinates.forEach((coordinates) => appendGeometry({ type: 'LineString', coordinates }, target));
+      return;
+    }
+    if (geometry.type === 'GeometryCollection') {
+      (geometry.geometries || []).forEach((item) => appendGeometry(item, target));
+    }
   };
 
-  const selectCoordinatesAt = (clientX, clientY) => {
-    const coordinates = coordinatesFromMapPoint(mapPointFromClient(clientX, clientY));
-    if (!coordinates) return;
-    selectedCoordinates = coordinates;
-    updateSelectedCoordinateDisplay();
+  const normaliseRoadDataset = (data) => {
+    const groups = Object.fromEntries(ROAD_ORDER.map((name) => [name, []]));
+
+    if (data?.groups && typeof data.groups === 'object' && !Array.isArray(data.groups)) {
+      Object.entries(data.groups).forEach(([rawGroup, geometry]) => {
+        const group = normaliseRoadGroup(rawGroup);
+        if (!group) return;
+        if (geometry?.type === 'Feature') appendGeometry(geometry.geometry, groups[group]);
+        else appendGeometry(geometry?.geometry || geometry, groups[group]);
+      });
+      return groups;
+    }
+
+    const features = data?.type === 'FeatureCollection'
+      ? data.features || []
+      : (data?.type === 'Feature' ? [data] : []);
+
+    features.forEach((feature) => {
+      const group = featureGroup(feature);
+      if (!group) return;
+      appendGeometry(feature.geometry, groups[group]);
+    });
+
+    return groups;
+  };
+
+  const loadRoadGeometry = () => {
+    if (roadGeometryPromise) return roadGeometryPromise;
+    roadGeometryPromise = fetch(ROAD_URL, {
+      method: 'GET',
+      headers: { Accept: 'application/geo+json, application/json' },
+      cache: 'force-cache'
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Road data returned HTTP ${response.status}.`);
+        return response.json();
+      })
+      .then(normaliseRoadDataset)
+      .catch((error) => {
+        roadGeometryPromise = null;
+        throw error;
+      });
+    return roadGeometryPromise;
+  };
+
+  const zoomWidthProfile = (zoom) => {
+    const z = Number(zoom);
+    if (!Number.isFinite(z) || z <= 0) return 0.38;
+    if (z <= 1) return 0.45;
+    if (z <= 2) return 0.55;
+    if (z <= 3) return 0.68;
+    if (z <= 4) return 0.82;
+    if (z <= 5) return 0.96;
+    if (z <= 6) return 1.10;
+    return Math.min(2.45, 1.10 + ((z - 6) * 0.18));
   };
 
   const fallbackCopy = (text) => {
@@ -155,633 +197,417 @@
     document.body.append(field);
     field.select();
     let copied = false;
-    try { copied = document.execCommand('copy'); } catch (error) { copied = false; }
+    try { copied = document.execCommand('copy'); } catch { copied = false; }
     field.remove();
     return copied;
   };
 
-  const copySelectedCoordinates = async () => {
-    if (!selectedCoordinates || !copyCoordinatesButton) return;
-    const text = `X ${selectedCoordinates.x.toFixed(3)}, Z ${selectedCoordinates.z.toFixed(3)}`;
-    let copied = false;
+  const copyText = async (text) => {
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
-        copied = true;
+        return true;
       }
-    } catch (error) {
-      copied = false;
-    }
-    if (!copied) copied = fallbackCopy(text);
-    const original = copyCoordinatesButton.textContent;
-    copyCoordinatesButton.textContent = copied ? 'Copied' : 'Copy failed';
-    window.setTimeout(() => { copyCoordinatesButton.textContent = original; }, 1400);
+    } catch {}
+    return fallbackCopy(text);
   };
 
-  const currentTileZoom = () => {
-    if (!Number.isFinite(view.zoom) || view.zoom <= 0) return minTileZoom;
-    const ideal = maxTileZoom + Math.log2(view.zoom);
-    return clamp(Math.ceil(ideal), minTileZoom, maxTileZoom);
-  };
+  const create = (container, options = {}) => {
+    if (!container) throw new Error('A Chernarus map container is required.');
+    if (!window.L?.map) throw new Error('Leaflet is not available.');
+    if (container._wwzChernarusMapInstance) return container._wwzChernarusMapInstance;
 
-  const tilePath = (zoom, x, y) => {
-    const version = tileCacheVersion ? `?v=${encodeURIComponent(tileCacheVersion)}` : '';
-    return `${tileBasePath}/${zoom}/${x}/${y}.${tileFormat}${version}`;
-  };
-
-  const overlayTilePath = (overlay, zoom, x, y) => {
-    const pyramid = overlay?.tilePyramid;
-    const version = pyramid?.cacheVersion ? `?v=${encodeURIComponent(pyramid.cacheVersion)}` : '';
-    return `${pyramid.basePath}/${zoom}/${x}/${y}.${pyramid.format}${version}`;
-  };
-
-  const clearRenderedRoadTiles = () => {
-    renderedRoadTiles.forEach((tile) => tile.remove());
-    renderedRoadTiles.clear();
-  };
-
-  const updateRoadToggle = () => {
-    if (!roadToggleButton) return;
-    const available = Boolean(roadOverlay?.enabled);
-    roadToggleButton.hidden = !available;
-    roadToggleButton.disabled = !available;
-    roadToggleButton.classList.toggle('active', available && roadOverlayVisible);
-    roadToggleButton.setAttribute('aria-pressed', String(available && roadOverlayVisible));
-    roadToggleButton.title = available
-      ? `${roadOverlayVisible ? 'Hide' : 'Show'} ${roadOverlay.name || 'roads'} overlay`
-      : 'Road overlay source not installed';
-  };
-
-  const renderVisibleTiles = () => {
-    tileRenderFrame = 0;
-    if (!dataReady || !frame.clientWidth || !frame.clientHeight) return;
-
-    const zoom = currentTileZoom();
-    const dimension = 2 ** zoom;
-    const span = worldPixels / dimension;
-    const left = clamp(-view.x / view.zoom, 0, worldPixels);
-    const top = clamp(-view.y / view.zoom, 0, worldPixels);
-    const right = clamp((frame.clientWidth - view.x) / view.zoom, 0, worldPixels);
-    const bottom = clamp((frame.clientHeight - view.y) / view.zoom, 0, worldPixels);
-    const buffer = 1;
-    const minX = clamp(Math.floor(left / span) - buffer, 0, dimension - 1);
-    const maxX = clamp(Math.floor(Math.max(0, right - 0.001) / span) + buffer, 0, dimension - 1);
-    const minY = clamp(Math.floor(top / span) - buffer, 0, dimension - 1);
-    const maxY = clamp(Math.floor(Math.max(0, bottom - 0.001) / span) + buffer, 0, dimension - 1);
-    const required = new Set();
-
-    for (let y = minY; y <= maxY; y += 1) {
-      for (let x = minX; x <= maxX; x += 1) {
-        const key = `${zoom}/${x}/${y}`;
-        required.add(key);
-        if (renderedTiles.has(key)) continue;
-
-        const tile = document.createElement('img');
-        tile.className = 'map-tile';
-        tile.alt = '';
-        tile.draggable = false;
-        tile.decoding = 'async';
-        tile.loading = 'eager';
-        tile.style.left = `${x * span}px`;
-        tile.style.top = `${y * span}px`;
-        tile.style.width = `${span + 0.25}px`;
-        tile.style.height = `${span + 0.25}px`;
-        tile.src = tilePath(zoom, x, y);
-        tile.addEventListener('load', () => {
-          tile.classList.add('loaded');
-          if (!firstTileLoaded) {
-            firstTileLoaded = true;
-            finishInitialLoading();
-          }
-        }, { once: true });
-        tile.addEventListener('error', () => {
-          tile.classList.add('failed');
-          setLoadingError('A Chernarus map tile could not be loaded.');
-        }, { once: true });
-        tileLayer.append(tile);
-        renderedTiles.set(key, tile);
-      }
-    }
-
-    renderedTiles.forEach((tile, key) => {
-      if (required.has(key)) return;
-      tile.remove();
-      renderedTiles.delete(key);
+    const L = window.L;
+    const bounds = L.latLngBounds([-MAP_UNITS, 0], [0, MAP_UNITS]);
+    const map = L.map(container, {
+      crs: L.CRS.Simple,
+      minZoom: options.minZoom ?? MIN_ZOOM,
+      maxZoom: options.maxZoom ?? MAX_ZOOM,
+      zoomSnap: options.zoomSnap ?? 0.25,
+      zoomDelta: options.zoomDelta ?? 0.5,
+      attributionControl: false,
+      zoomControl: false,
+      preferCanvas: true,
+      maxBounds: options.maxBounds === false ? null : bounds.pad(0.04),
+      maxBoundsViscosity: 0.85,
+      boxZoom: true,
+      keyboard: true,
+      tap: true
     });
 
-    if (roadTileLayer && roadOverlay?.enabled && roadOverlayVisible) {
-      const roadRequired = new Set();
-      for (let y = minY; y <= maxY; y += 1) {
-        for (let x = minX; x <= maxX; x += 1) {
-          const key = `${zoom}/${x}/${y}`;
-          roadRequired.add(key);
-          if (renderedRoadTiles.has(key)) continue;
+    container.classList.add('wwz-chernarus-map', `wwz-chernarus-map--${options.mode || 'picker'}`);
 
-          const tile = document.createElement('img');
-          tile.className = 'map-tile map-road-tile';
-          tile.alt = '';
-          tile.draggable = false;
-          tile.decoding = 'async';
-          tile.loading = 'eager';
-          tile.style.left = `${x * span}px`;
-          tile.style.top = `${y * span}px`;
-          tile.style.width = `${span + 0.25}px`;
-          tile.style.height = `${span + 0.25}px`;
-          tile.style.setProperty('--road-overlay-opacity', String(roadOverlay.opacity));
-          tile.src = overlayTilePath(roadOverlay, zoom, x, y);
-          tile.addEventListener('load', () => tile.classList.add('loaded'), { once: true });
-          tile.addEventListener('error', () => tile.classList.add('failed'), { once: true });
-          roadTileLayer.append(tile);
-          renderedRoadTiles.set(key, tile);
+    const casingPane = map.createPane('wwzRoadCasingPane');
+    const surfacePane = map.createPane('wwzRoadSurfacePane');
+    casingPane.style.zIndex = '350';
+    surfacePane.style.zIndex = '360';
+    casingPane.style.pointerEvents = 'none';
+    surfacePane.style.pointerEvents = 'none';
+    const roadCasingRenderer = L.canvas({ padding: 0.55, pane: 'wwzRoadCasingPane' });
+    const roadSurfaceRenderer = L.canvas({ padding: 0.55, pane: 'wwzRoadSurfacePane' });
+
+    container.querySelectorAll('.map-controls, .coordinate-picker-controls, .member-map-controls, .saved-location-map-controls, .map-coordinate-readout, .coordinate-picker-hint, .member-map-readout, .saved-location-map-readout').forEach((element) => {
+      L.DomEvent.disableClickPropagation(element);
+      L.DomEvent.disableScrollPropagation(element);
+    });
+
+    const satellite = L.tileLayer(SATELLITE_URL, {
+      tileSize: 256,
+      minZoom: MIN_ZOOM,
+      maxNativeZoom: MAX_NATIVE_ZOOM,
+      maxZoom: MAX_ZOOM,
+      noWrap: true,
+      bounds,
+      keepBuffer: options.keepBuffer ?? 3,
+      updateWhenIdle: true,
+      className: 'wwz-chernarus-satellite'
+    }).addTo(map);
+
+    const roadLayers = new Map();
+    const state = {
+      selection: null,
+      selectionEnabled: options.selectable !== false,
+      roadsVisible: options.roadsVisible !== false,
+      trailsVisible: options.trailsVisible !== false,
+      destroyed: false
+    };
+
+    let selectionMarker = null;
+    let roadsReady = false;
+    let roadError = null;
+
+    const loadingElement = options.loadingElement || null;
+    const pointerElement = options.pointerElement || null;
+    const selectedElement = options.selectedElement || null;
+    const copyButton = options.copyButton || null;
+    const roadToggle = options.roadToggle || null;
+    const trailToggle = options.trailToggle || null;
+    const fullscreenTarget = options.fullscreenTarget || container;
+
+    const setLoading = (message, status = 'loading') => {
+      if (!loadingElement) return;
+      if (!message) {
+        loadingElement.hidden = true;
+        loadingElement.classList.remove('error', 'ready');
+        return;
+      }
+      loadingElement.hidden = false;
+      loadingElement.classList.toggle('error', status === 'error');
+      loadingElement.classList.toggle('ready', status === 'ready');
+      const label = loadingElement.querySelector('strong') || loadingElement;
+      label.textContent = message;
+    };
+
+    const updateToggleButton = (button, active, label) => {
+      if (!button) return;
+      button.hidden = false;
+      button.disabled = false;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+      button.title = `${active ? 'Hide' : 'Show'} ${label}`;
+    };
+
+    const updateToggleState = () => {
+      updateToggleButton(roadToggle, state.roadsVisible, 'roads');
+      updateToggleButton(trailToggle, state.trailsVisible, 'trails and paths');
+    };
+
+    const roadEnabledForGroup = (group) => group === 'trail' ? state.trailsVisible : state.roadsVisible;
+
+    const updateRoadLayers = () => {
+      if (!roadsReady || state.destroyed) return;
+      const zoom = map.getZoom();
+      const globalWidth = zoomWidthProfile(zoom) * PRODUCTION_WIDTH_MULTIPLIER;
+
+      ROAD_ORDER.forEach((group) => {
+        const bundle = roadLayers.get(group);
+        if (!bundle) return;
+        const style = ROAD_STYLES[group];
+        const shouldShow = roadEnabledForGroup(group) && zoom >= style.minZoom;
+
+        if (shouldShow) {
+          if (!map.hasLayer(bundle.casing)) bundle.casing.addTo(map);
+          if (!map.hasLayer(bundle.surface)) bundle.surface.addTo(map);
+          const surfaceWidth = Math.max(0.8, style.width * globalWidth);
+          const casingWidth = surfaceWidth + Math.max(1.1, 1.55 * globalWidth);
+          bundle.casing.setStyle({ weight: casingWidth, opacity: Math.min(0.92, style.opacity) });
+          bundle.surface.setStyle({ weight: surfaceWidth, opacity: style.opacity });
+        } else {
+          if (map.hasLayer(bundle.surface)) map.removeLayer(bundle.surface);
+          if (map.hasLayer(bundle.casing)) map.removeLayer(bundle.casing);
         }
-      }
-
-      renderedRoadTiles.forEach((tile, key) => {
-        if (roadRequired.has(key)) return;
-        tile.remove();
-        renderedRoadTiles.delete(key);
       });
-    } else {
-      clearRenderedRoadTiles();
-    }
-  };
-
-  const scheduleTileRender = () => {
-    if (tileRenderFrame) return;
-    tileRenderFrame = window.requestAnimationFrame(renderVisibleTiles);
-  };
-
-  const updateTransform = () => {
-    stage.style.transform = `translate3d(${view.x}px, ${view.y}px, 0) scale(${view.zoom})`;
-    const inverseScale = String(1 / view.zoom);
-    markerElements.forEach((marker) => marker.style.setProperty('--marker-inverse-scale', inverseScale));
-    selectionMarker?.style.setProperty('--marker-inverse-scale', inverseScale);
-    scheduleTileRender();
-  };
-
-  const clampPosition = () => {
-    const width = frame.clientWidth;
-    const height = frame.clientHeight;
-    if (!width || !height) return;
-
-    const scaledSize = worldPixels * view.zoom;
-    view.x = scaledSize <= width
-      ? (width - scaledSize) / 2
-      : clamp(view.x, width - scaledSize, 0);
-    view.y = scaledSize <= height
-      ? (height - scaledSize) / 2
-      : clamp(view.y, height - scaledSize, 0);
-  };
-
-  const fitMap = () => {
-    const width = frame.clientWidth;
-    const height = frame.clientHeight;
-    if (!width || !height) return;
-
-    view.minZoom = Math.min(width / worldPixels, height / worldPixels);
-    view.zoom = view.minZoom;
-    view.x = (width - worldPixels * view.zoom) / 2;
-    view.y = (height - worldPixels * view.zoom) / 2;
-    hasFitted = true;
-    updateTransform();
-  };
-
-  const zoomAt = (nextZoom, clientX, clientY) => {
-    const rect = frame.getBoundingClientRect();
-    const pointX = Number.isFinite(clientX) ? clientX - rect.left : rect.width / 2;
-    const pointY = Number.isFinite(clientY) ? clientY - rect.top : rect.height / 2;
-    const mapX = (pointX - view.x) / view.zoom;
-    const mapY = (pointY - view.y) / view.zoom;
-    const zoom = clamp(nextZoom, view.minZoom, Math.max(view.minZoom, view.maxZoom));
-
-    view.x = pointX - mapX * zoom;
-    view.y = pointY - mapY * zoom;
-    view.zoom = zoom;
-    clampPosition();
-    updateTransform();
-  };
-
-  const centreOnMapCoordinates = (x, z, preferredZoom = 0.32) => {
-    if (!frame.clientWidth || !frame.clientHeight) return;
-    const targetZoom = clamp(Math.max(view.zoom, preferredZoom), view.minZoom, view.maxZoom);
-    const pixelX = (x / mapSize) * worldPixels;
-    const pixelY = (1 - z / mapSize) * worldPixels;
-    view.zoom = targetZoom;
-    view.x = frame.clientWidth / 2 - pixelX * targetZoom;
-    view.y = frame.clientHeight / 2 - pixelY * targetZoom;
-    clampPosition();
-    updateTransform();
-  };
-
-  const findPoi = (poiId) => publicPois.find((poi) => poi.id === poiId) || null;
-
-  const selectPoi = (poiId, { centre = false } = {}) => {
-    const poi = findPoi(poiId);
-    if (!poi) return;
-    selectedPoiId = poi.id;
-
-    markerElements.forEach((element, id) => {
-      const selected = id === poi.id;
-      element.classList.toggle('selected', selected);
-      element.setAttribute('aria-pressed', String(selected));
-    });
-    locationElements.forEach((element, id) => element.classList.toggle('selected', id === poi.id));
-
-    document.querySelector('[data-map-details-empty]')?.setAttribute('hidden', '');
-    document.querySelector('[data-map-details-content]')?.removeAttribute('hidden');
-    const category = document.querySelector('[data-map-detail-category]');
-    const name = document.querySelector('[data-map-detail-name]');
-    const description = document.querySelector('[data-map-detail-description]');
-    const x = document.querySelector('[data-map-detail-x]');
-    const z = document.querySelector('[data-map-detail-z]');
-    if (category) category.textContent = poi.category;
-    if (name) name.textContent = poi.name;
-    if (description) description.textContent = poi.description;
-    if (x) x.textContent = formatCoordinate(poi.x);
-    if (z) z.textContent = formatCoordinate(poi.z);
-
-    if (centre) centreOnMapCoordinates(poi.x, poi.z);
-  };
-
-  const renderLocationList = (visiblePois) => {
-    if (!locationList) return;
-    locationList.replaceChildren();
-    locationElements.clear();
-
-    visiblePois.forEach((poi) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'map-location-button';
-      button.classList.toggle('selected', poi.id === selectedPoiId);
-
-      const symbol = document.createElement('span');
-      symbol.className = 'map-location-symbol';
-      symbol.setAttribute('aria-hidden', 'true');
-      symbol.textContent = '⌖';
-
-      const copy = document.createElement('span');
-      const name = document.createElement('strong');
-      name.textContent = poi.name;
-      const metadata = document.createElement('small');
-      metadata.textContent = `${poi.category} · X ${formatCoordinate(poi.x)} · Z ${formatCoordinate(poi.z)}`;
-      copy.append(name, metadata);
-
-      const arrow = document.createElement('span');
-      arrow.setAttribute('aria-hidden', 'true');
-      arrow.textContent = '→';
-      button.append(symbol, copy, arrow);
-      button.addEventListener('click', () => selectPoi(poi.id, { centre: true }));
-      locationList.append(button);
-      locationElements.set(poi.id, button);
-    });
-  };
-
-  const applyFilters = () => {
-    const searchValue = search?.value.trim().toLowerCase() || '';
-    const visiblePois = publicPois.filter((poi) => {
-      const matchesCategory = selectedCategory === 'All' || poi.category === selectedCategory;
-      const haystack = `${poi.name} ${poi.category} ${poi.description} ${poi.x} ${poi.z}`.toLowerCase();
-      return matchesCategory && haystack.includes(searchValue);
-    });
-    const visibleIds = new Set(visiblePois.map((poi) => poi.id));
-
-    markerElements.forEach((element, poiId) => { element.hidden = !visibleIds.has(poiId); });
-    if (resultCount) resultCount.textContent = String(visiblePois.length);
-    if (emptyState) emptyState.hidden = visiblePois.length !== 0;
-    renderLocationList(visiblePois);
-  };
-
-  const renderFilters = () => {
-    if (!filters) return;
-    const categories = ['All', ...new Set(publicPois.map((poi) => poi.category))];
-    filters.replaceChildren();
-
-    categories.forEach((category) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = category;
-      button.classList.toggle('active', category === selectedCategory);
-      button.setAttribute('aria-pressed', String(category === selectedCategory));
-      button.addEventListener('click', () => {
-        selectedCategory = category;
-        renderFilters();
-        applyFilters();
-      });
-      filters.append(button);
-    });
-  };
-
-  const renderMarkers = () => {
-    markersLayer.replaceChildren();
-    markerElements.clear();
-
-    publicPois.forEach((poi) => {
-      const marker = document.createElement('button');
-      marker.type = 'button';
-      marker.className = 'map-marker';
-      marker.dataset.category = categorySlug(poi.category);
-      marker.style.left = `${(poi.x / mapSize) * 100}%`;
-      marker.style.top = `${(1 - poi.z / mapSize) * 100}%`;
-      marker.setAttribute('aria-label', `${poi.name}, ${poi.category}, X ${formatCoordinate(poi.x)}, Z ${formatCoordinate(poi.z)}`);
-      marker.setAttribute('aria-pressed', 'false');
-
-      const label = document.createElement('span');
-      label.textContent = poi.name;
-      marker.append(label);
-      marker.addEventListener('pointerdown', (event) => event.stopPropagation());
-      marker.addEventListener('click', () => selectPoi(poi.id));
-      marker.addEventListener('dblclick', () => selectPoi(poi.id, { centre: true }));
-      markersLayer.append(marker);
-      markerElements.set(poi.id, marker);
-    });
-  };
-
-  const validateTilePyramid = (raw) => {
-    const basePath = validText(raw?.base_path, 180);
-    const format = validText(raw?.format, 12);
-    const configuredTileSize = Number(raw?.tile_size);
-    const configuredWorldPixels = Number(raw?.native_pixels);
-    const configuredMinZoom = Number(raw?.min_zoom);
-    const configuredMaxZoom = Number(raw?.max_zoom);
-    const configuredCacheVersion = validText(raw?.cache_version, 40) || '';
-    if (!basePath?.startsWith('assets/') || !/^[a-z0-9-]+$/i.test(format || '')) return null;
-    if (!Number.isInteger(configuredTileSize) || configuredTileSize < 128 || configuredTileSize > 1024) return null;
-    if (!Number.isInteger(configuredWorldPixels) || configuredWorldPixels < configuredTileSize) return null;
-    if (!Number.isInteger(configuredMinZoom) || !Number.isInteger(configuredMaxZoom)) return null;
-    if (configuredMinZoom < 0 || configuredMaxZoom < configuredMinZoom || configuredMaxZoom > 8) return null;
-    if (configuredTileSize * (2 ** configuredMaxZoom) !== configuredWorldPixels) return null;
-    return {
-      basePath,
-      format,
-      tileSize: configuredTileSize,
-      worldPixels: configuredWorldPixels,
-      minZoom: configuredMinZoom,
-      maxZoom: configuredMaxZoom,
-      cacheVersion: configuredCacheVersion
+      updateToggleState();
     };
-  };
 
-  const validateRoadOverlay = (raw, basePyramid) => {
-    if (!raw || raw.enabled !== true) return { enabled: false };
-    const pyramid = validateTilePyramid(raw.tile_pyramid);
-    const name = validText(raw.name, 40) || 'Roads';
-    const overviewPath = validText(raw.overview_path, 180);
-    const opacity = Number(raw.opacity);
-    if (!pyramid || !overviewPath?.startsWith('assets/')) return { enabled: false };
-    if (
-      pyramid.tileSize !== basePyramid.tileSize ||
-      pyramid.worldPixels !== basePyramid.worldPixels ||
-      pyramid.minZoom !== basePyramid.minZoom ||
-      pyramid.maxZoom !== basePyramid.maxZoom
-    ) return { enabled: false };
-    return {
-      enabled: true,
-      name,
-      overviewPath,
-      opacity: Number.isFinite(opacity) ? clamp(opacity, 0.1, 1) : 1,
-      defaultVisible: raw.default_visible !== false,
-      tilePyramid: pyramid
-    };
-  };
-
-  const loadMapData = async () => {
-    try {
-      const { response, payload } = await window.WWZHttp.json(DATA_URL, {
-        method: 'GET',
-        headers: { Accept: 'application/json' }
-      }, 15_000);
-      if (!response.ok) throw new Error(`Map data request failed: ${response.status}`);
-      const configuredSize = Number(payload?.map?.size_meters);
-      const pyramid = validateTilePyramid(payload?.map?.tile_pyramid);
-      if (!Number.isFinite(configuredSize) || configuredSize <= 0 || !pyramid) throw new Error('Invalid map configuration');
-      roadOverlay = validateRoadOverlay(payload?.map?.road_overlay, pyramid);
-      roadOverlayVisible = Boolean(roadOverlay.enabled && roadOverlay.defaultVisible);
-      if (roadTileLayer) roadTileLayer.hidden = !roadOverlayVisible;
-      updateRoadToggle();
-
-      mapSize = configuredSize;
-      tileBasePath = pyramid.basePath;
-      tileFormat = pyramid.format;
-      tileSize = pyramid.tileSize;
-      worldPixels = pyramid.worldPixels;
-      minTileZoom = pyramid.minZoom;
-      maxTileZoom = pyramid.maxZoom;
-      tileCacheVersion = pyramid.cacheVersion;
-      stage.style.width = `${worldPixels}px`;
-      stage.style.height = `${worldPixels}px`;
-
-      const seenIds = new Set();
-      publicPois = (Array.isArray(payload?.pois) ? payload.pois : [])
-        .map(validatePoi)
-        .filter((poi) => {
-          if (!poi || seenIds.has(poi.id)) return false;
-          seenIds.add(poi.id);
-          return true;
+    const buildRoadLayers = (groups) => {
+      ROAD_ORDER.forEach((group) => {
+        const latlngs = groups[group];
+        if (!latlngs?.length) return;
+        const style = ROAD_STYLES[group];
+        const base = {
+          interactive: false,
+          lineCap: 'butt',
+          lineJoin: 'round',
+          smoothFactor: 0,
+          noClip: false
+        };
+        const casing = L.polyline(latlngs, {
+          ...base,
+          renderer: roadCasingRenderer,
+          color: style.casing,
+          weight: style.width + 2,
+          opacity: Math.min(0.92, style.opacity)
         });
-
-      renderMarkers();
-      renderFilters();
-      applyFilters();
-      dataReady = true;
-      window.requestAnimationFrame(() => {
-        fitMap();
-        renderVisibleTiles();
+        const surface = L.polyline(latlngs, {
+          ...base,
+          renderer: roadSurfaceRenderer,
+          color: style.colour,
+          weight: style.width,
+          opacity: style.opacity,
+          dashArray: style.dashArray || null
+        });
+        roadLayers.set(group, { casing, surface });
       });
-    } catch (error) {
-      setLoadingError('Chernarus map data is temporarily unavailable.');
-    }
-  };
+      roadsReady = true;
+      roadError = null;
+      updateRoadLayers();
+      if (loadingElement) setLoading('', 'ready');
+      options.onRoadReady?.({ groups: roadLayers.size });
+    };
 
-  search?.addEventListener('input', applyFilters);
-  copyCoordinatesButton?.addEventListener('click', copySelectedCoordinates);
-  document.querySelector('[data-map-zoom-in]')?.addEventListener('click', () => zoomAt(view.zoom * 1.45));
-  document.querySelector('[data-map-zoom-out]')?.addEventListener('click', () => zoomAt(view.zoom / 1.45));
-  document.querySelector('[data-map-reset]')?.addEventListener('click', fitMap);
-  roadToggleButton?.addEventListener('click', () => {
-    if (!roadOverlay?.enabled) return;
-    roadOverlayVisible = !roadOverlayVisible;
-    if (roadTileLayer) roadTileLayer.hidden = !roadOverlayVisible;
-    updateRoadToggle();
-    if (roadOverlayVisible) scheduleTileRender();
-    else clearRenderedRoadTiles();
-  });
-  document.querySelector('[data-map-focus-selected]')?.addEventListener('click', () => {
-    const poi = findPoi(selectedPoiId);
-    if (poi) centreOnMapCoordinates(poi.x, poi.z);
-  });
+    const loadRoads = () => {
+      if (options.loadRoads === false || roadsReady) return Promise.resolve();
+      setLoading('Loading production road network…');
+      return loadRoadGeometry()
+        .then(buildRoadLayers)
+        .catch((error) => {
+          roadError = error;
+          setLoading('Road overlay unavailable — check production map assets.', 'error');
+          options.onRoadError?.(error);
+        });
+    };
 
-  if (!document.fullscreenEnabled || !fullscreenTarget.requestFullscreen) {
-    fullscreenButton?.setAttribute('hidden', '');
-  } else {
-    fullscreenButton?.addEventListener('click', async () => {
+    const updateSelectedDisplay = () => {
+      if (selectedElement) {
+        selectedElement.textContent = state.selection
+          ? `X ${formatCoordinate(state.selection.x)} · Z ${formatCoordinate(state.selection.z)}`
+          : (options.emptySelectionText || 'Click or tap the map');
+      }
+      if (copyButton) copyButton.disabled = !state.selection;
+    };
+
+    const renderSelectionMarker = () => {
+      if (!state.selection) {
+        if (selectionMarker) {
+          map.removeLayer(selectionMarker);
+          selectionMarker = null;
+        }
+        return;
+      }
+      const latlng = worldToLeaflet([state.selection.x, state.selection.z]);
+      if (!latlng) return;
+      if (!selectionMarker) {
+        selectionMarker = L.circleMarker(latlng, {
+          radius: options.selectionRadius || 7,
+          color: '#ffffff',
+          weight: 3,
+          fillColor: '#d52b1e',
+          fillOpacity: 1,
+          opacity: 1,
+          interactive: false,
+          className: 'wwz-map-selection-marker'
+        }).addTo(map);
+      } else {
+        selectionMarker.setLatLng(latlng);
+      }
+    };
+
+    const setSelection = (x, z, settings = {}) => {
+      const nextX = Number(x);
+      const nextZ = Number(z);
+      if (!Number.isFinite(nextX) || !Number.isFinite(nextZ)) return false;
+      if (nextX < 0 || nextX > MAP_METRES || nextZ < 0 || nextZ > MAP_METRES) return false;
+      state.selection = { x: nextX, z: nextZ };
+      renderSelectionMarker();
+      updateSelectedDisplay();
+      if (settings.center) {
+        const latlng = worldToLeaflet([nextX, nextZ]);
+        map.setView(latlng, settings.zoom ?? Math.max(5, map.getZoom()), { animate: settings.animate !== false });
+      }
+      if (settings.notify !== false) options.onSelect?.({ ...state.selection }, { source: settings.source || 'api' });
+      return true;
+    };
+
+    const clearSelection = (settings = {}) => {
+      state.selection = null;
+      renderSelectionMarker();
+      updateSelectedDisplay();
+      if (settings.notify !== false) options.onClearSelection?.();
+    };
+
+    const setSelectionEnabled = (enabled) => {
+      state.selectionEnabled = Boolean(enabled);
+      container.classList.toggle('wwz-map-selection-disabled', !state.selectionEnabled);
+    };
+
+    const copySelection = async () => {
+      if (!state.selection) return false;
+      const text = `${state.selection.x.toFixed(1)}, ${state.selection.z.toFixed(1)}`;
+      const copied = await copyText(text);
+      if (copyButton) {
+        const original = copyButton.dataset.originalLabel || copyButton.textContent || 'Copy';
+        copyButton.dataset.originalLabel = original;
+        copyButton.textContent = copied ? 'Copied' : 'Copy failed';
+        window.setTimeout(() => { copyButton.textContent = original; }, 1400);
+      }
+      options.onCopy?.({ ...state.selection, text, copied });
+      return copied;
+    };
+
+    const reset = () => {
+      map.fitBounds(bounds, { padding: options.fitPadding || [8, 8], animate: false });
+    };
+
+    const toggleFullscreen = async () => {
       try {
-        if (document.fullscreenElement === fullscreenTarget) await document.exitFullscreen();
-        else await fullscreenTarget.requestFullscreen();
-      } catch (error) {
-        /* Fullscreen can be denied by browser policy; the map remains usable. */
-      }
-    });
-    document.addEventListener('fullscreenchange', () => {
-      if (fullscreenButton) {
-        const active = document.fullscreenElement === fullscreenTarget;
-        fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen map' : 'Open fullscreen map');
-        fullscreenButton.textContent = active ? '×' : '⛶';
-      }
-      window.requestAnimationFrame(() => {
-        clampPosition();
-        updateTransform();
+        if (document.fullscreenElement === fullscreenTarget) {
+          await document.exitFullscreen?.();
+        } else if (fullscreenTarget?.requestFullscreen) {
+          await fullscreenTarget.requestFullscreen();
+        }
+      } catch {}
+    };
+
+    const focus = (x, z, zoom = Math.max(6, map.getZoom())) => {
+      const latlng = worldToLeaflet([x, z]);
+      if (!latlng) return;
+      map.setView(latlng, clamp(zoom, MIN_ZOOM, MAX_ZOOM), { animate: true });
+    };
+
+    const addPoi = (poi, handlers = {}) => {
+      const latlng = worldToLeaflet([poi?.x, poi?.z]);
+      if (!latlng) return null;
+      const marker = L.circleMarker(latlng, {
+        radius: 6,
+        color: '#fff4ea',
+        weight: 2,
+        fillColor: '#d52b1e',
+        fillOpacity: 0.94,
+        opacity: 0.98,
+        interactive: true,
+        className: `wwz-map-poi-marker wwz-map-poi-${String(poi.category || 'landmark').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
       });
+      marker.on('click', (event) => {
+        L.DomEvent.stopPropagation(event);
+        handlers.onClick?.(poi, marker);
+      });
+      handlers.layer?.addLayer(marker);
+      if (!handlers.layer) marker.addTo(map);
+      return marker;
+    };
+
+    map.on('mousemove', (event) => {
+      if (!pointerElement) return;
+      const world = leafletToWorld(event.latlng);
+      pointerElement.textContent = world
+        ? `X ${formatCoordinate(world.x)} · Z ${formatCoordinate(world.z)}`
+        : 'X — · Z —';
     });
-  }
 
-  frame.addEventListener('wheel', (event) => {
-    event.preventDefault();
-    const multiplier = Math.exp(-event.deltaY * 0.00145);
-    zoomAt(view.zoom * multiplier, event.clientX, event.clientY);
-  }, { passive: false });
+    map.on('mouseout', () => {
+      if (pointerElement) pointerElement.textContent = 'X — · Z —';
+    });
 
-  frame.addEventListener('dblclick', (event) => {
-    if (event.target.closest('button, a, input')) return;
-    event.preventDefault();
-    zoomAt(view.zoom * 1.8, event.clientX, event.clientY);
-  });
+    map.on('click', async (event) => {
+      if (!state.selectionEnabled) return;
+      const world = leafletToWorld(event.latlng);
+      if (!world) return;
+      setSelection(world.x, world.z, { notify: true, source: 'map' });
+      if (options.copyOnSelect) await copySelection();
+    });
 
-  const beginGesture = () => {
-    const pointers = [...activePointers.values()];
-    if (pointers.length === 1) {
-      const pointer = pointers[0];
-      gesture = {
-        type: 'pan',
-        pointerId: pointer.id,
-        startX: pointer.x,
-        startY: pointer.y,
-        viewX: view.x,
-        viewY: view.y,
-        moved: false
-      };
-      return;
-    }
-    if (pointers.length >= 2) {
-      const [a, b] = pointers;
-      const rect = frame.getBoundingClientRect();
-      const midpointX = (a.x + b.x) / 2 - rect.left;
-      const midpointY = (a.y + b.y) / 2 - rect.top;
-      suppressCoordinateClick = true;
-      gesture = {
-        type: 'pinch',
-        startDistance: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)),
-        startZoom: view.zoom,
-        mapX: (midpointX - view.x) / view.zoom,
-        mapY: (midpointY - view.y) / view.zoom,
-        moved: true
-      };
-    }
+    map.on('zoomend', updateRoadLayers);
+    map.on('resize', updateRoadLayers);
+
+    options.zoomInButton?.addEventListener('click', () => map.zoomIn());
+    options.zoomOutButton?.addEventListener('click', () => map.zoomOut());
+    options.resetButton?.addEventListener('click', reset);
+    options.fullscreenButton?.addEventListener('click', toggleFullscreen);
+    roadToggle?.addEventListener('click', () => {
+      state.roadsVisible = !state.roadsVisible;
+      updateRoadLayers();
+    });
+    trailToggle?.addEventListener('click', () => {
+      state.trailsVisible = !state.trailsVisible;
+      updateRoadLayers();
+    });
+    copyButton?.addEventListener('click', copySelection);
+
+    const fullscreenChange = () => {
+      window.setTimeout(() => map.invalidateSize({ pan: false }), 60);
+    };
+    document.addEventListener('fullscreenchange', fullscreenChange);
+
+    satellite.on('loading', () => {
+      if (!roadsReady && !roadError) setLoading('Loading corrected Chernarus satellite…');
+    });
+    satellite.on('load', () => {
+      if (!roadsReady && options.loadRoads === false) setLoading('');
+    });
+    satellite.on('tileerror', () => {
+      options.onTileError?.();
+    });
+
+    const api = {
+      map,
+      bounds,
+      satellite,
+      loadRoads,
+      reset,
+      focus,
+      setSelection,
+      clearSelection,
+      setSelectionEnabled,
+      copySelection,
+      addPoi,
+      invalidateSize: () => map.invalidateSize({ pan: false }),
+      getSelection: () => state.selection ? { ...state.selection } : null,
+      setRoadsVisible: (visible) => { state.roadsVisible = Boolean(visible); updateRoadLayers(); },
+      setTrailsVisible: (visible) => { state.trailsVisible = Boolean(visible); updateRoadLayers(); },
+      destroy: () => {
+        state.destroyed = true;
+        document.removeEventListener('fullscreenchange', fullscreenChange);
+        instances.delete(api);
+        map.remove();
+        delete container._wwzChernarusMapInstance;
+      }
+    };
+
+    container._wwzChernarusMapInstance = api;
+    instances.add(api);
+    updateSelectedDisplay();
+    updateToggleState();
+    reset();
+    window.setTimeout(() => api.invalidateSize(), 0);
+    loadRoads();
+    return api;
   };
 
-  frame.addEventListener('pointerdown', (event) => {
-    if (event.button !== 0 || event.target.closest('button, a, input')) return;
-    activePointers.set(event.pointerId, { id: event.pointerId, x: event.clientX, y: event.clientY });
-    frame.setPointerCapture?.(event.pointerId);
-    beginGesture();
+  window.WWZChernarusMap = Object.freeze({
+    MAP_METRES,
+    MAP_UNITS,
+    SCALE,
+    MIN_ZOOM,
+    MAX_NATIVE_ZOOM,
+    MAX_ZOOM,
+    PRODUCTION_WIDTH_MULTIPLIER,
+    SATELLITE_URL,
+    ROAD_URL,
+    ROAD_STYLES,
+    worldToLeaflet,
+    leafletToWorld,
+    formatCoordinate,
+    create
   });
-
-  frame.addEventListener('pointermove', (event) => {
-    updatePointerCoordinates(event.clientX, event.clientY);
-    if (!activePointers.has(event.pointerId)) return;
-    activePointers.set(event.pointerId, { id: event.pointerId, x: event.clientX, y: event.clientY });
-
-    if (activePointers.size >= 2) {
-      if (gesture?.type !== 'pinch') beginGesture();
-      const [a, b] = [...activePointers.values()];
-      const rect = frame.getBoundingClientRect();
-      const midpointX = (a.x + b.x) / 2 - rect.left;
-      const midpointY = (a.y + b.y) / 2 - rect.top;
-      const distance = Math.max(1, Math.hypot(b.x - a.x, b.y - a.y));
-      const zoom = clamp(gesture.startZoom * (distance / gesture.startDistance), view.minZoom, view.maxZoom);
-      view.zoom = zoom;
-      view.x = midpointX - gesture.mapX * zoom;
-      view.y = midpointY - gesture.mapY * zoom;
-      clampPosition();
-      updateTransform();
-      return;
-    }
-
-    if (gesture?.type === 'pan' && gesture.pointerId === event.pointerId) {
-      const dx = event.clientX - gesture.startX;
-      const dy = event.clientY - gesture.startY;
-      if (Math.hypot(dx, dy) > 6) gesture.moved = true;
-      view.x = gesture.viewX + dx;
-      view.y = gesture.viewY + dy;
-      clampPosition();
-      updateTransform();
-    }
-  });
-
-  const endPointer = (event) => {
-    if (!activePointers.has(event.pointerId)) return;
-    const wasClick = activePointers.size === 1 && gesture?.type === 'pan' && !gesture.moved && !suppressCoordinateClick;
-    activePointers.delete(event.pointerId);
-    frame.releasePointerCapture?.(event.pointerId);
-    if (wasClick) selectCoordinatesAt(event.clientX, event.clientY);
-    if (activePointers.size) beginGesture();
-    else {
-      gesture = null;
-      suppressCoordinateClick = false;
-    }
-  };
-
-  frame.addEventListener('pointerup', endPointer);
-  frame.addEventListener('pointercancel', endPointer);
-  frame.addEventListener('pointerleave', () => {
-    if (!activePointers.size && pointerReadout) pointerReadout.textContent = 'X — · Z —';
-  });
-
-  frame.addEventListener('keydown', (event) => {
-    const panDistance = Math.max(52, Math.min(frame.clientWidth, frame.clientHeight) * 0.12);
-    if (event.key === 'ArrowLeft') view.x += panDistance;
-    else if (event.key === 'ArrowRight') view.x -= panDistance;
-    else if (event.key === 'ArrowUp') view.y += panDistance;
-    else if (event.key === 'ArrowDown') view.y -= panDistance;
-    else if (event.key === '+' || event.key === '=') zoomAt(view.zoom * 1.45);
-    else if (event.key === '-' || event.key === '_') zoomAt(view.zoom / 1.45);
-    else if (event.key === '0') fitMap();
-    else if (event.key.toLowerCase() === 'c' && selectedCoordinates) copySelectedCoordinates();
-    else return;
-
-    event.preventDefault();
-    if (event.key.startsWith('Arrow')) {
-      clampPosition();
-      updateTransform();
-    }
-  });
-
-  window.addEventListener('wwz:viewchange', (event) => {
-    if (event.detail?.view !== 'map') return;
-    window.requestAnimationFrame(() => {
-      if (!hasFitted) fitMap();
-      else {
-        clampPosition();
-        updateTransform();
-      }
-    });
-  });
-
-  if (typeof ResizeObserver === 'function') {
-    new ResizeObserver(() => {
-      if (!frame.clientWidth || !frame.clientHeight || !dataReady) return;
-      if (!hasFitted) fitMap();
-      else {
-        clampPosition();
-        updateTransform();
-      }
-    }).observe(frame);
-  } else {
-    window.addEventListener('resize', () => {
-      clampPosition();
-      updateTransform();
-    });
-  }
-
-  updateSelectedCoordinateDisplay();
-  loadMapData();
 })();

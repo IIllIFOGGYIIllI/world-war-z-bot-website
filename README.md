@@ -10,15 +10,18 @@ After GitHub Pages is enabled, the site will be available at:
 
 ## Uploading and deploying the website
 
-1. Open the `world-war-z-website` repository on GitHub.
-2. Select **Add file** and then **Upload files**.
-3. Upload everything in this package, including `.github`, `.nojekyll` and the `assets` folder.
-4. Enter the commit message: `Preserve rental durations`
-5. Select **Commit changes**.
-6. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
-7. Open **Actions → Deploy World War Z Website** and run it manually only if the push did not start it automatically.
+Because the corrected Chernarus pyramid contains 4,810 JPG tiles, deploy this patch from a local clone rather than trying to upload the complete map through GitHub's browser uploader.
 
-Do not select **Deploy from a branch** while the included Pages workflow is being used. GitHub may take several minutes to publish the large local Chernarus map artifact.
+1. Pull or clone the existing `world-war-z-website` repository.
+2. Apply the files from this v1.22.27 patch over the repository.
+3. From the repository root, run `powershell -ExecutionPolicy Bypass -File .\scripts\install_chernarus_map_assets.ps1`.
+4. Confirm `py .\scripts\validate_site.py --require-map-assets` passes.
+5. Commit with: `Replace Chernarus map renderer`
+6. Push the commit, including the corrected JPG tiles and final road GeoJSON.
+7. Keep **Settings → Pages → Source** set to **GitHub Actions**.
+8. The included Pages workflow validates the map assets and JavaScript before publishing.
+
+Do not select **Deploy from a branch** while the included Pages workflow is being used. The workflow intentionally fails before deployment if the production map assets are missing or retired map files remain.
 
 ## Files
 
@@ -43,15 +46,15 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `assets/world-war-z-icon.png` and `assets/favicon.png` — local application icons
 - `assets/world-war-z-dashboard-bg.webp` — desktop command-centre atmosphere
 - `assets/world-war-z-dashboard-bg-mobile.webp` — mobile command-centre atmosphere
-- `assets/chernarus-map/tiles/` — locally generated multilevel WebP Chernarus satellite tiles
-- `assets/chernarus-map/overview.webp` — 3,840 px seamless satellite overview used by compact coordinate selectors
-- `assets/chernarus-map/tile-report.json` — source-tile validation and generated-pyramid report
+- `assets/chernarus-map/satellite-corrected/` — corrected local JPG Chernarus satellite pyramid, native zooms 0–6
+- `assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson` — final grouped WRP-derived production road geometry
 - `assets/data/chernarus/pois.json` — public read-only map locations and tile configuration
-- `assets/js/map/chernarus-map.js` — interactive tile renderer and coordinate tools
+- `assets/js/map/chernarus-map.js` — shared Leaflet satellite/road renderer and native DayZ coordinate tools
+- `assets/css/components/chernarus-map.css` — shared full-map and compact-picker presentation
 - `assets/js/pages/dashboard-map-loader.js` — lazy map workspace loader
 - `assets/js/core/http.js` — shared timeout-aware browser request helper
-- `assets/images/maps/chernarus-vector.svg` — retained legacy vector fallback
-- `scripts/validate_site.py` — static asset and reference validation used by GitHub Actions
+- `scripts/validate_site.py` — static/reference/map-data validation used by GitHub Actions
+- `scripts/install_chernarus_map_assets.ps1` — copies the approved local production map assets into the repository and removes retired map files
 - `PATCH_NOTES.md` — version history and update notes
 - `WEBHOOK_SETUP.md` — optional GitHub push notifications, separate from the dashboard-managed moderation webhooks
 - `CHERNARUS_MAP_PLAN.md` — implemented satellite map architecture and operating notes
@@ -61,6 +64,14 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+
+## Version 1.22.27 Unified Production Chernarus Map
+
+The website now uses one shared Leaflet-based Chernarus renderer for the main interactive map, dashboard shop checkout, standalone Survivor Shop checkout and Saved Delivery Locations. It uses the corrected local JPG satellite pyramid, the final grouped WRP-derived production road overlay, the proven 15,360 m → 240 Leaflet coordinate conversion, one-decimal DayZ X/Z selection and the approved 180% road-width profile.
+
+Before deployment, run `scripts/install_chernarus_map_assets.ps1` from a local clone. It copies the completed `satellite-corrected` pyramid and `chernarus-roads-overlay-final.geojson` from the approved local map project, removes the retired WebP/vector map assets and runs strict validation. GitHub Pages also enforces those production assets before publishing.
+
+Pairs with Bot v1.18.26. No Railway API, database, Normal Item delivery, Event Item rental, moderation, authentication or permission behaviour changed.
 
 ## Version 1.22.26 Road Overlay Foundation
 

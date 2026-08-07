@@ -14,7 +14,55 @@ const savedDeliveryLocationError = document.querySelector('[data-saved-location-
 const refreshDeliveryLocationsButton = document.querySelector('[data-refresh-delivery-locations]');
 const cancelDeliveryLocationEditButton = document.querySelector('[data-cancel-location-edit]');
 const saveDeliveryLocationButton = document.querySelector('[data-save-location]');
+const deliveryLocationMap = document.querySelector('[data-location-map]');
+const deliveryLocationMapReadout = document.querySelector('[data-location-map-readout]');
 let deliveryLocationRequestInProgress = false;
+let deliveryLocationMapInstance = null;
+
+const deliveryLocationCoordinates = () => {
+  const rawX = String(deliveryLocationX?.value ?? '').trim();
+  const rawZ = String(deliveryLocationZ?.value ?? '').trim();
+  const x = Number(rawX);
+  const z = Number(rawZ);
+  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= 15360 && z >= 0 && z <= 15360;
+  return { valid, x, z };
+};
+
+const syncDeliveryLocationMap = ({ center = false } = {}) => {
+  const { valid, x, z } = deliveryLocationCoordinates();
+  if (deliveryLocationMapReadout && !deliveryLocationMapInstance) {
+    deliveryLocationMapReadout.textContent = valid ? `X ${x.toFixed(1)} · Z ${z.toFixed(1)}` : 'No coordinates selected';
+  }
+  if (!deliveryLocationMapInstance) return;
+  if (valid) deliveryLocationMapInstance.setSelection(x, z, { notify: false, center, zoom: 6 });
+  else deliveryLocationMapInstance.clearSelection({ notify: false });
+};
+
+const ensureDeliveryLocationMap = () => {
+  if (deliveryLocationMapInstance || !deliveryLocationMap || !window.WWZChernarusMap) return deliveryLocationMapInstance;
+  deliveryLocationMapInstance = window.WWZChernarusMap.create(deliveryLocationMap, {
+    mode: 'saved-location',
+    selectable: true,
+    copyOnSelect: false,
+    roadsVisible: true,
+    trailsVisible: false,
+    selectedElement: deliveryLocationMapReadout,
+    zoomInButton: document.querySelector('[data-location-map-zoom-in]'),
+    zoomOutButton: document.querySelector('[data-location-map-zoom-out]'),
+    resetButton: document.querySelector('[data-location-map-reset]'),
+    fullscreenButton: document.querySelector('[data-location-map-fullscreen]'),
+    fullscreenTarget: deliveryLocationMap,
+    emptySelectionText: 'No coordinates selected',
+    onSelect: ({ x, z }) => {
+      if (deliveryLocationX) deliveryLocationX.value = x.toFixed(1);
+      if (deliveryLocationZ) deliveryLocationZ.value = z.toFixed(1);
+      if (deliveryLocationY && deliveryLocationY.value === '') deliveryLocationY.value = '0';
+      syncDeliveryLocationMap();
+    }
+  });
+  syncDeliveryLocationMap();
+  return deliveryLocationMapInstance;
+};
 
 const resetDeliveryLocationForm = () => {
   deliveryLocationForm?.reset();
@@ -23,19 +71,24 @@ const resetDeliveryLocationForm = () => {
   setText('[data-location-form-title]', 'Save a location');
   cancelDeliveryLocationEditButton?.setAttribute('hidden', '');
   showInlineMessage(deliveryLocationMessage, '');
+  deliveryLocationMapInstance?.clearSelection({ notify: false });
+  deliveryLocationMapInstance?.reset();
+  if (deliveryLocationMapReadout) deliveryLocationMapReadout.textContent = 'No coordinates selected';
 };
 
 const editDeliveryLocation = (location) => {
   if (!location) return;
   if (deliveryLocationId) deliveryLocationId.value = String(location.location_id);
   if (deliveryLocationName) deliveryLocationName.value = String(location.name || '');
-  if (deliveryLocationX) deliveryLocationX.value = String(location.x);
+  if (deliveryLocationX) deliveryLocationX.value = Number(location.x).toFixed(1);
   if (deliveryLocationY) deliveryLocationY.value = String(location.y);
-  if (deliveryLocationZ) deliveryLocationZ.value = String(location.z);
+  if (deliveryLocationZ) deliveryLocationZ.value = Number(location.z).toFixed(1);
   if (deliveryLocationRotation) deliveryLocationRotation.value = String(location.rotation);
   if (deliveryLocationDefault) deliveryLocationDefault.checked = Boolean(location.is_default);
   setText('[data-location-form-title]', `Edit ${location.name}`);
   cancelDeliveryLocationEditButton?.removeAttribute('hidden');
+  ensureDeliveryLocationMap();
+  syncDeliveryLocationMap({ center: true });
   deliveryLocationName?.focus();
 };
 
@@ -161,6 +214,7 @@ deliveryLocationForm?.addEventListener('submit', async (event) => {
 });
 refreshDeliveryLocationsButton?.addEventListener('click', () => loadDeliveryLocations());
 cancelDeliveryLocationEditButton?.addEventListener('click', resetDeliveryLocationForm);
+[deliveryLocationX, deliveryLocationZ].forEach((input) => input?.addEventListener('input', () => syncDeliveryLocationMap()));
 
 const deliveryScope = document.querySelector('[data-delivery-scope]');
 const deliveryOrderList = document.querySelector('[data-delivery-order-list]');
@@ -548,7 +602,14 @@ serverEventSearch?.addEventListener('input', renderServerEvents);
 window.addEventListener('wwz:viewchange', (event) => {
   const { view, section } = event.detail || {};
   const token = storageGet(AUTH_SESSION_KEY);
-  if (view === 'locations') loadDeliveryLocations(token);
+  if (view === 'locations') {
+    loadDeliveryLocations(token);
+    window.setTimeout(() => {
+      const instance = ensureDeliveryLocationMap();
+      syncDeliveryLocationMap();
+      instance?.invalidateSize();
+    }, 0);
+  }
   if (view === 'delivery') loadDeliveryQueue(token);
   if (view === 'serverconfig') {
     if (section === 'files') loadServerConfigOverview(token);
