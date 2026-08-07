@@ -100,7 +100,10 @@ def validate_css_references(errors: list[str]) -> None:
 
 
 def validate_json(errors: list[str]) -> None:
-    required_json = (ROOT / "assets/data/chernarus/pois.json",)
+    required_json = (
+        ROOT / "assets/data/chernarus/pois.json",
+        ROOT / "assets/data/chernarus/place-names.json",
+    )
     for json_path in required_json:
         if not json_path.is_file():
             errors.append(f"Missing JSON file: {json_path.relative_to(ROOT)}")
@@ -136,6 +139,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/pages/shop.js",
         "assets/js/map/chernarus-map.js",
         "assets/js/data/command-library.js",
+        "assets/data/chernarus/place-names.json",
         "assets/chernarus-map/satellite-corrected/README.md",
         "assets/chernarus-map/overlays/roads/README.md",
         "assets/world-war-z-banner.webp",
@@ -162,7 +166,7 @@ def validate_retired_map_assets(errors: list[str]) -> None:
     scan_paths = [ROOT / "dashboard.html", ROOT / "shop.html"]
     scan_paths += list((ROOT / "assets/js").rglob("*.js"))
     scan_paths += list((ROOT / "assets/css").rglob("*.css"))
-    scan_paths += [ROOT / "assets/data/chernarus/pois.json"]
+    scan_paths += [ROOT / "assets/data/chernarus/pois.json", ROOT / "assets/data/chernarus/place-names.json"]
     for path in scan_paths:
         if not path.is_file():
             continue
@@ -172,6 +176,46 @@ def validate_retired_map_assets(errors: list[str]) -> None:
                 errors.append(
                     f"{path.relative_to(ROOT)}: retired map reference remains: {reference}"
                 )
+
+
+def validate_place_names(errors: list[str]) -> None:
+    path = ROOT / "assets/data/chernarus/place-names.json"
+    if not path.is_file():
+        return
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return
+
+    places = payload.get("places") if isinstance(payload, dict) else None
+    if not isinstance(places, list) or not places:
+        errors.append("assets/data/chernarus/place-names.json: places must be a non-empty array")
+        return
+
+    valid_types = {"city", "town", "village"}
+    seen_ids: set[str] = set()
+    for index, place in enumerate(places):
+        if not isinstance(place, dict):
+            errors.append(f"place-names.json: entry {index} is not an object")
+            continue
+        place_id = str(place.get("id") or "").strip()
+        name = str(place.get("name") or "").strip()
+        place_type = str(place.get("type") or "").strip().lower()
+        if not place_id or not name:
+            errors.append(f"place-names.json: entry {index} is missing id/name")
+        elif place_id in seen_ids:
+            errors.append(f"place-names.json: duplicate id {place_id}")
+        else:
+            seen_ids.add(place_id)
+        if place_type not in valid_types:
+            errors.append(f"place-names.json: {place_id or index} has unsupported type {place_type!r}")
+        for axis in ("x", "z"):
+            value = place.get(axis)
+            if not isinstance(value, (int, float)) or not 0 <= float(value) <= 15360:
+                errors.append(f"place-names.json: {place_id or index} has invalid {axis}")
+        zoom = place.get("minZoom")
+        if not isinstance(zoom, (int, float)) or not 0 <= float(zoom) <= 14:
+            errors.append(f"place-names.json: {place_id or index} has invalid minZoom")
 
 
 def normalise_group(value: object) -> str | None:
@@ -337,6 +381,7 @@ def main() -> int:
     validate_html_references(errors, require_map_assets=args.require_map_assets)
     validate_css_references(errors)
     validate_json(errors)
+    validate_place_names(errors)
     validate_retired_map_assets(errors)
     validate_satellite_assets(errors, info, required=args.require_map_assets)
     validate_road_asset(errors, info, required=args.require_map_assets)

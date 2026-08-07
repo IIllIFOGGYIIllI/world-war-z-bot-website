@@ -2,7 +2,7 @@
 
 ## Required production assets
 
-The v1.22.27 patch now bundles the validated final production road GeoJSON. Before GitHub Pages deployment the repository must contain that bundled road file plus the corrected satellite pyramid:
+The v1.22.27 code patch does not fabricate or substitute the completed map binaries. Before GitHub Pages deployment the repository must contain:
 
 ```text
 assets/chernarus-map/satellite-corrected/0/0/0.jpg
@@ -35,7 +35,7 @@ From the root of a local clone of `world-war-z-website`:
 powershell -ExecutionPolicy Bypass -File .\scripts\install_chernarus_map_assets.ps1
 ```
 
-The script uses the approved local satellite path by default, removes retired map assets, copies the corrected JPG pyramid, preserves the bundled final road GeoJSON, validates the tile count and then runs strict website validation.
+The script uses the approved local map project paths by default, removes retired map assets, copies the corrected JPG pyramid and final road GeoJSON, validates the tile count and then runs strict website validation.
 
 ## Website validation
 
@@ -69,3 +69,12 @@ Verify all of these before publishing:
 10. Public POI search/details still work.
 
 Do not reopen WRP geometry reconstruction for minor thick-line intersection seams; those are renderer polish unless a genuine alignment defect is demonstrated.
+
+## v1.22.29 label and marker checks
+
+- `assets/data/chernarus/place-names.json` must parse as JSON and contain a non-empty `places` array.
+- Place IDs must be unique.
+- Supported settlement types are `city`, `town` and `village`.
+- Every label anchor X/Z must remain within the 0–15,360 m Chernarus bounds.
+- Every label `minZoom` must remain within Leaflet zoom 0–14.
+- Location pins and place labels are UI overlays only; satellite tile counts and production road line-part validation remain unchanged.

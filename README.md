@@ -10,16 +10,16 @@ After GitHub Pages is enabled, the site will be available at:
 
 ## Uploading and deploying the website
 
-Because the corrected Chernarus pyramid contains 4,810 JPG tiles, deploy this patch from a local clone rather than trying to upload the complete map through GitHub's browser uploader.
+The production repository already contains the corrected 4,810-tile Chernarus JPG pyramid and final road GeoJSON. Incremental website patches should be applied from a local clone so Git can preserve and validate those assets.
 
-1. Pull or clone the existing `world-war-z-website` repository.
+1. Pull the current `world-war-z-website` repository.
 2. Apply the files from the latest website patch over the repository.
-3. From the repository root, run `powershell -ExecutionPolicy Bypass -File .\scripts\install_chernarus_map_assets.ps1`.
-4. Confirm `py .\scripts\validate_site.py --require-map-assets` passes.
-5. Commit the website changes with the patch-specific commit message.
-6. Push the commit, including the corrected JPG tiles and final road GeoJSON.
-7. Keep **Settings → Pages → Source** set to **GitHub Actions**.
-8. The included Pages workflow validates the map assets and JavaScript before publishing.
+3. Confirm `py .\scripts\validate_site.py --require-map-assets` passes.
+4. Commit the patch and push it to `main`.
+5. Keep **Settings → Pages → Source** set to **GitHub Actions**.
+6. The included Pages workflow validates the website, place-name data, map assets and JavaScript before publishing.
+
+The PowerShell map installer is only needed if the corrected satellite pyramid or final road GeoJSON is missing from a local clone; routine UI/map-overlay patches do not require copying the 4,810 JPG files again.
 
 Do not select **Deploy from a branch** while the included Pages workflow is being used. The workflow intentionally fails before deployment if the production map assets are missing or retired map files remain.
 
@@ -49,6 +49,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 - `assets/chernarus-map/satellite-corrected/` — corrected local JPG Chernarus satellite pyramid, native zooms 0–6
 - `assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson` — final grouped WRP-derived production road geometry
 - `assets/data/chernarus/pois.json` — public read-only map locations and tile configuration
+- `assets/data/chernarus/place-names.json` — zoom-aware city, town and village label anchors for the optional Names overlay
 - `assets/js/map/chernarus-map.js` — shared Leaflet satellite/road renderer and native DayZ coordinate tools
 - `assets/css/components/chernarus-map.css` — shared full-map and compact-picker presentation
 - `assets/js/pages/dashboard-map-loader.js` — lazy map workspace loader
@@ -65,13 +66,15 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
-## Version 1.22.28 Map Locations & Custom Pins
+## Version 1.22.29 Map Pins and Place Names
 
-The dashboard Chernarus workspace now has a rebuilt location index plus personal custom map pins. Public landmarks remain read-only, while each browser can privately save up to 250 named pins with category, notes, marker colour and exact DayZ X/Z coordinates. Pins can be created from the current map selection, searched, filtered, centred, copied, edited, deleted, exported to JSON and imported again later.
+The main Chernarus workspace replaces circular POI dots with proper location-pin markers and keeps each public/custom marker name visible beside its pin. Selecting an existing marker highlights that marker without stacking a second selection pin on top of it.
 
-Custom pins use browser `localStorage` only. They are not uploaded to Railway, not published to other players and do not alter the production satellite or road data.
+A new **Names** overlay renders zoom-aware city, town and village labels from `assets/data/chernarus/place-names.json`. The layer is independent from the satellite and road geometry, can be toggled without redrawing roads, and suppresses duplicate settlement text where a visible public/custom marker already supplies the same name. This release is the first label pass; bilingual/Cyrillic treatment and fine anchor adjustments can be refined independently later.
 
-Pairs with Bot v1.18.26. No Railway API or database change is required.
+## Version 1.22.28 Map Locations and Custom Pins
+
+The dashboard map location index now uses themed location cards and supports personal browser-local custom pins. Users can save, edit, delete, search, filter, export and import up to 250 private locations without sending them to Railway or publishing them to other users.
 
 ## Version 1.22.27 Unified Production Chernarus Map
 

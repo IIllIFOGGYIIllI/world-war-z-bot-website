@@ -20,3 +20,7 @@ The original converted 32 × 32 satellite source was corrected for duplicated ti
 Map coordinates remain native DayZ Chernarus X/Z values over a 15,360 m × 15,360 m world.
 
 Chernarus, DayZ and associated source imagery remain © Bohemia Interactive. The World War Z community project claims no ownership of Bohemia Interactive game assets or trademarks.
+
+## Settlement name overlay
+
+Version 1.22.29 adds a local city/town/village label dataset for navigation. The iZurvive screenshots supplied during development are treated only as a visual behaviour reference; this website patch does not include iZurvive map imagery, icons, tiles or copied overlay assets. Settlement labels are stored locally in `assets/data/chernarus/place-names.json` and can be independently corrected or expanded later.

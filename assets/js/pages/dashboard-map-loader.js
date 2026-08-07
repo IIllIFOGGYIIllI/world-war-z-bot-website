@@ -4,7 +4,8 @@
   const frame = document.querySelector('[data-map-frame]');
   if (!frame) return;
 
-  const DATA_URL = 'assets/data/chernarus/pois.json?v=1.22.28';
+  const DATA_URL = 'assets/data/chernarus/pois.json?v=1.22.29';
+  const PLACE_NAMES_URL = 'assets/data/chernarus/place-names.json?v=1.22.29';
   const STORAGE_KEY = 'wwz.chernarus.customLocations.v1';
   const MAX_CUSTOM_LOCATIONS = 250;
   const COLOURS = Object.freeze({
@@ -24,6 +25,9 @@
   let selectedLocation = null;
   let poiLayer = null;
   let customLayer = null;
+  let placeNameLayer = null;
+  let placeNames = [];
+  let placeNamesVisible = true;
   const poiMarkers = new Map();
   const customMarkers = new Map();
 
@@ -85,6 +89,17 @@
     const z = clampCoordinate(rawPoi?.z);
     if (!name || x === null || z === null) return null;
     return { id, name, category, description, colour, x, z, visibility: 'private-browser', scope: 'custom' };
+  };
+
+  const validatePlaceName = (rawPlace) => {
+    const id = validText(rawPlace?.id, 100);
+    const name = validText(rawPlace?.name, 100);
+    const type = validText(rawPlace?.type, 30, 'village');
+    const x = clampCoordinate(rawPlace?.x);
+    const z = clampCoordinate(rawPlace?.z);
+    const minZoom = Math.max(0, Math.min(14, Number(rawPlace?.minZoom) || 4));
+    if (!id || !name || x === null || z === null) return null;
+    return { id, name, type, x, z, minZoom };
   };
 
   const loadCustomPois = () => {
@@ -193,30 +208,18 @@
     if (saveSelectedButton) saveSelectedButton.hidden = !isSelection;
   };
 
-  const markerStyle = (poi, selected = false) => {
-    const custom = poi.scope === 'custom';
-    const fill = custom ? (COLOURS[poi.colour] || COLOURS.amber) : '#d52b1e';
-    return {
-      radius: selected ? 8 : custom ? 7 : 6,
-      weight: selected ? 3 : 2,
-      color: selected ? '#ffffff' : custom ? '#17110a' : '#fff4ea',
-      fillColor: fill,
-      fillOpacity: custom ? 0.96 : 0.94,
-      opacity: 0.98
-    };
+  const applyMarkerSelection = () => {
+    poiMarkers.forEach((marker, id) => marker?._wwzSetSelected?.(selectedLocation?.id === id));
+    customMarkers.forEach((marker, id) => marker?._wwzSetSelected?.(selectedLocation?.id === id));
   };
 
-  const applyMarkerSelection = () => {
-    poiMarkers.forEach((marker, id) => marker?.setStyle?.(markerStyle(publicPois.find((poi) => poi.id === id) || {}, selectedLocation?.id === id)));
-    customMarkers.forEach((marker, id) => marker?.setStyle?.(markerStyle(customPois.find((poi) => poi.id === id) || {}, selectedLocation?.id === id)));
-  };
 
   const selectLocation = (poi, { focus = true, selectOnMap = false } = {}) => {
     selectedLocation = poi || null;
     updateDetails(selectedLocation);
     applyMarkerSelection();
     if (poi && focus) mapInstance?.focus(poi.x, poi.z, Math.max(6, mapInstance.map.getZoom()));
-    if (poi && selectOnMap) mapInstance?.setSelection(poi.x, poi.z, { notify: false });
+    if (poi && selectOnMap) mapInstance?.setSelection(poi.x, poi.z, { notify: false, marker: false });
   };
 
   const selectedMapPoint = () => mapInstance?.getSelection?.() || null;
@@ -310,35 +313,55 @@
     poiMarkers.clear();
     customMarkers.clear();
     visible.forEach((poi) => {
-      if (poi.scope === 'public') {
-        const marker = mapInstance.addPoi(poi, {
-          layer: poiLayer,
-          onClick: () => {
-            selectLocation(poi, { focus: false, selectOnMap: true });
-            renderResults();
-          }
-        });
-        marker?.setStyle?.(markerStyle(poi, selectedLocation?.id === poi.id));
-        if (marker) poiMarkers.set(poi.id, marker);
-        return;
-      }
-
-      const latlng = window.WWZChernarusMap.worldToLeaflet([poi.x, poi.z]);
-      if (!latlng) return;
-      const marker = window.L.circleMarker(latlng, {
-        ...markerStyle(poi, selectedLocation?.id === poi.id),
-        interactive: true,
-        className: 'wwz-map-poi-marker wwz-map-custom-marker'
+      const custom = poi.scope === 'custom';
+      const marker = mapInstance.addPoi(poi, {
+        layer: custom ? customLayer : poiLayer,
+        custom,
+        colour: custom ? (COLOURS[poi.colour] || COLOURS.amber) : '#d52b1e',
+        selected: selectedLocation?.id === poi.id,
+        showLabel: true,
+        onClick: () => {
+          selectLocation(poi, { focus: false, selectOnMap: true });
+          renderResults();
+        }
       });
-      marker.on('click', (event) => {
-        window.L.DomEvent.stopPropagation(event);
-        selectLocation(poi, { focus: false, selectOnMap: true });
-        renderResults();
-      });
-      customLayer.addLayer(marker);
-      customMarkers.set(poi.id, marker);
+      if (!marker) return;
+      (custom ? customMarkers : poiMarkers).set(poi.id, marker);
     });
   };
+
+  const renderPlaceNames = () => {
+    if (!placeNameLayer || !mapInstance) return;
+    placeNameLayer.clearLayers();
+    const toggle = document.querySelector('[data-map-name-toggle]');
+    toggle?.classList.toggle('active', placeNamesVisible);
+    toggle?.setAttribute('aria-pressed', String(placeNamesVisible));
+    if (!placeNamesVisible) return;
+
+    const zoom = mapInstance.map.getZoom();
+    const visibleMarkerNames = new Set(filteredLocations().map((poi) => poi.name.toLowerCase()));
+    placeNames.forEach((place) => {
+      if (zoom < place.minZoom || visibleMarkerNames.has(place.name.toLowerCase())) return;
+      const latlng = window.WWZChernarusMap.worldToLeaflet([place.x, place.z]);
+      if (!latlng) return;
+      const safeName = String(place.name).replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[character]));
+      const icon = window.L.divIcon({
+        className: 'wwz-map-place-name-div-icon',
+        html: `<span class=\"wwz-map-place-name wwz-map-place-name--${String(place.type).replace(/[^a-z0-9_-]/gi, '').toLowerCase()}\">${safeName}</span>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      });
+      window.L.marker(latlng, {
+        icon,
+        interactive: false,
+        keyboard: false,
+        zIndexOffset: 100
+      }).addTo(placeNameLayer);
+    });
+  };
+
 
   const renderResults = () => {
     const visible = filteredLocations();
@@ -353,6 +376,7 @@
     }
 
     renderMarkers(visible);
+    renderPlaceNames();
     if (selectedLocation?.id && !visible.some((poi) => poi.id === selectedLocation.id) && selectedLocation.scope !== 'selection') {
       selectLocation(null, { focus: false });
     }
@@ -415,10 +439,19 @@
     loadPromise = (async () => {
       if (!window.WWZChernarusMap || !window.L) throw new Error('The production Chernarus map runtime is unavailable.');
 
-      const response = await fetch(DATA_URL, { headers: { Accept: 'application/json' }, cache: 'force-cache' });
+      const [response, placeResponse] = await Promise.all([
+        fetch(DATA_URL, { headers: { Accept: 'application/json' }, cache: 'force-cache' }),
+        fetch(PLACE_NAMES_URL, { headers: { Accept: 'application/json' }, cache: 'force-cache' }).catch(() => null)
+      ]);
       if (!response.ok) throw new Error('Public map locations could not be loaded.');
       const payload = await response.json();
       publicPois = (Array.isArray(payload?.pois) ? payload.pois : []).map(validatePoi).filter(Boolean);
+      if (placeResponse?.ok) {
+        const placePayload = await placeResponse.json();
+        placeNames = (Array.isArray(placePayload?.places) ? placePayload.places : []).map(validatePlaceName).filter(Boolean);
+      } else {
+        placeNames = [];
+      }
       loadCustomPois();
 
       mapInstance = window.WWZChernarusMap.create(frame, {
@@ -454,8 +487,10 @@
         }
       });
 
+      placeNameLayer = window.L.layerGroup().addTo(mapInstance.map);
       poiLayer = window.L.layerGroup().addTo(mapInstance.map);
       customLayer = window.L.layerGroup().addTo(mapInstance.map);
+      mapInstance.map.on('zoomend', renderPlaceNames);
       renderFilters();
       renderResults();
       window.setTimeout(() => mapInstance.invalidateSize(), 80);
@@ -477,6 +512,10 @@
 
   search?.addEventListener('input', renderResults);
   document.querySelectorAll('[data-map-scope]').forEach((button) => button.addEventListener('click', () => setScope(button.dataset.mapScope)));
+  document.querySelector('[data-map-name-toggle]')?.addEventListener('click', () => {
+    placeNamesVisible = !placeNamesVisible;
+    renderPlaceNames();
+  });
 
   document.querySelector('[data-map-focus-selected]')?.addEventListener('click', () => {
     if (selectedLocation) mapInstance?.focus(selectedLocation.x, selectedLocation.z, Math.max(6, mapInstance.map.getZoom()));
@@ -533,7 +572,7 @@
     persistCustomPois();
     closeCustomEditor();
     setScope('all');
-    mapInstance?.setSelection(poi.x, poi.z, { notify: false });
+    mapInstance?.setSelection(poi.x, poi.z, { notify: false, marker: false });
     selectLocation(poi, { focus: true });
     renderFilters();
     renderResults();

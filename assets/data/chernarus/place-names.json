@@ -1,0 +1,600 @@
+{
+  "version": 1,
+  "map": "ChernarusPlus",
+  "coordinateSystem": "DayZ X/Z metres",
+  "note": "Settlement label coordinates are navigation-label anchor points and are intentionally independent from road geometry.",
+  "places": [
+    {
+      "id": "chernogorsk",
+      "name": "Chernogorsk",
+      "type": "city",
+      "x": 6472,
+      "z": 2568,
+      "minZoom": 2
+    },
+    {
+      "id": "elektrozavodsk",
+      "name": "Elektrozavodsk",
+      "type": "city",
+      "x": 10196,
+      "z": 2130,
+      "minZoom": 2
+    },
+    {
+      "id": "berezino",
+      "name": "Berezino",
+      "type": "city",
+      "x": 12341,
+      "z": 9671,
+      "minZoom": 2
+    },
+    {
+      "id": "novodmitrovsk",
+      "name": "Novodmitrovsk",
+      "type": "city",
+      "x": 11437,
+      "z": 14298,
+      "minZoom": 2
+    },
+    {
+      "id": "severograd",
+      "name": "Severograd",
+      "type": "city",
+      "x": 7983,
+      "z": 12746,
+      "minZoom": 2
+    },
+    {
+      "id": "zelenogorsk",
+      "name": "Zelenogorsk",
+      "type": "city",
+      "x": 2752,
+      "z": 5276,
+      "minZoom": 2
+    },
+    {
+      "id": "svetloyarsk",
+      "name": "Svetloyarsk",
+      "type": "city",
+      "x": 14051,
+      "z": 13226,
+      "minZoom": 2
+    },
+    {
+      "id": "novaya-petrovka",
+      "name": "Novaya Petrovka",
+      "type": "town",
+      "x": 3416,
+      "z": 13012,
+      "minZoom": 3
+    },
+    {
+      "id": "vybor",
+      "name": "Vybor",
+      "type": "town",
+      "x": 3840,
+      "z": 8921,
+      "minZoom": 3
+    },
+    {
+      "id": "stary-sobor",
+      "name": "Stary Sobor",
+      "type": "town",
+      "x": 6075,
+      "z": 7758,
+      "minZoom": 3
+    },
+    {
+      "id": "novy-sobor",
+      "name": "Novy Sobor",
+      "type": "town",
+      "x": 7102,
+      "z": 7668,
+      "minZoom": 3
+    },
+    {
+      "id": "gorka",
+      "name": "Gorka",
+      "type": "town",
+      "x": 9558,
+      "z": 8823,
+      "minZoom": 3
+    },
+    {
+      "id": "solnechny",
+      "name": "Solnechny",
+      "type": "town",
+      "x": 13395,
+      "z": 6240,
+      "minZoom": 3
+    },
+    {
+      "id": "krasnostav",
+      "name": "Krasnostav",
+      "type": "town",
+      "x": 11148,
+      "z": 12277,
+      "minZoom": 3
+    },
+    {
+      "id": "chernaya-polyana",
+      "name": "Chernaya Polyana",
+      "type": "town",
+      "x": 12135,
+      "z": 13755,
+      "minZoom": 3
+    },
+    {
+      "id": "polyana",
+      "name": "Polyana",
+      "type": "town",
+      "x": 10672,
+      "z": 8100,
+      "minZoom": 3
+    },
+    {
+      "id": "kamyshovo",
+      "name": "Kamyshovo",
+      "type": "town",
+      "x": 12067,
+      "z": 3517,
+      "minZoom": 3
+    },
+    {
+      "id": "khelm",
+      "name": "Khelm",
+      "type": "town",
+      "x": 12315,
+      "z": 10882,
+      "minZoom": 3
+    },
+    {
+      "id": "grishino",
+      "name": "Grishino",
+      "type": "town",
+      "x": 5966,
+      "z": 10323,
+      "minZoom": 3
+    },
+    {
+      "id": "lopatino",
+      "name": "Lopatino",
+      "type": "town",
+      "x": 2760,
+      "z": 9963,
+      "minZoom": 3
+    },
+    {
+      "id": "tisy",
+      "name": "Tisy",
+      "type": "town",
+      "x": 3446,
+      "z": 14778,
+      "minZoom": 3
+    },
+    {
+      "id": "kamensk",
+      "name": "Kamensk",
+      "type": "town",
+      "x": 6641,
+      "z": 14467,
+      "minZoom": 3
+    },
+    {
+      "id": "novoselki",
+      "name": "Novoselki",
+      "type": "village",
+      "x": 6217,
+      "z": 3277,
+      "minZoom": 4
+    },
+    {
+      "id": "dubovo",
+      "name": "Dubovo",
+      "type": "village",
+      "x": 6723,
+      "z": 3630,
+      "minZoom": 4
+    },
+    {
+      "id": "vysotovo",
+      "name": "Vysotovo",
+      "type": "village",
+      "x": 5782,
+      "z": 2553,
+      "minZoom": 4
+    },
+    {
+      "id": "bor",
+      "name": "Bor",
+      "type": "village",
+      "x": 3315,
+      "z": 3982,
+      "minZoom": 4
+    },
+    {
+      "id": "tulga",
+      "name": "Tulga",
+      "type": "village",
+      "x": 12720,
+      "z": 4398,
+      "minZoom": 4
+    },
+    {
+      "id": "msta",
+      "name": "Msta",
+      "type": "village",
+      "x": 11321,
+      "z": 5486,
+      "minZoom": 4
+    },
+    {
+      "id": "staroye",
+      "name": "Staroye",
+      "type": "village",
+      "x": 10128,
+      "z": 5433,
+      "minZoom": 4
+    },
+    {
+      "id": "shakhovka",
+      "name": "Shakhovka",
+      "type": "village",
+      "x": 9622,
+      "z": 6555,
+      "minZoom": 4
+    },
+    {
+      "id": "dolina",
+      "name": "Dolina",
+      "type": "village",
+      "x": 11305,
+      "z": 6600,
+      "minZoom": 4
+    },
+    {
+      "id": "orlovets",
+      "name": "Orlovets",
+      "type": "village",
+      "x": 12176,
+      "z": 7297,
+      "minZoom": 4
+    },
+    {
+      "id": "kabanino",
+      "name": "Kabanino",
+      "type": "village",
+      "x": 5328,
+      "z": 8617,
+      "minZoom": 4
+    },
+    {
+      "id": "mogilevka",
+      "name": "Mogilevka",
+      "type": "village",
+      "x": 7556,
+      "z": 5163,
+      "minZoom": 4
+    },
+    {
+      "id": "nadezhdino",
+      "name": "Nadezhdino",
+      "type": "village",
+      "x": 5853,
+      "z": 4803,
+      "minZoom": 4
+    },
+    {
+      "id": "guglovo",
+      "name": "Guglovo",
+      "type": "village",
+      "x": 8433,
+      "z": 6630,
+      "minZoom": 4
+    },
+    {
+      "id": "pusta",
+      "name": "Pusta",
+      "type": "village",
+      "x": 9157,
+      "z": 3858,
+      "minZoom": 4
+    },
+    {
+      "id": "dubrovka",
+      "name": "Dubrovka",
+      "type": "village",
+      "x": 10428,
+      "z": 9862,
+      "minZoom": 4
+    },
+    {
+      "id": "vyshnaya-dubrovka",
+      "name": "Vyshnaya Dubrovka",
+      "type": "village",
+      "x": 9926,
+      "z": 10421,
+      "minZoom": 4
+    },
+    {
+      "id": "olsha",
+      "name": "Olsha",
+      "type": "village",
+      "x": 13308,
+      "z": 12956,
+      "minZoom": 4
+    },
+    {
+      "id": "gvozdno",
+      "name": "Gvozdno",
+      "type": "village",
+      "x": 8636,
+      "z": 11846,
+      "minZoom": 4
+    },
+    {
+      "id": "rogovo",
+      "name": "Rogovo",
+      "type": "village",
+      "x": 4766,
+      "z": 6791,
+      "minZoom": 4
+    },
+    {
+      "id": "pogorevka",
+      "name": "Pogorevka",
+      "type": "village",
+      "x": 4451,
+      "z": 6427,
+      "minZoom": 4
+    },
+    {
+      "id": "pustoshka",
+      "name": "Pustoshka",
+      "type": "village",
+      "x": 3071,
+      "z": 7912,
+      "minZoom": 4
+    },
+    {
+      "id": "kozlovka",
+      "name": "Kozlovka",
+      "type": "village",
+      "x": 4376,
+      "z": 4687,
+      "minZoom": 4
+    },
+    {
+      "id": "balota",
+      "name": "Balota",
+      "type": "village",
+      "x": 4492,
+      "z": 2445,
+      "minZoom": 4
+    },
+    {
+      "id": "komarovo",
+      "name": "Komarovo",
+      "type": "village",
+      "x": 3663,
+      "z": 2482,
+      "minZoom": 4
+    },
+    {
+      "id": "kamenka",
+      "name": "Kamenka",
+      "type": "village",
+      "x": 1942,
+      "z": 2242,
+      "minZoom": 4
+    },
+    {
+      "id": "myshkino",
+      "name": "Myshkino",
+      "type": "village",
+      "x": 1972,
+      "z": 7342,
+      "minZoom": 4
+    },
+    {
+      "id": "pavlovo",
+      "name": "Pavlovo",
+      "type": "village",
+      "x": 1702,
+      "z": 3825,
+      "minZoom": 4
+    },
+    {
+      "id": "vyshnoye",
+      "name": "Vyshnoye",
+      "type": "village",
+      "x": 6570,
+      "z": 6060,
+      "minZoom": 4
+    },
+    {
+      "id": "prigorodki",
+      "name": "Prigorodki",
+      "type": "village",
+      "x": 7732,
+      "z": 3288,
+      "minZoom": 4
+    },
+    {
+      "id": "sosnovka",
+      "name": "Sosnovka",
+      "type": "village",
+      "x": 2523,
+      "z": 6375,
+      "minZoom": 4
+    },
+    {
+      "id": "nizhneye",
+      "name": "Nizhneye",
+      "type": "village",
+      "x": 12993,
+      "z": 8055,
+      "minZoom": 4
+    },
+    {
+      "id": "pulkovo",
+      "name": "Pulkovo",
+      "type": "village",
+      "x": 4942,
+      "z": 5696,
+      "minZoom": 4
+    },
+    {
+      "id": "berezhki",
+      "name": "Berezhki",
+      "type": "village",
+      "x": 15112,
+      "z": 13845,
+      "minZoom": 4
+    },
+    {
+      "id": "turovo",
+      "name": "Turovo",
+      "type": "village",
+      "x": 13571,
+      "z": 14006,
+      "minZoom": 4
+    },
+    {
+      "id": "belaya-polyana",
+      "name": "Belaya Polyana",
+      "type": "village",
+      "x": 14096,
+      "z": 15037,
+      "minZoom": 4
+    },
+    {
+      "id": "dobroye",
+      "name": "Dobroye",
+      "type": "village",
+      "x": 12971,
+      "z": 15037,
+      "minZoom": 4
+    },
+    {
+      "id": "nagornoye",
+      "name": "Nagornoye",
+      "type": "village",
+      "x": 9348,
+      "z": 14568,
+      "minZoom": 4
+    },
+    {
+      "id": "svergino",
+      "name": "Svergino",
+      "type": "village",
+      "x": 9510,
+      "z": 14568,
+      "minZoom": 4
+    },
+    {
+      "id": "ratnoye",
+      "name": "Ratnoye",
+      "type": "village",
+      "x": 6288,
+      "z": 12701,
+      "minZoom": 4
+    },
+    {
+      "id": "stary-yar",
+      "name": "Stary Yar",
+      "type": "village",
+      "x": 4980,
+      "z": 15093,
+      "minZoom": 4
+    },
+    {
+      "id": "polesovo",
+      "name": "Polesovo",
+      "type": "village",
+      "x": 5827,
+      "z": 13530,
+      "minZoom": 4
+    },
+    {
+      "id": "topolniki",
+      "name": "Topolniki",
+      "type": "village",
+      "x": 2850,
+      "z": 12390,
+      "minZoom": 4
+    },
+    {
+      "id": "zaprudnoye",
+      "name": "Zaprudnoye",
+      "type": "village",
+      "x": 5013,
+      "z": 12806,
+      "minZoom": 4
+    },
+    {
+      "id": "sinystok",
+      "name": "Sinystok",
+      "type": "village",
+      "x": 1511,
+      "z": 11970,
+      "minZoom": 4
+    },
+    {
+      "id": "vavilovo",
+      "name": "Vavilovo",
+      "type": "village",
+      "x": 2227,
+      "z": 11058,
+      "minZoom": 4
+    },
+    {
+      "id": "kumyrna",
+      "name": "Kumyrna",
+      "type": "village",
+      "x": 8396,
+      "z": 5985,
+      "minZoom": 4
+    },
+    {
+      "id": "kalinovka",
+      "name": "Kalinovka",
+      "type": "village",
+      "x": 7582,
+      "z": 13537,
+      "minZoom": 4
+    },
+    {
+      "id": "bogatyrka",
+      "name": "Bogatyrka",
+      "type": "village",
+      "x": 1563,
+      "z": 8959,
+      "minZoom": 5
+    },
+    {
+      "id": "zvir",
+      "name": "Zvir",
+      "type": "village",
+      "x": 551,
+      "z": 5358,
+      "minZoom": 5
+    },
+    {
+      "id": "zabolotye",
+      "name": "Zabolotye",
+      "type": "village",
+      "x": 1245,
+      "z": 9956,
+      "minZoom": 5
+    },
+    {
+      "id": "skalisty",
+      "name": "Skalisty",
+      "type": "village",
+      "x": 13665,
+      "z": 3026,
+      "minZoom": 5
+    }
+  ]
+}

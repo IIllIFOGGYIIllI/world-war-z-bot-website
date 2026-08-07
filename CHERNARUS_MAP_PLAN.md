@@ -124,3 +124,14 @@ Events & Zones are not given a new map merely because the renderer exists. A sha
 - Road layers use Canvas and `interactive: false`.
 - Satellite tiles are local static GitHub Pages assets.
 - Map instances lazy-initialise in hidden dashboard views only when needed.
+
+## v1.22.29 — map pins and place-name overlay
+
+- Public and browser-local custom map locations use named location-pin markers instead of circular dots.
+- Marker labels are presentation-only and do not change stored DayZ X/Z coordinates.
+- Selecting an existing location highlights its real marker; the separate unsaved-selection pin is reserved for direct map clicks.
+- The main map exposes a `Names` layer beside Roads and Trails.
+- `assets/data/chernarus/place-names.json` stores settlement label anchors independently from WRP road geometry.
+- City, town and village labels are zoom-aware and non-interactive.
+- If a visible public/custom marker has the same name as a settlement label, the generic settlement label is suppressed to avoid duplicate text.
+- This architecture allows later bilingual/Cyrillic text, label hierarchy and anchor-position polish without rebuilding satellite tiles or touching road coordinates.

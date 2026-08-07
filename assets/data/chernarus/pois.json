@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "map": {
     "name": "ChernarusPlus",
     "size_meters": 15360,
@@ -26,7 +26,7 @@
       "max_native_zoom": 6,
       "max_zoom": 14,
       "source": "User-supplied corrected ChernarusPlus satellite pyramid",
-      "cache_version": "1.22.28"
+      "cache_version": "1.22.29"
     },
     "attribution": "Chernarus and DayZ imagery © Bohemia Interactive. Unofficial community dashboard; not affiliated with or endorsed by Bohemia Interactive.",
     "road_overlay": {
@@ -65,7 +65,19 @@
         "unresolved_records": 15,
         "centerline_diagnostics": 68
       },
-      "cache_version": "1.22.28"
+      "cache_version": "1.22.29"
+    },
+    "place_names": {
+      "enabled": true,
+      "default_visible": true,
+      "source": "assets/data/chernarus/place-names.json",
+      "types": [
+        "city",
+        "town",
+        "village"
+      ],
+      "renderer": "non-interactive Leaflet divIcon labels",
+      "cache_version": "1.22.29"
     }
   },
   "pois": [

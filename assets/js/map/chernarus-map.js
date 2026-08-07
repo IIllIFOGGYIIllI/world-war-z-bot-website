@@ -40,6 +40,13 @@
 
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
+  const escapeHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
   const formatCoordinate = (value, decimals = 1) => {
     const number = Number(value);
     if (!Number.isFinite(number)) return '—';
@@ -267,6 +274,7 @@
     const state = {
       selection: null,
       selectionEnabled: options.selectable !== false,
+      selectionMarkerVisible: true,
       roadsVisible: options.roadsVisible !== false,
       trailsVisible: options.trailsVisible !== false,
       destroyed: false
@@ -283,6 +291,25 @@
     const roadToggle = options.roadToggle || null;
     const trailToggle = options.trailToggle || null;
     const fullscreenTarget = options.fullscreenTarget || container;
+
+    const makeLocationIcon = ({ name = '', colour = '#d52b1e', selected = false, custom = false, showLabel = true, selection = false } = {}) => {
+      const safeColour = /^#[0-9a-f]{6}$/i.test(String(colour)) ? String(colour) : '#d52b1e';
+      const classes = [
+        'wwz-map-location-pin-wrap',
+        custom ? 'is-custom' : 'is-public',
+        selected ? 'is-selected' : '',
+        selection ? 'is-selection' : ''
+      ].filter(Boolean).join(' ');
+      const label = showLabel && name
+        ? `<span class=\"wwz-map-location-pin-label\">${escapeHtml(name)}</span>`
+        : '';
+      return L.divIcon({
+        className: 'wwz-map-location-div-icon',
+        html: `<span class=\"${classes}\" style=\"--wwz-pin-colour:${safeColour}\"><span class=\"wwz-map-location-pin\"><span class=\"wwz-map-location-pin-core\"></span></span>${label}</span>`,
+        iconSize: [24, 32],
+        iconAnchor: [12, 30]
+      });
+    };
 
     const setLoading = (message, status = 'loading') => {
       if (!loadingElement) return;
@@ -398,7 +425,7 @@
     };
 
     const renderSelectionMarker = () => {
-      if (!state.selection) {
+      if (!state.selection || !state.selectionMarkerVisible) {
         if (selectionMarker) {
           map.removeLayer(selectionMarker);
           selectionMarker = null;
@@ -408,15 +435,11 @@
       const latlng = worldToLeaflet([state.selection.x, state.selection.z]);
       if (!latlng) return;
       if (!selectionMarker) {
-        selectionMarker = L.circleMarker(latlng, {
-          radius: options.selectionRadius || 7,
-          color: '#ffffff',
-          weight: 3,
-          fillColor: '#d52b1e',
-          fillOpacity: 1,
-          opacity: 1,
+        selectionMarker = L.marker(latlng, {
+          icon: makeLocationIcon({ colour: '#d52b1e', selected: true, showLabel: false, selection: true }),
           interactive: false,
-          className: 'wwz-map-selection-marker'
+          keyboard: false,
+          zIndexOffset: 800
         }).addTo(map);
       } else {
         selectionMarker.setLatLng(latlng);
@@ -429,6 +452,7 @@
       if (!Number.isFinite(nextX) || !Number.isFinite(nextZ)) return false;
       if (nextX < 0 || nextX > MAP_METRES || nextZ < 0 || nextZ > MAP_METRES) return false;
       state.selection = { x: nextX, z: nextZ };
+      state.selectionMarkerVisible = settings.marker !== false;
       renderSelectionMarker();
       updateSelectedDisplay();
       if (settings.center) {
@@ -441,6 +465,7 @@
 
     const clearSelection = (settings = {}) => {
       state.selection = null;
+      state.selectionMarkerVisible = true;
       renderSelectionMarker();
       updateSelectedDisplay();
       if (settings.notify !== false) options.onClearSelection?.();
@@ -488,16 +513,24 @@
     const addPoi = (poi, handlers = {}) => {
       const latlng = worldToLeaflet([poi?.x, poi?.z]);
       if (!latlng) return null;
-      const marker = L.circleMarker(latlng, {
-        radius: 6,
-        color: '#fff4ea',
-        weight: 2,
-        fillColor: '#d52b1e',
-        fillOpacity: 0.94,
-        opacity: 0.98,
-        interactive: true,
-        className: `wwz-map-poi-marker wwz-map-poi-${String(poi.category || 'landmark').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      const isCustom = handlers.custom === true || poi?.scope === 'custom';
+      const colour = handlers.colour || (isCustom ? '#ffbd36' : '#d52b1e');
+      const makeIcon = (selected = false) => makeLocationIcon({
+        name: poi?.name || 'Location',
+        colour,
+        selected,
+        custom: isCustom,
+        showLabel: handlers.showLabel !== false
       });
+      const marker = L.marker(latlng, {
+        icon: makeIcon(Boolean(handlers.selected)),
+        interactive: true,
+        keyboard: true,
+        title: String(poi?.name || 'Map location'),
+        riseOnHover: true,
+        zIndexOffset: isCustom ? 500 : 350
+      });
+      marker._wwzSetSelected = (selected) => marker.setIcon(makeIcon(Boolean(selected)));
       marker.on('click', (event) => {
         L.DomEvent.stopPropagation(event);
         handlers.onClick?.(poi, marker);
