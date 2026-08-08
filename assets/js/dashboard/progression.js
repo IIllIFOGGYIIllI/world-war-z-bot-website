@@ -9,11 +9,14 @@
   const leaderboard = panel.querySelector('[data-progression-leaderboard]');
   const leaderboardEmpty = panel.querySelector('[data-progression-leaderboard-empty]');
   const refreshButton = panel.querySelector('[data-refresh-progression]');
+  const saveAllButton = panel.querySelector('[data-save-progression-all]');
   const saveSettingsButton = panel.querySelector('[data-save-progression-settings]');
   const saveExclusionsButton = panel.querySelector('[data-save-progression-exclusions]');
+  const syncRolesButton = panel.querySelector('[data-progression-sync-roles]');
   const levelRoleList = panel.querySelector('[data-progression-level-roles]');
   const prestigeRoleList = panel.querySelector('[data-progression-prestige-roles]');
   const customLevelInput = panel.querySelector('[data-progression-custom-level]');
+  const customLevelRoleSearch = panel.querySelector('[data-progression-custom-role-search]');
   const customLevelRole = panel.querySelector('[data-progression-custom-role]');
   const customLevelSave = panel.querySelector('[data-progression-custom-save]');
   const levelupChannel = panel.querySelector('[data-progression-levelup-channel]');
@@ -158,16 +161,57 @@
     (options || []).forEach((option) => {
       const node = document.createElement('option');
       node.value = String(option.key || '');
-      node.textContent = String(option.name || 'Unknown');
+      const manageable = option.manageable !== false;
+      node.textContent = manageable
+        ? String(option.name || 'Unknown')
+        : `${String(option.name || 'Unknown')} — move bot role above this role`;
       node.selected = selected.has(node.value);
+      node.disabled = !manageable && !node.selected;
+      if (!manageable) node.dataset.unmanageable = 'true';
       select.append(node);
     });
   };
 
-  const roleSelect = (roles, selectedKey = '') => {
+  const filterRoleOptions = (roles, query, selectedKey = '') => {
+    const term = String(query || '').trim().toLocaleLowerCase();
+    const selected = String(selectedKey || '');
+    if (!term) return roles || [];
+    return (roles || []).filter((role) => (
+      String(role.key || '') === selected
+      || String(role.name || '').toLocaleLowerCase().includes(term)
+    ));
+  };
+
+  const searchableRoleSelect = (roles, selectedKey = '', { blankLabel = 'No role bound' } = {}) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'progression-role-picker';
+    const search = document.createElement('input');
+    search.type = 'search';
+    search.placeholder = 'Search roles…';
+    search.autocomplete = 'off';
+    search.setAttribute('aria-label', 'Search Discord roles');
     const select = document.createElement('select');
-    fillSelect(select, roles, [selectedKey], { blankLabel: 'No role bound' });
-    return select;
+    let currentValue = String(selectedKey || '');
+    const renderOptions = () => {
+      const filtered = filterRoleOptions(roles, search.value, currentValue);
+      fillSelect(select, filtered, [currentValue], { blankLabel });
+    };
+    select.addEventListener('change', () => { currentValue = select.value; });
+    search.addEventListener('input', renderOptions);
+    renderOptions();
+    wrapper.append(search, select);
+    return { wrapper, search, select };
+  };
+
+  const refreshCustomRolePicker = () => {
+    const roles = adminData?.resources?.roles || [];
+    const currentValue = customLevelRole?.value || '';
+    fillSelect(
+      customLevelRole,
+      filterRoleOptions(roles, customLevelRoleSearch?.value || '', currentValue),
+      [currentValue],
+      { blankLabel: 'Select role' }
+    );
   };
 
   const saveRole = async ({ type, milestone, roleKey }) => {
@@ -180,11 +224,7 @@
       const body = type === 'level'
         ? { action: 'set_level_role', level: Number(milestone), role_key: roleKey }
         : { action: 'set_prestige_role', prestige: Number(milestone), role_key: roleKey };
-      const payload = await requestJson(ADMIN_PROGRESSION_CONFIG_URL, {
-        method: 'POST',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
-        body: JSON.stringify(body)
-      }, true);
+      const payload = await postProgressionAction(sessionToken, body);
       adminData = payload;
       renderAdmin(payload);
       setAdminMessage('Role binding saved.', 'success');
@@ -207,17 +247,20 @@
       const icon = document.createElement('span');
       icon.textContent = String(recommendation?.icon || '◇');
       const copy = document.createElement('strong');
-      copy.textContent = type === 'level'
+      copy.textContent = recommendation?.role_name || (type === 'level'
         ? `Level ${milestone} · ${recommendation?.name || 'Custom milestone'}`
-        : `Prestige ${milestone} · ${recommendation?.name || 'Custom prestige'}`;
+        : `Prestige ${milestone} · ${recommendation?.name || 'Custom prestige'}`);
       label.append(icon, copy);
-      const select = roleSelect(adminData?.resources?.roles || [], mapping.role_key || '');
+      const picker = searchableRoleSelect(adminData?.resources?.roles || [], mapping.role_key || '');
+      const select = picker.select;
+      select.dataset.progressionRoleType = type;
+      select.dataset.progressionRoleMilestone = String(milestone);
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'secondary-action compact-action';
       button.textContent = 'Save';
       button.addEventListener('click', () => saveRole({ type, milestone, roleKey: select.value }));
-      row.append(label, select, button);
+      row.append(label, picker.wrapper, button);
       container.append(row);
     };
 
@@ -254,7 +297,8 @@
     fillSelect(levelupChannel, payload?.resources?.text_channels || [], [payload?.levelup_channel_key || ''], { blankLabel: 'Automatic / source channel' });
     fillSelect(excludedText, payload?.resources?.text_channels || [], payload?.excluded_text_channel_keys || [], { multiple: true });
     fillSelect(excludedVoice, payload?.resources?.voice_channels || [], payload?.excluded_voice_channel_keys || [], { multiple: true });
-    fillSelect(customLevelRole, payload?.resources?.roles || [], [], { blankLabel: 'Select role' });
+    fillSelect(customLevelRole, payload?.resources?.roles || [], [customLevelRole?.value || ''], { blankLabel: 'Select role' });
+    refreshCustomRolePicker();
     renderRoleRows(levelRoleList, payload?.level_recommendations || [], payload?.level_roles || [], 'level');
     renderRoleRows(prestigeRoleList, payload?.prestige_tiers || [], payload?.prestige_roles || [], 'prestige');
   };
@@ -282,10 +326,9 @@
 
   const selectedValues = (select) => [...(select?.selectedOptions || [])].map((option) => option.value).filter(Boolean);
 
-  saveSettingsButton?.addEventListener('click', async () => {
-    if (requestInProgress) return;
-    const sessionToken = token();
-    if (!sessionToken) return;
+  customLevelRoleSearch?.addEventListener('input', refreshCustomRolePicker);
+
+  const buildSettingsBody = () => {
     const body = { action: 'save_settings', levelup_channel_key: levelupChannel?.value || '' };
     panel.querySelectorAll('[data-progression-toggle]').forEach((input) => {
       body[input.dataset.progressionToggle] = Boolean(input.checked);
@@ -293,6 +336,81 @@
     panel.querySelectorAll('[data-progression-rate]').forEach((input) => {
       body[input.dataset.progressionRate] = Number(input.value);
     });
+    return body;
+  };
+
+  const collectRoleBindings = () => {
+    const bindings = [...panel.querySelectorAll('select[data-progression-role-type]')].map((select) => ({
+      type: String(select.dataset.progressionRoleType || ''),
+      milestone: Number(select.dataset.progressionRoleMilestone || 0),
+      roleKey: select.value || ''
+    }));
+    const customLevel = Number(customLevelInput?.value || 0);
+    if (customLevelInput?.value && (!Number.isInteger(customLevel) || customLevel < 1 || customLevel > 100)) {
+      throw new Error('Custom level milestones must be between 1 and 100.');
+    }
+    if (Number.isInteger(customLevel) && customLevel >= 1 && customLevel <= 100 && customLevelRole?.value) {
+      const existing = bindings.find((row) => row.type === 'level' && row.milestone === customLevel);
+      if (existing) existing.roleKey = customLevelRole.value;
+      else bindings.push({ type: 'level', milestone: customLevel, roleKey: customLevelRole.value });
+    }
+    return bindings;
+  };
+
+  const postProgressionAction = async (sessionToken, body) => requestJson(ADMIN_PROGRESSION_CONFIG_URL, {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+    body: JSON.stringify(body)
+  }, true);
+
+  saveAllButton?.addEventListener('click', async () => {
+    if (requestInProgress) return;
+    const sessionToken = token();
+    if (!sessionToken) return;
+    let roleBindings = [];
+    try {
+      roleBindings = collectRoleBindings();
+    } catch (error) {
+      setAdminMessage(error.message || 'Check the progression role settings.', 'error');
+      return;
+    }
+    requestInProgress = true;
+    saveAllButton.disabled = true;
+    saveSettingsButton && (saveSettingsButton.disabled = true);
+    saveExclusionsButton && (saveExclusionsButton.disabled = true);
+    setAdminMessage('Saving all XP, economy, role and channel changes…');
+    try {
+      let payload = await postProgressionAction(sessionToken, buildSettingsBody());
+      for (const binding of roleBindings) {
+        payload = await postProgressionAction(sessionToken, binding.type === 'level'
+          ? { action: 'set_level_role', level: binding.milestone, role_key: binding.roleKey }
+          : { action: 'set_prestige_role', prestige: binding.milestone, role_key: binding.roleKey });
+      }
+      payload = await postProgressionAction(sessionToken, {
+        action: 'save_exclusions',
+        text_channel_keys: selectedValues(excludedText),
+        voice_channel_keys: selectedValues(excludedVoice)
+      });
+      adminData = payload;
+      renderAdmin(payload);
+      if (customLevelInput) customLevelInput.value = '';
+      if (customLevelRoleSearch) customLevelRoleSearch.value = '';
+      setAdminMessage(`All progression changes saved (${roleBindings.length} role binding${roleBindings.length === 1 ? '' : 's'} checked).`, 'success');
+    } catch (error) {
+      setAdminMessage(error.message || 'One or more progression changes could not be saved.', 'error');
+    } finally {
+      requestInProgress = false;
+      saveAllButton.disabled = false;
+      if (saveSettingsButton) saveSettingsButton.disabled = false;
+      if (saveExclusionsButton) saveExclusionsButton.disabled = false;
+    }
+  });
+
+  saveSettingsButton?.addEventListener('click', async () => {
+    if (requestInProgress) return;
+    const sessionToken = token();
+    if (!sessionToken) return;
+    const body = buildSettingsBody();
     requestInProgress = true;
     saveSettingsButton.disabled = true;
     setAdminMessage('Saving XP rates and system settings…');
@@ -338,6 +456,39 @@
     } finally {
       requestInProgress = false;
       saveExclusionsButton.disabled = false;
+    }
+  });
+
+  syncRolesButton?.addEventListener('click', async () => {
+    if (requestInProgress) return;
+    const sessionToken = token();
+    if (!sessionToken) return;
+    requestInProgress = true;
+    syncRolesButton.disabled = true;
+    setAdminMessage('Creating dividers, binding official roles and arranging the hierarchy…');
+    try {
+      const payload = await requestJson(ADMIN_PROGRESSION_CONFIG_URL, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+        body: JSON.stringify({ action: 'sync_roles' })
+      }, true);
+      adminData = payload;
+      renderAdmin(payload);
+      const sync = payload?.role_sync || {};
+      const missing = Array.isArray(sync.missing_roles) ? sync.missing_roles.length : 0;
+      const created = Array.isArray(sync.created_dividers) ? sync.created_dividers.length : 0;
+      const suffix = missing
+        ? ` ${missing} official role${missing === 1 ? '' : 's'} could not be found by exact name.`
+        : ' All official progression roles were found.';
+      setAdminMessage(
+        `Role sync complete: ${sync.bound_level_roles || 0} level roles, ${sync.bound_prestige_roles || 0} prestige roles, ${created} divider role${created === 1 ? '' : 's'} created, ${sync.synced_members || 0} member${Number(sync.synced_members) === 1 ? '' : 's'} updated.${suffix}`,
+        missing ? 'error' : 'success'
+      );
+    } catch (error) {
+      setAdminMessage(error.message || 'Progression roles could not be synchronized.', 'error');
+    } finally {
+      requestInProgress = false;
+      syncRolesButton.disabled = false;
     }
   });
 

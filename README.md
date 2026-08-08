@@ -67,6 +67,10 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+## Version 1.22.36 — Progression Role Automation & Save All
+
+Pairs with Bot v1.18.35. The XP & Prestige workspace now includes searchable role pickers, automatic official progression-role hierarchy sync, configurable economy rewards for levels/prestiges, and a one-click Save All Changes workflow. Existing XP, economy, role mappings, map assets and Railway data remain intact.
+
 ## Version 1.22.35 Console Item Delivery & Map Marker Auth Fix
 
 Pairs with Bot v1.18.34. The automatic delivery monitor now reflects the verified

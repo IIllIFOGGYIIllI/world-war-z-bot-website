@@ -1,8 +1,5 @@
-world-war-z-website v1.22.35
+world-war-z-website v1.22.36
 
-No repository files need to be deleted for this patch.
+Files to delete: NONE
 
-Do not delete or replace the production Chernarus map assets:
-- assets/chernarus-map/satellite-corrected/
-- assets/chernarus-map/overlays/roads/chernarus-roads-overlay-final.geojson
-- assets/data/chernarus/place-names.json
+Do not delete the production Chernarus satellite tiles, road overlay, place-name data, or any existing website assets not included in this patch.

@@ -1,3 +1,26 @@
+# Version 1.22.36
+
+## Progression Role Automation, Search & Save All
+
+- Adds searchable Discord-role pickers for every Level/Prestige binding and the custom level milestone picker, making large role lists practical to configure. The picker now lists every non-managed guild role; roles above the bot are still searchable and are clearly marked as unmanageable until the World War Z bot role is moved above them.
+- Adds a prominent **Save All Changes** workflow that saves all current XP/economy settings, visible Level/Prestige role bindings and text/voice exclusions in one action.
+- Adds the website controls and presentation for Bot v1.18.35 economy rewards and automatic progression role hierarchy sync.
+- Keeps the individual Save buttons and dedicated **Sync Discord Roles** action for targeted changes.
+- Updates all local CSS/JS cache-busters to `v1.22.36` and extends static validation for the new progression controls.
+- Preserves the 4,810-tile Chernarus satellite pyramid, production road GeoJSON, authoritative place names and all Railway data.
+- Deploy Bot v1.18.35 before Website v1.22.36.
+
+## Deployment
+
+```powershell
+py .\scripts\validate_site.py --require-map-assets
+git add .
+git commit -m "Improve progression controls"
+git push
+```
+
+---
+
 # Version 1.22.35
 
 ## Console Item Delivery UI + Public Marker Session Fix

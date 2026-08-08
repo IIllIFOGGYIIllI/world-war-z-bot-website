@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.35"
+EXPECTED_ASSET_VERSION = "1.22.36"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -239,6 +239,37 @@ def validate_map_marker_auth(errors: list[str]) -> None:
         errors.append("Dashboard public-marker actions must handle expired/forbidden sessions explicitly.")
 
 
+def validate_progression_dashboard_controls(errors: list[str]) -> None:
+    html = (ROOT / "dashboard.html").read_text(encoding="utf-8")
+    js = (ROOT / "assets/js/dashboard/progression.js").read_text(encoding="utf-8")
+    css = (ROOT / "assets/css/dashboard/progression.css").read_text(encoding="utf-8")
+    required_html = (
+        'data-save-progression-all',
+        'data-progression-custom-role-search',
+        'data-progression-sync-roles',
+        'data-progression-toggle="economy_rewards_enabled"',
+        'data-progression-rate="level_money_base"',
+        'data-progression-rate="prestige_money_base"',
+    )
+    for token in required_html:
+        if token not in html:
+            errors.append(f"Progression dashboard is missing required control: {token}")
+    required_js = (
+        'searchableRoleSelect',
+        "placeholder = 'Search roles…'",
+        'collectRoleBindings',
+        'option.manageable !== false',
+        'move bot role above this role',
+        "saveAllButton?.addEventListener('click'",
+        "'Saving all XP, economy, role and channel changes…'",
+    )
+    for token in required_js:
+        if token not in js:
+            errors.append(f"Progression dashboard JavaScript is missing: {token}")
+    if '.progression-role-picker' not in css:
+        errors.append("Progression role search controls are missing their dashboard styling.")
+
+
 def validate_checkout_compatibility(errors: list[str]) -> None:
     coordinate_fields = (
         "data-map-custom-x",
@@ -311,6 +342,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/css/dashboard/moderation.css",
         "assets/css/dashboard/workspace.css",
         "assets/css/dashboard/catalogue.css",
+        "assets/css/dashboard/progression.css",
         "assets/css/components/chernarus-map.css",
         "assets/css/pages/shop.css",
         "assets/css/pages/policies.css",
@@ -321,6 +353,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/dashboard/administration.js",
         "assets/js/dashboard/account.js",
         "assets/js/dashboard/shop.js",
+        "assets/js/dashboard/progression.js",
         "assets/js/dashboard/delivery.js",
         "assets/js/pages/dashboard-map-loader.js",
         "assets/js/pages/shop.js",
@@ -609,6 +642,7 @@ def main() -> int:
     validate_interactions(errors, info)
     validate_asset_versions(errors)
     validate_map_marker_auth(errors)
+    validate_progression_dashboard_controls(errors)
     validate_checkout_compatibility(errors)
     validate_json(errors)
     validate_place_names(errors)
