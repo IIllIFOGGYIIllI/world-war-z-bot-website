@@ -67,7 +67,21 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
-## Version 1.22.32 Shared Admin Public Map Markers
+## Version 1.22.33 Checkout Compatibility & Interaction Audit
+
+Saved delivery locations created by older website releases can contain more decimal precision than the current one-decimal map picker. Checkout now treats a selected saved location as an opaque `location_id`: the hidden manual X/Y/Z/rotation inputs are disabled and therefore cannot block submission through browser-native step validation.
+
+Coordinate fields across the map, saved-location editor and both checkout surfaces now accept legacy precision while map selections continue to generate one-decimal DayZ X/Z values. The standalone shop and all public HTML pages also receive the current cache-buster so browsers cannot keep an older shop runtime after deployment.
+
+The website validator now includes an interaction-wiring audit for enabled static buttons/forms and release cache-busters. This release was checked against all 229 static website buttons plus 30 JavaScript-created button builders; intentionally disabled preview controls remain disabled, native `<dialog>` controls remain native, and active controls are wired to JavaScript or native form behavior.
+
+Pairs with Bot v1.18.30. No Railway API, database schema, satellite tiles, road geometry or settlement-label data are changed.
+
+## Version 1.22.32 Refund Confirmation Cleanup
+
+Cancel/refund confirmations no longer require a typed reason. The protected Railway action, economy refund, finite-stock restoration, order history and audit record remain in place; the note is simply optional for these two actions. Pairs with Bot v1.18.30.
+
+## Version 1.22.31 Shared Admin Public Map Markers
 
 The main Chernarus map no longer ships the old hard-coded landmark pins. The authoritative bilingual settlement-name layer handles built-in city/village navigation, while shared public markers are now live server data from Railway.
 

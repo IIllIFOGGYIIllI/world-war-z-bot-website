@@ -259,7 +259,12 @@ const syncShopDeliveryForm = () => {
   const usesSavedLocation = Boolean(shopDeliveryLocation?.value);
   if (shopCoordinateInputs) shopCoordinateInputs.hidden = usesSavedLocation;
   [shopDeliveryX, shopDeliveryY, shopDeliveryZ, shopDeliveryRotation].forEach((input) => {
-    if (input) input.required = !usesSavedLocation;
+    if (!input) return;
+    // A selected saved location is represented by location_id only. Disable the
+    // hidden manual inputs so legacy multi-decimal coordinates cannot trigger
+    // browser step-mismatch validation and silently block the submit event.
+    input.disabled = usesSavedLocation;
+    input.required = !usesSavedLocation;
   });
   if (shopSaveLocation) {
     shopSaveLocation.disabled = usesSavedLocation;

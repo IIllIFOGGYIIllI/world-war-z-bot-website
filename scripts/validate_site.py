@@ -22,6 +22,8 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
+EXPECTED_ASSET_VERSION = "1.22.33"
+
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
     "paved_secondary",
@@ -46,6 +48,49 @@ class ReferenceParser(HTMLParser):
             value = values.get(attribute)
             if value:
                 self.references.append((tag, attribute, value))
+
+
+class InteractionParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.forms: list[dict[str, object]] = []
+        self.form_stack: list[dict[str, object]] = []
+        self.buttons: list[dict[str, object]] = []
+        self.inputs: list[dict[str, str | None]] = []
+
+    @staticmethod
+    def _attrs(attrs) -> dict[str, str | None]:
+        return {str(key): value for key, value in attrs}
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        values = self._attrs(attrs)
+        if tag == "form":
+            form = {
+                "attrs": values,
+                "data_attrs": [key for key in values if key.startswith("data-")],
+                "submit_buttons": 0,
+            }
+            self.forms.append(form)
+            self.form_stack.append(form)
+            return
+        if tag == "button":
+            form = self.form_stack[-1] if self.form_stack else None
+            button_type = str(values.get("type") or ("submit" if form else "button")).lower()
+            if form is not None and button_type == "submit":
+                form["submit_buttons"] = int(form["submit_buttons"]) + 1
+            self.buttons.append({
+                "attrs": values,
+                "data_attrs": [key for key in values if key.startswith("data-")],
+                "form": form,
+                "type": button_type,
+            })
+            return
+        if tag in {"input", "select", "textarea"}:
+            self.inputs.append(values)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "form" and self.form_stack:
+            self.form_stack.pop()
 
 
 def is_external(reference: str) -> bool:
@@ -97,6 +142,133 @@ def validate_css_references(errors: list[str]) -> None:
                 errors.append(
                     f"{css_path.relative_to(ROOT)}: missing CSS asset: {reference}"
                 )
+
+
+def validate_interactions(errors: list[str], info: list[str]) -> None:
+    js_source = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / "assets/js").rglob("*.js"))
+    )
+    button_count = 0
+    enabled_count = 0
+
+    for html_path in sorted(ROOT.glob("*.html")):
+        parser = InteractionParser()
+        parser.feed(html_path.read_text(encoding="utf-8"))
+
+        for button in parser.buttons:
+            button_count += 1
+            attrs = button["attrs"]
+            if "disabled" in attrs:
+                continue
+            enabled_count += 1
+            data_attrs = button["data_attrs"]
+            form = button["form"]
+
+            if any(data_attr in js_source for data_attr in data_attrs):
+                continue
+
+            if form is not None and button["type"] == "submit":
+                form_attrs = form["attrs"]
+                form_data_attrs = form["data_attrs"]
+                if str(form_attrs.get("method") or "").lower() == "dialog":
+                    continue
+                if form_attrs.get("action"):
+                    continue
+                if any(data_attr in js_source for data_attr in form_data_attrs):
+                    continue
+
+            if (
+                form is not None
+                and str(form["attrs"].get("method") or "").lower() == "dialog"
+                and str(attrs.get("value") or "").lower() == "close"
+            ):
+                continue
+
+            errors.append(
+                f"{html_path.name}: enabled button has no JavaScript/native form wiring: "
+                + ", ".join(data_attrs or ["no data-* action"])
+            )
+
+    dynamic_button_count = 0
+    for js_path in sorted((ROOT / "assets/js").rglob("*.js")):
+        lines = js_path.read_text(encoding="utf-8").splitlines()
+        for index, line in enumerate(lines):
+            if "createElement('button')" not in line and 'createElement("button")' not in line:
+                continue
+            dynamic_button_count += 1
+            nearby = "\n".join(lines[index:index + 40])
+            if "addEventListener" not in nearby and ".onclick" not in nearby and "disabled" not in nearby:
+                errors.append(
+                    f"{js_path.relative_to(ROOT)}:{index + 1}: dynamically created button has no nearby handler/disabled state"
+                )
+
+    info.append(
+        f"Button wiring audit: {button_count} static buttons ({enabled_count} enabled/native checked) + "
+        f"{dynamic_button_count} dynamic button builders"
+    )
+
+
+def validate_asset_versions(errors: list[str]) -> None:
+    pattern = re.compile(
+        r"(?:src|href)=[\"'](assets/(?:js|css)/[^\"'?#]+\?v=([^\"'&]+))[\"']",
+        re.IGNORECASE,
+    )
+    for html_path in sorted(ROOT.glob("*.html")):
+        source = html_path.read_text(encoding="utf-8")
+        for reference, version in pattern.findall(source):
+            if version != EXPECTED_ASSET_VERSION:
+                errors.append(
+                    f"{html_path.name}: stale local asset cache version {version!r} in {reference}; "
+                    f"expected {EXPECTED_ASSET_VERSION}"
+                )
+
+
+def validate_checkout_compatibility(errors: list[str]) -> None:
+    coordinate_fields = (
+        "data-map-custom-x",
+        "data-map-custom-z",
+        "data-location-x",
+        "data-location-y",
+        "data-location-z",
+        "data-location-rotation",
+        "data-shop-delivery-x",
+        "data-shop-delivery-y",
+        "data-shop-delivery-z",
+        "data-shop-delivery-rotation",
+        "data-member-delivery-x",
+        "data-member-delivery-y",
+        "data-member-delivery-z",
+        "data-member-delivery-rotation",
+    )
+    html_source = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (ROOT / "dashboard.html", ROOT / "shop.html")
+    )
+    for data_attr in coordinate_fields:
+        match = re.search(
+            rf"<input\b(?=[^>]*\b{re.escape(data_attr)}(?:=|\s|>))[^>]*>",
+            html_source,
+            re.IGNORECASE,
+        )
+        if not match:
+            errors.append(f"Missing coordinate input: {data_attr}")
+            continue
+        if not re.search(r"\bstep=[\"']any[\"']", match.group(0), re.IGNORECASE):
+            errors.append(
+                f"{data_attr}: coordinate input must use step=any for legacy saved-location compatibility"
+            )
+
+    standalone_shop = (ROOT / "assets/js/pages/shop.js").read_text(encoding="utf-8")
+    dashboard_shop = (ROOT / "assets/js/dashboard/shop.js").read_text(encoding="utf-8")
+    if "input.disabled = saved;" not in standalone_shop:
+        errors.append(
+            "Standalone shop must disable hidden manual coordinate inputs when a saved location is selected."
+        )
+    if "input.disabled = usesSavedLocation;" not in dashboard_shop:
+        errors.append(
+            "Dashboard shop must disable hidden manual coordinate inputs when a saved location is selected."
+        )
 
 
 def validate_json(errors: list[str]) -> None:
@@ -419,6 +591,9 @@ def main() -> int:
     validate_required_files(errors)
     validate_html_references(errors, require_map_assets=args.require_map_assets)
     validate_css_references(errors)
+    validate_interactions(errors, info)
+    validate_asset_versions(errors)
+    validate_checkout_compatibility(errors)
     validate_json(errors)
     validate_place_names(errors)
     validate_retired_map_assets(errors)

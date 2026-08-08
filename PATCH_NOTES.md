@@ -1,3 +1,22 @@
+# Version 1.22.33
+
+## Checkout Compatibility & Website Interaction Audit
+
+- Fixes the apparent dead **Place Protected Order / Place Order** button when an older saved delivery location contains X/Z/rotation precision that does not match the current manual-input step.
+- When a saved location is selected, hidden manual X/Y/Z/rotation inputs are now disabled as well as made non-required, so browser-native constraint validation cannot suppress the JavaScript submit handler.
+- Both checkout surfaces are covered:
+  - standalone `shop.html`
+  - dashboard Shop checkout
+- Coordinate inputs in the main-map pin editor, Saved Delivery Locations and both checkout surfaces now use `step="any"` so existing legacy coordinates can be opened/edited without silent step-mismatch failures.
+- Map clicks still write one-decimal X/Z values; the change is compatibility for existing/manual values, not a coordinate-system change.
+- Refreshes local CSS/JS cache-busters across all HTML pages to `v1.22.33`, including the standalone shop which had remained on `v1.22.27`.
+- Adds interaction-wiring and cache-version checks to `scripts/validate_site.py` so enabled static buttons/forms and stale local asset versions are caught before GitHub Pages deploys.
+- Interaction audit covers all 229 static website buttons plus 30 JavaScript-created button builders; deliberately disabled preview/example controls remain intentionally disabled.
+- Pairs with Bot v1.18.30.
+- No Railway API/database migration, map satellite, production-road or authoritative settlement-label data changed.
+
+---
+
 # Version 1.22.32
 
 ## Trader Refund Confirmation Cleanup

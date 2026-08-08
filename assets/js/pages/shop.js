@@ -321,7 +321,14 @@ const populateLocations = () => {
 const syncLocationMode = () => {
   const saved = Boolean(elements.location.value);
   elements.coordinateInputs.hidden = saved;
-  [elements.x,elements.y,elements.z,elements.rotation].forEach((input) => { input.required = !saved; });
+  [elements.x, elements.y, elements.z, elements.rotation].forEach((input) => {
+    if (!input) return;
+    // Disabled controls are excluded from native constraint validation. This is
+    // required for legacy saved locations whose stored precision may not match
+    // the manual coordinate input step used by older website releases.
+    input.disabled = saved;
+    input.required = !saved;
+  });
   if (saved) {
     const location = state.locations.find((entry) => String(entry.location_id) === elements.location.value);
     if (location) { elements.x.value = location.x; elements.y.value = location.y; elements.z.value = location.z; elements.rotation.value = location.rotation; }
