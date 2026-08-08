@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.34"
+EXPECTED_ASSET_VERSION = "1.22.35"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -222,6 +222,21 @@ def validate_asset_versions(errors: list[str]) -> None:
                     f"{html_path.name}: stale local asset cache version {version!r} in {reference}; "
                     f"expected {EXPECTED_ASSET_VERSION}"
                 )
+
+
+def validate_map_marker_auth(errors: list[str]) -> None:
+    path = ROOT / "assets/js/pages/dashboard-map-loader.js"
+    source = path.read_text(encoding="utf-8")
+    if "const currentSessionToken = () =>" not in source:
+        errors.append("Dashboard map must resolve the current auth session token at action time.")
+    if source.count("const sessionToken = currentSessionToken();") < 2:
+        errors.append(
+            "Dashboard public-marker create/delete actions must each resolve a fresh session token."
+        )
+    if "if (!hasAdminAccess() || !sessionToken)" not in source:
+        errors.append("Dashboard public-marker save must reject missing Admin/session state.")
+    if "handleMarkerAuthorizationFailure(response, payload);" not in source:
+        errors.append("Dashboard public-marker actions must handle expired/forbidden sessions explicitly.")
 
 
 def validate_checkout_compatibility(errors: list[str]) -> None:
@@ -593,6 +608,7 @@ def main() -> int:
     validate_css_references(errors)
     validate_interactions(errors, info)
     validate_asset_versions(errors)
+    validate_map_marker_auth(errors)
     validate_checkout_compatibility(errors)
     validate_json(errors)
     validate_place_names(errors)

@@ -1,12 +1,11 @@
-world-war-z-website v1.22.34 patch files
+world-war-z-website v1.22.35 patch files
 
 Updated:
 - PATCH_FILE_LIST.txt
 - PATCH_NOTES.md
-- README.md
 - DELETE_THESE_FILES.txt
-- assets/js/dashboard/core.js
-- assets/js/data/command-library.js
+- README.md
+- assets/js/pages/dashboard-map-loader.js
 - changelog.html
 - community-guidelines.html
 - dashboard.html
@@ -18,10 +17,7 @@ Updated:
 - shop.html
 - terms.html
 
-Added:
-- assets/css/dashboard/progression.css
-- assets/js/dashboard/progression.js
-
-Pairs with Bot v1.18.33.
-No satellite JPG tiles, production road GeoJSON or authoritative place-name data are changed by this patch.
+Fixes Admin public-marker session-token handling and updates Normal Item delivery/progression presentation for Bot v1.18.34.
+Pairs with Bot v1.18.34.
+No satellite JPG tiles, production road GeoJSON, or authoritative place-name data are changed by this patch.
 No Railway database file is included.

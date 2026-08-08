@@ -81,6 +81,29 @@
     }
   };
 
+  const currentSessionToken = () => {
+    try {
+      return storageGet(AUTH_SESSION_KEY) || '';
+    } catch {
+      return '';
+    }
+  };
+
+  const handleMarkerAuthorizationFailure = (response, payload) => {
+    if (response.status === 401) {
+      try {
+        storageRemove(AUTH_SESSION_KEY);
+        applySignedOutState();
+      } catch {
+        // The core authentication module will reconcile state on the next check.
+      }
+      throw new Error('Your dashboard session expired. Sign in with Discord again, then retry the public marker action.');
+    }
+    if (response.status === 403) {
+      throw new Error(payload?.message || 'Your current Discord account does not have Admin access to public markers.');
+    }
+  };
+
   const validatePoi = (rawPoi) => {
     const markerId = Number(rawPoi?.marker_id);
     const id = validText(rawPoi?.id, 100) || (Number.isInteger(markerId) && markerId > 0 ? `public-${markerId}` : null);
@@ -539,6 +562,7 @@
   };
 
   const submitPublicMarker = async (poi) => {
+    const sessionToken = currentSessionToken();
     if (!hasAdminAccess() || !sessionToken) throw new Error('Administrator sign-in is required.');
     const editingPublic = editingLocation?.scope === 'public' && Number.isInteger(editingLocation.markerId);
     const action = editingPublic ? 'update' : 'create';
@@ -561,6 +585,7 @@
       })
     });
     const payload = await response.json().catch(() => ({}));
+    handleMarkerAuthorizationFailure(response, payload);
     if (!response.ok) throw new Error(payload?.message || 'The public marker could not be saved.');
     await loadPublicMarkers();
     const saved = validatePoi(payload?.marker) || publicPois.find((entry) => entry.markerId === editingLocation?.markerId) || null;
@@ -568,6 +593,7 @@
   };
 
   const deletePublicMarker = async (poi) => {
+    const sessionToken = currentSessionToken();
     if (!hasAdminAccess() || !sessionToken || !Number.isInteger(poi?.markerId)) throw new Error('Administrator sign-in is required.');
     const response = await authFetch(ADMIN_MARKER_ACTION_URL, {
       method: 'POST',
@@ -579,6 +605,7 @@
       body: JSON.stringify({ action: 'delete', marker_id: poi.markerId })
     });
     const payload = await response.json().catch(() => ({}));
+    handleMarkerAuthorizationFailure(response, payload);
     if (!response.ok) throw new Error(payload?.message || 'The public marker could not be deleted.');
     await loadPublicMarkers();
   };

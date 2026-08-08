@@ -67,6 +67,25 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+## Version 1.22.35 Console Item Delivery & Map Marker Auth Fix
+
+Pairs with Bot v1.18.34. The automatic delivery monitor now reflects the verified
+PlayStation-console Normal Item method: temporary `cfgEffectArea.json` entries at
+the buyer-selected X/Y/Z are spawned by the next restart and then removed by
+Railway. Event Item rentals remain on the existing restart-bound Central Economy
+workflow and use family-prefixed names such as `VehicleWWZOrder000001`.
+
+The Chernarus map public-marker client now resolves the current dashboard session
+token at the moment an Admin creates, edits or deletes a marker. This fixes the
+undefined/stale token path that could make public marker writes fail even after a
+successful Discord sign-in. Expired and forbidden sessions now show explicit
+re-authentication/permission errors.
+
+Progression recommendations are refreshed so Level 100 and Prestige X are
+distinct: Level 100 is `👑 Legendary Survivor`, while Prestige X is
+`👑 World War Z Immortal`. Existing XP, prestige values and bound Discord role IDs
+are not reset.
+
 ## Version 1.22.34 XP & Prestige Dashboard
 
 The dashboard now includes a dedicated XP & Prestige workspace connected to Bot v1.18.33. Signed-in members can view their current prestige identity, level milestone, XP bar, next milestone, source XP totals and top-10 overall leaderboard.

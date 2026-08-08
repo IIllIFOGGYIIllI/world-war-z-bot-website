@@ -1,4 +1,4 @@
-world-war-z-website v1.22.34
+world-war-z-website v1.22.35
 
 No repository files need to be deleted for this patch.
 
