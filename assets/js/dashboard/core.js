@@ -6,6 +6,8 @@ const AUTH_COMPLETE_URL = `${DASHBOARD_API_BASE}/api/auth/discord/complete`;
 const AUTH_ME_URL = `${DASHBOARD_API_BASE}/api/auth/me`;
 const AUTH_LOGOUT_URL = `${DASHBOARD_API_BASE}/api/auth/logout`;
 const ACCOUNT_SUMMARY_URL = `${DASHBOARD_API_BASE}/api/account/summary`;
+const ACCOUNT_PROGRESSION_URL = `${DASHBOARD_API_BASE}/api/account/progression`;
+const ADMIN_PROGRESSION_CONFIG_URL = `${DASHBOARD_API_BASE}/api/admin/progression/config`;
 const SHOP_CATALOGUE_URL = `${DASHBOARD_API_BASE}/api/shop/catalogue`;
 const ACCOUNT_SHOP_URL = `${DASHBOARD_API_BASE}/api/account/shop`;
 const ACCOUNT_SHOP_PURCHASE_URL = `${DASHBOARD_API_BASE}/api/account/shop/purchase`;
@@ -476,6 +478,7 @@ const applySignedOutState = ({ unavailable = false } = {}) => {
   document.querySelector('[data-auth-guest-action]')?.removeAttribute('hidden');
   signOutButton?.setAttribute('hidden', '');
   setAuthBadgeState(unavailable ? 'unavailable' : 'offline', unavailable ? 'Verification unavailable' : 'Not connected');
+  window.dispatchEvent(new CustomEvent('wwz:authchange', { detail: { authenticated: false, accessLevel: 'guest' } }));
 };
 
 const applyAuthenticatedState = (payload) => {
@@ -521,6 +524,7 @@ const applyAuthenticatedState = (payload) => {
   document.querySelector('[data-auth-guest-action]')?.setAttribute('hidden', '');
   signOutButton?.removeAttribute('hidden');
   setAuthBadgeState('online', `Connected · ${level}`);
+  window.dispatchEvent(new CustomEvent('wwz:authchange', { detail: { authenticated: true, accessLevel } }));
 };
 
 const openLoginDialog = () => {

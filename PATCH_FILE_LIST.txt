@@ -1,21 +1,27 @@
-world-war-z-website v1.22.33 patch files
+world-war-z-website v1.22.34 patch files
 
-PATCH_FILE_LIST.txt
-PATCH_NOTES.md
-README.md
-assets/js/dashboard/shop.js
-assets/js/pages/shop.js
-changelog.html
-community-guidelines.html
-dashboard.html
-index.html
-legal.html
-moderation-policy.html
-privacy.html
-scripts/validate_site.py
-shop.html
-terms.html
+Updated:
+- PATCH_FILE_LIST.txt
+- PATCH_NOTES.md
+- README.md
+- DELETE_THESE_FILES.txt
+- assets/js/dashboard/core.js
+- assets/js/data/command-library.js
+- changelog.html
+- community-guidelines.html
+- dashboard.html
+- index.html
+- legal.html
+- moderation-policy.html
+- privacy.html
+- scripts/validate_site.py
+- shop.html
+- terms.html
 
-Pairs with Bot v1.18.30.
+Added:
+- assets/css/dashboard/progression.css
+- assets/js/dashboard/progression.js
+
+Pairs with Bot v1.18.33.
 No satellite JPG tiles, production road GeoJSON or authoritative place-name data are changed by this patch.
 No Railway database file is included.

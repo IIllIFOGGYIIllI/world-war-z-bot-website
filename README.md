@@ -67,6 +67,14 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 
 
+## Version 1.22.34 XP & Prestige Dashboard
+
+The dashboard now includes a dedicated XP & Prestige workspace connected to Bot v1.18.33. Signed-in members can view their current prestige identity, level milestone, XP bar, next milestone, source XP totals and top-10 overall leaderboard.
+
+Verified Admins and the Owner can configure the full progression system from the website: feature toggles, all XP rates and anti-farming cooldowns, level-up announcement channel, level/prestige role mappings, custom level milestones, and excluded text/voice channels. Railway repeats the live Discord access check on every protected write and stores changes in the existing additive progression tables without resetting member XP.
+
+Pairs with Bot v1.18.33. Deploy the bot before the website. No satellite map, road geometry, settlement labels, shop data or existing Railway database records are replaced.
+
 ## Version 1.22.33 Checkout Compatibility & Interaction Audit
 
 Saved delivery locations created by older website releases can contain more decimal precision than the current one-decimal map picker. Checkout now treats a selected saved location as an opaque `location_id`: the hidden manual X/Y/Z/rotation inputs are disabled and therefore cannot block submission through browser-native step validation.

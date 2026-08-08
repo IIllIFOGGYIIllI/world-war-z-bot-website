@@ -1,103 +1,23 @@
-# Version 1.22.33
+# Version 1.22.34
 
-## Checkout Compatibility & Website Interaction Audit
+## XP & Prestige Dashboard Configuration
 
-- Fixes the apparent dead **Place Protected Order / Place Order** button when an older saved delivery location contains X/Z/rotation precision that does not match the current manual-input step.
-- When a saved location is selected, hidden manual X/Y/Z/rotation inputs are now disabled as well as made non-required, so browser-native constraint validation cannot suppress the JavaScript submit handler.
-- Both checkout surfaces are covered:
-  - standalone `shop.html`
-  - dashboard Shop checkout
-- Coordinate inputs in the main-map pin editor, Saved Delivery Locations and both checkout surfaces now use `step="any"` so existing legacy coordinates can be opened/edited without silent step-mismatch failures.
-- Map clicks still write one-decimal X/Z values; the change is compatibility for existing/manual values, not a coordinate-system change.
-- Refreshes local CSS/JS cache-busters across all HTML pages to `v1.22.33`, including the standalone shop which had remained on `v1.22.27`.
-- Adds interaction-wiring and cache-version checks to `scripts/validate_site.py` so enabled static buttons/forms and stale local asset versions are caught before GitHub Pages deploys.
-- Interaction audit covers all 229 static website buttons plus 30 JavaScript-created button builders; deliberately disabled preview/example controls remain intentionally disabled.
-- Pairs with Bot v1.18.30.
-- No Railway API/database migration, map satellite, production-road or authoritative settlement-label data changed.
-
----
-
-# Version 1.22.32
-
-## Trader Refund Confirmation Cleanup
-
-- Removes the Reason textarea entirely from Cancel & Refund / Refund Order confirmation dialogs.
-- Cancel/refund actions no longer require staff to type a 3–1,000 character reason before confirming.
-- Processing and fulfilment actions keep their optional Action note field.
-- The refund, stock restoration, order-history and protected Railway action flow are unchanged.
-- Pairs with Bot v1.18.30, which accepts an empty cancellation/refund note.
-- No map, satellite, road, authentication or database-reset behaviour changed.
-
----
-
-# Version 1.22.31
-
-## Shared Admin Public Map Markers
-
-- Retires the old hard-coded public landmark pins now that the authoritative bilingual settlement overlay provides built-in place navigation.
-- Keeps `assets/data/chernarus/pois.json` as map metadata but intentionally sets its legacy `pois` array to empty.
-- Loads shared public markers from Railway `GET /api/map/markers`.
-- Adds Admin-only **Create Public Marker**, edit and delete controls for authenticated `staff` / `owner` users.
-- Publishes public marker writes through protected `POST /api/admin/map/markers/action`; Bot v1.18.27 performs the real server-side Discord permission check.
-- Public markers support name, category, description, colour and one-decimal DayZ X/Z coordinates.
-- Member/guest custom pins remain browser-local and private; they are never sent to Railway.
-- Private pin export/import remains private-only.
-- Adds an access-change event so the map immediately gains or loses Admin controls after Discord sign-in/sign-out.
-- Preserves the 77 authoritative bilingual settlement labels, 4,810 corrected satellite JPGs and 52,006 production road line parts unchanged.
-- Pairs with Bot v1.18.27. Deploy the bot first so the Railway marker API/table exists before publishing the website.
-- No existing Railway record is reset or replaced; `/app/data/players.db` is never included in this website patch.
+- Adds a dedicated **XP & Prestige** dashboard workspace for signed-in members.
+- Shows current prestige icon/title, current level milestone, an XP progress bar, server rank, next milestone, lifetime XP and XP source totals.
+- Adds a live top-10 overall progression leaderboard.
+- Adds Admin/Owner progression configuration backed by Bot v1.18.33.
+- Website controls cover every current progression toggle and XP rate, the level-up announcement channel, level role bindings, Prestige I–X role bindings, custom level milestones, and excluded text/voice channels.
+- Role and channel choices are resolved through opaque dashboard resource keys; Railway rechecks live Discord Admin/Owner access before every write.
+- Existing member XP and `/app/data/players.db` are preserved. No progression data is reset.
+- Adds authentication-change refresh handling so the progression page updates after Discord sign-in/sign-out.
+- Refreshes website CSS/JS cache-busters to `v1.22.34`.
+- Pairs with Bot v1.18.33. Deploy the bot first so the new progression API is available before publishing the website.
 
 ## Deployment
-
-No satellite reinstall is required. After Bot v1.18.27 is deployed to Railway, apply this website patch and run:
 
 ```powershell
 py .\scripts\validate_site.py --require-map-assets
 git add .
-git commit -m "Add admin public map markers"
+git commit -m "Add XP dashboard settings"
 git push
-```
-
-# Version 1.22.30
-
-## Authoritative Bilingual Chernarus Labels
-
-- Replaces the temporary hand-built 74-place settlement dataset with **77 authoritative settlement anchors** extracted from `CfgWorlds > ChernarusPlus > Names` in the ChernarusPlus world `config.cpp`.
-- Preserves the exact game-config X/Z positions and Cyrillic `name` values.
-- Uses the `Settlement_*` class identifiers for the familiar Latin/transliterated map names.
-- Preserves the game config's own settlement hierarchy instead of inventing a `town` tier:
-  - 2 `Capital`
-  - 16 `City`
-  - 59 `Village`
-- Adds the three settlements that were absent from the first manual pass: **Drozhino, Karmanovka and Krasnoye**.
-- Renders settlement labels as two lines: Cyrillic above, Latin/transliterated name below.
-- Uses zoom-aware hierarchy: capitals from zoom 0, cities from zoom 2 and villages from zoom 4.
-- Adds lightweight label-collision suppression with Capital → City → Village priority so lower-priority labels do not overwhelm the map.
-- Gives place names their own non-interactive Leaflet pane below public/custom location pins and above the production road/satellite layers.
-- Suppresses a settlement label when a visible public/custom marker already displays the same Latin or Cyrillic name.
-- Adds `scripts/build_chernarus_place_names.py` so the JSON can be regenerated directly from an extracted ChernarusPlus `world/config.cpp`.
-- Strengthens validation to require the authoritative 306-name source count and exact 77-settlement / 2+16+59 breakdown.
-- Preserves v1.22.29 location-pin markers and v1.22.28 browser-local custom pins.
-- Preserves the corrected 4,810 JPG satellite tiles and final 52,006-part road overlay unchanged.
-- Pairs with Bot v1.18.26.
-- No Railway API, authentication, permission, moderation, shop/rental API contract or database behaviour changed.
-- `/app/data/players.db` is not included, reset, replaced or modified.
-
-## Deployment
-
-This is an incremental website patch. **Do not rerun the satellite installer** if the 4,810 production JPG tiles are already present in your repository.
-
-Run:
-
-```powershell
-py .\scripts\validate_site.py --require-map-assets
-git add .
-git commit -m "Refine Chernarus place labels"
-git push
-```
-
-Optional regeneration from the extracted game config:
-
-```powershell
-py .\scripts\build_chernarus_place_names.py "D:\Project Drive\DZ\worlds\chernarusplus\world\config.cpp"
 ```

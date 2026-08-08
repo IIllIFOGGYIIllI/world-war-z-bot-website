@@ -106,7 +106,25 @@
   {"name": "rental cancel", "category": "Shop & delivery", "description": "Cancel one of your current rentals and receive an automatic refund when eligible.", "access": "Member"},
   {"name": "adminrental", "category": "Shop & delivery", "description": "Administrator rental-management command group.", "access": "Admin"},
   {"name": "adminrental list", "category": "Shop & delivery", "description": "View current and historical rentals across the server.", "access": "Admin"},
-  {"name": "adminrental cancel", "category": "Shop & delivery", "description": "Cancel or refund a rental and queue automatic DayZ file cleanup.", "access": "Admin"}
+  {"name": "adminrental cancel", "category": "Shop & delivery", "description": "Cancel or refund a rental and queue automatic DayZ file cleanup.", "access": "Admin"},
+  {"name": "rank", "category": "Progression", "description": "View your own or another member’s World War Z level, XP, prestige and milestone progress.", "access": "Member"},
+  {"name": "leaderboard", "category": "Progression", "description": "View progression leaderboards by overall level, lifetime XP, text XP, voice XP, combat XP or prestige.", "access": "Member"},
+  {"name": "prestige", "category": "Progression", "description": "Prestige after reaching Level 100 while preserving lifetime progression statistics.", "access": "Member"},
+  {"name": "xp", "category": "Progression", "description": "World War Z XP, level-role, prestige and activity configuration command group.", "access": "Member"},
+  {"name": "xp status", "category": "Progression", "description": "View XP-system status plus your current level, XP bar and next progression milestone.", "access": "Member"},
+  {"name": "xp recommendations", "category": "Progression", "description": "View the recommended World War Z level and prestige role ladder.", "access": "Member"},
+  {"name": "xp roles", "category": "Progression", "description": "View the Discord roles currently bound to level and prestige milestones.", "access": "Member"},
+  {"name": "xp channel", "category": "Progression", "description": "Set the Discord channel used for level-up and prestige announcements.", "access": "Admin"},
+  {"name": "xp toggle", "category": "Progression", "description": "Enable or disable text, voice, combat, event or announcement portions of progression.", "access": "Admin"},
+  {"name": "xp rate", "category": "Progression", "description": "Change an XP rate, threshold or anti-farming cooldown.", "access": "Admin"},
+  {"name": "xp levelrole", "category": "Progression", "description": "Bind a manageable Discord role to a level milestone.", "access": "Admin"},
+  {"name": "xp prestigerole", "category": "Progression", "description": "Bind a manageable Discord role to a prestige milestone.", "access": "Admin"},
+  {"name": "xp exclude_text", "category": "Progression", "description": "Exclude a text channel from earning message XP.", "access": "Admin"},
+  {"name": "xp include_text", "category": "Progression", "description": "Re-enable message XP in a previously excluded text channel.", "access": "Admin"},
+  {"name": "xp exclude_voice", "category": "Progression", "description": "Exclude a voice channel from earning voice XP.", "access": "Admin"},
+  {"name": "xp include_voice", "category": "Progression", "description": "Re-enable voice XP in a previously excluded voice channel.", "access": "Admin"},
+  {"name": "xp award", "category": "Progression", "description": "Award manual bonus XP to a member with an auditable reason.", "access": "Admin"},
+  {"name": "xp remove", "category": "Progression", "description": "Remove current-prestige XP from a member without deleting lifetime history.", "access": "Admin"}
 ];
 
   const initialiseCommandLibrary = () => {
